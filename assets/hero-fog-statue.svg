@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid slice">
+  <title id="title">A monumental fogbound statue in the Bastion</title>
+  <desc id="desc">A grey statue and broken towers behind inert layers of fog. There is no sun, star, or moon.</desc>
+  <rect width="900" height="520" fill="none"/>
+  <g fill="#0d1015" opacity="0.88">
+    <path d="M58 438 L92 214 L126 438 Z"/>
+    <path d="M724 440 L770 176 L824 440 Z"/>
+    <path d="M642 442 L690 262 L734 442 Z"/>
+    <path d="M150 444 L196 286 L238 444 Z"/>
+  </g>
+  <g fill="#05070a" opacity="0.96">
+    <path d="M408 54 C438 36 474 39 498 62 L512 118 L544 154 L532 214 L566 438 L330 438 L362 222 L344 158 L384 118 Z"/>
+    <path d="M386 128 C350 164 330 214 326 282 L366 292 C374 224 390 176 414 146 Z"/>
+    <path d="M520 132 C562 168 584 224 586 292 L544 300 C538 226 522 178 498 148 Z"/>
+    <path d="M400 70 C404 44 430 28 456 30 C486 32 506 52 508 78 C510 108 490 128 456 128 C424 128 396 104 400 70 Z"/>
+    <path d="M298 438 L612 438 L640 486 L272 486 Z"/>
+    <path d="M352 486 L560 486 L586 520 L326 520 Z"/>
+  </g>
+  <g fill="#c8cdd2">
+    <path opacity="0.16" d="M0 118 C150 88 260 142 420 116 C590 88 720 126 900 92 L900 176 C730 208 586 164 420 190 C260 216 130 184 0 204 Z"/>
+    <path opacity="0.22" d="M0 250 C130 224 282 272 436 246 C606 218 744 262 900 232 L900 330 C728 360 566 310 408 338 C246 366 120 330 0 350 Z"/>
+    <path opacity="0.28" d="M0 382 C170 348 330 402 492 376 C650 350 770 392 900 366 L900 470 C742 500 590 452 420 478 C264 502 126 464 0 486 Z"/>
+    <path opacity="0.18" d="M0 34 C180 8 360 48 540 24 C690 4 800 34 900 16 L900 82 C730 112 560 72 386 94 C236 114 110 90 0 108 Z"/>
+  </g>
+  <g stroke="#e7ddc8" stroke-width="5" stroke-linecap="round" opacity="0.5">
+    <path d="M118 332 L118 286"/>
+    <path d="M782 322 L782 276"/>
+  </g>
+  <g fill="#f2a83b" opacity="0.72">
+    <circle cx="118" cy="278" r="7"/>
+    <circle cx="782" cy="268" r="7"/>
+  </g>
+</svg>

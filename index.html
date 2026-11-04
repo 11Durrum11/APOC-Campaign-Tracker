@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14171f">
+<meta name="description" content="APOC Survival — the shared Bastion of Last Hope campaign tracker for the whole table.">
+<title>APOC Survival — Campaign Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+  :root{
+    color-scheme:dark;
+    --background:hsl(222 22% 10%);
+    --foreground:hsl(42 38% 88%);
+    --card:hsl(222 20% 14%);
+    --card-foreground:hsl(42 38% 88%);
+    --card-border:hsl(220 16% 24%);
+    --popover:hsl(222 20% 13%);
+    --primary:hsl(38 92% 50%);
+    --primary-foreground:hsl(30 40% 10%);
+    --secondary:hsl(220 16% 20%);
+    --muted:hsl(220 16% 20%);
+    --muted-foreground:hsl(220 12% 62%);
+    --accent:hsl(222 18% 22%);
+    --accent-foreground:hsl(42 38% 90%);
+    --destructive:hsl(0 62% 46%);
+    --border:hsl(220 16% 24%);
+    --input:hsl(220 16% 26%);
+    --ring:hsl(38 92% 50%);
+    --radius:12px;
+    --scene-image:url("assets/scenes/bastion-streets.webp");
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;overflow-x:hidden}
+  body{
+    margin:0;background:var(--background);color:var(--foreground);
+    font-family:Georgia,"Times New Roman",serif;line-height:1.5;
+    overflow-x:hidden;min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background-image:var(--scene-image);background-size:cover;background-position:center;
+    opacity:.34;filter:saturate(.55) brightness(.62);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      linear-gradient(180deg,hsla(222,22%,10%,.58),hsla(222,22%,10%,.88) 46%,hsl(222 22% 10%) 100%),
+      radial-gradient(ellipse at 50% 0%,transparent 0%,hsla(222,22%,10%,.34) 72%);
+  }
+  a{color:var(--primary)}
+  button,input,select,textarea{font:inherit}
+  button,select,input,textarea{color:var(--foreground)}
+  button{cursor:pointer}
+  :focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+  .page{width:min(1180px,100%);margin:0 auto;padding:0 16px 28px}
+
+  /* 1 — Hero */
+  .hero{
+    position:relative;overflow:hidden;isolation:isolate;
+    min-height:430px;margin:0 -16px;padding:52px 24px 28px;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    background-image:var(--scene-image);background-size:cover;background-position:center;
+    border-bottom:1px solid var(--card-border);
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:-2;
+    background:linear-gradient(180deg,hsla(222,22%,10%,.18),hsla(222,22%,10%,.52) 58%,hsl(222 22% 10%));
+    transition:background .35s ease;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(90deg,transparent,hsla(220,12%,76%,.10),transparent);
+  }
+  .hero[data-sky="Fog"]::before{background:linear-gradient(180deg,hsla(220,12%,62%,.30),hsla(222,22%,10%,.62) 56%,hsl(222 22% 10%))}
+  .hero[data-sky="Rain"]::before{background:linear-gradient(180deg,hsla(218,18%,32%,.48),hsla(222,22%,10%,.68) 56%,hsl(222 22% 10%))}
+  .hero[data-sky="Snow"]::before{background:linear-gradient(180deg,hsla(210,18%,72%,.28),hsla(222,22%,10%,.58) 56%,hsl(222 22% 10%))}
+  .hero[data-sky="Calm"]::before{background:linear-gradient(180deg,hsla(220,12%,58%,.20),hsla(222,22%,10%,.52) 58%,hsl(222 22% 10%))}
+  .hero[data-sky="Rare"]::before{background:linear-gradient(180deg,hsla(264,16%,34%,.42),hsla(222,22%,10%,.66) 56%,hsl(222 22% 10%))}
+  .hero[data-sky="Hatestorm"]::before{background:linear-gradient(180deg,hsla(350,32%,22%,.48),hsla(222,22%,10%,.72) 56%,hsl(222 22% 10%))}
+  .hero-art{position:absolute;right:-30px;bottom:0;width:min(620px,78vw);height:100%;object-fit:cover;object-position:center bottom;z-index:-1;opacity:.88}
+  .hero-copy{position:relative;z-index:3;max-width:760px;text-shadow:0 2px 14px rgba(0,0,0,.72)}
+  .eyebrow{margin:0 0 6px;color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
+  h1{font-size:clamp(2.7rem,8vw,6.2rem);line-height:.92;margin:0;font-weight:500;letter-spacing:.01em}
+  .hero-sub{font-size:clamp(1.02rem,2.5vw,1.35rem);max-width:650px;margin:14px 0 0;color:var(--accent-foreground)}
+  .sky-panel{
+    position:relative;z-index:3;margin-top:24px;max-width:760px;
+    background:hsla(222,20%,14%,.88);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:14px 16px;backdrop-filter:blur(5px);
+  }
+  .sky-panel h2{font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);margin:0 0 4px}
+  .sky-fact{font-size:1.08rem;margin:0}
+  .sky-note{color:var(--muted-foreground);margin:4px 0 0;font-size:.94rem}
+
+  /* Shared panels */
+  .panel{
+    background:hsla(222,20%,14%,.97);border:1px solid var(--card-border);
+    border-radius:var(--radius);padding:20px;margin-top:18px;
+    box-shadow:0 14px 32px rgba(0,0,0,.18);
+  }
+  .panel h2{margin:0 0 8px;font-size:clamp(1.45rem,4vw,2rem);font-weight:500}
+  .panel h3{font-weight:500}
+  .muted{color:var(--muted-foreground)}
+  .small{font-size:.9rem}
+
+  /* 2 — Countdown */
+  .countdown-panel{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+  .countdown-date{font-size:1.1rem;margin:2px 0 0}
+  .timer{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .timer div{min-width:70px;text-align:center;background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:9px 8px}
+  .timer b{display:block;font-size:1.35rem;line-height:1;color:var(--primary)}
+  .timer span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground)}
+
+  /* 3 — Hub */
+  .hub-panel{overflow:visible}
+  .hub-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
+  .hub-item{position:relative;min-width:0}
+  .hub-btn{
+    width:100%;min-height:74px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    padding:9px 5px;border:1px solid var(--card-border);border-radius:10px;
+    background:var(--secondary);color:var(--foreground);text-align:center;text-decoration:none;
+    font-size:.88rem;line-height:1.15;overflow:hidden;
+  }
+  .hub-btn:hover,.hub-btn:focus-visible{background:var(--accent);color:var(--accent-foreground)}
+  .hub-btn.primary-link{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+  .hub-btn .hub-name{overflow-wrap:anywhere}
+  .thumb-strip{display:flex;gap:2px;justify-content:center;max-width:100%}
+  .thumb-strip img{width:17px;height:17px;object-fit:cover;border-radius:3px;border:1px solid var(--card-border)}
+  .count-chip{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:18px;padding:0 5px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);font-size:.68rem;font-weight:700;line-height:1}
+  .pop{
+    position:absolute;top:calc(100% + 9px);left:50%;z-index:60;width:min(250px,76vw);
+    transform:translate(-50%,4px);background:var(--popover);color:var(--card-foreground);
+    border:1px solid var(--card-border);border-radius:10px;padding:11px 12px;
+    box-shadow:0 18px 42px rgba(0,0,0,.42);font-size:.9rem;line-height:1.4;
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .16s ease;
+  }
+  .hub-item:hover .pop,.hub-item:focus-within .pop,.hub-item.pop-open .pop{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
+  .hub-item:first-child .pop{left:0;transform:translate(0,4px)}
+  .hub-item:first-child:hover .pop,.hub-item:first-child:focus-within .pop,.hub-item:first-child.pop-open .pop{transform:translate(0,0)}
+  .hub-item:last-child .pop{left:auto;right:0;transform:translate(0,4px)}
+  .hub-item:last-child:hover .pop,.hub-item:last-child:focus-within .pop,.hub-item:last-child.pop-open .pop{transform:translate(0,0)}
+
+  /* Forms */
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .field.full{grid-column:1/-1}
+  label{font-size:.86rem;color:var(--accent-foreground)}
+  input,select,textarea{
+    width:100%;border:1px solid var(--input);border-radius:8px;background:var(--popover);
+    padding:10px 11px;min-height:44px;
+  }
+  textarea{min-height:96px;resize:vertical}
+  input::placeholder,textarea::placeholder{color:var(--muted-foreground)}
+  .button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+  .btn{
+    border:1px solid var(--card-border);background:var(--secondary);color:var(--foreground);
+    border-radius:9px;padding:10px 15px;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .btn:hover{background:var(--accent);color:var(--accent-foreground)}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);font-weight:700}
+  .btn.danger{background:transparent;border-color:var(--destructive);color:#f0b1b1}
+  .btn.danger:hover{background:var(--destructive);color:#fff}
+  .status-line{min-height:1.5em;margin:10px 0 0;color:var(--muted-foreground)}
+  .warning{border-left:4px solid var(--primary);background:hsla(38,92%,50%,.09);padding:10px 12px;margin-top:12px}
+  .error{border:1px solid var(--destructive);background:hsla(0,62%,46%,.14);padding:11px 13px;border-radius:9px;margin-top:14px}
+  [hidden]{display:none !important}
+
+  /* Tracker */
+  .tracker-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .tabs{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+  .tab{border:1px solid var(--card-border);background:var(--secondary);border-radius:999px;padding:9px 13px;min-height:42px}
+  .tab:hover{background:var(--accent)}
+  .tab.active{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);font-weight:700}
+  .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:9px;margin-top:15px}
+  .counts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:16px 0}
+  .count{background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;min-width:0}
+  .count b{display:block;color:var(--primary);font-size:1.45rem;line-height:1.05}
+  .count span{font-size:.78rem;color:var(--muted-foreground);overflow-wrap:anywhere}
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .entry-card{background:var(--popover);border:1px solid var(--card-border);border-radius:11px;padding:16px;min-width:0}
+  .entry-card h3{margin:0 0 7px;font-size:1.22rem;line-height:1.22}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+  .pill{display:inline-flex;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--secondary);font-size:.74rem;line-height:1.35;color:var(--accent-foreground)}
+  .pill.cat{color:var(--primary);border-color:hsla(38,92%,50%,.55)}
+  .pill.dm{border-color:var(--primary);color:var(--primary)}
+  .detail{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--card-foreground)}
+  .secret{white-space:pre-wrap;border-left:4px solid var(--primary);background:hsla(38,92%,50%,.08);padding:9px 11px;margin-top:10px}
+  .pinned{margin-top:9px;color:var(--primary)}
+  .links{margin-top:9px;overflow-wrap:anywhere}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+  .actions .btn{min-height:38px;padding:7px 11px}
+  .empty{border:1px dashed var(--border);border-radius:10px;padding:22px;text-align:center;color:var(--muted-foreground)}
+  .ai-brief{background:var(--popover);border:1px solid var(--card-border);border-radius:11px;padding:16px;margin-bottom:12px}
+  .ai-brief pre{white-space:pre-wrap;font:inherit;background:var(--secondary);border-radius:8px;padding:12px;max-height:360px;overflow:auto}
+
+  /* Gallery */
+  .overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(3,5,8,.78);
+    display:flex;align-items:center;justify-content:center;padding:14px;
+  }
+  .gallery-panel{
+    width:min(1060px,100%);max-height:92vh;overflow:auto;background:var(--card);color:var(--card-foreground);
+    border:1px solid var(--card-border);border-radius:16px;padding:18px;box-shadow:0 28px 80px rgba(0,0,0,.55);
+  }
+  .gallery-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .gallery-head h2{margin:0;font-weight:500;font-size:1.65rem}
+  .featured{margin:15px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--popover)}
+  .featured img{width:100%;height:min(52vh,520px);object-fit:contain;background:#07090d;display:block}
+  .featured figcaption{padding:9px 12px;color:var(--muted-foreground)}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px}
+  .gallery-item{margin:0;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--popover)}
+  .gallery-item button{all:unset;display:block;width:100%;cursor:pointer}
+  .gallery-item img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+  .gallery-item figcaption{padding:6px 7px;font-size:.78rem;color:var(--muted-foreground);display:flex;justify-content:space-between;gap:5px}
+  .gallery-item .mini-delete{color:#f0b1b1;cursor:pointer}
+  .upload-box{border:1px dashed var(--input);border-radius:10px;padding:12px;margin-top:14px}
+
+  /* Bottom notice */
+  .notice{
+    margin-top:18px;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:17px 20px;color:var(--muted-foreground)
+  }
+  .notice strong{color:var(--foreground)}
+
+  @media (max-width:760px){
+    .page{padding:0 10px 22px}
+    .hero{margin:0 -10px;min-height:390px;padding:38px 16px 20px}
+    .hero-art{width:96vw;right:-92px;opacity:.72}
+    .countdown-panel{grid-template-columns:1fr}
+    .timer{justify-content:flex-start}
+    .form-grid{grid-template-columns:1fr}
+    .toolbar{grid-template-columns:1fr 1fr}
+    .toolbar input{grid-column:1/-1}
+    .counts{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .cards{grid-template-columns:1fr}
+    .hub-row{gap:4px}
+    .hub-btn{min-height:78px;font-size:.69rem;padding:7px 2px}
+    .thumb-strip img{width:12px;height:12px}
+    .count-chip{min-width:20px;height:16px;font-size:.6rem}
+    .hub-item:nth-child(2) .pop{left:-6px;transform:translate(0,4px)}
+    .hub-item:nth-child(2):hover .pop,.hub-item:nth-child(2):focus-within .pop,.hub-item:nth-child(2).pop-open .pop{transform:translate(0,0)}
+    .hub-item:nth-child(5) .pop,.hub-item:nth-child(6) .pop{left:auto;right:-6px;transform:translate(0,4px)}
+    .hub-item:nth-child(5):hover .pop,.hub-item:nth-child(5):focus-within .pop,.hub-item:nth-child(5).pop-open .pop,
+    .hub-item:nth-child(6):hover .pop,.hub-item:nth-child(6):focus-within .pop,.hub-item:nth-child(6).pop-open .pop{transform:translate(0,0)}
+    .panel{padding:16px}
+    .gallery-panel{padding:13px;max-height:94vh}
+    .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}
+  }
+</style>
+</head>
+<body data-scene="bastion-streets">
+<div class="page">
+
+  <!-- 1 / Visual hero header -->
+  <header class="hero" id="hero" data-sky="Fog">
+    <img class="hero-art" src="assets/hero-fog-statue.svg" alt="" aria-hidden="true">
+    <div class="hero-copy">
+      <p class="eyebrow">The Bastion of Last Hope · 2701 DR</p>
+      <h1>APOC Survival</h1>
+      <p class="hero-sub">One campaign page for the whole table — the tracker, the story, the weather, and Cody's artwork, shared for everybody.</p>
+    </div>
+    <section class="sky-panel" aria-labelledby="skyHeading">
+      <h2 id="skyHeading">The sky — right now</h2>
+      <p class="sky-fact" id="skyFact">Heavy Fog over the Bastion — fogbound streets.</p>
+      <p class="sky-note" id="skyNote">The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
+    </section>
+  </header>
+
+  <!-- 2 / The table reconvenes -->
+  <section class="panel countdown-panel" aria-labelledby="countdownHeading">
+    <div>
+      <p class="eyebrow">Every other Sunday · 11:00 AM · Phoenix</p>
+      <h2 id="countdownHeading">The table reconvenes</h2>
+      <p class="countdown-date" id="nextSessionLabel">Sunday, November 8, 2026 at 11:00 AM</p>
+    </div>
+    <div class="timer" aria-label="Countdown to the next session">
+      <div><b id="cdDays">—</b><span>Days</span></div>
+      <div><b id="cdHours">—</b><span>Hours</span></div>
+      <div><b id="cdMins">—</b><span>Minutes</span></div>
+      <div><b id="cdSecs">—</b><span>Seconds</span></div>
+    </div>
+  </section>
+
+  <!-- 3 / APOC System Hub -->
+  <section class="panel hub-panel" id="system" aria-labelledby="hubHeading">
+    <p class="eyebrow">One APOC system</p>
+    <h2 id="hubHeading">APOC System Hub</h2>
+    <div class="hub-row" id="hubRow">
+      <div class="hub-item">
+        <a class="hub-btn" href="#tracker" data-hub-action="tracker"><span class="hub-name">The Tracker</span></a>
+        <div class="pop" role="note">The campaign tracker: people, quests, places, factions, timeline, lore, and the AI DM journal.</div>
+      </div>
+      <div class="hub-item">
+        <button class="hub-btn" type="button" data-hub-action="gallery" aria-haspopup="dialog" aria-expanded="false" id="galleryButton">
+          <span class="hub-name">Cody's Artwork</span>
+          <span class="thumb-strip" aria-hidden="true">
+            <img src="assets/cody/3974.webp" alt=""><img src="assets/cody/3975.webp" alt=""><img src="assets/cody/3976.webp" alt="">
+          </span>
+          <span class="count-chip" id="artworkChip">60</span>
+        </button>
+        <div class="pop" role="note">Cody's campaign pictures — 60 built into this page, plus shared uploads when the artwork bucket is ready.</div>
+      </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="#tracker" data-hub-action="aidm"><span class="hub-name">AI DM</span></a>
+        <div class="pop" role="note">Open the Journal &amp; AI DM tab for the source brief and a session brief built from the tracker.</div>
+      </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="https://11durrum11.github.io/APOC-Weather-Engine/" target="_blank" rel="noopener"><span class="hub-name">Weather Engine</span></a>
+        <div class="pop" role="note">Roll and explore the APOC Weather Engine — 52 subtypes in six categories.</div>
+      </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="https://11durrum11.github.io/Blendcrafter/" target="_blank" rel="noopener"><span class="hub-name">Blendcrafter</span></a>
+        <div class="pop" role="note">Build and level APOC characters in the Blendcrafter library.</div>
+      </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="https://11durrum11.github.io/APOC-Live-Tracker/" target="_blank" rel="noopener"><span class="hub-name">Live Tracker</span></a>
+        <div class="pop" role="note">The shared Live Tracker board — the same entries, in the board's own app.</div>
+      </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="https://11durrum11.github.io/APOC-CritGen/" target="_blank" rel="noopener"><span class="hub-name">CritGen APOC</span></a>
+        <div class="pop" role="note">Critical hits and fumbles: 520 cards, 10 decks, with APOC mode.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 / Campaign Status -->
+  <section class="panel" id="campaign-status" aria-labelledby="statusHeading">
+    <p class="eyebrow">Campaign status</p>
+    <h2 id="statusHeading">Campaign Status</h2>
+    <form id="statusForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="statusDate">In-world date</label>
+          <input id="statusDate" name="inWorldDate" type="text" placeholder="e.g. 12 Mirtul, 2701 DR" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="statusScene">Current location / scene</label>
+          <select id="statusScene" name="scene"></select>
+        </div>
+        <div class="field">
+          <label for="statusFood">Food</label>
+          <input id="statusFood" name="food" type="text" placeholder="e.g. 6 days" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="statusWater">Water</label>
+          <input id="statusWater" name="water" type="text" placeholder="e.g. 4 days" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="weatherCategory">Weather category</label>
+          <select id="weatherCategory" name="weatherCategory"></select>
+        </div>
+        <div class="field">
+          <label for="weatherSubtype">Current weather — Weather Engine subtype</label>
+          <select id="weatherSubtype" name="weatherSubtype"></select>
+        </div>
+        <div class="field full">
+          <label for="statusSupplies">Supplies note</label>
+          <textarea id="statusSupplies" name="suppliesNote" placeholder="What the party is carrying, missing, or rationing…"></textarea>
+        </div>
+      </div>
+      <p class="status-line" id="statusWeatherLine" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="btn primary" type="submit">Save campaign status</button>
+      </div>
+      <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
+      <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
+    </form>
+  </section>
+
+  <!-- 5 / The tracker -->
+  <main class="panel" id="tracker" aria-labelledby="trackerHeading">
+    <div class="tracker-head">
+      <div>
+        <p class="eyebrow">Shared board + DM-only browser records</p>
+        <h2 id="trackerHeading">Campaign Tracker</h2>
+        <p class="muted" style="margin:4px 0 0">Shared entries are saved to the board for everybody. DM-only records — and every DM secret — stay in the browser that created them.</p>
+      </div>
+      <button class="btn" id="refreshEntries" type="button">↻ Refresh</button>
+    </div>
+
+    <div class="error" id="entriesError" hidden></div>
+    <nav class="tabs" id="trackerTabs" aria-label="Tracker sections"></nav>
+
+    <div class="toolbar">
+      <input type="search" id="entrySearch" placeholder="Search the tracker…" aria-label="Search the tracker">
+      <button class="btn primary" id="addEntryBtn" type="button">+ Add entry</button>
+      <button class="btn" id="copyBriefBtn" type="button" hidden>Copy AI DM brief</button>
+    </div>
+
+    <form class="panel" id="entryForm" hidden style="margin-top:14px;box-shadow:none">
+      <h3 id="entryFormHeading" style="margin-top:0">Add entry</h3>
+      <input type="hidden" id="entryId">
+      <input type="hidden" id="entryOrigin">
+      <div class="form-grid">
+        <div class="field">
+          <label for="entryScope">Where this entry lives</label>
+          <select id="entryScope">
+            <option value="shared">Shared board — everybody sees it</option>
+            <option value="dm">DM-only — this browser only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="entryCategory">Category</label>
+          <select id="entryCategory"></select>
+        </div>
+        <div class="field full">
+          <label for="entryTitle">Title *</label>
+          <input id="entryTitle" required maxlength="300" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="entryStatus">Status</label>
+          <input id="entryStatus" maxlength="200" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="entryDate">Date label</label>
+          <input id="entryDate" maxlength="120" autocomplete="off">
+        </div>
+        <div class="field full">
+          <label for="entryDetail">Details</label>
+          <textarea id="entryDetail"></textarea>
+        </div>
+        <div class="field full">
+          <label for="entryLinks">Links (e.g. a Blendcrafter build link)</label>
+          <input id="entryLinks" autocomplete="off">
+        </div>
+        <div class="field full">
+          <label for="entryPinned">Pinned note (optional)</label>
+          <input id="entryPinned" maxlength="300" autocomplete="off">
+        </div>
+        <div class="field full" id="secretField">
+          <label for="entrySecret">DM secret — this browser only, never sent to the shared board</label>
+          <textarea id="entrySecret" placeholder="Only stored locally when this entry is DM-only."></textarea>
+        </div>
+      </div>
+      <p class="status-line" id="entryScopeNote"></p>
+      <div class="button-row">
+        <button class="btn primary" type="submit">Save entry</button>
+        <button class="btn" id="cancelEntryBtn" type="button">Cancel</button>
+      </div>
+    </form>
+
+    <section id="trackerContent" aria-live="polite" style="margin-top:16px"></section>
+  </main>
+
+  <!-- 6 / Bottom notice — LAST -->
+  <footer class="notice" id="bottom-notice">
+    <strong>Shared for everybody:</strong> shared tracker entries on this page are saved to the Live Tracker board and show up for the whole table. DM-only records stay in the browser that created them, and DM secrets are never sent to the shared board — there is no secret field on it, by design.
+  </footer>
+</div>
+
+<!-- Cody's Artwork overlay -->
+<div class="overlay" id="galleryOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="galleryHeading">
+  <div class="gallery-panel">
+    <div class="gallery-head">
+      <div>
+        <h2 id="galleryHeading">Cody's Artwork</h2>
+        <p class="muted" style="margin:4px 0 0" id="galleryCountLine">60 pictures by Cody, in his numbered order.</p>
+      </div>
+      <button class="btn" id="galleryClose" type="button">Close ✕</button>
+    </div>
+
+    <figure class="featured">
+      <img id="featuredArt" src="assets/cody/3974.webp" alt="Cody's campaign picture 3974">
+      <figcaption id="featuredCaption">Cody's picture #3974</figcaption>
+    </figure>
+
+    <div class="upload-box">
+      <label for="artUpload"><strong>Add pictures for everybody</strong></label>
+      <p class="muted small" id="artworkSetupNote">Checking the shared artwork bucket…</p>
+      <input id="artUpload" type="file" accept="image/*" multiple>
+      <p class="status-line" id="artUploadLine" aria-live="polite"></p>
+    </div>
+
+    <h3>Built-in gallery</h3>
+    <div class="gallery-grid" id="builtinGallery"></div>
+    <h3 id="uploadedHeading" hidden>Shared uploads</h3>
+    <div class="gallery-grid" id="uploadedGallery"></div>
+  </div>
+</div>
+
+<noscript><div style="padding:16px;text-align:center">This page needs JavaScript for the shared tracker, countdown, weather, and gallery.</div></noscript>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+
+/* ================= Shared backend config ================= */
+const SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
+const ENTRIES_TABLE = "entries";
+const SETTINGS_TABLE = "site_settings";       // per live-tracker-prep/artwork-storage-and-settings.sql
+const STATUS_KEY = "campaign_status";         // the campaign-status row key in site_settings
+const ARTWORK_BUCKET = "cody-artwork";        // per the same setup SQL
+
+let db = null;
+try {
+  if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) { db = null; }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+  remove(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+
+/* ================= Weather Engine: the exact 52 subtypes ================= */
+const WEATHER = {
+  "Fog": ["Light Fog","Heavy Fog","Dense Fog","Crimson Fog","Solid Fog"],
+  "Rain": ["Light Rain","Heavy Rain","Downpour","Thunderstorm","Reverse Rain"],
+  "Snow": ["Light Snow","Heavy Snow","Blizzard","Whiteout","Small Hail","Large Hail"],
+  "Hatestorm": ["Magnetic Storm","Violet Rain","Frozen Ruin","Crushing Darkness","Acid Rain","Plague of Nettles","Green Rain","Green Fog","Rain of Blood","Rain of Frogs or Fish","Acid Sleet","Blood Snow Blizzard","Death Hail","Howl of the North","Negation Flurry","Razor Sleet","Rust Flurry","Necroburst","Firestorm"],
+  "Calm": ["Very Light Winds","Clear-ish Day","Dark Foreboding Sky","Harsh Seasonal Winds","Typical Day","High, Gray Sky","Dead Calm","Perfect Stillness"],
+  "Rare": ["Incorporeal Wind","Ghoststorm","Rogue Zephyr","Undead Fog","Gale Force Winds","Arcane Tempest","Dragon's Breath","Aberrant Sky","Skyquake"]
+};
+const WEATHER_CATEGORIES = Object.keys(WEATHER);
+const CATEGORY_SCENARIO = {
+  "Fog": "Visibility is swallowed by fog. The Fog of Life itself is inert and untouchable — nothing parts, moves, or dispels it.",
+  "Rain": "Rain works its way through the grey while the Fog of Life hangs over it, untouched and untouchable.",
+  "Snow": "Snow falls through a grey, fog-bound sky. The Fog of Life remains inert, beyond any hand or spell.",
+  "Hatestorm": "A set-piece storm bears down under a bruised grey sky. Even here, the Fog of Life itself cannot be touched or moved.",
+  "Calm": "A grey breathing space — and still foggy to some degree, because the Fog of Life never lifts.",
+  "Rare": "Something strange moves through the grey. The Fog of Life itself stays inert and unexplained."
+};
+function categoryOfSubtype(name){
+  for (const cat of WEATHER_CATEGORIES) if (WEATHER[cat].includes(name)) return cat;
+  return "Fog";
+}
+
+/* ================= Scenes: where the party is ================= */
+const SCENES = {
+  "bastion-streets":      { label:"The Bastion — fogbound streets",    file:"assets/scenes/bastion-streets.webp" },
+  "market-guild-streets": { label:"The Bastion — market & guild streets", file:"assets/scenes/market-guild-streets.webp" },
+  "lower-quarter":        { label:"The Bastion — lower quarter",       file:"assets/scenes/lower-quarter.webp" },
+  "city-approach":        { label:"The Bastion — city approach road",  file:"assets/scenes/city-approach.webp" },
+  "winding-dock-road":    { label:"The Bastion — winding dock road",   file:"assets/scenes/winding-dock-road.webp" },
+  "watch-precinct":       { label:"The Bastion — watch precinct streets", file:"assets/scenes/watch-precinct.webp" },
+  "broad-avenue":         { label:"The Bastion — broad avenue",        file:"assets/scenes/broad-avenue.webp" }
+};
+const DEFAULT_STATUS = {
+  inWorldDate:"", food:"", water:"",
+  weatherCategory:"Fog", weatherSubtype:"Heavy Fog",
+  scene:"bastion-streets", suppliesNote:""
+};
+let campaignStatus = { ...DEFAULT_STATUS };
+let statusSharedReady = false;
+
+function applyStatusToForm(){
+  $("statusDate").value = campaignStatus.inWorldDate || "";
+  $("statusFood").value = campaignStatus.food || "";
+  $("statusWater").value = campaignStatus.water || "";
+  $("statusSupplies").value = campaignStatus.suppliesNote || "";
+  $("statusScene").value = SCENES[campaignStatus.scene] ? campaignStatus.scene : "bastion-streets";
+  $("weatherCategory").value = WEATHER[campaignStatus.weatherCategory] ? campaignStatus.weatherCategory : categoryOfSubtype(campaignStatus.weatherSubtype);
+  fillSubtypeOptions($("weatherCategory").value, campaignStatus.weatherSubtype);
+  applySceneAndSky();
+}
+function readStatusFromForm(){
+  return {
+    inWorldDate: $("statusDate").value.trim(),
+    food: $("statusFood").value.trim(),
+    water: $("statusWater").value.trim(),
+    weatherCategory: $("weatherCategory").value,
+    weatherSubtype: $("weatherSubtype").value,
+    scene: $("statusScene").value,
+    suppliesNote: $("statusSupplies").value.trim()
+  };
+}
+function fillSubtypeOptions(category, selected){
+  const list = WEATHER[category] || WEATHER.Fog;
+  $("weatherSubtype").innerHTML = list.map(n => `<option value="${esc(n)}"${n===selected?" selected":""}>${esc(n)}</option>`).join("");
+  if (!list.includes(selected)) $("weatherSubtype").value = list[0];
+}
+function applySceneAndSky(){
+  const sceneKey = SCENES[campaignStatus.scene] ? campaignStatus.scene : "bastion-streets";
+  const scene = SCENES[sceneKey];
+  document.body.dataset.scene = sceneKey;
+  document.body.style.setProperty("--scene-image", `url("${scene.file}")`);
+  const subtype = campaignStatus.weatherSubtype || "Heavy Fog";
+  const category = categoryOfSubtype(subtype);
+  campaignStatus.weatherCategory = category;
+  $("hero").dataset.sky = category;
+  $("skyFact").textContent = `${subtype} over ${scene.label.replace(/^The Bastion — /,"the Bastion — ")}.`;
+  $("skyNote").textContent = `${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
+  $("statusWeatherLine").textContent = `Current weather scenario: ${subtype} (${category}) at ${scene.label}.`;
+}
+async function loadCampaignStatus(){
+  const saved = store.get("apoc-campaign-status");
+  if (saved) { try { campaignStatus = { ...DEFAULT_STATUS, ...JSON.parse(saved) }; } catch(e){} }
+  applyStatusToForm();
+  if (!db) { $("statusSetupNote").hidden = false; return; }
+  try {
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", STATUS_KEY).maybeSingle();
+    if (error) throw error;
+    statusSharedReady = true;
+    $("statusSetupNote").hidden = true;
+    if (data && data.value) {
+      campaignStatus = { ...DEFAULT_STATUS, ...data.value };
+      store.set("apoc-campaign-status", JSON.stringify(campaignStatus));
+      applyStatusToForm();
+    }
+  } catch(e) {
+    statusSharedReady = false;
+    $("statusSetupNote").hidden = false;
+  }
+}
+$("weatherCategory").addEventListener("change", () => {
+  campaignStatus = readStatusFromForm();
+  fillSubtypeOptions(campaignStatus.weatherCategory, null);
+  campaignStatus = readStatusFromForm();
+  applySceneAndSky();
+});
+["weatherSubtype","statusScene"].forEach(id => $(id).addEventListener("change", () => {
+  campaignStatus = readStatusFromForm();
+  applySceneAndSky();
+}));
+$("statusForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  campaignStatus = readStatusFromForm();
+  store.set("apoc-campaign-status", JSON.stringify(campaignStatus));
+  applySceneAndSky();
+  if (!db) { $("statusSaveLine").textContent = "Saved on this device. The shared status table could not be reached."; return; }
+  try {
+    const { error } = await db.from(SETTINGS_TABLE).upsert(
+      { key: STATUS_KEY, value: campaignStatus, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    if (error) throw error;
+    statusSharedReady = true;
+    $("statusSetupNote").hidden = true;
+    $("statusSaveLine").textContent = "Saved — campaign status is shared for everybody.";
+  } catch(e) {
+    statusSharedReady = false;
+    $("statusSetupNote").hidden = false;
+    $("statusSaveLine").textContent = "Saved on this device. Shared campaign status is still being set up, so this has not gone to the shared table yet.";
+  }
+});
+
+/* ================= Countdown: every other Sunday, 11:00 AM Phoenix ================= */
+const SESSION_ANCHOR_UTC = Date.UTC(2026, 10, 8, 18, 0, 0); // Sun Nov 8, 2026, 11:00 AM America/Phoenix (UTC-7)
+const SESSION_PERIOD_MS = 14 * 24 * 60 * 60 * 1000;
+const SESSION_LENGTH_MS = 4 * 60 * 60 * 1000;
+function nextSessionStart(now){
+  if (now < SESSION_ANCHOR_UTC) return SESSION_ANCHOR_UTC;
+  const periods = Math.floor((now - SESSION_ANCHOR_UTC) / SESSION_PERIOD_MS);
+  let start = SESSION_ANCHOR_UTC + periods * SESSION_PERIOD_MS;
+  if (now >= start + SESSION_LENGTH_MS) start += SESSION_PERIOD_MS;
+  return start;
+}
+function tickCountdown(){
+  const now = Date.now();
+  const start = nextSessionStart(now);
+  const inSession = now >= start && now < start + SESSION_LENGTH_MS;
+  const target = inSession ? start + SESSION_LENGTH_MS : start;
+  const label = new Intl.DateTimeFormat("en-US", { timeZone:"America/Phoenix", weekday:"long", month:"long", day:"numeric", year:"numeric" }).format(new Date(start));
+  $("nextSessionLabel").textContent = inSession
+    ? `The table is gathered now — session began ${label} at 11:00 AM`
+    : `${label} at 11:00 AM`;
+  let diff = Math.max(0, target - now);
+  const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+  const h = Math.floor(diff / 3600000); diff -= h * 3600000;
+  const m = Math.floor(diff / 60000); diff -= m * 60000;
+  const s = Math.floor(diff / 1000);
+  $("cdDays").textContent = d; $("cdHours").textContent = h;
+  $("cdMins").textContent = m; $("cdSecs").textContent = s;
+}
+
+/* ================= Hub pop-ups (hover/focus; tap = open, tap again = go) ================= */
+let openHubItem = null;
+function closeHubPops(){
+  document.querySelectorAll(".hub-item.pop-open").forEach(el => el.classList.remove("pop-open"));
+  openHubItem = null;
+}
+function isTouchLike(){
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+function activateHub(btn){
+  const action = btn.dataset.hubAction;
+  if (action === "tracker") {
+    $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
+  } else if (action === "aidm") {
+    setActiveTab("journal");
+    $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
+  } else if (action === "gallery") {
+    openGallery();
+  }
+}
+document.querySelectorAll(".hub-btn").forEach(btn => {
+  btn.addEventListener("click", ev => {
+    const item = btn.closest(".hub-item");
+    if (isTouchLike() && item && openHubItem !== item) {
+      ev.preventDefault();
+      closeHubPops();
+      item.classList.add("pop-open");
+      openHubItem = item;
+      return;
+    }
+    closeHubPops();
+    if (btn.dataset.hubAction) { ev.preventDefault(); activateHub(btn); }
+  });
+});
+document.addEventListener("click", ev => {
+  if (!ev.target.closest(".hub-item")) closeHubPops();
+});
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") { closeHubPops(); closeGallery(); }
+});
+</script>
+
+<script>
+"use strict";
+/* ================= Tracker: shared board + DM-only browser records =================
+   HARD RULE: a shared-board row is built from an explicit field list that has
+   NO secret in it. DM secrets exist only on DM-only records, which are kept
+   in this browser's localStorage and are never sent anywhere. */
+const SHARED_CATEGORIES = ["npc","location","faction","quest","timeline","event","note","thread","aidm"];
+const CAT_LABEL = {
+  npc:"Person", character:"Character", location:"Location", faction:"Faction", quest:"Quest",
+  timeline:"Timeline", event:"Festival / Event", note:"Lore note", thread:"Thread", aidm:"AI DM",
+  session:"Session", loot:"Loot"
+};
+const TABS = [
+  { id:"overview", label:"Overview", cats:null },
+  { id:"people", label:"People", cats:["npc","character"] },
+  { id:"quests", label:"Quests", cats:["quest"] },
+  { id:"world", label:"World", cats:["location","faction","loot"] },
+  { id:"journal", label:"Journal & AI DM", cats:["aidm","session"] },
+  { id:"time", label:"Timeline & Calendar", cats:["timeline","event"] },
+  { id:"lore", label:"Lore & Threads", cats:["note","thread"] }
+];
+let sharedEntries = [];
+let localEntries = [];
+let activeTab = "overview";
+let entryQuery = "";
+
+try { localEntries = JSON.parse(store.get("apoc-dm-entries") || "[]"); } catch(e){ localEntries = []; }
+if (!Array.isArray(localEntries)) localEntries = [];
+
+function allEntries(){
+  const shared = sharedEntries.map(e => ({ ...e, origin:"shared" }));
+  const local = localEntries.map(e => ({ ...e, origin:"dm" }));
+  return [...shared, ...local].sort((a,b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+}
+function saveLocalEntries(){ store.set("apoc-dm-entries", JSON.stringify(localEntries)); }
+function showEntriesError(msg){
+  const box = $("entriesError");
+  if (!msg) { box.hidden = true; box.textContent = ""; return; }
+  box.hidden = false; box.textContent = msg;
+}
+function buildTabs(){
+  const entries = allEntries();
+  $("trackerTabs").innerHTML = TABS.map(t => {
+    const n = t.cats ? entries.filter(e => t.cats.includes(e.category)).length : entries.length;
+    return `<button type="button" class="tab${t.id===activeTab?" active":""}" data-tab="${t.id}">${esc(t.label)} (${n})</button>`;
+  }).join("");
+  $("trackerTabs").querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => setActiveTab(b.dataset.tab)));
+  const sel = $("entryCategory");
+  if (!sel.options.length) {
+    sel.innerHTML = Object.keys(CAT_LABEL).map(c => `<option value="${c}">${esc(CAT_LABEL[c])}</option>`).join("");
+  }
+}
+function setActiveTab(id){ activeTab = id; renderTracker(); }
+function setCategoryOptions(origin){
+  const cats = origin === "shared" ? SHARED_CATEGORIES : Object.keys(CAT_LABEL);
+  $("entryCategory").innerHTML = cats.map(c => `<option value="${c}">${esc(CAT_LABEL[c])}</option>`).join("");
+}
+function entryMatches(e){
+  const q = entryQuery.trim().toLowerCase();
+  if (!q) return true;
+  return [e.title,e.status,e.detail,e.date_label,e.links,e.pinned].join(" ").toLowerCase().includes(q);
+}
+function entryCard(e){
+  const meta = [
+    `<span class="pill cat">${esc(CAT_LABEL[e.category] || e.category)}</span>`,
+    e.origin === "dm" ? `<span class="pill dm">DM-only — this browser</span>` : `<span class="pill">Shared board</span>`,
+    e.status ? `<span class="pill">${esc(e.status)}</span>` : "",
+    e.date_label ? `<span class="pill">${esc(e.date_label)}</span>` : ""
+  ].join("");
+  return `<article class="entry-card">
+    <h3>${esc(e.title)}</h3>
+    <div class="meta">${meta}</div>
+    ${e.detail ? `<div class="detail">${esc(e.detail)}</div>` : ""}
+    ${e.origin === "dm" && e.secret ? `<div class="secret"><strong>DM secret (this browser only):</strong>\n${esc(e.secret)}</div>` : ""}
+    ${e.pinned ? `<div class="pinned">📌 ${esc(e.pinned)}</div>` : ""}
+    ${e.links ? `<div class="links">${linkify(e.links)}</div>` : ""}
+    <div class="actions">
+      <button type="button" class="btn" data-edit-entry="${esc(String(e.id))}" data-origin="${e.origin}">Edit</button>
+      <button type="button" class="btn danger" data-delete-entry="${esc(String(e.id))}" data-origin="${e.origin}">Delete</button>
+    </div>
+  </article>`;
+}
+function aiDmBrief(){
+  const entries = allEntries();
+  const openQuests = entries.filter(e => e.category === "quest" && /open/i.test(e.status || ""));
+  const recent = entries.slice(0, 5);
+  const lines = [
+    "APOC SURVIVAL — AI DM SESSION BRIEF",
+    `Current weather: ${campaignStatus.weatherSubtype} (${campaignStatus.weatherCategory})`,
+    `Current location: ${(SCENES[campaignStatus.scene] || SCENES["bastion-streets"]).label}`,
+    campaignStatus.inWorldDate ? `In-world date: ${campaignStatus.inWorldDate}` : null,
+    `Tracker: ${entries.length} entries (${sharedEntries.length} shared, ${localEntries.length} DM-only in this browser).`,
+    "",
+    "Open quests:",
+    ...(openQuests.length ? openQuests.map(q => `- ${q.title}${q.status ? ` — ${q.status}` : ""}`) : ["- None marked open."]),
+    "",
+    "Most recent entries:",
+    ...(recent.length ? recent.map(e => `- [${CAT_LABEL[e.category] || e.category}] ${e.title}`) : ["- None yet."])
+  ].filter(x => x !== null);
+  return lines.join("\n");
+}
+function renderTracker(){
+  buildTabs();
+  const entries = allEntries();
+  const tab = TABS.find(t => t.id === activeTab) || TABS[0];
+  let html = "";
+  if (activeTab === "overview") {
+    html += `<div class="counts">` + TABS.slice(1).map(t =>
+      `<div class="count"><b>${entries.filter(e => t.cats.includes(e.category)).length}</b><span>${esc(t.label)}</span></div>`
+    ).join("") + `</div>`;
+    const recent = entries.filter(entryMatches).slice(0, 12);
+    html += `<h3>Most recent</h3>` + (recent.length
+      ? `<div class="cards">${recent.map(entryCard).join("")}</div>`
+      : `<div class="empty">Nothing here yet.</div>`);
+  } else {
+    if (activeTab === "journal") {
+      html += `<div class="ai-brief"><h3 style="margin-top:0">AI DM session brief</h3><pre id="aiBriefText">${esc(aiDmBrief())}</pre></div>`;
+    }
+    const list = entries.filter(e => tab.cats.includes(e.category)).filter(entryMatches);
+    html += list.length
+      ? `<div class="cards">${list.map(entryCard).join("")}</div>`
+      : `<div class="empty">Nothing in this tab yet — add the first entry.</div>`;
+  }
+  $("trackerContent").innerHTML = html;
+  $("copyBriefBtn").hidden = activeTab !== "journal";
+  $("trackerContent").querySelectorAll("[data-edit-entry]").forEach(b =>
+    b.addEventListener("click", () => openEntryForm(b.dataset.origin, b.dataset.editEntry)));
+  $("trackerContent").querySelectorAll("[data-delete-entry]").forEach(b =>
+    b.addEventListener("click", () => deleteEntry(b.dataset.origin, b.dataset.deleteEntry)));
+}
+async function loadSharedEntries(showFailure = true){
+  if (!db) {
+    if (showFailure) showEntriesError("The shared board could not be reached — DM-only records in this browser still work below.");
+    renderTracker();
+    return;
+  }
+  try {
+    const { data, error } = await db.from(ENTRIES_TABLE).select("*").order("created_at", { ascending:false }).limit(2000);
+    if (error) throw error;
+    sharedEntries = data || [];
+    showEntriesError(null);
+  } catch(e) {
+    if (showFailure) showEntriesError("Couldn't load the shared board — it may be waking up. DM-only records in this browser still work below; try Refresh in a few seconds.");
+  }
+  renderTracker();
+}
+function updateScopeUI(){
+  const scope = $("entryScope").value;
+  const category = $("entryCategory").value;
+  const categoryIsShared = SHARED_CATEGORIES.includes(category);
+  const secretField = $("secretField");
+  if (!categoryIsShared && scope === "shared") {
+    $("entryScope").value = "dm";
+    $("entryScopeNote").textContent = "Sessions, characters, and loot are not part of the shared-board schema, so this entry stays DM-only in this browser.";
+  } else if (scope === "shared") {
+    $("entryScopeNote").textContent = "This entry will be saved to the shared board for everybody. There is no secret field on a shared entry — secrets are never sent to the board.";
+  } else {
+    $("entryScopeNote").textContent = "This entry — including its DM secret — is stored only in this browser and never leaves it.";
+  }
+  secretField.hidden = $("entryScope").value !== "dm";
+}
+function openEntryForm(origin, id){
+  const form = $("entryForm");
+  form.reset();
+  $("entryId").value = "";
+  $("entryOrigin").value = "";
+  $("entryFormHeading").textContent = "Add entry";
+  $("entryScope").disabled = false;
+  setCategoryOptions(origin);
+  const tab = TABS.find(t => t.id === activeTab);
+  if (tab && tab.cats && [...$("entryCategory").options].some(o => o.value === tab.cats[0])) $("entryCategory").value = tab.cats[0];
+  if (id) {
+    const list = origin === "dm" ? localEntries : sharedEntries;
+    const e = list.find(x => String(x.id) === String(id));
+    if (!e) return;
+    $("entryFormHeading").textContent = "Edit entry";
+    $("entryId").value = e.id;
+    $("entryOrigin").value = origin;
+    $("entryScope").value = origin === "dm" ? "dm" : "shared";
+    $("entryScope").disabled = true; // an entry does not move between the board and a browser
+    $("entryCategory").value = e.category;
+    $("entryTitle").value = e.title || "";
+    $("entryStatus").value = e.status || "";
+    $("entryDate").value = e.date_label || "";
+    $("entryDetail").value = e.detail || "";
+    $("entryLinks").value = e.links || "";
+    $("entryPinned").value = e.pinned || "";
+    $("entrySecret").value = origin === "dm" ? (e.secret || "") : "";
+  }
+  updateScopeUI();
+  form.hidden = false;
+  form.scrollIntoView({ behavior:"smooth", block:"center" });
+  $("entryTitle").focus({ preventScroll:true });
+}
+async function deleteEntry(origin, id){
+  const list = origin === "dm" ? localEntries : sharedEntries;
+  const e = list.find(x => String(x.id) === String(id));
+  const title = e ? e.title : id;
+  if (origin === "dm") {
+    if (!confirm(`Delete "${title}" from this browser? It exists only here.`)) return;
+    localEntries = localEntries.filter(x => String(x.id) !== String(id));
+    saveLocalEntries(); renderTracker(); return;
+  }
+  if (!confirm(`Delete "${title}" from the shared board? Everybody will stop seeing it.`)) return;
+  if (!db) { showEntriesError("The shared board could not be reached, so that delete did not go through."); return; }
+  try {
+    const { error } = await db.from(ENTRIES_TABLE).delete().eq("id", Number(id));
+    if (error) throw error;
+    await loadSharedEntries();
+  } catch(err) { showEntriesError("That delete didn't go through — try Refresh and again."); }
+}
+$("entryScope").addEventListener("change", updateScopeUI);
+$("entryCategory").addEventListener("change", updateScopeUI);
+$("addEntryBtn").addEventListener("click", () => openEntryForm());
+$("cancelEntryBtn").addEventListener("click", () => { $("entryForm").hidden = true; });
+$("refreshEntries").addEventListener("click", () => { loadSharedEntries(); loadCampaignStatus(); loadArtwork(); });
+$("entrySearch").addEventListener("input", ev => { entryQuery = ev.target.value; renderTracker(); });
+$("copyBriefBtn").addEventListener("click", async () => {
+  const text = aiDmBrief();
+  try { await navigator.clipboard.writeText(text); $("copyBriefBtn").textContent = "Copied ✓"; }
+  catch(e) { $("copyBriefBtn").textContent = "Copy failed — select the brief text"; }
+  setTimeout(() => { $("copyBriefBtn").textContent = "Copy AI DM brief"; }, 2200);
+});
+$("entryForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const scope = $("entryScope").value;
+  const category = $("entryCategory").value;
+  const base = {
+    category,
+    title: $("entryTitle").value.trim(),
+    status: $("entryStatus").value.trim() || null,
+    date_label: $("entryDate").value.trim() || null,
+    detail: $("entryDetail").value.trim() || null,
+    links: $("entryLinks").value.trim() || null,
+    pinned: $("entryPinned").value.trim() || null
+  };
+  if (!base.title) return;
+  const editingId = $("entryId").value;
+  const origin = $("entryOrigin").value;
+
+  if (scope === "dm" || !SHARED_CATEGORIES.includes(category)) {
+    // DM-only: stored in this browser, secret included. Never transmitted.
+    const localRow = { ...base, secret: $("entrySecret").value.trim() || null, visibility:"dm" };
+    if (origin === "dm" && editingId) {
+      const i = localEntries.findIndex(x => String(x.id) === String(editingId));
+      if (i >= 0) localEntries[i] = { ...localEntries[i], ...localRow };
+    } else {
+      localRow.id = "local-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+      localRow.created_at = new Date().toISOString();
+      localEntries.unshift(localRow);
+    }
+    saveLocalEntries();
+    $("entryForm").hidden = true;
+    renderTracker();
+    return;
+  }
+
+  // Shared: explicit field list — no secret key exists on this object.
+  const sharedRow = { ...base, visibility:"shared" };
+  if (!db) { showEntriesError("The shared board could not be reached, so that entry was not saved. Switch it to DM-only to keep it in this browser."); return; }
+  try {
+    const result = (origin === "shared" && editingId)
+      ? await db.from(ENTRIES_TABLE).update(sharedRow).eq("id", Number(editingId))
+      : await db.from(ENTRIES_TABLE).insert(sharedRow);
+    if (result.error) throw result.error;
+    $("entryForm").hidden = true;
+    await loadSharedEntries();
+  } catch(err) {
+    showEntriesError("That save didn't go through — check the connection and try again.");
+  }
+});
+</script>
+
+<script>
+"use strict";
+/* ================= Cody's Artwork =================
+   Built-in gallery: exactly the 60 cleared pictures, in Cody's numbered
+   order. Four numbers are deliberately absent and must never be added. */
+const BUILTIN_ART = [3974,3975,3976,3977,3978,3979,3980,3981,3982,3983,3984,3993,3994,3996,3998,3999,4000,4002,4003,4004,4005,4006,4007,4008,4018,4019,4020,4021,4022,4023,4024,4025,4026,4027,4028,4029,4030,4032,4034,4035,4037,4045,4046,4047,4048,4049,4050,4051,4052,4053,4054,4056,4058,4059,4060,4061,4062,4065,4067,4068];
+let uploadedArt = [];
+let artworkSharedReady = false;
+let lastGalleryFocus = null;
+
+function artItemHTML(item){
+  return `<figure class="gallery-item">
+    <button type="button" data-art-src="${esc(item.src)}" data-art-label="${esc(item.label)}" aria-label="View ${esc(item.label)}">
+      <img src="${esc(item.src)}" alt="${esc(item.label)}" loading="lazy">
+    </button>
+    <figcaption><span>${esc(item.label)}</span>${item.uploaded ? `<span class="mini-delete" data-art-delete="${esc(item.name)}" role="button" tabindex="0" aria-label="Delete ${esc(item.label)}">Delete</span>` : ""}</figcaption>
+  </figure>`;
+}
+function renderArtwork(){
+  const builtins = BUILTIN_ART.map(n => ({ src:`assets/cody/${n}.webp`, label:`Cody's picture #${n}`, uploaded:false }));
+  $("builtinGallery").innerHTML = builtins.map(artItemHTML).join("");
+  $("uploadedHeading").hidden = uploadedArt.length === 0;
+  $("uploadedGallery").innerHTML = uploadedArt.map(artItemHTML).join("");
+  const total = builtins.length + uploadedArt.length;
+  $("artworkChip").textContent = total;
+  $("galleryCountLine").textContent = uploadedArt.length
+    ? `${total} pictures — Cody's 60, plus ${uploadedArt.length} shared upload${uploadedArt.length === 1 ? "" : "s"}.`
+    : "60 pictures by Cody, in his numbered order.";
+  document.querySelectorAll("[data-art-src]").forEach(b => b.addEventListener("click", () => {
+    $("featuredArt").src = b.dataset.artSrc;
+    $("featuredArt").alt = b.dataset.artLabel;
+    $("featuredCaption").textContent = b.dataset.artLabel;
+    $("featuredArt").scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }));
+  document.querySelectorAll("[data-art-delete]").forEach(el => {
+    const del = async () => {
+      if (!confirm("Delete this shared picture for everybody?")) return;
+      if (!db) return;
+      try {
+        const { error } = await db.storage.from(ARTWORK_BUCKET).remove([el.dataset.artDelete]);
+        if (error) throw error;
+        await loadArtwork();
+      } catch(e) { $("artUploadLine").textContent = "That delete didn't go through — try again."; }
+    };
+    el.addEventListener("click", del);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); del(); } });
+  });
+}
+async function loadArtwork(){
+  renderArtwork();
+  if (!db) {
+    artworkSharedReady = false;
+    $("artworkSetupNote").textContent = "Shared uploads are being set up — the built-in 60 are here, and uploads can't be shared yet.";
+    return;
+  }
+  try {
+    const { data, error } = await db.storage.from(ARTWORK_BUCKET).list("", { limit:100, offset:0, sortBy:{ column:"name", order:"asc" } });
+    if (error) throw error;
+    uploadedArt = (data || [])
+      .filter(o => o && o.name && /\.(png|jpe?g|webp|gif|bmp)$/i.test(o.name))
+      .map(o => ({
+        name: o.name,
+        src: db.storage.from(ARTWORK_BUCKET).getPublicUrl(o.name).data.publicUrl,
+        label: `Shared upload — ${o.name}`,
+        uploaded: true
+      }));
+    artworkSharedReady = true;
+    $("artworkSetupNote").textContent = "Uploads go to the shared artwork bucket and show up for everybody.";
+    renderArtwork();
+  } catch(e) {
+    artworkSharedReady = false;
+    uploadedArt = [];
+    $("artworkSetupNote").textContent = "Shared uploads are being set up — the built-in 60 are here, and uploads can't be shared until the artwork bucket exists.";
+    renderArtwork();
+  }
+}
+$("artUpload").addEventListener("change", async ev => {
+  const files = [...(ev.target.files || [])];
+  ev.target.value = "";
+  if (!files.length) return;
+  if (!db) { $("artUploadLine").textContent = "Uploads can't be shared right now — the shared backend could not be reached."; return; }
+  let done = 0;
+  for (const file of files) {
+    const safe = file.name.replace(/[^\w.\-]+/g, "-").slice(-80) || "picture";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safe}`;
+    try {
+      const { error } = await db.storage.from(ARTWORK_BUCKET).upload(path, file, { upsert:false, contentType:file.type || undefined });
+      if (error) throw error;
+      done++;
+    } catch(e) {
+      $("artUploadLine").textContent = "Shared uploads are being set up — that picture was not uploaded. The built-in gallery is unaffected.";
+      return;
+    }
+  }
+  $("artUploadLine").textContent = done ? `Uploaded ${done} picture${done === 1 ? "" : "s"} for everybody.` : "";
+  await loadArtwork();
+});
+function openGallery(){
+  lastGalleryFocus = document.activeElement;
+  $("galleryOverlay").hidden = false;
+  $("galleryButton").setAttribute("aria-expanded", "true");
+  document.body.style.overflow = "hidden";
+  $("galleryClose").focus();
+  loadArtwork();
+}
+function closeGallery(){
+  if ($("galleryOverlay").hidden) return;
+  $("galleryOverlay").hidden = true;
+  $("galleryButton").setAttribute("aria-expanded", "false");
+  document.body.style.overflow = "";
+  if (lastGalleryFocus && lastGalleryFocus.focus) lastGalleryFocus.focus();
+}
+$("galleryClose").addEventListener("click", closeGallery);
+$("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galleryOverlay")) closeGallery(); });
+
+/* ================= Init ================= */
+(function init(){
+  $("statusScene").innerHTML = Object.entries(SCENES).map(([k,v]) => `<option value="${k}">${esc(v.label)}</option>`).join("");
+  $("weatherCategory").innerHTML = WEATHER_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join("");
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+  renderTracker();
+  loadCampaignStatus();
+  loadSharedEntries();
+  loadArtwork();
+  setInterval(() => loadSharedEntries(false), 60000);
+  if (db) {
+    try {
+      db.channel("entries-live")
+        .on("postgres_changes", { event:"*", schema:"public", table:ENTRIES_TABLE }, () => loadSharedEntries(false))
+        .subscribe();
+    } catch(e) { /* realtime is a bonus; the 60-second refresh stands */ }
+  }
+})();
+</script>
+</body>
+</html>
