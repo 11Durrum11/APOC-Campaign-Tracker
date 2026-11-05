@@ -15,8 +15,17 @@ from zoneinfo import ZoneInfo
 now = datetime.now(ZoneInfo("America/Phoenix"))
 stamp = now.strftime("%Y-%m-%d-%H%M")
 # The simple human version shown by the badge at the top of the site
-# (Shaun, 2026-11-04) — the stamp broken down plainly, e.g. "Nov 4 · 7:25 PM".
-display = now.strftime("%b %-d · %-I:%M %p")
+# (Shaun, 2026-11-04): a plain version number like Blendcrafter's
+# "20.2" — NOT a date. It is set by hand per release and PRESERVED
+# across stamp bumps: edit DISPLAY_HERE (or the existing version.json)
+# when a release ships, never regenerate it from the clock.
 path = Path(__file__).with_name("version.json")
+display = "20.2"
+try:
+    existing = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(existing.get("display"), str) and existing["display"]:
+        display = existing["display"]
+except Exception:
+    pass
 path.write_text(json.dumps({"version": stamp, "display": display}) + "\n", encoding="utf-8")
 print("version.json ->", stamp, "| display:", display)
