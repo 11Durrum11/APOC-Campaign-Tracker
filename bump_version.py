@@ -16,10 +16,18 @@ now = datetime.now(ZoneInfo("America/Phoenix"))
 stamp = now.strftime("%Y-%m-%d-%H%M")
 # The simple human version shown by the badge at the top of the site
 # (Shaun, 2026-11-04): a plain version number like Blendcrafter's
-# "20.2" — NOT a date. Bump DISPLAY by hand when a release ships;
-# stamp bumps alone never change it.
-DISPLAY = "20.2"
+# "20.2" — NOT a date. Shaun's standing rule: EVERY publish raises it
+# by one point (20.2 -> 20.3 -> 20.4 ...), so this script increments
+# the display it finds in version.json by 0.1 on every run.
 path = Path(__file__).with_name("version.json")
-display = DISPLAY
+display = "20.2"
+try:
+    existing = json.loads(path.read_text(encoding="utf-8"))
+    d = existing.get("display")
+    if isinstance(d, str) and "." in d:
+        major, minor = d.rsplit(".", 1)
+        display = f"{major}.{int(minor) + 1}"
+except Exception:
+    pass
 path.write_text(json.dumps({"version": stamp, "display": display}) + "\n", encoding="utf-8")
 print("version.json ->", stamp, "| display:", display)
