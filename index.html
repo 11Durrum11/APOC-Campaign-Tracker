@@ -300,6 +300,21 @@
       <p class="eyebrow">The Bastion of Last Hope · 2701 DR</p>
       <h1>APOC Survival</h1>
       <p class="hero-sub">One campaign page for the whole table — the tracker, the story, the weather, and Cody's artwork, shared for everybody.</p>
+      <!-- Version indicator (Shaun, 2026-11-04): a little badge at the
+           top of the site showing the simple version he is looking at.
+           The text comes from version.json's "display" field, read
+           fresh on every load; hidden until it loads. -->
+      <p id="siteVersion" hidden style="display:inline-block;margin:.35rem 0 0;padding:.1rem .5rem;border:1px solid rgba(255,255,255,.35);border-radius:.375rem;font-size:11px;font-weight:600;letter-spacing:.02em;opacity:.8"></p>
+      <script>
+        fetch("version.json", { cache: "no-store" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            var el = document.getElementById("siteVersion");
+            var v = d && (d.display || d.version);
+            if (el && v) { el.textContent = "v" + v; el.hidden = false; el.style.display = "inline-block"; }
+          })
+          .catch(function () {});
+      </script>
     </div>
     <section class="sky-panel" aria-labelledby="skyHeading">
       <h2 id="skyHeading">The sky — right now</h2>

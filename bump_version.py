@@ -12,7 +12,11 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-stamp = datetime.now(ZoneInfo("America/Phoenix")).strftime("%Y-%m-%d-%H%M")
+now = datetime.now(ZoneInfo("America/Phoenix"))
+stamp = now.strftime("%Y-%m-%d-%H%M")
+# The simple human version shown by the badge at the top of the site
+# (Shaun, 2026-11-04) — the stamp broken down plainly, e.g. "Nov 4 · 7:25 PM".
+display = now.strftime("%b %-d · %-I:%M %p")
 path = Path(__file__).with_name("version.json")
-path.write_text(json.dumps({"version": stamp}) + "\n", encoding="utf-8")
-print("version.json ->", stamp)
+path.write_text(json.dumps({"version": stamp, "display": display}) + "\n", encoding="utf-8")
+print("version.json ->", stamp, "| display:", display)
