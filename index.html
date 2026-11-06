@@ -114,7 +114,11 @@
   .small{font-size:.9rem}
 
   /* 2 — Countdown */
-  .top-bubbles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;align-items:start;position:relative;z-index:3}
+  /* Laptop/desktop (Shaun, 2026-11-06): the two bubbles sit at the
+     hero's top right, stacked — Reconvenes at the very top right,
+     the Sky directly below it. Phones keep them in flow (media query
+     below), stacked full-width under the title. */
+  .top-bubbles{position:absolute;top:22px;right:24px;width:min(430px,44%);display:grid;grid-template-columns:1fr;gap:14px;align-items:start;z-index:3}
   .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
   .top-bubbles .sky-panel{max-width:none}
   .countdown-panel{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
@@ -362,7 +366,7 @@
   .notice strong{color:var(--foreground)}
 
   @media (max-width:760px){
-    .top-bubbles{grid-template-columns:1fr}
+    .top-bubbles{grid-template-columns:1fr;position:static;width:auto;margin-top:24px}
     .page{padding:0 10px 22px}
     .hero{margin:0 -10px;min-height:390px;padding:38px 16px 20px}
     .hero-art{width:96vw;right:-92px;opacity:.72}
