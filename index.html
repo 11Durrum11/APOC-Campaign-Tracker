@@ -109,7 +109,11 @@
   .small{font-size:.9rem}
 
   /* 2 — Countdown */
-  .countdown-panel{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+  .top-bubbles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;align-items:start;position:relative;z-index:3}
+  .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
+  .top-bubbles .sky-panel{max-width:none}
+  .countdown-panel{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+  .countdown-panel .timer{justify-content:flex-start;margin-top:10px}
   .countdown-date{font-size:1.1rem;margin:2px 0 0}
   .timer{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
   .timer div{min-width:70px;text-align:center;background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:9px 8px}
@@ -443,6 +447,7 @@
           .catch(function () {});
       </script>
     </div>
+    <div class="top-bubbles">
     <section class="panel countdown-panel" aria-label="The table reconvenes">
     <details class="canon-item section-fold">
       <summary>The table reconvenes</summary>
@@ -464,11 +469,12 @@
       <details class="canon-item section-fold">
         <summary>The sky — right now</summary>
         <div class="fold-body">
-      <p class="sky-fact" id="skyFact">Heavy Fog over the Bastion — fogbound streets.</p>
-      <p class="sky-note" id="skyNote">The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
+      <p class="sky-fact" id="skyFact">Regular fog over the Bastion — steady, thick, England-like. Only regular fog ever falls inside the walls.</p>
+      <p class="sky-note" id="skyNote">Out in the badlands all around the Bastion, the set weather rules. The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
         </div>
       </details>
     </section>
+    </div>
   </header>
 
   <!-- 2 / The table reconvenes -->
@@ -1172,9 +1178,14 @@ function applySceneAndSky(){
   const category = categoryOfSubtype(subtype);
   campaignStatus.weatherCategory = category;
   $("hero").dataset.sky = category;
-  $("skyFact").textContent = `${subtype} over ${scene.label.replace(/^The Bastion — /,"the Bastion — ")}.`;
-  $("skyNote").textContent = `${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
-  $("statusWeatherLine").textContent = `Current weather scenario: ${subtype} (${category}) at ${scene.label}.`;
+  if (category === "Fog") {
+    $("skyFact").textContent = `${subtype} over the Bastion — regular fog, steady and thick, like always inside the walls.`;
+    $("skyNote").textContent = `${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
+  } else {
+    $("skyFact").textContent = "Regular fog over the Bastion — steady, thick, England-like. Only regular fog ever falls inside the walls.";
+    $("skyNote").textContent = `Out in the badlands all around the Bastion: ${subtype} (${category}). ${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
+  }
+  $("statusWeatherLine").textContent = `Current weather scenario: ${subtype} (${category}) — that is the badlands weather; over the Bastion itself, only regular fog ever falls.`;
 }
 async function loadCampaignStatus(){
   const saved = store.get("apoc-campaign-status");
