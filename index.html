@@ -163,6 +163,9 @@
   .canon-item .law-why ul{margin:0;padding-left:18px}
   .canon-item .law-why li{margin:0 0 9px;line-height:1.56}
   .canon-item .law-why li:last-child{margin-bottom:0}
+  .section-fold{border:none;background:transparent;margin:0;border-radius:0}
+  .section-fold>summary{font-size:1.32rem;padding:4px 2px 10px;min-height:44px}
+  .section-fold .fold-body{padding:2px 2px 2px}
 
   /* Faerûn map */
   .map-frame{margin-top:14px;border:1px solid var(--card-border);border-radius:10px;overflow:hidden;background:var(--background)}
@@ -556,9 +559,11 @@
   </section>
 
   <!-- 4b / Faerûn Map -->
-  <section class="panel" id="laws-of-the-bastion" aria-labelledby="lawsHeading">
+  <section class="panel" id="laws-of-the-bastion" aria-label="Laws of the Bastion">
+    <details class="canon-item section-fold">
+      <summary>Laws of the Bastion</summary>
+      <div class="fold-body">
     <p class="eyebrow">Bastion of Last Hope · 2701 DR</p>
-    <h2 id="lawsHeading">Laws of the Bastion</h2>
     <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
     <div class="laws-body">
       <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
@@ -588,11 +593,15 @@
       </details>
     </div>
     <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
+      </div>
+    </details>
   </section>
 
-  <section class="panel" id="canon" aria-labelledby="canonHeading">
+  <section class="panel" id="canon" aria-label="World and City Canon">
+    <details class="canon-item section-fold">
+      <summary>World &amp; City Canon</summary>
+      <div class="fold-body">
     <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
-    <h2 id="canonHeading">World &amp; City Canon</h2>
     <p class="muted">The one-spot compilation of Shaun's canon, for the tracker hub's Canon button. Everything here is Shaun's ruling/canon as recorded; the Laws' base text and civil list are locked canon, Code Legal-derived material shaded as proposed amendments stands as marked in the Laws text itself.</p>
     <details class="canon-item">
       <summary>WORLD CANON</summary>
@@ -629,6 +638,8 @@
         <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands).</li>
         <li><strong>Slavery &amp; Warforged:</strong> abolition RECENT and Warforged-driven; Warforged created not born, "just toasters" who gained sentience; "about 1965 for the Warforged," a long couple of decades of 1965 — unfinished; Warforged still second-class citizens; in-world slur "toi" (T-O-I), represented in material as-is per Shaun's direction.</li>
       </ul></div>
+    </details>
+      </div>
     </details>
   </section>
 
