@@ -210,6 +210,9 @@
   .status-chips button[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
   .ruler-label{background:rgba(10,12,16,.85);color:#f2e7c8;padding:3px 9px;border-radius:999px;font-size:.8rem;font-weight:700;white-space:nowrap;border:1px solid var(--primary)}
   .scale-input{width:96px}
+  .tk-gm .tk-disc{border-style:dashed;border-color:#e8a33d}
+  .draw-text{background:rgba(10,12,16,.82);padding:2px 8px;border-radius:6px;font-weight:700;font-size:.85rem;white-space:nowrap;border:1px solid rgba(255,255,255,.25)}
+  body.projecting .draw-text{font-size:1.1rem}
 
   /* Forms */
   .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
@@ -528,6 +531,66 @@
       <button type="button" class="btn" id="addTokenBtn">Add token</button>
       <span class="muted small" id="tokenStatus">Tokens load from the shared board…</span>
     </div>
+    <div class="map-tools">
+      <button type="button" class="btn" id="gmBtn" aria-pressed="false">GM view: off</button>
+      <span class="muted small" id="gmStatus">GM view shows the fog dimmed, GM-only tokens and GM drawings. Players and the TV never see GM pieces, and projection is always the player view.</span>
+    </div>
+    <div class="map-tools" id="fogControls" hidden>
+      <label class="atlas-toggle"><input type="checkbox" id="fogEnabled"> Fog of war on this map</label>
+      <button type="button" class="btn" id="fogRevealBtn" aria-pressed="false">Reveal area</button>
+      <button type="button" class="btn" id="fogHideBtn" aria-pressed="false">Hide area</button>
+      <button type="button" class="btn" id="fogAllBtn">Reveal all (fog off)</button>
+      <button type="button" class="btn" id="fogNoneBtn">Hide all</button>
+      <button type="button" class="btn" id="gmPinBtn">Set GM PIN</button>
+    </div>
+    <div class="map-tools">
+      <div class="field" style="flex:0 1 auto">
+        <label for="drawTool">Draw tool</label>
+        <select id="drawTool">
+          <option value="">Off</option>
+          <option value="line">Freehand line</option>
+          <option value="rect">Rectangle</option>
+          <option value="circle">Circle</option>
+          <option value="text">Text note</option>
+          <option value="template">Spell template</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="drawColor">Color</label>
+        <select id="drawColor">
+          <option value="#e8a33d">Amber</option>
+          <option value="#d9534f">Red</option>
+          <option value="#7aa2c4">Blue</option>
+          <option value="#58b368">Green</option>
+          <option value="#f2e7c8">White</option>
+          <option value="#9a86c8">Violet</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="drawLayerSel">Layer</label>
+        <select id="drawLayerSel">
+          <option value="shared">Shared</option>
+          <option value="gm">GM only</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 1 auto" id="tplShapeField" hidden>
+        <label for="tplShape">Template</label>
+        <select id="tplShape">
+          <option value="circle">Circle — radius</option>
+          <option value="cone">Cone — length</option>
+          <option value="line">Line — length</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 1 auto" id="tplSizeField" hidden>
+        <label for="tplSize">Size (ft)</label>
+        <input id="tplSize" type="number" value="20" min="5" step="5" style="width:84px">
+      </div>
+      <label class="atlas-toggle"><input type="checkbox" id="drawToggle" checked> Drawings</label>
+      <label class="atlas-toggle"><input type="checkbox" id="tokensToggle" checked> Tokens</label>
+      <button type="button" class="btn" id="drawUndo">Undo drawing</button>
+      <button type="button" class="btn" id="drawClear">Clear drawings</button>
+      <span class="muted small" id="drawStatus"></span>
+    </div>
     <div id="apocMap" class="apoc-map" aria-label="Editable shared map of Faerûn"></div>
     <div id="placeCard" class="place-card" hidden></div>
     <p class="map-status muted small" id="mapStatus">Loading the shared markers…</p>
@@ -604,6 +667,9 @@
         <div class="field full">
           <label for="tokenImg">Portrait image (optional — a Cody's Artwork path like assets/cody/3974.webp, or an image address)</label>
           <input id="tokenImg" type="text" autocomplete="off" placeholder="Optional">
+        </div>
+        <div class="field full">
+          <label class="atlas-toggle"><input type="checkbox" id="tokenGm"> GM only — hidden from players and the TV</label>
         </div>
         <div class="field full">
           <label>Status markers</label>
@@ -1560,7 +1626,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     form.hidden = false;
     form.scrollIntoView({ behavior: "smooth", block: "center" });
   }
-  map.on("click", e => { if (isProjecting()) return; const p = toXY(e.latlng); openEditor({ mode: "new", x: p.x, y: p.y }); });
+  map.on("click", e => { if (isProjecting()) return; if (typeof armedMode !== "undefined" && armedMode) return; if (typeof rulerOn !== "undefined" && rulerOn) return; const p = toXY(e.latlng); openEditor({ mode: "new", x: p.x, y: p.y }); });
   $("markerCancel").addEventListener("click", closeEditor);
   $("markerDelete").addEventListener("click", async () => {
     if (!editing || editing.mode !== "edit") return;
@@ -1737,7 +1803,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     { k:"cursed", label:"Cursed", c:"#9a86c8" },
     { k:"dead", label:"Dead", c:"#22242c" }
   ];
-  let tokens = [], feetPerSquare = 5, gridOn = false;
+  let tokens = [], feetPerSquare = 5, gridOn = false, gmView = false;
   const tokenLayer = L.layerGroup().addTo(map);
   const gridLayer = L.layerGroup();
   const tokenStatusEl = $("tokenStatus");
@@ -1815,13 +1881,14 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     }).join("");
     return L.divIcon({
       className: "tk-icon",
-      html: `<div class="tk tkc-${tk.color || "amber"}" style="width:${px}px"><div class="tk-disc" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.45)}px">${disc}</div>${hp}<div class="tk-status">${dots}</div><span class="tk-label">${esc(tk.name || "Token")}</span></div>`,
+      html: `<div class="tk tkc-${tk.color || "amber"}${tk.gm ? " tk-gm" : ""}" style="width:${px}px"><div class="tk-disc" style="width:${px}px;height:${px}px;font-size:${Math.round(px * 0.45)}px">${disc}</div>${hp}<div class="tk-status">${dots}</div><span class="tk-label">${esc(tk.name || "Token")}</span></div>`,
       iconAnchor: [px / 2, px / 2]
     });
   }
   function drawTokens(){
     tokenLayer.clearLayers();
     for (const tk of tokens) {
+      if (tk.gm && !effectiveGm()) continue;
       const m = L.marker(toLatLng(tk.x, tk.y), { draggable: true, icon: tokenIcon(tk) }).addTo(tokenLayer);
       m.on("click", () => {
         if (isProjecting()) {
@@ -1880,6 +1947,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     $("tokenHp").value = tk.hp ?? "";
     $("tokenMaxHp").value = tk.maxHp ?? "";
     $("tokenImg").value = tk.img || "";
+    $("tokenGm").checked = !!tk.gm;
     draftStatus = [...(tk.status || [])];
     renderStatusChips();
     fillLinkOptions(tk.entryId || "");
@@ -1919,7 +1987,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       maxHp: $("tokenMaxHp").value === "" ? null : parseInt($("tokenMaxHp").value, 10),
       img: $("tokenImg").value.trim(),
       status: [...draftStatus],
-      entryId: $("tokenLink").value
+      entryId: $("tokenLink").value,
+      gm: $("tokenGm").checked
     });
     const ok = await saveTokens();
     if (!ok) { tokenStatusEl.textContent = "That token didn't save — check the connection and try again."; return; }
@@ -1969,8 +2038,294 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   loadTokens();
   setInterval(() => { loadTokens(true); loadVttSettings(true); }, 60000);
   try {
-    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); loadActiveMap(); }).subscribe();
+    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); loadActiveMap(); loadFog(true); loadDraw(true); }).subscribe();
   } catch(e) { /* realtime is a bonus; the 60-second refresh stands */ }
+
+  /* ================= VTT Phase 2: GM gate, fog of war, GM layer, drawing =================
+     Fog and drawings are per-map (same key pattern as tokens). The GM PIN is a
+     convenience gate only: it lives in the shared store like everything else
+     on this public page. GM view is per-screen (this browser session);
+     projection is always the player view. */
+  function effectiveGm(){ return gmView && !isProjecting(); }
+  map.createPane("fogPane");
+  map.getPane("fogPane").style.zIndex = 640;
+  map.getPane("fogPane").style.pointerEvents = "none";
+  const fogLayer = L.layerGroup().addTo(map);
+  const drawLayer = L.layerGroup().addTo(map);
+  const previewLayer = L.layerGroup().addTo(map);
+  const fogKey = () => currentMapId === "faerun" ? "vtt_fog" : `vtt_fog_${currentMapId}`;
+  const drawKey = () => currentMapId === "faerun" ? "vtt_draw" : `vtt_draw_${currentMapId}`;
+  let fogState = { enabled: false, revealed: [] };
+  let drawItems = [];
+  const drawStatusEl = $("drawStatus");
+
+  /* ---- GM gate ---- */
+  async function getGmPin(){
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", "gm_pin").maybeSingle();
+    return data && data.value && data.value.pin ? String(data.value.pin) : null;
+  }
+  async function setGmPin(pin){
+    await db.from(SETTINGS_TABLE).upsert({ key: "gm_pin", value: { pin }, updated_at: new Date().toISOString() }, { onConflict: "key" });
+  }
+  function applyGmUi(){
+    $("gmBtn").textContent = gmView ? "GM view: on" : "GM view: off";
+    $("gmBtn").setAttribute("aria-pressed", String(gmView));
+    $("fogControls").hidden = !gmView;
+    renderFog(); drawTokens(); renderDraw();
+  }
+  $("gmBtn").addEventListener("click", async () => {
+    if (gmView) { gmView = false; sessionStorage.removeItem("apocGm"); applyGmUi(); return; }
+    const existing = await getGmPin();
+    if (!existing) {
+      const pin = prompt("No GM PIN is set yet. Choose the campaign's GM PIN (convenience gate only — it just keeps the GM controls out of casual reach):");
+      if (!pin) return;
+      await setGmPin(pin.trim());
+    } else {
+      const pin = prompt("GM PIN:");
+      if (pin === null) return;
+      if (pin.trim() !== existing) { alert("That PIN doesn't match."); return; }
+    }
+    gmView = true;
+    sessionStorage.setItem("apocGm", "1");
+    applyGmUi();
+  });
+  $("gmPinBtn").addEventListener("click", async () => {
+    const pin = prompt("Set a new GM PIN for the campaign:");
+    if (!pin) return;
+    await setGmPin(pin.trim());
+    $("gmStatus").textContent = "GM PIN updated.";
+  });
+  if (sessionStorage.getItem("apocGm") === "1") gmView = true;
+
+  /* ---- Fog of war ---- */
+  async function loadFog(quiet){
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", fogKey()).maybeSingle();
+    if (error) return;
+    fogState = (data && data.value && typeof data.value === "object")
+      ? { enabled: !!data.value.enabled, revealed: Array.isArray(data.value.revealed) ? data.value.revealed : [] }
+      : { enabled: false, revealed: [] };
+    $("fogEnabled").checked = fogState.enabled;
+    renderFog();
+  }
+  async function saveFog(){
+    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: fogKey(), value: fogState, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    return !error;
+  }
+  function renderFog(){
+    fogLayer.clearLayers();
+    if (!fogState.enabled) return;
+    const holes = fogState.revealed.map(r => {
+      const a = toLatLng(r.x, r.y), b = toLatLng(r.x + r.w, r.y + r.h);
+      return [[a[0], a[1]], [a[0], b[1]], [b[0], b[1]], [b[0], a[1]]];
+    });
+    fogLayer.addLayer(L.polygon([[[0, 0], [0, MW], [MH, MW], [MH, 0]], ...holes],
+      { pane: "fogPane", color: "transparent", weight: 0, fillColor: "#04060a", fillOpacity: effectiveGm() ? 0.45 : 0.93, interactive: false }));
+    if (effectiveGm()) for (const r of fogState.revealed)
+      fogLayer.addLayer(L.rectangle([toLatLng(r.x, r.y), toLatLng(r.x + r.w, r.y + r.h)], { pane: "fogPane", color: "#e8a33d", weight: 1, fill: false, interactive: false }));
+  }
+  $("fogEnabled").addEventListener("change", async () => { fogState.enabled = $("fogEnabled").checked; await saveFog(); renderFog(); });
+  $("fogAllBtn").addEventListener("click", async () => { fogState.enabled = false; $("fogEnabled").checked = false; await saveFog(); renderFog(); });
+  $("fogNoneBtn").addEventListener("click", async () => { if (!confirm("Hide the whole map? Every revealed area is forgotten.")) return; fogState = { enabled: true, revealed: [] }; $("fogEnabled").checked = true; await saveFog(); renderFog(); });
+
+  /* ---- Drawing ---- */
+  async function loadDraw(quiet){
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", drawKey()).maybeSingle();
+    if (error) return;
+    drawItems = (data && data.value && Array.isArray(data.value.items)) ? data.value.items : [];
+    renderDraw();
+  }
+  async function saveDraw(){
+    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: drawKey(), value: { items: drawItems }, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    return !error;
+  }
+  function uToLatLng(ux, uy){ return [MH - uy, ux]; }
+  function renderDraw(){
+    drawLayer.clearLayers();
+    if (!$("drawToggle").checked) return;
+    const gm = effectiveGm();
+    for (const it of drawItems) {
+      if (it.gm && !gm) continue;
+      const st = { color: it.color || "#e8a33d", weight: 3, fillColor: it.color || "#e8a33d", interactive: false };
+      if (it.type === "line") drawLayer.addLayer(L.polyline(it.pts.map(p => toLatLng(p[0], p[1])), { ...st, fill: false }));
+      else if (it.type === "rect") drawLayer.addLayer(L.rectangle([toLatLng(it.x, it.y), toLatLng(it.x + it.w, it.y + it.h)], { ...st, fillOpacity: 0.18 }));
+      else if (it.type === "circle") drawLayer.addLayer(L.circle(toLatLng(it.x, it.y), { ...st, radius: it.r / 100 * MW, fillOpacity: 0.18 }));
+      else if (it.type === "text") drawLayer.addLayer(L.marker(toLatLng(it.x, it.y), { icon: L.divIcon({ className: "atlas-icon", html: `<span class="draw-text" style="color:${it.color || "#f2e7c8"}">${esc(it.text)}</span>`, iconAnchor: [0, 0] }), interactive: false }));
+      else if (it.type === "template") {
+        const cells = (it.sizeFt || 20) / feetPerSquare;
+        const Lun = cells * CELL;
+        const o = [it.x / 100 * MW, it.y / 100 * MH];
+        if (it.shape === "circle") {
+          drawLayer.addLayer(L.circle(uToLatLng(o[0], o[1]), { ...st, radius: Lun, fillOpacity: 0.22 }));
+        } else {
+          const a = (it.angle || 0) * Math.PI / 180;
+          const end = [o[0] + Lun * Math.cos(a), o[1] + Lun * Math.sin(a)];
+          if (it.shape === "cone") {
+            const h = Math.atan(0.5);
+            const p1 = [o[0] + Lun * Math.cos(a - h), o[1] + Lun * Math.sin(a - h)];
+            const p2 = [o[0] + Lun * Math.cos(a + h), o[1] + Lun * Math.sin(a + h)];
+            drawLayer.addLayer(L.polygon([uToLatLng(o[0], o[1]), uToLatLng(p1[0], p1[1]), uToLatLng(p2[0], p2[1])], { ...st, fillOpacity: 0.22 }));
+          } else {
+            const wU = (5 / feetPerSquare) * CELL / 2;
+            const pxv = -Math.sin(a), pyv = Math.cos(a);
+            const c = [[o[0] + pxv * wU, o[1] + pyv * wU], [end[0] + pxv * wU, end[1] + pyv * wU], [end[0] - pxv * wU, end[1] - pyv * wU], [o[0] - pxv * wU, o[1] - pyv * wU]];
+            drawLayer.addLayer(L.polygon(c.map(p => uToLatLng(p[0], p[1])), { ...st, fillOpacity: 0.22 }));
+          }
+        }
+      }
+    }
+  }
+  $("drawToggle").addEventListener("change", renderDraw);
+  $("tokensToggle").addEventListener("change", ev => { if (ev.target.checked) tokenLayer.addTo(map); else map.removeLayer(tokenLayer); });
+  $("drawLayerSel").addEventListener("change", () => {
+    if ($("drawLayerSel").value === "gm" && !gmView) { alert("The GM layer needs GM view on."); $("drawLayerSel").value = "shared"; }
+  });
+  $("drawTool").addEventListener("change", () => {
+    const t = $("drawTool").value;
+    $("tplShapeField").hidden = $("tplSizeField").hidden = t !== "template";
+    if (t) setArmed("draw"); else setArmed(null);
+  });
+  $("drawUndo").addEventListener("click", async () => {
+    if (!drawItems.length) return;
+    drawItems.pop();
+    const ok = await saveDraw(); renderDraw();
+    drawStatusEl.textContent = ok ? "Last drawing removed for everybody." : "Undo didn't save — refreshed.";
+    if (!ok) loadDraw(true);
+  });
+  $("drawClear").addEventListener("click", async () => {
+    const gmSel = $("drawLayerSel").value === "gm";
+    if (!confirm(gmSel ? "Clear all GM-layer drawings on this map?" : "Clear all shared drawings on this map? Everybody loses them.")) return;
+    drawItems = drawItems.filter(it => gmSel ? !it.gm : !!it.gm);
+    const ok = await saveDraw(); renderDraw();
+    drawStatusEl.textContent = ok ? "Drawings cleared on that layer." : "Clear didn't save — refreshed.";
+    if (!ok) loadDraw(true);
+  });
+
+  /* ---- Mode arbitration + pointer drawing ---- */
+  let armedMode = null, drawStart = null, drawPts = null;
+  function setArmed(mode){
+    armedMode = mode;
+    if (mode && rulerOn) {
+      rulerOn = false;
+      $("rulerBtn").setAttribute("aria-pressed", "false");
+      $("rulerBtn").textContent = "Ruler";
+      if (rulerLine) { map.removeLayer(rulerLine); rulerLine = null; }
+      if (rulerTip) { map.removeLayer(rulerTip); rulerTip = null; }
+      rulerStart = null;
+    }
+    $("fogRevealBtn").setAttribute("aria-pressed", String(mode === "fog-reveal"));
+    $("fogHideBtn").setAttribute("aria-pressed", String(mode === "fog-hide"));
+    if (mode) map.dragging.disable(); else if (!rulerOn) map.dragging.enable();
+  }
+  $("fogRevealBtn").addEventListener("click", () => setArmed(armedMode === "fog-reveal" ? null : "fog-reveal"));
+  $("fogHideBtn").addEventListener("click", () => setArmed(armedMode === "fog-hide" ? null : "fog-hide"));
+  $("rulerBtn").addEventListener("click", () => {
+    if (rulerOn) { setArmed(null); $("drawTool").value = ""; $("tplShapeField").hidden = $("tplSizeField").hidden = true; }
+  });
+  function rectFromDrag(a, b){
+    return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) };
+  }
+  map.on("mousedown", e => {
+    if (isProjecting()) return;
+    if (armedMode === "fog-reveal" || armedMode === "fog-hide") { drawStart = toXY(e.latlng); return; }
+    if (armedMode !== "draw") return;
+    const tool = $("drawTool").value;
+    const p = toXY(e.latlng);
+    if (tool === "text") {
+      const text = prompt("Text note:");
+      if (text && text.trim()) {
+        drawItems.push({ type: "text", x: p.x, y: p.y, text: text.trim().slice(0, 80), color: $("drawColor").value, gm: $("drawLayerSel").value === "gm" });
+        saveDraw().then(ok => { renderDraw(); drawStatusEl.textContent = ok ? "Note placed." : "Note didn't save."; if (!ok) loadDraw(true); });
+      }
+      return;
+    }
+    drawStart = { p, ll: e.latlng };
+    drawPts = tool === "line" ? [[p.x, p.y]] : null;
+  });
+  map.on("mousemove", e => {
+    if (!drawStart) return;
+    const p = toXY(e.latlng);
+    previewLayer.clearLayers();
+    if (armedMode === "fog-reveal" || armedMode === "fog-hide") {
+      const r = rectFromDrag(drawStart, p);
+      previewLayer.addLayer(L.rectangle([toLatLng(r.x, r.y), toLatLng(r.x + r.w, r.y + r.h)], { color: "#e8a33d", weight: 1, dashArray: "5 5", fill: false, interactive: false }));
+      return;
+    }
+    if (armedMode !== "draw") return;
+    const tool = $("drawTool").value, color = $("drawColor").value;
+    if (tool === "line" && drawPts) {
+      const last = drawPts[drawPts.length - 1];
+      const du = Math.hypot((p.x - last[0]) / 100 * MW, (p.y - last[1]) / 100 * MH);
+      if (du > 3) drawPts.push([p.x, p.y]);
+      previewLayer.addLayer(L.polyline(drawPts.map(q => toLatLng(q[0], q[1])), { color, weight: 3, interactive: false }));
+    } else if (tool === "rect") {
+      const r = rectFromDrag(drawStart.p, p);
+      previewLayer.addLayer(L.rectangle([toLatLng(r.x, r.y), toLatLng(r.x + r.w, r.y + r.h)], { color, weight: 2, fillColor: color, fillOpacity: 0.18, interactive: false }));
+    } else if (tool === "circle") {
+      const r = Math.hypot((p.x - drawStart.p.x) / 100 * MW, (p.y - drawStart.p.y) / 100 * MH);
+      previewLayer.addLayer(L.circle(drawStart.ll, { color, weight: 2, fillColor: color, fillOpacity: 0.18, radius: r, interactive: false }));
+    } else if (tool === "template" && $("tplShape").value !== "circle") {
+      previewLayer.addLayer(L.polyline([drawStart.ll, e.latlng], { color, weight: 2, dashArray: "5 5", interactive: false }));
+    }
+  });
+  map.on("mouseup", async e => {
+    if (!drawStart) return;
+    const start = drawStart, startPts = drawPts;
+    drawStart = null; drawPts = null;
+    previewLayer.clearLayers();
+    const p = toXY(e.latlng);
+    if (armedMode === "fog-reveal" || armedMode === "fog-hide") {
+      const r = rectFromDrag(start, p);
+      if (r.w < 0.2 || r.h < 0.2) return;
+      if (armedMode === "fog-reveal") {
+        fogState.revealed.push(r);
+        if (!fogState.enabled) { fogState.enabled = true; $("fogEnabled").checked = true; }
+        const ok = await saveFog(); renderFog();
+        $("gmStatus").textContent = ok ? "Area revealed for the players." : "Fog change didn't save — try again.";
+      } else {
+        fogState.revealed = fogState.revealed.filter(q => !(q.x < r.x + r.w && q.x + q.w > r.x && q.y < r.y + r.h && q.y + q.h > r.y));
+        const ok = await saveFog(); renderFog();
+        $("gmStatus").textContent = ok ? "Revealed areas touched by that drag are hidden again." : "Fog change didn't save — try again.";
+      }
+      return;
+    }
+    if (armedMode !== "draw") return;
+    const tool = $("drawTool").value, color = $("drawColor").value, gm = $("drawLayerSel").value === "gm";
+    let item = null;
+    if (tool === "line" && startPts && startPts.length > 1) item = { type: "line", pts: startPts, color, gm };
+    else if (tool === "rect") { const r = rectFromDrag(start.p, p); if (r.w > 0.1 && r.h > 0.1) item = { type: "rect", ...r, color, gm }; }
+    else if (tool === "circle") {
+      const rUnits = Math.hypot((p.x - start.p.x) / 100 * MW, (p.y - start.p.y) / 100 * MH);
+      if (rUnits > 2) item = { type: "circle", x: start.p.x, y: start.p.y, r: rUnits / MW * 100, color, gm };
+    } else if (tool === "template") {
+      const shape = $("tplShape").value;
+      const sizeFt = Math.max(5, parseInt($("tplSize").value, 10) || 20);
+      let angle = 0;
+      if (shape !== "circle") {
+        const dx = (p.x - start.p.x) / 100 * MW, dy = (p.y - start.p.y) / 100 * MH;
+        angle = Math.round(Math.atan2(dy, dx) * 180 / Math.PI);
+      }
+      item = { type: "template", shape, x: start.p.x, y: start.p.y, sizeFt, angle, color, gm };
+    }
+    if (!item) return;
+    drawItems.push(item);
+    const ok = await saveDraw(); renderDraw();
+    drawStatusEl.textContent = ok ? "Drawing saved — the table sees it." : "Drawing didn't save — try again.";
+    if (!ok) loadDraw(true);
+  });
+
+  /* Entering/leaving projection re-renders the player-facing pieces. */
+  new MutationObserver(() => { renderFog(); drawTokens(); renderDraw(); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  /* Follow map switches; keep fog and drawings fresh. */
+  let lastMapId = currentMapId;
+  loadFog();
+  loadDraw();
+  applyGmUi();
+  setInterval(() => {
+    if (currentMapId !== lastMapId) { lastMapId = currentMapId; loadFog(true); loadDraw(true); }
+  }, 3000);
+  setInterval(() => { loadFog(true); loadDraw(true); }, 60000);
 
   /* ---- Map switching: every map loads into the SAME VTT surface (one engine,
         one projection). The loaded map is a shared setting — switch it on one
