@@ -193,6 +193,12 @@
   body.projecting .atlas-dot{width:14px;height:14px}
   .proj-exit-wrap{display:none}
   body.projecting .proj-exit-wrap{display:block}
+  body.map-expanded{overflow:hidden}
+  #faerun-map.expanded{position:fixed;inset:0;z-index:1500;background:hsl(222 22% 10%);overflow-y:auto;padding:14px}
+  #faerun-map.expanded #apocMap{height:calc(100vh - 270px);min-height:360px}
+  #faerun-map:fullscreen{overflow-y:auto;background:hsl(222 22% 10%);padding:14px}
+  .expand-exit{display:none}
+  #faerun-map.expanded .expand-exit{display:inline-flex}
   .tk-icon{background:none;border:none}
   .tk{position:relative}
   .tk-disc{border-radius:50%;border:3px solid #0d0f14;box-shadow:0 2px 8px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#101319;overflow:hidden;margin:0 auto}
@@ -537,6 +543,8 @@
       <label class="atlas-toggle"><input type="checkbox" id="atlasToggle" checked> Atlas places</label>
       <label class="atlas-toggle"><input type="checkbox" id="apocToggle" checked> APOC view</label>
       <button type="button" class="btn primary" id="projBtn">Project to TV</button>
+      <button type="button" class="btn" id="mapExpandBtn">⛶ Expand map</button>
+      <button type="button" class="btn expand-exit" id="mapExitBtn">Exit full screen</button>
     </div>
     <div class="map-tools">
       <label class="atlas-toggle"><input type="checkbox" id="gridToggle"> Grid</label>
@@ -1867,6 +1875,35 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     return setP;
   }
   makeProjectable(map, "apocMap", "projBtn");
+
+  /* Expand map: the whole map section goes full screen and STAYS editable
+     (unlike Project to TV, which is display-only). Fullscreen on the section
+     where the browser allows it; the .expanded fixed overlay is the fallback
+     and the sizing hook either way. */
+  const mapSection = $("faerun-map");
+  function setExpanded(on){
+    mapSection.classList.toggle("expanded", on);
+    document.body.classList.toggle("map-expanded", on);
+    $("mapExpandBtn").textContent = on ? "⛶ Exit full screen" : "⛶ Expand map";
+    setTimeout(() => map.invalidateSize(), 280);
+  }
+  $("mapExpandBtn").addEventListener("click", () => {
+    const on = !mapSection.classList.contains("expanded");
+    setExpanded(on);
+    if (on) {
+      try {
+        if (mapSection.requestFullscreen) { const r = mapSection.requestFullscreen(); if (r && r.catch) r.catch(() => {}); }
+        else if (mapSection.webkitRequestFullscreen) mapSection.webkitRequestFullscreen();
+      } catch(e) { /* the expanded overlay class still applies */ }
+    } else if (document.fullscreenElement) document.exitFullscreen();
+  });
+  $("mapExitBtn").addEventListener("click", () => {
+    setExpanded(false);
+    if (document.fullscreenElement) document.exitFullscreen();
+  });
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement && mapSection.classList.contains("expanded") && !document.body.classList.contains("projecting")) setExpanded(false);
+  });
 
   /* ================= VTT Phase 1: grid, shared scale, tokens, ruler =================
      Tokens and the table scale live in the shared site_settings store
