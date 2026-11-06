@@ -118,7 +118,7 @@
 
   /* 3 — Hub */
   .hub-panel{overflow:visible}
-  .hub-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
+  .hub-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
   .hub-item{position:relative;min-width:0}
   .hub-btn{
     width:100%;min-height:74px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
@@ -144,6 +144,13 @@
   .hub-item:first-child:hover .pop,.hub-item:first-child:focus-within .pop,.hub-item:first-child.pop-open .pop{transform:translate(0,0)}
   .hub-item:last-child .pop{left:auto;right:0;transform:translate(0,4px)}
   .hub-item:last-child:hover .pop,.hub-item:last-child:focus-within .pop,.hub-item:last-child.pop-open .pop{transform:translate(0,0)}
+
+  /* Faerûn map */
+  .map-frame{margin-top:14px;border:1px solid var(--card-border);border-radius:10px;overflow:hidden;background:var(--background)}
+  .map-frame iframe{display:block;width:100%;height:min(74vh,680px);min-height:380px;border:0}
+  .map-note{margin-top:12px;border-left:3px solid var(--primary);padding:8px 12px}
+  .map-actions{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .map-open{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border-radius:10px;background:var(--primary);color:var(--primary-foreground);border:1px solid var(--primary);text-decoration:none;font-weight:600}
 
   /* Forms */
   .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
@@ -373,6 +380,10 @@
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-CritGen/" target="_blank" rel="noopener"><span class="hub-name">CritGen APOC</span></a>
         <div class="pop" role="note">Critical hits and fumbles: 520 cards, 10 decks, with APOC mode.</div>
       </div>
+      <div class="hub-item">
+        <a class="hub-btn" href="#faerun-map" data-hub-action="map"><span class="hub-name">Faerûn Map</span></a>
+        <div class="pop" role="note">The interactive Faerûn atlas: zoom, pan, tap markers for lore, search by name, measure journeys. The Realms as canon left them at the APOC — and the city it prints as Waterdeep is the Bastion of Last Hope.</div>
+      </div>
     </div>
   </section>
 
@@ -418,6 +429,21 @@
       <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
       <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
     </form>
+  </section>
+
+  <!-- 4b / Faerûn Map -->
+  <section class="panel" id="faerun-map" aria-labelledby="mapHeading">
+    <p class="eyebrow">Campaign map</p>
+    <h2 id="mapHeading">Faerûn — Interactive Map</h2>
+    <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. Zoom and pan, tap a marker for its lore, search by name, and measure a journey's distance and travel time.</p>
+    <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast the atlas prints as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the atlas gives for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
+    <div class="map-frame">
+      <iframe src="https://www.aidedd.org/atlas/faerun" title="AideDD Faerûn Interactive Map" loading="lazy" allowfullscreen></iframe>
+    </div>
+    <div class="map-actions">
+      <a class="map-open" href="https://www.aidedd.org/atlas/faerun" target="_blank" rel="noopener">Open the map full-screen</a>
+      <span class="muted small">The map runs on AideDD's atlas — if it ever stalls inside the page, the full-screen button always works.</span>
+    </div>
   </section>
 
   <!-- 5 / The tracker -->
@@ -737,6 +763,8 @@ function activateHub(btn){
   } else if (action === "aidm") {
     setActiveTab("journal");
     $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
+  } else if (action === "map") {
+    $("faerun-map").scrollIntoView({ behavior:"smooth", block:"start" });
   } else if (action === "gallery") {
     openGallery();
   }
