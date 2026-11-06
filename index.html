@@ -591,11 +591,9 @@
 
   <section class="panel hub-content-panel" id="mapPanel" hidden aria-label="The VTT — Maps">
     <p class="eyebrow">Campaign map</p>
-    <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
+    <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
     <p class="muted">The world was decimated. Everywhere else is pretty much a ghost town or dead. Life did come back to the surface but diminished. Changed. Altered. The grey over this map is the Fog of Life — always grey, no sun, no stars — and the surviving cities are the pockets that held. What is dead, what is ruined, and what came back changed, the table marks as it learns.</p>
-    <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map. Kinds run from City and Party to Ruin, Ghost Town, Dead and Altered Life — mark the decimation as the table learns it.</p>
-    <p class="muted">Every map loads into this same tabletop — pick the loaded map above the board. Grid, tokens, ruler and the TV projection work on whichever map is loaded, the loaded map is shared (switch it and every screen follows), and each map keeps its own tokens.</p>
     <div class="map-tools">
       <div class="field">
         <label for="placeSearch">Find a place — the atlas, stripped down and APOC-screened</label>
@@ -637,17 +635,16 @@
         <label for="libName">Name for the next token (optional)</label>
         <input id="libName" type="text" autocomplete="off" placeholder="e.g. Goblin 3">
       </div>
-      <p class="lib-head">Symbols — tap one to drop it on the map</p>
+      <p class="lib-head">Symbols</p>
       <div class="lib-grid" id="libSymbols"></div>
       <p class="lib-head">Discs &amp; numbers</p>
       <div class="lib-grid" id="libDiscs"></div>
       <p class="lib-head">Artwork — Saint James &amp; Cody's gallery</p>
       <div class="lib-grid" id="libArt"></div>
-      <p class="muted small">Tokens land at the center of the map view — drag them into place. Tap a token on the map to rename it, set its hit points, add a symbol or portrait, or link it to a tracker entry.</p>
     </div>
     <div class="map-tools">
       <button type="button" class="btn" id="gmBtn" aria-pressed="false">GM view: off</button>
-      <span class="muted small" id="gmStatus">GM view shows the fog dimmed, GM-only tokens and GM drawings. Players and the TV never see GM pieces, and projection is always the player view.</span>
+      <span class="muted small" id="gmStatus"></span>
     </div>
     <div class="map-tools" id="fogControls" hidden>
       <label class="atlas-toggle"><input type="checkbox" id="fogEnabled"> Fog of war on this map</label>
@@ -869,13 +866,13 @@
         <div class="map-actions">
           <button type="button" class="btn" id="saveMacroBtn">Save as macro</button>
           <button type="button" class="btn" id="clearDiceBtn">Clear log</button>
-          <span class="muted small" id="diceStatus">Every roll lands in the shared log — the whole table sees it.</span>
+          <span class="muted small" id="diceStatus"></span>
         </div>
         <ol class="dice-log" id="diceLog"></ol>
       </div>
       <div class="vtt-col">
         <h3>Initiative — turn order</h3>
-        <p class="muted small" id="initMeta">No combat running. Start builds the order from the tokens on the loaded map; tap a name in the order to jump the map to that token.</p>
+        <p class="muted small" id="initMeta">No combat running.</p>
         <div class="map-actions">
           <button type="button" class="btn primary" id="initStartBtn">Start from tokens</button>
           <button type="button" class="btn" id="initRollAllBtn">Roll all (d20)</button>
