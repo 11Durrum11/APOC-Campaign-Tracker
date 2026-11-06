@@ -69,8 +69,12 @@
   /* 1 — Hero */
   .hero{
     position:relative;overflow:hidden;isolation:isolate;
-    min-height:430px;margin:0 -16px;padding:52px 24px 28px;
-    display:flex;flex-direction:column;justify-content:flex-end;
+    /* Pushed up (Shaun, 2026-11-06, laptop): with the bubbles moved to
+       the top right, the hero's content rides at the top and the hero
+       is shorter, so everything below it moves up the page. Phones
+       keep their taller hero (media query below). */
+    min-height:330px;margin:0 -16px;padding:26px 24px 24px;
+    display:flex;flex-direction:column;justify-content:flex-start;
     border-bottom:1px solid var(--card-border);
   }
   .hero::before{
