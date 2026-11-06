@@ -166,6 +166,21 @@
   .mk-temp{opacity:.6}
   .marker-form{margin-top:12px;border:1px solid var(--card-border);border-radius:10px;padding:13px}
   .map-status{margin-top:9px}
+  .map-tools{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .map-tools .field{flex:1 1 240px;position:relative}
+  .place-results{position:absolute;top:100%;left:0;right:0;z-index:80;margin-top:4px;background:var(--popover);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 18px 42px rgba(0,0,0,.42)}
+  .place-results button{display:block;width:100%;text-align:left;padding:10px 12px;min-height:44px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--foreground);font-size:.92rem}
+  .place-results button:last-child{border-bottom:none}
+  .place-results button:hover,.place-results button:focus-visible{background:var(--accent)}
+  .place-results .pr-kind{color:var(--muted-foreground);font-size:.78rem}
+  .atlas-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:.9rem;color:var(--accent-foreground)}
+  .atlas-toggle input{width:20px;height:20px;min-height:20px}
+  .atlas-icon{background:none;border:none}
+  .atlas-dot{display:block;width:10px;height:10px;border-radius:50%;background:#e9e2cf;border:2px solid #22242c;box-shadow:0 1px 4px rgba(0,0,0,.6)}
+  .place-card{margin-top:12px;border:1px solid var(--card-border);border-left:3px solid var(--primary);border-radius:10px;padding:12px 14px}
+  .place-card h4{margin:0 0 3px;font-size:1.02rem}
+  .place-card p{margin:5px 0 0}
+  .place-card .pc-close{float:right}
 
   /* Forms */
   .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
@@ -454,7 +469,16 @@
     <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
     <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map.</p>
+    <div class="map-tools">
+      <div class="field">
+        <label for="placeSearch">Find a place — the atlas, stripped down and APOC-screened</label>
+        <input id="placeSearch" type="text" autocomplete="off" placeholder="Search — e.g. Silverymoon, Candlekeep, Waterdeep">
+        <div id="placeResults" class="place-results" hidden></div>
+      </div>
+      <label class="atlas-toggle"><input type="checkbox" id="atlasToggle" checked> Atlas places</label>
+    </div>
     <div id="apocMap" class="apoc-map" aria-label="Editable shared map of Faerûn"></div>
+    <div id="placeCard" class="place-card" hidden></div>
     <p class="map-status muted small" id="mapStatus">Loading the shared markers…</p>
     <form id="markerForm" class="marker-form" hidden>
       <div class="form-grid">
@@ -1436,6 +1460,105 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     }
     closeEditor(); draw(); setStatus(`"${title}" saved — the whole table sees it.`);
   });
+  /* ---- Atlas layer: the reference atlas taken over — its places and structure,
+        stripped to what the table uses, screened for APOC, on our own surface.
+        Canon 3E geography; blurbs are the tracker's own. Waterdeep is filed under
+        its current name: Bastion of Last Hope. ---- */
+  const PLACES = [
+    { n:"Bastion of Last Hope", alias:"Waterdeep", x:11.5, y:19.5, t:"City — one of the four that held", dot:false, d:"Printed as Waterdeep on the canon map — its original name, the City of Splendors. When the APOC hit it became the Bastion of Last Hope, refuge under its mythals, which also bar flying creatures, demons, undead and dragons. Undermountain sprawls below it." },
+    { n:"Neverwinter", x:10.8, y:15.3, t:"City", d:"Sword Coast port north of the Bastion, the City of Skilled Hands on the Neverwinter River." },
+    { n:"Luskan", x:10.3, y:12.3, t:"Port", d:"Hard northern port at the mouth of the Mirar, ruled in canon from the Hosttower of the Arcane Brotherhood." },
+    { n:"Icewind Dale", x:13.5, y:4.8, t:"Region", d:"The frozen far north — Ten-Towns and tundra under the Spine of the World." },
+    { n:"Mirabar", x:17.8, y:9.3, t:"City", d:"Mining city on the Mirar, wealth of the North, held by the heirs of Delzoun." },
+    { n:"Mithral Hall", x:20.3, y:10.8, t:"Stronghold", d:"Dwarven stronghold of Clan Battlehammer in the Silver Marches, famed for its mithral." },
+    { n:"Citadel Felbarr", x:26.8, y:7.0, t:"Stronghold", d:"Dwarven citadel of the eastern Silver Marches." },
+    { n:"Silverymoon", x:23.5, y:8.0, t:"City — one of the four that held", dot:false, d:"The Gem of the North, city of magic and learning in the Silver Marches. One of the four cities that held when the APOC hit." },
+    { n:"Sundabar", x:28.5, y:8.5, t:"City — one of the four that held", dot:false, d:"Silver Marches city east of Silverymoon. One of the four cities that held when the APOC hit." },
+    { n:"Citadel Adbar", x:30.5, y:6.0, t:"Stronghold", d:"Great dwarven stronghold and forge-city of the Silver Marches." },
+    { n:"Everlund", x:21.2, y:12.8, t:"City", d:"Silver Marches trading city on the Rauvin, crossroads market of the North." },
+    { n:"Yartar", x:17.2, y:16.8, t:"Town", d:"River town on the Surbrin, barge hub of the Dessarin valley." },
+    { n:"Triboar", x:15.3, y:15.2, t:"Town", d:"Trail town east of Neverwinter Wood, named for three boars felled by its founder." },
+    { n:"Longsaddle", x:13.8, y:13.8, t:"Village", d:"Quiet village on the Long Road, home of the Harpell wizard family." },
+    { n:"The High Forest", x:21.5, y:16.5, t:"Region", d:"Vast ancient forest south of the Silver Marches, old elf country around the Grandfather Tree." },
+    { n:"Evereska", x:24.8, y:18.8, t:"City", d:"Hidden elf vale-city at the desert's edge, in canon the mainland's last great elven refuge." },
+    { n:"Anauroch", x:35.5, y:11.5, t:"Region", d:"The Great Sand Sea — canon's vast desert over the old Netherese heartland." },
+    { n:"Daggerford", x:11.8, y:23.8, t:"Town", d:"Walled town on the Delimbiyr, on the Trade Way south of the Bastion." },
+    { n:"Baldur's Gate", x:12.3, y:28.8, t:"City", d:"Great port and mercantile power on the Chionthar, ruled by its dukes and the Flaming Fist." },
+    { n:"Candlekeep", x:10.8, y:31.8, t:"Fortress-library", d:"The great library-fortress on the Sword Coast cliffs; entry costs a book the monks do not have." },
+    { n:"Beregost", x:14.3, y:30.8, t:"Town", d:"Temple town on the Coast Way below Candlekeep, around the temple of Lathander." },
+    { n:"Nashkel", x:15.8, y:32.3, t:"Town", d:"Mining town at Amn's northern border, under the Cloud Peaks." },
+    { n:"Athkatla", x:16.8, y:36.8, t:"City", d:"Capital of Amn, the City of Coin, where the Cowled Wizards police all arcane magic." },
+    { n:"Crimmor", x:19.5, y:35.5, t:"City", d:"Amn's caravan capital on the Trade Way." },
+    { n:"Calimport", x:21.8, y:62.5, t:"City", d:"Ancient capital of Calimshan on the Shining Sea, city of a thousand districts." },
+    { n:"Zazesspur", x:24.5, y:55.5, t:"City", d:"Coastal capital of Tethyr, rebuilt after its civil war." },
+    { n:"Suzail", x:41.2, y:30.2, t:"City", d:"Capital of Cormyr on the Dragonmere, seat of the Obarskyr crown." },
+    { n:"Arabel", x:41.5, y:26.5, t:"City", d:"Cormyr's northern caravan city, gateway to the Stonelands." },
+    { n:"Westgate", x:40.2, y:34.8, t:"City", d:"Old, rich and corrupt port at the Dragonmere's western end, city of the Night Masks." },
+    { n:"Ordulin", x:45.8, y:26.8, t:"City", d:"Capital of Sembia, the counting-house heart of the merchant nation." },
+    { n:"Shadowdale", x:46.8, y:19.8, t:"Town", d:"The famous dale of Elminster, heart of the Dalelands under the old twisted tower." },
+    { n:"Myth Drannor", x:47.8, y:17.2, t:"Ruins", d:"Fallen elven capital in Cormanthor — a ruin of mythals and monsters long before the APOC." },
+    { n:"Zhentil Keep", x:48.2, y:14.2, t:"City", d:"Zhentarim stronghold on the Moonsea's north shore, the Black Network's fist in canon." },
+    { n:"Hillsfar", x:51.2, y:18.8, t:"City", d:"The Moonsea's southern gate city, hard-handed in canon." },
+    { n:"Mulmaster", x:54.5, y:15.8, t:"City", d:"The Moonsea's eastern power, city of Cloaks and Hawks." },
+    { n:"Melvaunt", x:52.8, y:13.8, t:"City", d:"Forge-city on the Moonsea's northern shore." },
+    { n:"Tantras", x:57.2, y:23.2, t:"City", d:"Vast port where Torm fell in the Time of Troubles; his great temple stands here." },
+    { n:"Procampur", x:58.8, y:27.8, t:"City", d:"Old, ordered port of the Vast, a city of districts each given to a single trade." },
+    { n:"Raven's Bluff", x:56.5, y:25.5, t:"City", d:"Free port of the Vast, the adventurers' city on the Dragon Reach." },
+    { n:"Damara", x:60.5, y:9.5, t:"Region", d:"Cold northern kingdom of the Bloodstone lands, hard against Vaasa." },
+    { n:"Vaasa", x:56.5, y:7.5, t:"Region", d:"Bleak northern land of tundra and the Galena mountains." },
+    { n:"Narfell", x:66.5, y:11.5, t:"Region", d:"Ancient land whose old empire trafficked with demons in canon — an ill name in the east." },
+    { n:"Telflamm", x:68.2, y:22.8, t:"City", d:"Thesk's great port and crossroads on the Easting Reach." },
+    { n:"Bezantur", x:75.5, y:24.8, t:"City", d:"Thay's greatest port on the Sea of Fallen Stars, hub of the Red Wizards' trade in canon." },
+    { n:"Rashemen", x:73.5, y:14.5, t:"Region", d:"Land of berserkers and wychlaran witches, east of the Lake of Mists." },
+    { n:"Velprintalar", x:66.2, y:28.8, t:"City", d:"Capital of Aglarond on the Yuirwood coast." },
+    { n:"Cimbarra", x:64.2, y:44.2, t:"City", d:"Chessenta's city of war-temples on the Bay of Chessenta." },
+    { n:"Messema", x:71.2, y:46.2, t:"City", d:"Unther's port, long in the shadow of Gilgeam's tyranny in canon." },
+    { n:"Skuld", x:77.2, y:48.2, t:"City", d:"Ancient capital of Mulhorand, the walled City of Shadows." },
+    { n:"Alaghôn", x:53.5, y:39.5, t:"City", d:"Capital of Turmish on the Vilhon Reach, city of councils." },
+    { n:"The Vilhon Reach", x:55.5, y:43.5, t:"Region", d:"Warm southern waters ringed by Chondath's old city-states and olive groves." },
+    { n:"The Shaar", x:52.5, y:64.5, t:"Region", d:"Endless southern grasslands, hunting ground of wemics and Shaaran nomads." },
+    { n:"Halruaa", x:47.5, y:83.5, t:"Region", d:"Southern land of wizard-kings behind the great wall, rich in skyships in canon." },
+    { n:"Jungles of Chult", x:15.5, y:83.5, t:"Region", d:"Dinosaur jungles of the southern peninsula, wild and fevered." },
+    { n:"Lantan", x:9.8, y:60.5, t:"Island", d:"Isle of the Gondar, famed in canon for smokepowder and strange devices." },
+    { n:"The Moonshae Isles", x:7.5, y:38.5, t:"Region", d:"Misty isles of the Ffolk and Northmen in the Sea of Moonshae." }
+  ];
+  const atlasLayer = L.layerGroup().addTo(map);
+  const card = $("placeCard"), searchInput = $("placeSearch"), resultsBox = $("placeResults");
+  function showCard(title, kindLabel, body, hint){
+    card.innerHTML = `<button type="button" class="btn pc-close" id="placeCardClose">Close</button><h4>${esc(title)}</h4><span class="pr-kind">${esc(kindLabel)}</span><p>${esc(body)}</p>${hint ? `<p class="muted small">${esc(hint)}</p>` : ""}`;
+    card.hidden = false;
+    $("placeCardClose").addEventListener("click", () => { card.hidden = true; });
+  }
+  function focusPlace(x, y, title, kindLabel, body, hint){
+    map.flyTo(toLatLng(x, y), Math.max(map.getZoom(), 0.75), { duration: 0.6 });
+    showCard(title, kindLabel, body, hint);
+    resultsBox.hidden = true;
+  }
+  for (const p of PLACES) {
+    if (p.dot === false) continue;
+    const dot = L.marker(toLatLng(p.x, p.y), { icon: L.divIcon({ className: "atlas-icon", html: '<span class="atlas-dot"></span>', iconSize: [10, 10], iconAnchor: [5, 5] }), keyboard: false }).addTo(atlasLayer);
+    dot.on("click", () => showCard(p.n, p.t, p.d));
+  }
+  $("atlasToggle").addEventListener("change", ev => {
+    if (ev.target.checked) atlasLayer.addTo(map); else map.removeLayer(atlasLayer);
+  });
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if (q.length < 2) { resultsBox.hidden = true; return; }
+    const placeHits = PLACES.filter(p => p.n.toLowerCase().includes(q) || (p.alias && p.alias.toLowerCase().includes(q)));
+    const markerHits = markers.filter(mk => (mk.name || "").toLowerCase().includes(q));
+    const hits = [
+      ...placeHits.map(p => ({ label: p.alias && p.n === "Bastion of Last Hope" ? `${p.n} (printed: ${p.alias})` : p.n, kind: p.t, go: () => focusPlace(p.x, p.y, p.n, p.t, p.d) })),
+      ...markerHits.map(mk => ({ label: mk.name, kind: "Shared marker — " + mk.kind, go: () => focusPlace(mk.x, mk.y, mk.name, "Shared marker — " + mk.kind, mk.note || "", "Tap the marker itself on the map to edit or move it.") }))
+    ].slice(0, 8);
+    if (!hits.length) { resultsBox.innerHTML = ""; resultsBox.hidden = true; return; }
+    resultsBox.innerHTML = hits.map((h, i) => `<button type="button" data-hit="${i}">${esc(h.label)} <span class="pr-kind">${esc(h.kind)}</span></button>`).join("");
+    resultsBox.hidden = false;
+    resultsBox.querySelectorAll("button").forEach((b, i) => b.addEventListener("click", () => hits[i].go()));
+  });
+  searchInput.addEventListener("keydown", ev => { if (ev.key === "Escape") resultsBox.hidden = true; });
+  document.addEventListener("click", ev => { if (!ev.target.closest(".map-tools")) resultsBox.hidden = true; });
+
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
   try {
