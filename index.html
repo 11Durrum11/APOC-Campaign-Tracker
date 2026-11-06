@@ -118,6 +118,7 @@
 
   /* 3 — Hub */
   .hub-panel{overflow:visible}
+  .hub-content-panel{margin-top:14px}
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
   .hub-item{position:relative;min-width:0}
   .hub-btn{
@@ -512,14 +513,90 @@
         <div class="pop" role="note">The table's one map of Faerûn — interactive and editable: zoom, pan, and mark it up together. The city printed as Waterdeep is the Bastion of Last Hope.</div>
       </div>
       <div class="hub-item">
-        <a class="hub-btn" href="#laws-of-the-bastion" data-hub-action="laws"><span class="hub-name">Laws of the Bastion</span></a>
+        <button class="hub-btn" type="button" data-hub-action="laws" aria-expanded="false" id="lawsButton"><span class="hub-name">Laws of the Bastion</span></button>
         <div class="pop" role="note">The Laws of the Bastion — the city's law: contracts, the gates, the watch and the guard, and the one absolute. Canon.</div>
       </div>
       <div class="hub-item">
-        <a class="hub-btn" href="#canon" data-hub-action="canon"><span class="hub-name">Canon</span></a>
+        <button class="hub-btn" type="button" data-hub-action="canon" aria-expanded="false" id="canonButton"><span class="hub-name">Canon</span></button>
         <div class="pop" role="note">World &amp; City Canon — all of the world and city canon in one spot: the APOC, the Fog, magic's laws, the Bastion and its society.</div>
       </div>
     </div>
+  </section>
+
+
+  <!-- Laws + Canon live behind their hub buttons only -->
+  <section class="panel hub-content-panel" id="lawsPanel" hidden aria-label="Laws of the Bastion">
+    <p class="eyebrow">Bastion of Last Hope · 2701 DR</p>
+    <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
+    <div class="laws-body">
+      <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
+      <details class="law-item">
+        <summary>WHO MAKES THE LAW</summary>
+        <div class="law-why"><p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>WHO CARRIES IT</summary>
+        <div class="law-why"><p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE GATES</summary>
+        <div class="law-why"><p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>CONTRACTS ARE THE CITY'S TRUE CODE</summary>
+        <div class="law-why"><p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE ONE ABSOLUTE</summary>
+        <div class="law-why"><p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE STANDING TOLERANCES</summary>
+        <div class="law-why"><p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p></div>
+      </details>
+    </div>
+    <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
+  </section>
+
+  <section class="panel hub-content-panel" id="canonPanel" hidden aria-label="World and City Canon">
+    <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
+    <p class="muted">The one-spot compilation of Shaun's canon, for the tracker hub's Canon button. Everything here is Shaun's ruling/canon as recorded; the Laws' base text and civil list are locked canon, Code Legal-derived material shaded as proposed amendments stands as marked in the Laws text itself.</p>
+    <details class="canon-item">
+      <summary>WORLD CANON</summary>
+      <div class="law-why"><ul>
+        <li><strong>Scope:</strong> Forgotten Realms original canon, altered by the APOC and Shaun's rulings. No other setting's canon applies — Eberron and every other non-FR source is mechanics/tools only (equipment, spells, items, feats, classes), lore stripped.</li>
+        <li><strong>Timeline:</strong> FR canon runs UP TO the APOC — the APOC is where FR canon ends. Then 1,000 years pass. Play is in 2701 DR. Everything between the APOC and 2701 is Shaun's lore, being built now.</li>
+        <li><strong>The APOC:</strong> the original party failed against the Demon God imprisoned in Limbo — god freed, Laney captured, Abyssal rifts, 80% of life dead in 24 hours, crystal sphere scarred over, all planar travel permanently severed.</li>
+        <li><strong>Fog of Life:</strong> surface only, out to the crystal sphere; does NOT work underground; does NOT penetrate the Bastion's mythals; always grey, no sun, no stars; NOT damp; INERT and UNTOUCHABLE.</li>
+        <li><strong>Magic now:</strong> raw magic blights/rots land around the caster; alchemy is the cornerstone; extra-dimensional magic is dead (Bag of Holding, Banishment, Misty Step, Blink fail); elemental magic hampered unless augmented by alchemical components/steampunk apparatus; summoning spells DON'T WORK; firearms are SIMPLE weapons; potion rule (magic-item potions immediate; alchemical potions spread over rounds = spell level, cure line Nd8+N at 1d8+1/round); psionics–magic transparency; psychoportation beyond the Material fails; Astral Construct out.</li>
+        <li><strong>Fantasy Physics document:</strong> adopted as PRE-APOC FR baseline (Weave = physics, Shadow Weave, spellfire, mythals as physics fields) with Shaun's overrides: planar travel severed, extra-dimensional magic dead, firearms work (Gond's ban does not carry into 2701), raw-magic blight = post-APOC Weave state, Bastion mythal effects = Shaun's ward list.</li>
+        <li><strong>Constant war:</strong> beyond the city walls, permanent multi-way war in the badlands — Life (good, neutral, AND evils of life) vs demons vs the Kingdom of the Undead, Warforged as their own side.</li>
+        <li><strong>Factions:</strong> demon enclaves (mortal now, steampunk + undead armies), Remnants of Life, Kingdom of the Undead, free/sentient Warforged (second-class citizens).</li>
+        <li><strong>Dragons:</strong> ALL withdrew deep into the far Underdark — the Council of Wyrms (W-Y-R-M-S, pronounced "worms," never spelled with an O) saw what was coming and could not stop it. No dragons roam the surface.</li>
+        <li><strong>Drow CHOSE:</strong> the whole race welcomed the demons and was absorbed — no drow exist as a race, not playable. <strong>Tieflings were TAKEN:</strong> backdoored into being demons — no tieflings exist. ANY race that worshipped demonic gods was also folded in — some backdoored, some opened their arms, some both.</li>
+        <li><strong>Four cities held:</strong> (1) the Bastion of Last Hope, (2) Silverymoon, (3) Sundabar (NOT Citadel Adbar), (4) an unknown city on the far side of the planet — unknown in canon.</li>
+        <li><strong>Maps:</strong> standing geographic reference = 3rd Edition Faerûn map + AideDD Faerûn Interactive Map. Waterdeep is renamed Bastion of Last Hope on maps/materials.</li>
+        <li><strong>Currency:</strong> book standard — 10 cp = 1 sp, 10 sp = 1 gp, 1 pp = 10 gp; no electrum.</li>
+      </ul></div>
+    </details>
+    <details class="canon-item">
+      <summary>CITY CANON — THE BASTION OF LAST HOPE</summary>
+      <div class="law-why"><ul>
+        <li><strong>The Bastion IS Waterdeep:</strong> Waterdeep's FR history is the Bastion's pre-APOC history; Ruins of Undermountain is core Bastion material; Shaun's sourcebook #6 was built from the original City of Waterdeep book.</li>
+        <li><strong>Defences:</strong> (1) Melairshield mythal, (2) cannoneer-towered wall, (3) walking gargantuan constructs, (4) city guard. Guard looks OUTWARD; city watch looks INWARD (Judge Dredd-like) because the city is packed, life boiling over.</li>
+        <li><strong>Mythal wards:</strong> keeps OUT aerial/flying creatures, demons, undead, dragons; Fog of Life does not penetrate it.</li>
+        <li><strong>Society:</strong> LAWFUL EVIL with neutral tendencies; ruling institution's iron thumb; the city does NOT like change (why it held on); Mega-City One-like vertical mega-structures; Little Timmy canon (born 32nd floor, grandfather 40th, father 2nd, school 12th, market 10th, park on the roof — a whole life in one building).</li>
+        <li><strong>Status geography:</strong> status runs north and up — top floors of the northern buildings are high society; lower and further south is lesser; first floor of a southern building is almost as bad as outside the wall.</li>
+        <li><strong>Shantytown:</strong> outside the wall on the lower/southern side; the mythal spreads past the walls there weak and fluttering like a candle; outlanders settle there for what protection it gives; built from the city's REFUSE plus badlands finds.</li>
+        <li><strong>Entry rule:</strong> no entry without business there or work for somebody — no lollygagging.</li>
+        <li><strong>Economy:</strong> guilds, schools, businesses, consortiums — 24 CONSORTIUMS, each of many businesses. They SELL to each other, they don't give. Everything runs on contracts; ALL contracts are temporary. They build what each other needs to bolster their individual armies; contract disputes are settled in the badlands.</li>
+        <li><strong>Reclamation Item Retrieval:</strong> ONE job/business among the city's big businesses, based in the Bastion; it is what brings characters out into the badlands. Saint James is separate — an independent operator, nothing to do with the city.</li>
+        <li><strong>Protan Consortium:</strong> main business = battle wagons that stand up to the badlands elements and the Hatestorms; sold to whoever can pay.</li>
+        <li><strong>The Laws (LOCKED CANON 2026-11-06):</strong> everything is a written, temporary contract; breaking a contract is the core crime; gates split Guard (access) / Watch (observes entrants, pursues fugitives, escorts visitors); Watch under Captain Rulathon reporting to the Open Lords (ward civilars, guard posts, a skulk, an arcanum per ward; base: the Palace); Lord's Court final; rulings/decrees printed on the city's restricted presses (Gilder's); faiths/festivals tolerated so long as they violate no law and don't interfere with commerce; Gray Hands answer directly to the Open Lords, called only when nothing else remains; Walking Statues act against any Huge+ creature engaged in destructive/hostile activity against the city and defend themselves against serious attack; South Brigade Precinct fights crime and corruption inside the administration. Civil side folded in as canon: civil offenses (breaking terms, unpaid debt past term, fraud, selling outside your contract, blocking commerce) punished by fine/restitution/labor under contract; crimes against the city (raw magic, attempted summoning/extra-dimensional working, violence in the towers, theft from city stores/wall/war effort, forgery of contract/decree/gate pass, smuggling or harboring what the mythal bars, private war inside the walls, treason) punished by imprisonment, expulsion beyond the wall, or death.</li>
+        <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands).</li>
+        <li><strong>Slavery &amp; Warforged:</strong> abolition RECENT and Warforged-driven; Warforged created not born, "just toasters" who gained sentience; "about 1965 for the Warforged," a long couple of decades of 1965 — unfinished; Warforged still second-class citizens; in-world slur "toi" (T-O-I), represented in material as-is per Shaun's direction.</li>
+      </ul></div>
+    </details>
   </section>
 
   <!-- 4 / Campaign Status -->
@@ -571,89 +648,9 @@
   </section>
 
   <!-- 4b / Faerûn Map -->
-  <section class="panel" id="laws-of-the-bastion" aria-label="Laws of the Bastion">
-    <details class="canon-item section-fold">
-      <summary>Laws of the Bastion</summary>
-      <div class="fold-body">
-    <p class="eyebrow">Bastion of Last Hope · 2701 DR</p>
-    <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
-    <div class="laws-body">
-      <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
-      <details class="law-item">
-        <summary>WHO MAKES THE LAW</summary>
-        <div class="law-why"><p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>WHO CARRIES IT</summary>
-        <div class="law-why"><p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE GATES</summary>
-        <div class="law-why"><p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>CONTRACTS ARE THE CITY'S TRUE CODE</summary>
-        <div class="law-why"><p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE ONE ABSOLUTE</summary>
-        <div class="law-why"><p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE STANDING TOLERANCES</summary>
-        <div class="law-why"><p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p></div>
-      </details>
-    </div>
-    <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
-      </div>
-    </details>
-  </section>
 
-  <section class="panel" id="canon" aria-label="World and City Canon">
-    <details class="canon-item section-fold">
-      <summary>World &amp; City Canon</summary>
-      <div class="fold-body">
-    <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
-    <p class="muted">The one-spot compilation of Shaun's canon, for the tracker hub's Canon button. Everything here is Shaun's ruling/canon as recorded; the Laws' base text and civil list are locked canon, Code Legal-derived material shaded as proposed amendments stands as marked in the Laws text itself.</p>
-    <details class="canon-item">
-      <summary>WORLD CANON</summary>
-      <div class="law-why"><ul>
-        <li><strong>Scope:</strong> Forgotten Realms original canon, altered by the APOC and Shaun's rulings. No other setting's canon applies — Eberron and every other non-FR source is mechanics/tools only (equipment, spells, items, feats, classes), lore stripped.</li>
-        <li><strong>Timeline:</strong> FR canon runs UP TO the APOC — the APOC is where FR canon ends. Then 1,000 years pass. Play is in 2701 DR. Everything between the APOC and 2701 is Shaun's lore, being built now.</li>
-        <li><strong>The APOC:</strong> the original party failed against the Demon God imprisoned in Limbo — god freed, Laney captured, Abyssal rifts, 80% of life dead in 24 hours, crystal sphere scarred over, all planar travel permanently severed.</li>
-        <li><strong>Fog of Life:</strong> surface only, out to the crystal sphere; does NOT work underground; does NOT penetrate the Bastion's mythals; always grey, no sun, no stars; NOT damp; INERT and UNTOUCHABLE.</li>
-        <li><strong>Magic now:</strong> raw magic blights/rots land around the caster; alchemy is the cornerstone; extra-dimensional magic is dead (Bag of Holding, Banishment, Misty Step, Blink fail); elemental magic hampered unless augmented by alchemical components/steampunk apparatus; summoning spells DON'T WORK; firearms are SIMPLE weapons; potion rule (magic-item potions immediate; alchemical potions spread over rounds = spell level, cure line Nd8+N at 1d8+1/round); psionics–magic transparency; psychoportation beyond the Material fails; Astral Construct out.</li>
-        <li><strong>Fantasy Physics document:</strong> adopted as PRE-APOC FR baseline (Weave = physics, Shadow Weave, spellfire, mythals as physics fields) with Shaun's overrides: planar travel severed, extra-dimensional magic dead, firearms work (Gond's ban does not carry into 2701), raw-magic blight = post-APOC Weave state, Bastion mythal effects = Shaun's ward list.</li>
-        <li><strong>Constant war:</strong> beyond the city walls, permanent multi-way war in the badlands — Life (good, neutral, AND evils of life) vs demons vs the Kingdom of the Undead, Warforged as their own side.</li>
-        <li><strong>Factions:</strong> demon enclaves (mortal now, steampunk + undead armies), Remnants of Life, Kingdom of the Undead, free/sentient Warforged (second-class citizens).</li>
-        <li><strong>Dragons:</strong> ALL withdrew deep into the far Underdark — the Council of Wyrms (W-Y-R-M-S, pronounced "worms," never spelled with an O) saw what was coming and could not stop it. No dragons roam the surface.</li>
-        <li><strong>Drow CHOSE:</strong> the whole race welcomed the demons and was absorbed — no drow exist as a race, not playable. <strong>Tieflings were TAKEN:</strong> backdoored into being demons — no tieflings exist. ANY race that worshipped demonic gods was also folded in — some backdoored, some opened their arms, some both.</li>
-        <li><strong>Four cities held:</strong> (1) the Bastion of Last Hope, (2) Silverymoon, (3) Sundabar (NOT Citadel Adbar), (4) an unknown city on the far side of the planet — unknown in canon.</li>
-        <li><strong>Maps:</strong> standing geographic reference = 3rd Edition Faerûn map + AideDD Faerûn Interactive Map. Waterdeep is renamed Bastion of Last Hope on maps/materials.</li>
-        <li><strong>Currency:</strong> book standard — 10 cp = 1 sp, 10 sp = 1 gp, 1 pp = 10 gp; no electrum.</li>
-      </ul></div>
-    </details>
-    <details class="canon-item">
-      <summary>CITY CANON — THE BASTION OF LAST HOPE</summary>
-      <div class="law-why"><ul>
-        <li><strong>The Bastion IS Waterdeep:</strong> Waterdeep's FR history is the Bastion's pre-APOC history; Ruins of Undermountain is core Bastion material; Shaun's sourcebook #6 was built from the original City of Waterdeep book.</li>
-        <li><strong>Defences:</strong> (1) Melairshield mythal, (2) cannoneer-towered wall, (3) walking gargantuan constructs, (4) city guard. Guard looks OUTWARD; city watch looks INWARD (Judge Dredd-like) because the city is packed, life boiling over.</li>
-        <li><strong>Mythal wards:</strong> keeps OUT aerial/flying creatures, demons, undead, dragons; Fog of Life does not penetrate it.</li>
-        <li><strong>Society:</strong> LAWFUL EVIL with neutral tendencies; ruling institution's iron thumb; the city does NOT like change (why it held on); Mega-City One-like vertical mega-structures; Little Timmy canon (born 32nd floor, grandfather 40th, father 2nd, school 12th, market 10th, park on the roof — a whole life in one building).</li>
-        <li><strong>Status geography:</strong> status runs north and up — top floors of the northern buildings are high society; lower and further south is lesser; first floor of a southern building is almost as bad as outside the wall.</li>
-        <li><strong>Shantytown:</strong> outside the wall on the lower/southern side; the mythal spreads past the walls there weak and fluttering like a candle; outlanders settle there for what protection it gives; built from the city's REFUSE plus badlands finds.</li>
-        <li><strong>Entry rule:</strong> no entry without business there or work for somebody — no lollygagging.</li>
-        <li><strong>Economy:</strong> guilds, schools, businesses, consortiums — 24 CONSORTIUMS, each of many businesses. They SELL to each other, they don't give. Everything runs on contracts; ALL contracts are temporary. They build what each other needs to bolster their individual armies; contract disputes are settled in the badlands.</li>
-        <li><strong>Reclamation Item Retrieval:</strong> ONE job/business among the city's big businesses, based in the Bastion; it is what brings characters out into the badlands. Saint James is separate — an independent operator, nothing to do with the city.</li>
-        <li><strong>Protan Consortium:</strong> main business = battle wagons that stand up to the badlands elements and the Hatestorms; sold to whoever can pay.</li>
-        <li><strong>The Laws (LOCKED CANON 2026-11-06):</strong> everything is a written, temporary contract; breaking a contract is the core crime; gates split Guard (access) / Watch (observes entrants, pursues fugitives, escorts visitors); Watch under Captain Rulathon reporting to the Open Lords (ward civilars, guard posts, a skulk, an arcanum per ward; base: the Palace); Lord's Court final; rulings/decrees printed on the city's restricted presses (Gilder's); faiths/festivals tolerated so long as they violate no law and don't interfere with commerce; Gray Hands answer directly to the Open Lords, called only when nothing else remains; Walking Statues act against any Huge+ creature engaged in destructive/hostile activity against the city and defend themselves against serious attack; South Brigade Precinct fights crime and corruption inside the administration. Civil side folded in as canon: civil offenses (breaking terms, unpaid debt past term, fraud, selling outside your contract, blocking commerce) punished by fine/restitution/labor under contract; crimes against the city (raw magic, attempted summoning/extra-dimensional working, violence in the towers, theft from city stores/wall/war effort, forgery of contract/decree/gate pass, smuggling or harboring what the mythal bars, private war inside the walls, treason) punished by imprisonment, expulsion beyond the wall, or death.</li>
-        <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands).</li>
-        <li><strong>Slavery &amp; Warforged:</strong> abolition RECENT and Warforged-driven; Warforged created not born, "just toasters" who gained sentience; "about 1965 for the Warforged," a long couple of decades of 1965 — unfinished; Warforged still second-class citizens; in-world slur "toi" (T-O-I), represented in material as-is per Shaun's direction.</li>
-      </ul></div>
-    </details>
-      </div>
-    </details>
-  </section>
+
+
 
   <section class="panel" id="faerun-map" aria-label="The VTT — Maps">
     <details class="canon-item section-fold" id="mapFold">
@@ -1286,6 +1283,15 @@ function closeHubPops(){
 function isTouchLike(){
   return window.matchMedia("(hover: none), (pointer: coarse)").matches;
 }
+function toggleHubPanel(panelId, btnId, otherPanelId, otherBtnId){
+  const panel = $(panelId), btn = $(btnId), other = $(otherPanelId), otherBtn = $(otherBtnId);
+  if (!panel || !btn) return;
+  const opening = panel.hidden;
+  panel.hidden = !opening;
+  btn.setAttribute("aria-expanded", opening ? "true" : "false");
+  if (other && otherBtn) { other.hidden = true; otherBtn.setAttribute("aria-expanded", "false"); }
+  if (opening) panel.scrollIntoView({ behavior:"smooth", block:"start" });
+}
 function activateHub(btn){
   const action = btn.dataset.hubAction;
   if (action === "tracker") {
@@ -1296,9 +1302,9 @@ function activateHub(btn){
   } else if (action === "map") {
     $("faerun-map").scrollIntoView({ behavior:"smooth", block:"start" });
   } else if (action === "laws") {
-    $("laws-of-the-bastion").scrollIntoView({ behavior:"smooth", block:"start" });
+    toggleHubPanel("lawsPanel", "lawsButton", "canonPanel", "canonButton");
   } else if (action === "canon") {
-    $("canon").scrollIntoView({ behavior:"smooth", block:"start" });
+    toggleHubPanel("canonPanel", "canonButton", "lawsPanel", "lawsButton");
   } else if (action === "gallery") {
     openGallery();
   }
