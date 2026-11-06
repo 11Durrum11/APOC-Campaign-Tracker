@@ -1591,30 +1591,36 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   });
   searchInput.addEventListener("keydown", ev => { if (ev.key === "Escape") resultsBox.hidden = true; });
   document.addEventListener("click", ev => { if (!ev.target.closest(".map-tools")) resultsBox.hidden = true; });
-  function setProjecting(on){
-    document.body.classList.toggle("projecting", on);
-    setTimeout(() => map.invalidateSize(), 260);
-  }
-  $("projBtn").addEventListener("click", () => {
-    setProjecting(true);
-    const el = $("apocMap");
-    try {
-      if (el.requestFullscreen) { const r = el.requestFullscreen(); if (r && r.catch) r.catch(() => {}); }
-      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    } catch(e) { /* the full-window projection class still applies */ }
-  });
-  document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) setProjecting(false); });
-  const exitCtl = L.control({ position: "bottomright" });
-  exitCtl.onAdd = () => {
-    const d = L.DomUtil.create("div", "proj-exit-wrap");
-    d.innerHTML = '<button type="button" class="btn primary">Exit projection</button>';
-    L.DomEvent.on(d.querySelector("button"), "click", () => {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else setProjecting(false);
+  /* ---- Projection mode: REUSABLE — every map on this site gets this exact
+        treatment (Shaun's standing rule, 2026-11-05: any map he has or will have).
+        A new map surface calls makeProjectable(itsMap, itsContainerId, itsButtonId)
+        and inherits full-screen landscape projection, big room-readable labels
+        (the global body.projecting CSS), hidden editing chrome, simple exit. ---- */
+  function makeProjectable(lmap, containerId, buttonId){
+    const setP = on => { document.body.classList.toggle("projecting", on); setTimeout(() => lmap.invalidateSize(), 260); };
+    $(buttonId).addEventListener("click", () => {
+      setP(true);
+      const el = $(containerId);
+      try {
+        if (el.requestFullscreen) { const r = el.requestFullscreen(); if (r && r.catch) r.catch(() => {}); }
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } catch(e) { /* the full-window projection class still applies */ }
     });
-    return d;
-  };
-  exitCtl.addTo(map);
+    document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) setP(false); });
+    const exitCtl = L.control({ position: "bottomright" });
+    exitCtl.onAdd = () => {
+      const d = L.DomUtil.create("div", "proj-exit-wrap");
+      d.innerHTML = '<button type="button" class="btn primary">Exit projection</button>';
+      L.DomEvent.on(d.querySelector("button"), "click", () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else setP(false);
+      });
+      return d;
+    };
+    exitCtl.addTo(lmap);
+    return setP;
+  }
+  makeProjectable(map, "apocMap", "projBtn");
 
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
