@@ -1185,7 +1185,6 @@ function applySceneAndSky(){
     $("skyNote").textContent = `Out in the badlands all around the Bastion: ${subtype} (${category}). ${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
   }
   $("statusWeatherLine").textContent = `Current weather scenario: ${subtype} (${category}) — that is the badlands weather; over the Bastion itself, only regular fog ever falls.`;
-  jumpBackdropTo(sceneKey);
 }
 // Background slideshow (Shaun): the backdrop stays pinned in place while it
 // cycles through every scene background; picking a scene in Campaign Status
@@ -1209,7 +1208,7 @@ function jumpBackdropTo(sceneKey){
   const i = f ? BG_FILES.indexOf(f) : -1;
   if (i >= 0) { bgIdx = i; paintBackdrop(); }
 }
-if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && BG_FILES.length > 1) {
+if (BG_FILES.length > 1) {
   setInterval(cycleBackdrop, 14000);
 }
 async function loadCampaignStatus(){
