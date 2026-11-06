@@ -36,23 +36,28 @@
     --scene-image:url("assets/scenes/bastion-streets.webp");
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;overflow-x:hidden}
+  html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
   body{
     margin:0;background:var(--background);color:var(--foreground);
     font-family:Georgia,"Times New Roman",serif;line-height:1.5;
-    overflow-x:hidden;min-height:100vh;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;
   }
+  /* The backdrop: a PLAIN fixed layer — no transform, no filter, no
+     will-change (2026-11-06). Desktop pixel tests proved this layer
+     pinned, but on Shaun's phone it still dragged with the scroll:
+     filtered/transformed full-screen fixed layers repaint-lag on
+     phone GPUs and read as moving. All dimming lives in the plain
+     gradient scrim (::after) instead, which cannot lag. */
   body::before{
     content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-2;
-    transform:translateZ(0);will-change:opacity;
     background-image:var(--scene-image);background-size:cover;background-position:center;
-    opacity:var(--bg-opacity,.45);transition:opacity 1.5s ease;filter:saturate(.55) brightness(.62);
+    opacity:var(--bg-opacity,.45);transition:opacity 1.5s ease;
   }
   body::after{
-    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;transform:translateZ(0);
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;
     background:
-      linear-gradient(180deg,hsla(222,22%,10%,.50),hsla(222,22%,10%,.80) 46%,hsla(222,22%,10%,.94) 100%),
-      radial-gradient(ellipse at 50% 0%,transparent 0%,hsla(222,22%,10%,.34) 72%);
+      linear-gradient(180deg,hsla(222,22%,10%,.62),hsla(222,22%,10%,.86) 46%,hsla(222,22%,10%,.96) 100%),
+      radial-gradient(ellipse at 50% 0%,transparent 0%,hsla(222,22%,10%,.40) 72%);
   }
   a{color:var(--primary)}
   button,input,select,textarea{font:inherit}
