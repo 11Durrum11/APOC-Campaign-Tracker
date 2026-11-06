@@ -118,7 +118,7 @@
 
   /* 3 — Hub */
   .hub-panel{overflow:visible}
-  .hub-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
+  .hub-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;flex-wrap:nowrap;margin-top:14px}
   .hub-item{position:relative;min-width:0}
   .hub-btn{
     width:100%;min-height:74px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
@@ -146,6 +146,8 @@
   .hub-item:last-child:hover .pop,.hub-item:last-child:focus-within .pop,.hub-item:last-child.pop-open .pop{transform:translate(0,0)}
   .hub-item:nth-child(7) .pop{left:auto;right:0;transform:translate(0,4px)}
   .hub-item:nth-child(7):hover .pop,.hub-item:nth-child(7):focus-within .pop,.hub-item:nth-child(7).pop-open .pop{transform:translate(0,0)}
+  .hub-item:nth-child(4) .pop{left:auto;right:0;transform:translate(0,4px)}
+  .hub-item:nth-child(4):hover .pop,.hub-item:nth-child(4):focus-within .pop,.hub-item:nth-child(4).pop-open .pop{transform:translate(0,0)}
   .draft-badge{display:inline-block;background:#b3541e;color:#fff;border-radius:6px;padding:2px 9px;font-size:.72rem;font-weight:800;letter-spacing:.07em;vertical-align:middle;margin-left:8px}
   .laws-body h3{margin:18px 0 6px;font-size:1.04rem}
   .laws-body p{margin:0 0 10px;line-height:1.58}
@@ -351,7 +353,7 @@
     .count-chip{min-width:20px;height:16px;font-size:.6rem}
     .hub-item:nth-child(2) .pop{left:-6px;transform:translate(0,4px)}
     .hub-item:nth-child(2):hover .pop,.hub-item:nth-child(2):focus-within .pop,.hub-item:nth-child(2).pop-open .pop{transform:translate(0,0)}
-    .hub-item:nth-child(5) .pop,.hub-item:nth-child(6) .pop,.hub-item:nth-child(7) .pop{left:auto;right:-6px;transform:translate(0,4px)}
+    .hub-item:nth-child(4) .pop,.hub-item:nth-child(5) .pop,.hub-item:nth-child(6) .pop,.hub-item:nth-child(7) .pop{left:auto;right:-6px;transform:translate(0,4px)}
     .hub-item:nth-child(5):hover .pop,.hub-item:nth-child(5):focus-within .pop,.hub-item:nth-child(5).pop-open .pop,
     .hub-item:nth-child(6):hover .pop,.hub-item:nth-child(6):focus-within .pop,.hub-item:nth-child(6).pop-open .pop,
     .hub-item:nth-child(7):hover .pop,.hub-item:nth-child(7):focus-within .pop,.hub-item:nth-child(7).pop-open .pop{transform:translate(0,0)}
