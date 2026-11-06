@@ -442,18 +442,24 @@
           .catch(function () {});
       </script>
     </div>
-    <section class="sky-panel" aria-labelledby="skyHeading">
-      <h2 id="skyHeading">The sky — right now</h2>
+    <section class="sky-panel" aria-label="The sky right now">
+      <details class="canon-item section-fold">
+        <summary>The sky — right now</summary>
+        <div class="fold-body">
       <p class="sky-fact" id="skyFact">Heavy Fog over the Bastion — fogbound streets.</p>
       <p class="sky-note" id="skyNote">The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
+        </div>
+      </details>
     </section>
   </header>
 
   <!-- 2 / The table reconvenes -->
-  <section class="panel countdown-panel" aria-labelledby="countdownHeading">
+  <section class="panel countdown-panel" aria-label="The table reconvenes">
+    <details class="canon-item section-fold">
+      <summary>The table reconvenes</summary>
+      <div class="fold-body">
     <div>
       <p class="eyebrow">Every other Sunday · 11:00 AM · Phoenix</p>
-      <h2 id="countdownHeading">The table reconvenes</h2>
       <p class="countdown-date" id="nextSessionLabel">Sunday, November 8, 2026 at 11:00 AM</p>
     </div>
     <div class="timer" aria-label="Countdown to the next session">
@@ -462,6 +468,8 @@
       <div><b id="cdMins">—</b><span>Minutes</span></div>
       <div><b id="cdSecs">—</b><span>Seconds</span></div>
     </div>
+      </div>
+    </details>
   </section>
 
   <!-- 3 / APOC System Hub -->
@@ -515,9 +523,11 @@
   </section>
 
   <!-- 4 / Campaign Status -->
-  <section class="panel" id="campaign-status" aria-labelledby="statusHeading">
+  <section class="panel" id="campaign-status" aria-label="Campaign Status">
+    <details class="canon-item section-fold">
+      <summary>Campaign Status</summary>
+      <div class="fold-body">
     <p class="eyebrow">Campaign status</p>
-    <h2 id="statusHeading">Campaign Status</h2>
     <form id="statusForm">
       <div class="form-grid">
         <div class="field">
@@ -556,6 +566,8 @@
       <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
       <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
     </form>
+      </div>
+    </details>
   </section>
 
   <!-- 4b / Faerûn Map -->
@@ -643,9 +655,11 @@
     </details>
   </section>
 
-  <section class="panel" id="faerun-map" aria-labelledby="mapHeading">
+  <section class="panel" id="faerun-map" aria-label="The VTT — Maps">
+    <details class="canon-item section-fold" id="mapFold">
+      <summary>The VTT — Maps</summary>
+      <div class="fold-body">
     <p class="eyebrow">Campaign map</p>
-    <h2 id="mapHeading">The VTT — Maps</h2>
     <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
     <p class="muted">The world was decimated. Everywhere else is pretty much a ghost town or dead. Life did come back to the surface but diminished. Changed. Altered. The grey over this map is the Fog of Life — always grey, no sun, no stars — and the surviving cities are the pockets that held. What is dead, what is ruined, and what came back changed, the table marks as it learns.</p>
@@ -954,14 +968,18 @@
         <ol class="init-list" id="initList"></ol>
       </div>
     </div>
+      </div>
+    </details>
   </section>
 
   <!-- 5 / The tracker -->
-  <main class="panel" id="tracker" aria-labelledby="trackerHeading">
+  <main class="panel" id="tracker" aria-label="Campaign Tracker">
+    <details class="canon-item section-fold">
+      <summary>Campaign Tracker</summary>
+      <div class="fold-body">
     <div class="tracker-head">
       <div>
         <p class="eyebrow">Shared board + DM-only browser records</p>
-        <h2 id="trackerHeading">Campaign Tracker</h2>
         <p class="muted" style="margin:4px 0 0">Shared entries are saved to the board for everybody. DM-only records — and every DM secret — stay in the browser that created them.</p>
       </div>
       <button class="btn" id="refreshEntries" type="button">↻ Refresh</button>
@@ -1030,6 +1048,8 @@
     </form>
 
     <section id="trackerContent" aria-live="polite" style="margin-top:16px"></section>
+      </div>
+    </details>
   </main>
 
   <!-- 6 / Bottom notice — LAST -->
@@ -3091,6 +3111,10 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   $("mapSelect").addEventListener("change", async () => { switchMap($("mapSelect").value); await saveActiveMap(); });
   loadActiveMap();
   setInterval(loadActiveMap, 60000);
+  const mapFoldEl = document.getElementById("mapFold");
+  if (mapFoldEl) mapFoldEl.addEventListener("toggle", () => {
+    if (mapFoldEl.open) setTimeout(() => { try { map.invalidateSize(); } catch (e) {} renderAll(); }, 60);
+  });
 
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
