@@ -181,6 +181,18 @@
   .place-card h4{margin:0 0 3px;font-size:1.02rem}
   .place-card p{margin:5px 0 0}
   .place-card .pc-close{float:right}
+  .mk-ruin .mk-dot{background:#c47b4a}
+  .mk-ghost .mk-dot{background:#c9cdd6}
+  .mk-dead .mk-dot{background:#43464d;border-color:#c9cdd6}
+  .mk-altered .mk-dot{background:#57b8a2}
+  .apoc-on .leaflet-image-layer{filter:grayscale(.55) sepia(.14) brightness(.93) contrast(1.03)}
+  #apocMap:fullscreen{height:100%;width:100%;border:none;border-radius:0}
+  body.projecting #apocMap{position:fixed;inset:0;width:100vw;height:100vh;z-index:2000;border:none;border-radius:0}
+  body.projecting .mk-label{font-size:1.12rem;padding:4px 12px}
+  body.projecting .mk-dot{width:22px;height:22px}
+  body.projecting .atlas-dot{width:14px;height:14px}
+  .proj-exit-wrap{display:none}
+  body.projecting .proj-exit-wrap{display:block}
 
   /* Forms */
   .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
@@ -468,7 +480,8 @@
     <h2 id="mapHeading">Faerûn — Interactive Map</h2>
     <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
-    <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map.</p>
+    <p class="muted">The world was decimated. Everywhere else is pretty much a ghost town or dead. Life did come back to the surface but diminished. Changed. Altered. The grey over this map is the Fog of Life — always grey, no sun, no stars — and the surviving cities are the pockets that held. What is dead, what is ruined, and what came back changed, the table marks as it learns.</p>
+    <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map. Kinds run from City and Party to Ruin, Ghost Town, Dead and Altered Life — mark the decimation as the table learns it.</p>
     <div class="map-tools">
       <div class="field">
         <label for="placeSearch">Find a place — the atlas, stripped down and APOC-screened</label>
@@ -476,6 +489,8 @@
         <div id="placeResults" class="place-results" hidden></div>
       </div>
       <label class="atlas-toggle"><input type="checkbox" id="atlasToggle" checked> Atlas places</label>
+      <label class="atlas-toggle"><input type="checkbox" id="apocToggle" checked> APOC view</label>
+      <button type="button" class="btn primary" id="projBtn">Project to TV</button>
     </div>
     <div id="apocMap" class="apoc-map" aria-label="Editable shared map of Faerûn"></div>
     <div id="placeCard" class="place-card" hidden></div>
@@ -494,6 +509,10 @@
             <option value="place">Place</option>
             <option value="danger">Danger</option>
             <option value="note">Note</option>
+            <option value="ruin">Ruin</option>
+            <option value="ghost">Ghost Town</option>
+            <option value="dead">Dead</option>
+            <option value="altered">Altered Life</option>
           </select>
         </div>
         <div class="field full">
@@ -1370,13 +1389,21 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   if (!window.L) { statusEl.textContent = "The map library could not load — check the connection and refresh."; return; }
   if (!db) { statusEl.textContent = "The shared store could not be reached, so markers can't load or save right now."; return; }
   const MW = 4763, MH = 3185, MARKERS_KEY = "map_markers";
-  const KINDS = ["city", "party", "place", "danger", "note"];
+  const KINDS = ["city", "party", "place", "danger", "note", "ruin", "ghost", "dead", "altered"];
   const map = L.map("apocMap", { crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0.25, attributionControl: false });
   const bounds = [[0, 0], [MH, MW]];
   L.imageOverlay("assets/maps/faerun-3e.webp", bounds).addTo(map);
   map.fitBounds([[MH * (1 - 0.34), MW * 0.02], [MH * (1 - 0.005), MW * 0.38]]);
   map.setMaxBounds([[-MH * 0.08, -MW * 0.08], [MH * 1.08, MW * 1.08]]);
   const layer = L.layerGroup().addTo(map);
+  const veil = L.rectangle(bounds, { color: "transparent", weight: 0, fillColor: "#767c86", fillOpacity: 0.16, interactive: false });
+  const veilLayer = L.layerGroup([veil]).addTo(map);
+  $("apocMap").classList.add("apoc-on");
+  $("apocToggle").addEventListener("change", ev => {
+    $("apocMap").classList.toggle("apoc-on", ev.target.checked);
+    if (ev.target.checked) veilLayer.addTo(map); else map.removeLayer(veilLayer);
+  });
+  const isProjecting = () => document.body.classList.contains("projecting");
   const toLatLng = (x, y) => [MH * (1 - y / 100), MW * (x / 100)];
   const toXY = ll => ({ x: Math.round(ll.lng / MW * 10000) / 100, y: Math.round((1 - ll.lat / MH) * 10000) / 100 });
   const iconFor = (kind, name, temp) => L.divIcon({
@@ -1394,7 +1421,10 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     for (const mk of markers) {
       const kind = KINDS.includes(mk.kind) ? mk.kind : "place";
       const m = L.marker(toLatLng(mk.x, mk.y), { draggable: true, icon: iconFor(kind, mk.name) }).addTo(layer);
-      m.on("click", () => openEditor({ mode: "edit", mk }));
+      m.on("click", () => {
+        if (isProjecting()) { L.popup().setLatLng(m.getLatLng()).setContent(`<b>${esc(mk.name)}</b>${mk.note ? "<br>" + esc(mk.note) : ""}`).openOn(map); return; }
+        openEditor({ mode: "edit", mk });
+      });
       m.on("dragend", async () => {
         const p = toXY(m.getLatLng()); mk.x = p.x; mk.y = p.y;
         setStatus(`Saving ${mk.name}'s new position\u2026`);
@@ -1431,7 +1461,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     form.hidden = false;
     form.scrollIntoView({ behavior: "smooth", block: "center" });
   }
-  map.on("click", e => { const p = toXY(e.latlng); openEditor({ mode: "new", x: p.x, y: p.y }); });
+  map.on("click", e => { if (isProjecting()) return; const p = toXY(e.latlng); openEditor({ mode: "new", x: p.x, y: p.y }); });
   $("markerCancel").addEventListener("click", closeEditor);
   $("markerDelete").addEventListener("click", async () => {
     if (!editing || editing.mode !== "edit") return;
@@ -1537,7 +1567,10 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   for (const p of PLACES) {
     if (p.dot === false) continue;
     const dot = L.marker(toLatLng(p.x, p.y), { icon: L.divIcon({ className: "atlas-icon", html: '<span class="atlas-dot"></span>', iconSize: [10, 10], iconAnchor: [5, 5] }), keyboard: false }).addTo(atlasLayer);
-    dot.on("click", () => showCard(p.n, p.t, p.d));
+    dot.on("click", () => {
+      if (isProjecting()) { L.popup().setLatLng(toLatLng(p.x, p.y)).setContent(`<b>${esc(p.n)}</b><br>${esc(p.d)}`).openOn(map); return; }
+      showCard(p.n, p.t, p.d, "Atlas lore is the world as canon left it — what stands here now, the table marks.");
+    });
   }
   $("atlasToggle").addEventListener("change", ev => {
     if (ev.target.checked) atlasLayer.addTo(map); else map.removeLayer(atlasLayer);
@@ -1558,6 +1591,30 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   });
   searchInput.addEventListener("keydown", ev => { if (ev.key === "Escape") resultsBox.hidden = true; });
   document.addEventListener("click", ev => { if (!ev.target.closest(".map-tools")) resultsBox.hidden = true; });
+  function setProjecting(on){
+    document.body.classList.toggle("projecting", on);
+    setTimeout(() => map.invalidateSize(), 260);
+  }
+  $("projBtn").addEventListener("click", () => {
+    setProjecting(true);
+    const el = $("apocMap");
+    try {
+      if (el.requestFullscreen) { const r = el.requestFullscreen(); if (r && r.catch) r.catch(() => {}); }
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } catch(e) { /* the full-window projection class still applies */ }
+  });
+  document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) setProjecting(false); });
+  const exitCtl = L.control({ position: "bottomright" });
+  exitCtl.onAdd = () => {
+    const d = L.DomUtil.create("div", "proj-exit-wrap");
+    d.innerHTML = '<button type="button" class="btn primary">Exit projection</button>';
+    L.DomEvent.on(d.querySelector("button"), "click", () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else setProjecting(false);
+    });
+    return d;
+  };
+  exitCtl.addTo(map);
 
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
