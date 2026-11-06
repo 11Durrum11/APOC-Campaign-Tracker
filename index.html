@@ -250,6 +250,7 @@
   .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .entry-card{background:var(--popover);border:1px solid var(--card-border);border-radius:11px;padding:16px;min-width:0}
   .entry-card h3{margin:0 0 7px;font-size:1.22rem;line-height:1.22}
+  .entry-art{width:100%;display:block;border-radius:9px;border:1px solid var(--card-border);margin-bottom:10px}
   .meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
   .pill{display:inline-flex;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--secondary);font-size:.74rem;line-height:1.35;color:var(--accent-foreground)}
   .pill.cat{color:var(--primary);border-color:hsla(38,92%,50%,.55)}
@@ -494,16 +495,24 @@
   <!-- 4b / Faerûn Map -->
   <section class="panel" id="faerun-map" aria-labelledby="mapHeading">
     <p class="eyebrow">Campaign map</p>
-    <h2 id="mapHeading">Faerûn — Interactive Map</h2>
+    <h2 id="mapHeading">The VTT — Maps</h2>
     <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
     <p class="muted">The world was decimated. Everywhere else is pretty much a ghost town or dead. Life did come back to the surface but diminished. Changed. Altered. The grey over this map is the Fog of Life — always grey, no sun, no stars — and the surviving cities are the pockets that held. What is dead, what is ruined, and what came back changed, the table marks as it learns.</p>
     <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map. Kinds run from City and Party to Ruin, Ghost Town, Dead and Altered Life — mark the decimation as the table learns it.</p>
+    <p class="muted">Every map loads into this same tabletop — pick the loaded map above the board. Grid, tokens, ruler and the TV projection work on whichever map is loaded, the loaded map is shared (switch it and every screen follows), and each map keeps its own tokens.</p>
     <div class="map-tools">
       <div class="field">
         <label for="placeSearch">Find a place — the atlas, stripped down and APOC-screened</label>
         <input id="placeSearch" type="text" autocomplete="off" placeholder="Search — e.g. Silverymoon, Candlekeep, Waterdeep">
         <div id="placeResults" class="place-results" hidden></div>
+      </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="mapSelect">Map loaded in the VTT (shared)</label>
+        <select id="mapSelect">
+          <option value="faerun">Faerûn — World Map</option>
+          <option value="saint-james">Arcanic Rendez-Vous — Saint James</option>
+        </select>
       </div>
       <label class="atlas-toggle"><input type="checkbox" id="atlasToggle" checked> Atlas places</label>
       <label class="atlas-toggle"><input type="checkbox" id="apocToggle" checked> APOC view</label>
@@ -663,7 +672,7 @@
           <textarea id="entryDetail"></textarea>
         </div>
         <div class="field full">
-          <label for="entryLinks">Links (e.g. a Blendcrafter build link)</label>
+          <label for="entryLinks">Links (a Blendcrafter build link; an image path like assets/… becomes the entry art)</label>
           <input id="entryLinks" autocomplete="off">
         </div>
         <div class="field full">
@@ -1024,7 +1033,9 @@ function entryCard(e){
     e.status ? `<span class="pill">${esc(e.status)}</span>` : "",
     e.date_label ? `<span class="pill">${esc(e.date_label)}</span>` : ""
   ].join("");
+  const art = (e.links || "").match(/assets\/[^\s"']+\.(?:webp|jpg|jpeg|png)/i);
   return `<article class="entry-card">
+    ${art ? `<img class="entry-art" src="${esc(art[0])}" alt="${esc(e.title)}" loading="lazy">` : ""}
     <h3>${esc(e.title)}</h3>
     <div class="meta">${meta}</div>
     ${e.detail ? `<div class="detail">${esc(e.detail)}</div>` : ""}
@@ -1469,16 +1480,22 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   const statusEl = $("mapStatus"), form = $("markerForm");
   if (!window.L) { statusEl.textContent = "The map library could not load — check the connection and refresh."; return; }
   if (!db) { statusEl.textContent = "The shared store could not be reached, so markers can't load or save right now."; return; }
-  const MW = 4763, MH = 3185, MARKERS_KEY = "map_markers";
+  let MW = 4763, MH = 3185;
+  const MARKERS_KEY = "map_markers";
+  let currentMapId = "faerun";
   const KINDS = ["city", "party", "place", "danger", "note", "ruin", "ghost", "dead", "altered"];
   const map = L.map("apocMap", { crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0.25, attributionControl: false });
-  const bounds = [[0, 0], [MH, MW]];
-  L.imageOverlay("assets/maps/faerun-3e.webp", bounds).addTo(map);
+  let bounds = [[0, 0], [MH, MW]];
+  let baseOverlay = L.imageOverlay("assets/maps/faerun-3e.webp", bounds).addTo(map);
   map.fitBounds([[MH * (1 - 0.34), MW * 0.02], [MH * (1 - 0.005), MW * 0.38]]);
   map.setMaxBounds([[-MH * 0.08, -MW * 0.08], [MH * 1.08, MW * 1.08]]);
   const layer = L.layerGroup().addTo(map);
-  const veil = L.rectangle(bounds, { color: "transparent", weight: 0, fillColor: "#767c86", fillOpacity: 0.16, interactive: false });
-  const veilLayer = L.layerGroup([veil]).addTo(map);
+  const veilLayer = L.layerGroup().addTo(map);
+  function drawVeil(){
+    veilLayer.clearLayers();
+    veilLayer.addLayer(L.rectangle(bounds, { color: "transparent", weight: 0, fillColor: "#767c86", fillOpacity: 0.16, interactive: false }));
+  }
+  drawVeil();
   $("apocMap").classList.add("apoc-on");
   $("apocToggle").addEventListener("change", ev => {
     $("apocMap").classList.toggle("apoc-on", ev.target.checked);
@@ -1499,6 +1516,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   function setStatus(msg){ statusEl.textContent = msg; }
   function draw(){
     layer.clearLayers();
+    if (currentMapId !== "faerun") return;
     for (const mk of markers) {
       const kind = KINDS.includes(mk.kind) ? mk.kind : "place";
       const m = L.marker(toLatLng(mk.x, mk.y), { draggable: true, icon: iconFor(kind, mk.name) }).addTo(layer);
@@ -1708,8 +1726,9 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
      (keys "vtt_tokens" / "vtt_settings") — everybody sees the same tabletop.
      Grid geometry: CELL map units per square on this map; the shared scale
      setting says how many feet one square stands for (default 5). */
-  const CELL = 60;
-  const TOKENS_KEY = "vtt_tokens", VTT_KEY = "vtt_settings";
+  let CELL = 60;
+  const tokensKey = () => currentMapId === "faerun" ? "vtt_tokens" : `vtt_tokens_${currentMapId}`;
+  const vttKey = () => currentMapId === "faerun" ? "vtt_settings" : `vtt_settings_${currentMapId}`;
   const STATUSES = [
     { k:"bloodied", label:"Bloodied", c:"#d9534f" },
     { k:"poisoned", label:"Poisoned", c:"#58b368" },
@@ -1739,7 +1758,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   });
 
   async function loadVttSettings(quiet){
-    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", VTT_KEY).maybeSingle();
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", vttKey()).maybeSingle();
     if (error) return;
     if (data && data.value && Number(data.value.feetPerSquare) > 0) {
       feetPerSquare = Number(data.value.feetPerSquare);
@@ -1748,7 +1767,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   }
   async function saveVttSettings(){
     const { error } = await db.from(SETTINGS_TABLE).upsert(
-      { key: VTT_KEY, value: { feetPerSquare }, updated_at: new Date().toISOString() },
+      { key: vttKey(), value: { feetPerSquare }, updated_at: new Date().toISOString() },
       { onConflict: "key" }
     );
     return !error;
@@ -1762,7 +1781,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   });
 
   async function loadTokens(quiet){
-    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", TOKENS_KEY).maybeSingle();
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", tokensKey()).maybeSingle();
     if (error) { if (!quiet) tokenStatusEl.textContent = "Tokens could not be loaded — try again in a few seconds."; return; }
     tokens = (data && data.value && Array.isArray(data.value.tokens)) ? data.value.tokens : [];
     drawTokens();
@@ -1770,7 +1789,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   }
   async function saveTokens(){
     const { error } = await db.from(SETTINGS_TABLE).upsert(
-      { key: TOKENS_KEY, value: { tokens }, updated_at: new Date().toISOString() },
+      { key: tokensKey(), value: { tokens }, updated_at: new Date().toISOString() },
       { onConflict: "key" }
     );
     return !error;
@@ -1950,8 +1969,60 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   loadTokens();
   setInterval(() => { loadTokens(true); loadVttSettings(true); }, 60000);
   try {
-    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); }).subscribe();
+    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); loadActiveMap(); }).subscribe();
   } catch(e) { /* realtime is a bonus; the 60-second refresh stands */ }
+
+  /* ---- Map switching: every map loads into the SAME VTT surface (one engine,
+        one projection). The loaded map is a shared setting — switch it on one
+        screen and every screen, TV included, follows. Each map keeps its own
+        tokens and scale (per-map store keys); the Faerûn markers and atlas
+        belong to the world map's own definition. ---- */
+  const MAPS = {
+    faerun: { name: "Faerûn — World Map", img: "assets/maps/faerun-3e.webp", w: 4763, h: 3185, cell: 60 },
+    "saint-james": { name: "Arcanic Rendez-Vous — Saint James's floors", img: "assets/maps/saint-james-floors.webp", w: 1662, h: 1077, cell: 50 }
+  };
+  const ACTIVE_KEY = "vtt_active";
+  function switchMap(id){
+    const def = MAPS[id];
+    if (!def) return;
+    currentMapId = id;
+    MW = def.w; MH = def.h; CELL = def.cell;
+    bounds = [[0, 0], [MH, MW]];
+    map.setMaxBounds([[-MH * 0.08, -MW * 0.08], [MH * 1.08, MW * 1.08]]);
+    map.removeLayer(baseOverlay);
+    baseOverlay = L.imageOverlay(def.img, bounds).addTo(map);
+    baseOverlay.bringToBack();
+    drawVeil();
+    $("mapSelect").value = id;
+    map.fitBounds(bounds);
+    drawGrid();
+    if (gridOn) gridLayer.addTo(map);
+    if (id === "faerun") {
+      layer.addTo(map);
+      draw();
+      if ($("atlasToggle").checked) atlasLayer.addTo(map);
+    } else {
+      map.removeLayer(layer);
+      map.removeLayer(atlasLayer);
+    }
+    loadTokens(true);
+    loadVttSettings(true);
+    setStatus(`Map loaded in the VTT: ${def.name}. Grid, tokens, ruler and projection work on it; its tokens are its own.`);
+  }
+  async function saveActiveMap(){
+    await db.from(SETTINGS_TABLE).upsert(
+      { key: ACTIVE_KEY, value: { mapId: currentMapId }, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+  }
+  async function loadActiveMap(){
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", ACTIVE_KEY).maybeSingle();
+    const id = data && data.value && MAPS[data.value.mapId] ? data.value.mapId : "faerun";
+    if (id !== currentMapId) switchMap(id);
+  }
+  $("mapSelect").addEventListener("change", async () => { switchMap($("mapSelect").value); await saveActiveMap(); });
+  loadActiveMap();
+  setInterval(loadActiveMap, 60000);
 
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
