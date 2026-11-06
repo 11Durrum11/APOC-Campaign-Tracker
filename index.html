@@ -405,6 +405,13 @@
   body.bg-animated::before{animation:none}
   @media (prefers-reduced-motion: reduce){body::before{animation:none !important}}
   #ambBtn[aria-pressed="true"]{color:var(--primary);border-color:var(--primary)}
+  /* Foreground completely transparent (Shaun, 2026-11-06): every
+     veil, sheen, blur and scrim layered in front of the pinned
+     backdrop is off — only the backdrop picture, the text and the
+     borders remain. */
+  .hero::before,.hero[data-sky]::before,.hero::after{background:none}
+  .panel,.sky-panel{backdrop-filter:none}
+  body::after{display:none}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 </head>
