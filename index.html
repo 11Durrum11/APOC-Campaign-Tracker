@@ -149,8 +149,15 @@
   .hub-item:nth-child(4) .pop{left:auto;right:0;transform:translate(0,4px)}
   .hub-item:nth-child(4):hover .pop,.hub-item:nth-child(4):focus-within .pop,.hub-item:nth-child(4).pop-open .pop{transform:translate(0,0)}
   .draft-badge{display:inline-block;background:#b3541e;color:#fff;border-radius:6px;padding:2px 9px;font-size:.72rem;font-weight:800;letter-spacing:.07em;vertical-align:middle;margin-left:8px}
-  .laws-body h3{margin:18px 0 6px;font-size:1.04rem}
   .laws-body p{margin:0 0 10px;line-height:1.58}
+  .law-item{border:1px solid var(--card-border);border-radius:10px;margin:0 0 8px;background:rgba(0,0,0,.14)}
+  .law-item summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:800;font-size:1.02rem;letter-spacing:.02em;color:var(--foreground);display:flex;align-items:center;gap:9px;min-height:48px}
+  .law-item summary::-webkit-details-marker{display:none}
+  .law-item summary::before{content:"\25B8";color:var(--primary);font-size:.95rem;flex:0 0 auto}
+  .law-item[open ] summary::before{content:"\25BE"}
+  .law-item summary:hover,.law-item summary:focus-visible{color:var(--primary)}
+  .law-item .law-why{margin:0 14px 12px 20px;padding:10px 12px;border-left:3px solid var(--primary);line-height:1.58}
+  .law-item .law-why p{margin:0}
 
   /* Faerûn map */
   .map-frame{margin-top:14px;border:1px solid var(--card-border);border-radius:10px;overflow:hidden;background:var(--background)}
@@ -546,18 +553,30 @@
     <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
     <div class="laws-body">
       <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
-      <h3>WHO MAKES THE LAW</h3>
-      <p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p>
-      <h3>WHO CARRIES IT</h3>
-      <p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p>
-      <h3>THE GATES</h3>
-      <p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p>
-      <h3>CONTRACTS ARE THE CITY'S TRUE CODE</h3>
-      <p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p>
-      <h3>THE ONE ABSOLUTE</h3>
-      <p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p>
-      <h3>THE STANDING TOLERANCES</h3>
-      <p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p>
+      <details class="law-item">
+        <summary>WHO MAKES THE LAW</summary>
+        <div class="law-why"><p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>WHO CARRIES IT</summary>
+        <div class="law-why"><p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE GATES</summary>
+        <div class="law-why"><p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>CONTRACTS ARE THE CITY'S TRUE CODE</summary>
+        <div class="law-why"><p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE ONE ABSOLUTE</summary>
+        <div class="law-why"><p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p></div>
+      </details>
+      <details class="law-item">
+        <summary>THE STANDING TOLERANCES</summary>
+        <div class="law-why"><p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p></div>
+      </details>
     </div>
     <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
   </section>
