@@ -480,7 +480,6 @@
     <div class="hub-row" id="hubRow">
       <div class="hub-item">
         <a class="hub-btn" href="#tracker" data-hub-action="tracker"><span class="hub-name">The Tracker</span></a>
-        <div class="pop" role="note">The campaign tracker: people, quests, places, factions, timeline, lore, and the AI DM journal.</div>
       </div>
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="gallery" aria-haspopup="dialog" aria-expanded="false" id="galleryButton">
@@ -490,35 +489,27 @@
           </span>
           <span class="count-chip" id="artworkChip">60</span>
         </button>
-        <div class="pop" role="note">Cody's campaign pictures — 60 built into this page, plus shared uploads when the artwork bucket is ready.</div>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="#tracker" data-hub-action="aidm"><span class="hub-name">AI DM</span></a>
-        <div class="pop" role="note">Open the Journal &amp; AI DM tab for the source brief and a session brief built from the tracker.</div>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-Weather-Engine/" target="_blank" rel="noopener"><span class="hub-name">Weather Engine</span></a>
-        <div class="pop" role="note">Roll and explore the APOC Weather Engine — 52 subtypes in six categories.</div>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="https://11durrum11.github.io/Blendcrafter/" target="_blank" rel="noopener"><span class="hub-name">Blendcrafter</span></a>
-        <div class="pop" role="note">Build and level APOC characters in the Blendcrafter library.</div>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-CritGen/" target="_blank" rel="noopener"><span class="hub-name">CritGen APOC</span></a>
-        <div class="pop" role="note">Critical hits and fumbles: 520 cards, 10 decks, with APOC mode.</div>
       </div>
       <div class="hub-item">
-        <a class="hub-btn" href="#faerun-map" data-hub-action="map"><span class="hub-name">Faerûn Map</span></a>
-        <div class="pop" role="note">The table's one map of Faerûn — interactive and editable: zoom, pan, and mark it up together. The city printed as Waterdeep is the Bastion of Last Hope.</div>
+        <button class="hub-btn" type="button" data-hub-action="map" aria-expanded="false" id="mapButton"><span class="hub-name">Faerûn Map</span></button>
       </div>
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="laws" aria-expanded="false" id="lawsButton"><span class="hub-name">Laws of the Bastion</span></button>
-        <div class="pop" role="note">The Laws of the Bastion — the city's law: contracts, the gates, the watch and the guard, and the one absolute. Canon.</div>
       </div>
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="canon" aria-expanded="false" id="canonButton"><span class="hub-name">Canon</span></button>
-        <div class="pop" role="note">World &amp; City Canon — all of the world and city canon in one spot: the APOC, the Fog, magic's laws, the Bastion and its society.</div>
       </div>
     </div>
   </section>
@@ -599,63 +590,7 @@
     </details>
   </section>
 
-  <!-- 4 / Campaign Status -->
-  <section class="panel" id="campaign-status" aria-label="Campaign Status">
-    <details class="canon-item section-fold">
-      <summary>Campaign Status</summary>
-      <div class="fold-body">
-    <p class="eyebrow">Campaign status</p>
-    <form id="statusForm">
-      <div class="form-grid">
-        <div class="field">
-          <label for="statusDate">In-world date</label>
-          <input id="statusDate" name="inWorldDate" type="text" placeholder="e.g. 12 Mirtul, 2701 DR" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="statusScene">Current location / scene</label>
-          <select id="statusScene" name="scene"></select>
-        </div>
-        <div class="field">
-          <label for="statusFood">Food</label>
-          <input id="statusFood" name="food" type="text" placeholder="e.g. 6 days" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="statusWater">Water</label>
-          <input id="statusWater" name="water" type="text" placeholder="e.g. 4 days" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="weatherCategory">Weather category</label>
-          <select id="weatherCategory" name="weatherCategory"></select>
-        </div>
-        <div class="field">
-          <label for="weatherSubtype">Current weather — Weather Engine subtype</label>
-          <select id="weatherSubtype" name="weatherSubtype"></select>
-        </div>
-        <div class="field full">
-          <label for="statusSupplies">Supplies note</label>
-          <textarea id="statusSupplies" name="suppliesNote" placeholder="What the party is carrying, missing, or rationing…"></textarea>
-        </div>
-      </div>
-      <p class="status-line" id="statusWeatherLine" aria-live="polite"></p>
-      <div class="button-row">
-        <button class="btn primary" type="submit">Save campaign status</button>
-      </div>
-      <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
-      <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
-    </form>
-      </div>
-    </details>
-  </section>
-
-  <!-- 4b / Faerûn Map -->
-
-
-
-
-  <section class="panel" id="faerun-map" aria-label="The VTT — Maps">
-    <details class="canon-item section-fold" id="mapFold">
-      <summary>The VTT — Maps</summary>
-      <div class="fold-body">
+  <section class="panel hub-content-panel" id="mapPanel" hidden aria-label="The VTT — Maps">
     <p class="eyebrow">Campaign map</p>
     <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
     <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
@@ -965,9 +900,63 @@
         <ol class="init-list" id="initList"></ol>
       </div>
     </div>
+  </section>
+
+
+  <!-- 4 / Campaign Status -->
+  <section class="panel" id="campaign-status" aria-label="Campaign Status">
+    <details class="canon-item section-fold">
+      <summary>Campaign Status</summary>
+      <div class="fold-body">
+    <p class="eyebrow">Campaign status</p>
+    <form id="statusForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="statusDate">In-world date</label>
+          <input id="statusDate" name="inWorldDate" type="text" placeholder="e.g. 12 Mirtul, 2701 DR" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="statusScene">Current location / scene</label>
+          <select id="statusScene" name="scene"></select>
+        </div>
+        <div class="field">
+          <label for="statusFood">Food</label>
+          <input id="statusFood" name="food" type="text" placeholder="e.g. 6 days" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="statusWater">Water</label>
+          <input id="statusWater" name="water" type="text" placeholder="e.g. 4 days" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="weatherCategory">Weather category</label>
+          <select id="weatherCategory" name="weatherCategory"></select>
+        </div>
+        <div class="field">
+          <label for="weatherSubtype">Current weather — Weather Engine subtype</label>
+          <select id="weatherSubtype" name="weatherSubtype"></select>
+        </div>
+        <div class="field full">
+          <label for="statusSupplies">Supplies note</label>
+          <textarea id="statusSupplies" name="suppliesNote" placeholder="What the party is carrying, missing, or rationing…"></textarea>
+        </div>
+      </div>
+      <p class="status-line" id="statusWeatherLine" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="btn primary" type="submit">Save campaign status</button>
+      </div>
+      <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
+      <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
+    </form>
       </div>
     </details>
   </section>
+
+  <!-- 4b / Faerûn Map -->
+
+
+
+
+
 
   <!-- 5 / The tracker -->
   <main class="panel" id="tracker" aria-label="Campaign Tracker">
@@ -1283,14 +1272,18 @@ function closeHubPops(){
 function isTouchLike(){
   return window.matchMedia("(hover: none), (pointer: coarse)").matches;
 }
-function toggleHubPanel(panelId, btnId, otherPanelId, otherBtnId){
-  const panel = $(panelId), btn = $(btnId), other = $(otherPanelId), otherBtn = $(otherBtnId);
+function toggleHubPanel(panelId, btnId){
+  const panel = $(panelId), btn = $(btnId);
   if (!panel || !btn) return;
   const opening = panel.hidden;
+  document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
+  ["lawsButton", "canonButton", "mapButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
-  if (other && otherBtn) { other.hidden = true; otherBtn.setAttribute("aria-expanded", "false"); }
-  if (opening) panel.scrollIntoView({ behavior:"smooth", block:"start" });
+  if (opening) {
+    panel.scrollIntoView({ behavior:"smooth", block:"start" });
+    if (panelId === "mapPanel") setTimeout(() => { try { map.invalidateSize(); } catch (e) {} renderAll(); }, 60);
+  }
 }
 function activateHub(btn){
   const action = btn.dataset.hubAction;
@@ -1300,26 +1293,17 @@ function activateHub(btn){
     setActiveTab("journal");
     $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
   } else if (action === "map") {
-    $("faerun-map").scrollIntoView({ behavior:"smooth", block:"start" });
+    toggleHubPanel("mapPanel", "mapButton");
   } else if (action === "laws") {
-    toggleHubPanel("lawsPanel", "lawsButton", "canonPanel", "canonButton");
+    toggleHubPanel("lawsPanel", "lawsButton");
   } else if (action === "canon") {
-    toggleHubPanel("canonPanel", "canonButton", "lawsPanel", "lawsButton");
+    toggleHubPanel("canonPanel", "canonButton");
   } else if (action === "gallery") {
     openGallery();
   }
 }
 document.querySelectorAll(".hub-btn").forEach(btn => {
   btn.addEventListener("click", ev => {
-    const item = btn.closest(".hub-item");
-    if (isTouchLike() && item && openHubItem !== item) {
-      ev.preventDefault();
-      closeHubPops();
-      item.classList.add("pop-open");
-      openHubItem = item;
-      return;
-    }
-    closeHubPops();
     if (btn.dataset.hubAction) { ev.preventDefault(); activateHub(btn); }
   });
 });
@@ -3117,10 +3101,6 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   $("mapSelect").addEventListener("change", async () => { switchMap($("mapSelect").value); await saveActiveMap(); });
   loadActiveMap();
   setInterval(loadActiveMap, 60000);
-  const mapFoldEl = document.getElementById("mapFold");
-  if (mapFoldEl) mapFoldEl.addEventListener("toggle", () => {
-    if (mapFoldEl.open) setTimeout(() => { try { map.invalidateSize(); } catch (e) {} renderAll(); }, 60);
-  });
 
   loadMarkers();
   setInterval(() => loadMarkers(true), 60000);
