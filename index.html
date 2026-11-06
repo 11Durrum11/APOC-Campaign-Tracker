@@ -479,7 +479,7 @@
     <h2 id="hubHeading">APOC System Hub</h2>
     <div class="hub-row" id="hubRow">
       <div class="hub-item">
-        <a class="hub-btn" href="#tracker" data-hub-action="tracker"><span class="hub-name">The Tracker</span></a>
+        <button class="hub-btn" type="button" data-hub-action="tracker" aria-expanded="false" id="trackerButton"><span class="hub-name">Campaign Status Tracker</span></button>
       </div>
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="gallery" aria-haspopup="dialog" aria-expanded="false" id="galleryButton">
@@ -902,12 +902,7 @@
     </div>
   </section>
 
-
-  <!-- 4 / Campaign Status -->
-  <section class="panel" id="campaign-status" aria-label="Campaign Status">
-    <details class="canon-item section-fold">
-      <summary>Campaign Status</summary>
-      <div class="fold-body">
+  <section class="panel hub-content-panel" id="trackerPanel" hidden aria-label="Campaign Status Tracker">
     <p class="eyebrow">Campaign status</p>
     <form id="statusForm">
       <div class="form-grid">
@@ -947,22 +942,7 @@
       <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
       <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
     </form>
-      </div>
-    </details>
-  </section>
-
-  <!-- 4b / Faerûn Map -->
-
-
-
-
-
-
-  <!-- 5 / The tracker -->
-  <main class="panel" id="tracker" aria-label="Campaign Tracker">
-    <details class="canon-item section-fold">
-      <summary>Campaign Tracker</summary>
-      <div class="fold-body">
+    <hr style="border:none;border-top:1px solid var(--card-border);margin:18px 0">
     <div class="tracker-head">
       <div>
         <p class="eyebrow">Shared board + DM-only browser records</p>
@@ -1034,9 +1014,22 @@
     </form>
 
     <section id="trackerContent" aria-live="polite" style="margin-top:16px"></section>
-      </div>
-    </details>
-  </main>
+  </section>
+
+
+
+  <!-- 4 / Campaign Status -->
+
+
+  <!-- 4b / Faerûn Map -->
+
+
+
+
+
+
+  <!-- 5 / The tracker -->
+
 
   <!-- 6 / Bottom notice — LAST -->
   <footer class="notice" id="bottom-notice">
@@ -1277,7 +1270,7 @@ function toggleHubPanel(panelId, btnId){
   if (!panel || !btn) return;
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
-  ["lawsButton", "canonButton", "mapButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
+  ["lawsButton", "canonButton", "mapButton", "trackerButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
   if (opening) {
@@ -1288,10 +1281,11 @@ function toggleHubPanel(panelId, btnId){
 function activateHub(btn){
   const action = btn.dataset.hubAction;
   if (action === "tracker") {
-    $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
+    toggleHubPanel("trackerPanel", "trackerButton");
   } else if (action === "aidm") {
+    if ($("trackerPanel").hidden) toggleHubPanel("trackerPanel", "trackerButton");
     setActiveTab("journal");
-    $("tracker").scrollIntoView({ behavior:"smooth", block:"start" });
+    $("trackerPanel").scrollIntoView({ behavior:"smooth", block:"start" });
   } else if (action === "map") {
     toggleHubPanel("mapPanel", "mapButton");
   } else if (action === "laws") {
