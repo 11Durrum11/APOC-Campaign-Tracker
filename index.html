@@ -213,6 +213,23 @@
   .tk-gm .tk-disc{border-style:dashed;border-color:#e8a33d}
   .draw-text{background:rgba(10,12,16,.82);padding:2px 8px;border-radius:6px;font-weight:700;font-size:.85rem;white-space:nowrap;border:1px solid rgba(255,255,255,.25)}
   body.projecting .draw-text{font-size:1.1rem}
+  .vtt-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  @media (max-width:820px){.vtt-panel{grid-template-columns:1fr}}
+  .vtt-col{background:var(--card);border:1px solid var(--card-border);border-radius:11px;padding:16px;min-width:0}
+  .vtt-col h3{margin:0 0 10px;font-size:1.08rem}
+  .quick-dice{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+  .macro-row{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+  .macro-chip{display:inline-flex;gap:2px}
+  .dice-log{list-style:none;margin:10px 0 0;padding:0;max-height:290px;overflow:auto;display:flex;flex-direction:column;gap:6px}
+  .dice-log li{background:rgba(255,255,255,.045);border:1px solid var(--card-border);border-radius:8px;padding:7px 10px;font-size:.92rem}
+  .dice-log .dl-total{font-weight:800;color:var(--primary)}
+  .init-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .init-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.045);border:1px solid var(--card-border);border-radius:8px;padding:6px 9px}
+  .init-row.active{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+  .init-row .init-name{flex:1;font-weight:600;cursor:pointer;min-width:0;overflow-wrap:anywhere}
+  .init-row input{width:70px}
+  .init-strip{background:rgba(10,12,16,.87);color:#f2e7c8;padding:6px 10px;border-radius:8px;font-size:.8rem;border:1px solid rgba(255,255,255,.25);max-width:48vw;line-height:1.45}
+  body.projecting .init-strip{font-size:1.05rem}
 
   /* Forms */
   .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;margin-top:14px}
@@ -682,6 +699,70 @@
         <button type="button" class="btn" id="tokenCancel">Cancel</button>
       </div>
     </form>
+    <div class="vtt-panel">
+      <div class="vtt-col">
+        <h3>Dice roller — shared log</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="diceName">Rolling as</label>
+            <input id="diceName" type="text" autocomplete="off" placeholder="Your name at the table">
+          </div>
+          <div class="field">
+            <label for="diceLabel">What for (optional)</label>
+            <input id="diceLabel" type="text" autocomplete="off" placeholder="e.g. Longsword attack">
+          </div>
+          <div class="field">
+            <label for="diceExpr">Dice</label>
+            <input id="diceExpr" type="text" autocomplete="off" value="1d20" placeholder="2d6+3">
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button type="button" class="btn primary" id="diceRollBtn">Roll</button>
+          </div>
+        </div>
+        <div class="quick-dice" id="quickDice">
+          <button type="button" class="btn" data-sides="4">d4</button>
+          <button type="button" class="btn" data-sides="6">d6</button>
+          <button type="button" class="btn" data-sides="8">d8</button>
+          <button type="button" class="btn" data-sides="10">d10</button>
+          <button type="button" class="btn" data-sides="12">d12</button>
+          <button type="button" class="btn" data-sides="20">d20</button>
+          <button type="button" class="btn" data-sides="100">d100</button>
+        </div>
+        <div class="macro-row" id="macroRow"></div>
+        <div class="map-actions">
+          <button type="button" class="btn" id="saveMacroBtn">Save as macro</button>
+          <button type="button" class="btn" id="clearDiceBtn">Clear log</button>
+          <span class="muted small" id="diceStatus">Every roll lands in the shared log — the whole table sees it.</span>
+        </div>
+        <ol class="dice-log" id="diceLog"></ol>
+      </div>
+      <div class="vtt-col">
+        <h3>Initiative — turn order</h3>
+        <p class="muted small" id="initMeta">No combat running. Start builds the order from the tokens on the loaded map; tap a name in the order to jump the map to that token.</p>
+        <div class="map-actions">
+          <button type="button" class="btn primary" id="initStartBtn">Start from tokens</button>
+          <button type="button" class="btn" id="initRollAllBtn">Roll all (d20)</button>
+          <button type="button" class="btn" id="initSortBtn">Sort</button>
+        </div>
+        <div class="map-actions">
+          <button type="button" class="btn" id="initPrevBtn">← Prev</button>
+          <button type="button" class="btn" id="initNextBtn">Next →</button>
+          <button type="button" class="btn danger" id="initEndBtn">End combat</button>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="initAddSelect">Add a token</label>
+            <select id="initAddSelect"></select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button type="button" class="btn" id="initAddBtn">Add</button>
+          </div>
+        </div>
+        <ol class="init-list" id="initList"></ol>
+      </div>
+    </div>
   </section>
 
   <!-- 5 / The tracker -->
@@ -2038,7 +2119,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   loadTokens();
   setInterval(() => { loadTokens(true); loadVttSettings(true); }, 60000);
   try {
-    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); loadActiveMap(); loadFog(true); loadDraw(true); }).subscribe();
+    db.channel("vtt-live").on("postgres_changes", { event: "*", schema: "public", table: SETTINGS_TABLE }, () => { loadTokens(true); loadVttSettings(true); loadActiveMap(); loadFog(true); loadDraw(true); loadDice(true); loadInit(true); }).subscribe();
   } catch(e) { /* realtime is a bonus; the 60-second refresh stands */ }
 
   /* ================= VTT Phase 2: GM gate, fog of war, GM layer, drawing =================
@@ -2326,6 +2407,195 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (currentMapId !== lastMapId) { lastMapId = currentMapId; loadFog(true); loadDraw(true); }
   }, 3000);
   setInterval(() => { loadFog(true); loadDraw(true); }, 60000);
+
+  /* ================= VTT Phase 3: shared dice log, macros, initiative =================
+     Dice rolls and initiative are table state (shared store, not per map);
+     initiative is built from the loaded map's tokens. Macros are per-device
+     (this page has no accounts, so they live in this browser, keyed by the
+     name you roll as). */
+  let diceRolls = [];
+  const diceStatusEl = $("diceStatus");
+  function parseExpr(expr){
+    const cleaned = String(expr || "").replace(/\s+/g, "");
+    if (!cleaned) return null;
+    const parts = cleaned.match(/[+-]?[^+-]+/g);
+    if (!parts) return null;
+    let total = 0;
+    const detail = [];
+    for (const part of parts) {
+      const sign = part.startsWith("-") ? -1 : 1;
+      const term = part.replace(/^[+-]/, "");
+      const dm = term.match(/^(\d*)d(\d+)$/i);
+      if (dm) {
+        const n = dm[1] === "" ? 1 : parseInt(dm[1], 10);
+        const sides = parseInt(dm[2], 10);
+        if (n < 1 || n > 100 || sides < 2 || sides > 1000) return null;
+        const rolls = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * sides));
+        total += sign * rolls.reduce((a, b) => a + b, 0);
+        detail.push({ term: `${n}d${sides}`, rolls, sign });
+      } else if (/^\d+$/.test(term)) {
+        const flat = parseInt(term, 10);
+        total += sign * flat;
+        detail.push({ term: String(flat), rolls: null, sign, flat });
+      } else return null;
+    }
+    return { total, detail };
+  }
+  function detailText(entry){
+    return entry.detail.map(d => d.rolls ? `${d.sign < 0 ? "− " : ""}${d.term}[${d.rolls.join(", ")}]` : `${d.sign < 0 ? "− " : "+ "}${d.flat}`).join(" ").replace(/^\+ /, "");
+  }
+  function renderDice(){
+    $("diceLog").innerHTML = [...diceRolls].slice(-20).reverse().map(r =>
+      `<li><strong>${esc(r.who)}</strong>${r.label ? ` — ${esc(r.label)}` : ""}: <span class="dl-total">${r.total}</span> <span class="muted">(${esc(r.expr)}: ${esc(detailText(r))})</span></li>`).join("");
+  }
+  async function loadDice(quiet){
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", "dice_log").maybeSingle();
+    if (error) return;
+    diceRolls = (data && data.value && Array.isArray(data.value.rolls)) ? data.value.rolls : [];
+    renderDice();
+  }
+  async function saveDice(){
+    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: "dice_log", value: { rolls: diceRolls }, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    return !error;
+  }
+  async function doRoll(expr, label){
+    const parsed = parseExpr(expr);
+    if (!parsed) { diceStatusEl.textContent = "Can't read that roll — try 2d6+3 or 1d20."; return; }
+    const who = $("diceName").value.trim() || "Someone at the table";
+    localStorage.setItem("apocDiceName", who);
+    await loadDice(true);
+    diceRolls = [...diceRolls, { who, label: (label || "").trim(), expr: String(expr).trim(), total: parsed.total, detail: parsed.detail, ts: Date.now() }].slice(-50);
+    renderDice();
+    const ok = await saveDice();
+    diceStatusEl.textContent = ok ? `${who} rolled ${parsed.total}.` : "That roll didn't reach the shared log — try again.";
+    if (!ok) loadDice(true);
+  }
+  $("diceName").value = localStorage.getItem("apocDiceName") || "";
+  $("diceRollBtn").addEventListener("click", () => doRoll($("diceExpr").value, $("diceLabel").value));
+  $("diceExpr").addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); doRoll($("diceExpr").value, $("diceLabel").value); } });
+  $("quickDice").querySelectorAll("button").forEach(b => b.addEventListener("click", () => doRoll(`1d${b.dataset.sides}`, $("diceLabel").value)));
+  $("clearDiceBtn").addEventListener("click", async () => {
+    if (!confirm("Clear the shared roll log for everybody?")) return;
+    diceRolls = [];
+    renderDice();
+    await saveDice();
+  });
+  /* Macros — saved on this device, under your table name. */
+  function getMacros(){ try { return JSON.parse(localStorage.getItem("apocMacros") || "[]"); } catch(e) { return []; } }
+  function renderMacros(){
+    const macros = getMacros();
+    $("macroRow").innerHTML = macros.map((m, i) =>
+      `<span class="macro-chip"><button type="button" class="btn" data-macro="${i}">${esc(m.name)}</button><button type="button" class="btn" data-macro-del="${i}" aria-label="Delete macro">×</button></span>`).join("");
+    $("macroRow").querySelectorAll("[data-macro]").forEach(b => b.addEventListener("click", () => { const m = getMacros()[Number(b.dataset.macro)]; if (m) doRoll(m.expr, m.label); }));
+    $("macroRow").querySelectorAll("[data-macro-del]").forEach(b => b.addEventListener("click", () => {
+      const macros2 = getMacros(); macros2.splice(Number(b.dataset.macroDel), 1);
+      localStorage.setItem("apocMacros", JSON.stringify(macros2)); renderMacros();
+    }));
+  }
+  $("saveMacroBtn").addEventListener("click", () => {
+    const expr = $("diceExpr").value.trim();
+    if (!parseExpr(expr)) { diceStatusEl.textContent = "Set a valid roll first, then save it as a macro."; return; }
+    const label = $("diceLabel").value.trim();
+    const macros = getMacros();
+    macros.push({ name: label || expr, expr, label });
+    localStorage.setItem("apocMacros", JSON.stringify(macros.slice(-12)));
+    renderMacros();
+    diceStatusEl.textContent = `Macro saved on this device: ${label || expr}.`;
+  });
+
+  /* ---- Initiative ---- */
+  let initState = { order: [], turn: 0, round: 1 };
+  const stripCtl = L.control({ position: "topright" });
+  stripCtl.onAdd = () => { const d = L.DomUtil.create("div", "init-strip"); d.id = "initStrip"; d.hidden = true; return d; };
+  stripCtl.addTo(map);
+  async function loadInit(quiet){
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", "initiative").maybeSingle();
+    if (error) return;
+    if (data && data.value && Array.isArray(data.value.order)) initState = { order: data.value.order, turn: data.value.turn || 0, round: data.value.round || 1 };
+    renderInit();
+  }
+  async function saveInit(){
+    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: "initiative", value: initState, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    return !error;
+  }
+  function renderInit(){
+    const { order, turn, round } = initState;
+    $("initMeta").textContent = order.length
+      ? `Round ${round} — ${order[turn] ? order[turn].name + " is up." : ""} Tap a name to jump the map to that token.`
+      : "No combat running. Start builds the order from the tokens on the loaded map; tap a name in the order to jump the map to that token.";
+    $("initList").innerHTML = order.map((o, i) =>
+      `<li class="init-row${i === turn ? " active" : ""}"><span class="init-name" data-init-fly="${i}">${esc(o.name)}</span><input type="number" value="${o.init}" data-init-val="${i}" aria-label="Initiative for ${esc(o.name)}"><button type="button" class="btn" data-init-roll="${i}">d20</button><button type="button" class="btn" data-init-del="${i}" aria-label="Remove">×</button></li>`).join("");
+    $("initList").querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", async () => {
+      const v = parseInt(inp.value, 10);
+      initState.order[Number(inp.dataset.initVal)].init = Number.isFinite(v) ? v : 0;
+      await saveInit(); renderInit();
+    }));
+    $("initList").querySelectorAll("[data-init-roll]").forEach(b => b.addEventListener("click", async () => {
+      initState.order[Number(b.dataset.initRoll)].init = 1 + Math.floor(Math.random() * 20);
+      await saveInit(); renderInit();
+    }));
+    $("initList").querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", async () => {
+      initState.order.splice(Number(b.dataset.initDel), 1);
+      if (initState.turn >= initState.order.length) initState.turn = Math.max(0, initState.order.length - 1);
+      await saveInit(); renderInit();
+    }));
+    $("initList").querySelectorAll("[data-init-fly]").forEach(el => el.addEventListener("click", () => {
+      const o = initState.order[Number(el.dataset.initFly)];
+      const tk = tokens.find(t => t.id === o.tokenId);
+      if (tk) map.flyTo(toLatLng(tk.x, tk.y), Math.max(map.getZoom(), 0));
+    }));
+    const notIn = tokens.filter(t => !order.some(o => o.tokenId === t.id));
+    $("initAddSelect").innerHTML = notIn.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join("") || `<option value="">(all tokens in)</option>`;
+    const strip = $("initStrip");
+    if (strip) {
+      strip.hidden = !order.length;
+      strip.innerHTML = order.length ? `<strong>Round ${round}</strong> · ` + order.map((o, i) => i === turn ? `<strong>${esc(o.name)} (${o.init})</strong>` : `${esc(o.name)} (${o.init})`).join(" → ") : "";
+    }
+  }
+  $("initStartBtn").addEventListener("click", async () => {
+    if (!tokens.length) { $("initMeta").textContent = "No tokens on the loaded map yet — add tokens first, then start."; return; }
+    if (initState.order.length && !confirm("Replace the current order with the loaded map's tokens?")) return;
+    initState = { order: tokens.map(t => ({ tokenId: t.id, name: t.name, init: 0 })), turn: 0, round: 1 };
+    await saveInit(); renderInit();
+  });
+  $("initRollAllBtn").addEventListener("click", async () => {
+    for (const o of initState.order) o.init = 1 + Math.floor(Math.random() * 20);
+    await saveInit(); renderInit();
+  });
+  $("initSortBtn").addEventListener("click", async () => {
+    initState.order.sort((a, b) => b.init - a.init);
+    await saveInit(); renderInit();
+  });
+  $("initNextBtn").addEventListener("click", async () => {
+    if (!initState.order.length) return;
+    initState.turn++;
+    if (initState.turn >= initState.order.length) { initState.turn = 0; initState.round++; }
+    await saveInit(); renderInit();
+  });
+  $("initPrevBtn").addEventListener("click", async () => {
+    if (!initState.order.length) return;
+    initState.turn--;
+    if (initState.turn < 0) { initState.turn = initState.order.length - 1; initState.round = Math.max(1, initState.round - 1); }
+    await saveInit(); renderInit();
+  });
+  $("initEndBtn").addEventListener("click", async () => {
+    if (!initState.order.length) return;
+    if (!confirm("End combat and clear the order for everybody?")) return;
+    initState = { order: [], turn: 0, round: 1 };
+    await saveInit(); renderInit();
+  });
+  $("initAddBtn").addEventListener("click", async () => {
+    const id = $("initAddSelect").value;
+    const tk = tokens.find(t => t.id === id);
+    if (!tk) return;
+    initState.order.push({ tokenId: tk.id, name: tk.name, init: 0 });
+    await saveInit(); renderInit();
+  });
+
+  loadDice();
+  loadInit();
+  renderMacros();
+  setInterval(() => { loadDice(true); loadInit(true); }, 30000);
 
   /* ---- Map switching: every map loads into the SAME VTT surface (one engine,
         one projection). The loaded map is a shared setting — switch it on one
