@@ -45,7 +45,7 @@
   body::before{
     content:"";position:fixed;inset:0;z-index:-2;
     background-image:var(--scene-image);background-size:cover;background-position:center;
-    opacity:.45;filter:saturate(.55) brightness(.62);
+    opacity:var(--bg-opacity,.45);transition:opacity 1.5s ease;filter:saturate(.55) brightness(.62);
   }
   body::after{
     content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
@@ -1185,6 +1185,32 @@ function applySceneAndSky(){
     $("skyNote").textContent = `Out in the badlands all around the Bastion: ${subtype} (${category}). ${CATEGORY_SCENARIO[category]} The sky is grey or worse: no sun, no stars, no moon.`;
   }
   $("statusWeatherLine").textContent = `Current weather scenario: ${subtype} (${category}) — that is the badlands weather; over the Bastion itself, only regular fog ever falls.`;
+  jumpBackdropTo(sceneKey);
+}
+// Background slideshow (Shaun): the backdrop stays pinned in place while it
+// cycles through every scene background; picking a scene in Campaign Status
+// jumps the show to that scene, then it keeps cycling.
+const BG_FILES = [...new Set(Object.values(SCENES).map(x => x.file))];
+let bgIdx = 0;
+BG_FILES.forEach(f => { const im = new Image(); im.src = f; });
+function paintBackdrop(){
+  document.body.style.setProperty("--scene-image", `url("${BG_FILES[bgIdx]}")`);
+}
+function cycleBackdrop(){
+  document.body.style.setProperty("--bg-opacity", "0");
+  setTimeout(() => {
+    bgIdx = (bgIdx + 1) % BG_FILES.length;
+    paintBackdrop();
+    document.body.style.setProperty("--bg-opacity", ".45");
+  }, 1500);
+}
+function jumpBackdropTo(sceneKey){
+  const f = SCENES[sceneKey] && SCENES[sceneKey].file;
+  const i = f ? BG_FILES.indexOf(f) : -1;
+  if (i >= 0) { bgIdx = i; paintBackdrop(); }
+}
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && BG_FILES.length > 1) {
+  setInterval(cycleBackdrop, 14000);
 }
 async function loadCampaignStatus(){
   const saved = store.get("apoc-campaign-status");
