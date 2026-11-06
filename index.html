@@ -398,7 +398,7 @@
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="#faerun-map" data-hub-action="map"><span class="hub-name">Faerûn Map</span></a>
-        <div class="pop" role="note">The interactive Faerûn atlas: zoom, pan, tap markers for lore, search by name, measure journeys. The Realms as canon left them at the APOC — and the city it prints as Waterdeep is the Bastion of Last Hope.</div>
+        <div class="pop" role="note">The table's one map of Faerûn — interactive and editable: zoom, pan, and mark it up together. The city printed as Waterdeep is the Bastion of Last Hope.</div>
       </div>
     </div>
   </section>
@@ -451,10 +451,9 @@
   <section class="panel" id="faerun-map" aria-labelledby="mapHeading">
     <p class="eyebrow">Campaign map</p>
     <h2 id="mapHeading">Faerûn — Interactive Map</h2>
-    <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. Zoom and pan, tap a marker for its lore, search by name, and measure a journey's distance and travel time.</p>
-    <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast the atlas prints as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the atlas gives for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
-    <h3 class="map-sub">The table's map — editable, shared by everybody</h3>
-    <p class="muted">This one is ours: the canon 3E map with the table's own markers laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map.</p>
+    <p class="muted">The Realms as Forgotten Realms canon left them when the APOC hit — Shaun's thousand years of lore layer over this. This is the table's one map of Faerûn: the canon 3E map, interactive and editable, marked up together.</p>
+    <p class="map-note"><strong>The Bastion of Last Hope</strong> — on this map, it is the city on the Sword Coast printed as <strong>Waterdeep</strong>: Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now. Everything the map shows for Waterdeep — its streets, Undermountain below it, its history — is the Bastion's own pre-APOC past, altered by what the APOC did to it.</p>
+    <p class="muted">The table's own markers are laid over it. <strong>Tap the map</strong> to drop a marker, <strong>drag</strong> a marker to move it, <strong>tap a marker</strong> to rename it, note it, or delete it. Every change saves to the shared board — the whole table sees the same map.</p>
     <div id="apocMap" class="apoc-map" aria-label="Editable shared map of Faerûn"></div>
     <p class="map-status muted small" id="mapStatus">Loading the shared markers…</p>
     <form id="markerForm" class="marker-form" hidden>
@@ -484,14 +483,6 @@
         <button type="button" class="btn" id="markerCancel">Cancel</button>
       </div>
     </form>
-    <h3 class="map-sub">AideDD atlas — lore &amp; journey calculator</h3>
-    <div class="map-frame">
-      <iframe src="https://www.aidedd.org/atlas/faerun" title="AideDD Faerûn Interactive Map" loading="lazy" allowfullscreen></iframe>
-    </div>
-    <div class="map-actions">
-      <a class="map-open" href="https://www.aidedd.org/atlas/faerun" target="_blank" rel="noopener">Open the map full-screen</a>
-      <span class="muted small">The map runs on AideDD's atlas — if it ever stalls inside the page, the full-screen button always works.</span>
-    </div>
   </section>
 
   <!-- 5 / The tracker -->
@@ -1352,8 +1343,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
    deliberately do NOT live there.) */
 (function(){
   const statusEl = $("mapStatus"), form = $("markerForm");
-  if (!window.L) { statusEl.textContent = "The map library could not load — check the connection and refresh. The AideDD atlas below still works."; return; }
-  if (!db) { statusEl.textContent = "The shared store could not be reached, so markers can't load or save right now. The AideDD atlas below still works."; return; }
+  if (!window.L) { statusEl.textContent = "The map library could not load — check the connection and refresh."; return; }
+  if (!db) { statusEl.textContent = "The shared store could not be reached, so markers can't load or save right now."; return; }
   const MW = 4763, MH = 3185, MARKERS_KEY = "map_markers";
   const KINDS = ["city", "party", "place", "danger", "note"];
   const map = L.map("apocMap", { crs: L.CRS.Simple, minZoom: -2, maxZoom: 3, zoomSnap: 0.25, attributionControl: false });
