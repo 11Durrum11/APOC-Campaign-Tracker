@@ -218,6 +218,16 @@
   .tk-gm .tk-disc{border-style:dashed;border-color:#e8a33d}
   .draw-text{background:rgba(10,12,16,.82);padding:2px 8px;border-radius:6px;font-weight:700;font-size:.85rem;white-space:nowrap;border:1px solid rgba(255,255,255,.25)}
   body.projecting .draw-text{font-size:1.1rem}
+  .lib-panel{border:1px solid hsl(222 18% 26%);border-radius:12px;padding:12px;margin:4px 0 10px}
+  .lib-head{font-weight:700;margin:10px 0 6px}
+  .lib-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .lib-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:hsl(222 20% 16%);border:1px solid hsl(222 18% 28%);border-radius:10px;padding:6px;cursor:pointer;color:inherit;width:76px}
+  .lib-item img{width:56px;height:56px;object-fit:cover;border-radius:50%}
+  .lib-sym{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;font-size:25px;font-weight:700}
+  .lib-cap{font-size:.68rem;text-align:center;line-height:1.15}
+  .layer-chips{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .layer-chip{border:1px solid hsl(222 18% 28%);border-radius:999px;padding:2px 6px 2px 10px;font-size:.8rem}
+  .chip-eye{margin-left:4px}
   .vtt-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
   @media (max-width:820px){.vtt-panel{grid-template-columns:1fr}}
   .vtt-col{background:var(--card);border:1px solid var(--card-border);border-radius:11px;padding:16px;min-width:0}
@@ -547,12 +557,33 @@
     <div class="map-tools">
       <label class="atlas-toggle"><input type="checkbox" id="gridToggle"> Grid</label>
       <div class="field" style="flex:0 1 auto">
-        <label for="scaleFeet">Scale — feet per square (shared)</label>
-        <input id="scaleFeet" class="scale-input" type="number" min="1" step="1" value="5">
+        <label for="gridType">Grid type</label>
+        <select id="gridType">
+          <option value="square">Squares</option>
+          <option value="hex">Hexes</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="scaleFeet">Scale — per square/hex (shared)</label>
+        <span style="display:flex;gap:6px;align-items:center"><input id="scaleFeet" class="scale-input" type="number" min="0.1" step="any" value="5"><select id="scaleUnit" aria-label="Scale unit"><option value="ft">feet</option><option value="mi">miles</option></select></span>
       </div>
       <button type="button" class="btn" id="rulerBtn" aria-pressed="false">Ruler</button>
+      <button type="button" class="btn" id="libBtn" aria-pressed="false">Token repository</button>
       <button type="button" class="btn" id="addTokenBtn">Add token</button>
       <span class="muted small" id="tokenStatus">Tokens load from the shared board…</span>
+    </div>
+    <div class="lib-panel" id="tokenLib" hidden>
+      <div class="field" style="max-width:280px">
+        <label for="libName">Name for the next token (optional)</label>
+        <input id="libName" type="text" autocomplete="off" placeholder="e.g. Goblin 3">
+      </div>
+      <p class="lib-head">Symbols — tap one to drop it on the map</p>
+      <div class="lib-grid" id="libSymbols"></div>
+      <p class="lib-head">Discs &amp; numbers</p>
+      <div class="lib-grid" id="libDiscs"></div>
+      <p class="lib-head">Artwork — Saint James &amp; Cody's gallery</p>
+      <div class="lib-grid" id="libArt"></div>
+      <p class="muted small">Tokens land at the center of the map view — drag them into place. Tap a token on the map to rename it, set its hit points, add a symbol or portrait, or link it to a tracker entry.</p>
     </div>
     <div class="map-tools">
       <button type="button" class="btn" id="gmBtn" aria-pressed="false">GM view: off</button>
@@ -572,10 +603,13 @@
         <select id="drawTool">
           <option value="">Off</option>
           <option value="line">Freehand line</option>
+          <option value="arrow">Arrow</option>
           <option value="rect">Rectangle</option>
           <option value="circle">Circle</option>
+          <option value="poly">Polygon (tap points)</option>
           <option value="text">Text note</option>
           <option value="template">Spell template</option>
+          <option value="erase">Eraser</option>
         </select>
       </div>
       <div class="field" style="flex:0 1 auto">
@@ -583,12 +617,38 @@
         <select id="drawColor">
           <option value="#e8a33d">Amber</option>
           <option value="#d9534f">Red</option>
-          <option value="#7aa2c4">Blue</option>
+          <option value="#e07b39">Orange</option>
+          <option value="#e8c33d">Gold</option>
+          <option value="#f2e14c">Yellow</option>
+          <option value="#9dc45b">Lime</option>
           <option value="#58b368">Green</option>
-          <option value="#f2e7c8">White</option>
+          <option value="#3fa08e">Teal</option>
+          <option value="#4fb3c9">Cyan</option>
+          <option value="#7aa2c4">Blue</option>
+          <option value="#4a6fa5">Navy</option>
           <option value="#9a86c8">Violet</option>
+          <option value="#7d4fa6">Purple</option>
+          <option value="#e58bb1">Pink</option>
+          <option value="#9a6b4f">Brown</option>
+          <option value="#f2e7c8">White</option>
+          <option value="#9aa0a8">Grey</option>
+          <option value="#26262a">Black</option>
         </select>
       </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="drawColorAny">Any color</label>
+        <input id="drawColorAny" type="color" value="#e8a33d" style="width:52px;height:34px;padding:0;background:none;border:none">
+      </div>
+      <div class="field" style="flex:0 1 auto">
+        <label for="drawWidth">Line width</label>
+        <select id="drawWidth">
+          <option value="2">Thin</option>
+          <option value="3" selected>Medium</option>
+          <option value="6">Thick</option>
+          <option value="10">Bold</option>
+        </select>
+      </div>
+      <label class="atlas-toggle"><input type="checkbox" id="drawFill" checked> Fill shapes</label>
       <div class="field" style="flex:0 1 auto">
         <label for="drawLayerSel">Layer</label>
         <select id="drawLayerSel">
@@ -613,6 +673,12 @@
       <button type="button" class="btn" id="drawUndo">Undo drawing</button>
       <button type="button" class="btn" id="drawClear">Clear drawings</button>
       <span class="muted small" id="drawStatus"></span>
+    </div>
+    <div class="map-tools">
+      <span class="muted small">Layers:</span>
+      <span id="drawLayerChips" class="layer-chips"></span>
+      <button type="button" class="btn" id="drawAddLayer">Add layer</button>
+      <button type="button" class="btn primary" id="drawFinish" hidden>Finish shape</button>
     </div>
     <div id="apocMap" class="apoc-map" aria-label="Editable shared map of Faerûn"></div>
     <div id="placeCard" class="place-card" hidden></div>
@@ -690,6 +756,10 @@
         <div class="field full">
           <label for="tokenImg">Portrait image (optional — a Cody's Artwork path like assets/cody/3974.webp, or an image address)</label>
           <input id="tokenImg" type="text" autocomplete="off" placeholder="Optional">
+        </div>
+        <div class="field full">
+          <label for="tokenSym">Symbol (optional — an emoji or a couple of letters; shows when there's no portrait)</label>
+          <input id="tokenSym" type="text" autocomplete="off" placeholder="Optional">
         </div>
         <div class="field full">
           <label class="atlas-toggle"><input type="checkbox" id="tokenGm"> GM only — hidden from players and the TV</label>
@@ -1928,17 +1998,40 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     { k:"cursed", label:"Cursed", c:"#9a86c8" },
     { k:"dead", label:"Dead", c:"#22242c" }
   ];
-  let tokens = [], feetPerSquare = 5, gridOn = false, gmView = false;
+  let tokens = [], feetPerSquare = 5, gridOn = false, gmView = false, gridType = "square", scaleUnit = "ft";
   const tokenLayer = L.layerGroup().addTo(map);
   const gridLayer = L.layerGroup();
   const tokenStatusEl = $("tokenStatus");
   const tokenForm = $("tokenForm");
   let editingToken = null, draftStatus = [];
 
+  function hexR(){ return CELL * 0.575; }
+  function hexCenters(){
+    const R = hexR(), dx = 1.5 * R, dy = Math.sqrt(3) * R, out = [];
+    let col = 0;
+    for (let cx = R; cx < MW + dx; cx += dx, col++) {
+      const off = (col % 2) ? dy / 2 : 0;
+      for (let cy = R + off; cy < MH + dy; cy += dy) out.push([cx, cy]);
+    }
+    return out;
+  }
+  function hexCorners(cx, cy){
+    const R = hexR(), pts = [];
+    for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k; pts.push([cy + R * Math.sin(a), cx + R * Math.cos(a)]); }
+    return pts;
+  }
   function drawGrid(){
     gridLayer.clearLayers();
     if (!gridOn) return;
     const opts = { color:"#e9e2cf", weight:1, opacity:0.16, interactive:false };
+    if (gridType === "hex") {
+      const b = map.getBounds().pad(0.2);
+      for (const c of hexCenters()) {
+        if (c[0] < b.getWest() - CELL || c[0] > b.getEast() + CELL || c[1] < b.getSouth() - CELL || c[1] > b.getNorth() + CELL) continue;
+        gridLayer.addLayer(L.polygon(hexCorners(c[0], c[1]), { ...opts, fill: false }));
+      }
+      return;
+    }
     for (let gx = 0; gx <= MW; gx += CELL) gridLayer.addLayer(L.polyline([[0, gx], [MH, gx]], opts));
     for (let gy = 0; gy <= MH; gy += CELL) gridLayer.addLayer(L.polyline([[gy, 0], [gy, MW]], opts));
   }
@@ -1947,28 +2040,47 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     drawGrid();
     if (gridOn) gridLayer.addTo(map); else map.removeLayer(gridLayer);
   });
+  map.on("moveend zoomend", () => { if (gridOn && gridType === "hex") drawGrid(); });
+  $("gridType").addEventListener("change", async () => {
+    gridType = $("gridType").value;
+    drawGrid();
+    const ok = await saveVttSettings();
+    tokenStatusEl.textContent = ok ? `Grid type for this map: ${gridType === "hex" ? "hexes" : "squares"} — shared with the table.` : "Grid type didn't save — try again.";
+  });
 
+  function scaleInputVal(){ return scaleUnit === "mi" ? Math.round(feetPerSquare / 5280 * 100) / 100 : feetPerSquare; }
   async function loadVttSettings(quiet){
     const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", vttKey()).maybeSingle();
     if (error) return;
-    if (data && data.value && Number(data.value.feetPerSquare) > 0) {
-      feetPerSquare = Number(data.value.feetPerSquare);
-      if (document.activeElement !== $("scaleFeet")) $("scaleFeet").value = feetPerSquare;
+    if (data && data.value) {
+      if (Number(data.value.feetPerSquare) > 0) feetPerSquare = Number(data.value.feetPerSquare);
+      if (data.value.unit === "mi" || data.value.unit === "ft") scaleUnit = data.value.unit;
+      if (data.value.gridType === "hex" || data.value.gridType === "square") gridType = data.value.gridType;
+      if (document.activeElement !== $("scaleFeet")) $("scaleFeet").value = scaleInputVal();
+      $("scaleUnit").value = scaleUnit;
+      $("gridType").value = gridType;
+      if (gridOn) drawGrid();
     }
   }
   async function saveVttSettings(){
     const { error } = await db.from(SETTINGS_TABLE).upsert(
-      { key: vttKey(), value: { feetPerSquare }, updated_at: new Date().toISOString() },
+      { key: vttKey(), value: { feetPerSquare, unit: scaleUnit, gridType }, updated_at: new Date().toISOString() },
       { onConflict: "key" }
     );
     return !error;
   }
   $("scaleFeet").addEventListener("change", async () => {
-    const v = parseInt($("scaleFeet").value, 10);
+    const v = parseFloat($("scaleFeet").value);
     if (!(v > 0)) return;
-    feetPerSquare = v;
+    feetPerSquare = scaleUnit === "mi" ? v * 5280 : v;
     const ok = await saveVttSettings();
-    tokenStatusEl.textContent = ok ? `Scale set: ${v} ft per square — shared with the table.` : "Scale didn't save — try again.";
+    tokenStatusEl.textContent = ok ? `Scale set: ${v} ${scaleUnit === "mi" ? "miles" : "feet"} per ${gridType === "hex" ? "hex" : "square"} — shared with the table.` : "Scale didn't save — try again.";
+  });
+  $("scaleUnit").addEventListener("change", async () => {
+    scaleUnit = $("scaleUnit").value;
+    $("scaleFeet").value = scaleInputVal();
+    const ok = await saveVttSettings();
+    tokenStatusEl.textContent = ok ? `Scale unit: ${scaleUnit === "mi" ? "miles" : "feet"} per ${gridType === "hex" ? "hex" : "square"} (same scale, shown in ${scaleUnit === "mi" ? "miles" : "feet"}).` : "Scale unit didn't save — try again.";
   });
 
   async function loadTokens(quiet){
@@ -1993,7 +2105,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   function tokenIcon(tk){
     const px = tokenPx(tk.size);
     const initial = esc((tk.name || "?").trim().charAt(0).toUpperCase() || "?");
-    const disc = tk.img ? `<img src="${esc(tk.img)}" alt="">` : initial;
+    const disc = tk.img ? `<img src="${esc(tk.img)}" alt="">` : (tk.sym ? esc(tk.sym) : initial);
     let hp = "";
     if (tk.maxHp > 0) {
       const pct = Math.max(0, Math.min(100, Math.round(((tk.hp || 0) / tk.maxHp) * 100)));
@@ -2024,7 +2136,12 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       });
       m.on("dragend", async () => {
         let p = toXY(m.getLatLng());
-        if (gridOn) {
+        if (gridOn && gridType === "hex") {
+          const lng = p.x / 100 * MW, lat = MH * (1 - p.y / 100);
+          let best = null, bd = Infinity;
+          for (const c of hexCenters()) { const d = (c[0] - lng) * (c[0] - lng) + (c[1] - lat) * (c[1] - lat); if (d < bd) { bd = d; best = c; } }
+          if (best) p = { x: Math.round(best[0] / MW * 10000) / 100, y: Math.round((1 - best[1] / MH) * 10000) / 100 };
+        } else if (gridOn) {
           p = {
             x: Math.round(((Math.floor((p.x / 100 * MW) / CELL) + 0.5) * CELL / MW * 100) * 100) / 100,
             y: Math.round(((Math.floor((p.y / 100 * MH) / CELL) + 0.5) * CELL / MH * 100) * 100) / 100
@@ -2072,6 +2189,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     $("tokenHp").value = tk.hp ?? "";
     $("tokenMaxHp").value = tk.maxHp ?? "";
     $("tokenImg").value = tk.img || "";
+    $("tokenSym").value = tk.sym || "";
     $("tokenGm").checked = !!tk.gm;
     draftStatus = [...(tk.status || [])];
     renderStatusChips();
@@ -2086,6 +2204,46 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     drawTokens();
     openTokenEditor({ mode: "new", tk });
   });
+
+  /* ---- Token repository (Shaun, 2026-11-05): a stocked shelf for the VTT.
+     Everything here is Shaun's own material or generic symbols/discs: all of
+     Cody's published artwork, Saint James's approved art, a symbol set,
+     color discs and numbered discs. Tap an item = drop that token at the
+     center of the map view, shared with the table like any other token. */
+  const LIB_SYMBOLS = [["\u2694\uFE0F","Fighter","amber"],["\uD83C\uDFF9","Archer","green"],["\uD83D\uDD2E","Wizard","violet"],["\uD83D\uDDE1\uFE0F","Rogue","grey"],["\uD83D\uDEE1\uFE0F","Guardian","blue"],["\uD83D\uDC80","Skeleton","grey"],["\u2620\uFE0F","Undead","violet"],["\uD83D\uDC79","Ogre","red"],["\uD83E\uDDCC","Troll","green"],["\uD83D\uDC09","Dragon","red"],["\uD83D\uDD77\uFE0F","Spider","grey"],["\uD83D\uDC3A","Wolf","grey"],["\uD83E\uDD87","Bat","violet"],["\uD83D\uDC17","Boar","amber"],["\uD83E\uDDD9","Caster","blue"],["\uD83D\uDC41\uFE0F","Watcher","violet"],["\uD83D\uDD25","Fire","red"],["\u2744\uFE0F","Ice","blue"],["\u26A1","Lightning","amber"],["\uD83C\uDFAF","Target","red"],["\uD83C\uDFF4","Flag","grey"],["\uD83D\uDC51","Boss","amber"],["\uD83D\uDDDD\uFE0F","Key","amber"],["\uD83D\uDCE6","Crate","amber"],["\u2B50","Star","amber"],["\u2753","Unknown","grey"],["\uD83D\uDC34","Horse","amber"],["\uD83D\uDEAA","Door","grey"],["\uD83D\uDCB0","Loot","amber"],["\uD83E\uDDEA","Potion","green"],["\u2623\uFE0F","Hazard","green"],["\uD83E\uDEA6","Grave","grey"]];
+  const LIB_ART = [["assets/saint-james-winged.webp", "Saint James"], ["assets/cody/3974.webp", "Cody's Artwork 3974"], ["assets/cody/3975.webp", "Cody's Artwork 3975"], ["assets/cody/3976.webp", "Cody's Artwork 3976"], ["assets/cody/3977.webp", "Cody's Artwork 3977"], ["assets/cody/3978.webp", "Cody's Artwork 3978"], ["assets/cody/3979.webp", "Cody's Artwork 3979"], ["assets/cody/3980.webp", "Cody's Artwork 3980"], ["assets/cody/3981.webp", "Cody's Artwork 3981"], ["assets/cody/3982.webp", "Cody's Artwork 3982"], ["assets/cody/3983.webp", "Cody's Artwork 3983"], ["assets/cody/3984.webp", "Cody's Artwork 3984"], ["assets/cody/3993.webp", "Cody's Artwork 3993"], ["assets/cody/3994.webp", "Cody's Artwork 3994"], ["assets/cody/3996.webp", "Cody's Artwork 3996"], ["assets/cody/3998.webp", "Cody's Artwork 3998"], ["assets/cody/3999.webp", "Cody's Artwork 3999"], ["assets/cody/4000.webp", "Cody's Artwork 4000"], ["assets/cody/4002.webp", "Cody's Artwork 4002"], ["assets/cody/4003.webp", "Cody's Artwork 4003"], ["assets/cody/4004.webp", "Cody's Artwork 4004"], ["assets/cody/4005.webp", "Cody's Artwork 4005"], ["assets/cody/4006.webp", "Cody's Artwork 4006"], ["assets/cody/4007.webp", "Cody's Artwork 4007"], ["assets/cody/4008.webp", "Cody's Artwork 4008"], ["assets/cody/4018.webp", "Cody's Artwork 4018"], ["assets/cody/4019.webp", "Cody's Artwork 4019"], ["assets/cody/4020.webp", "Cody's Artwork 4020"], ["assets/cody/4021.webp", "Cody's Artwork 4021"], ["assets/cody/4022.webp", "Cody's Artwork 4022"], ["assets/cody/4023.webp", "Cody's Artwork 4023"], ["assets/cody/4024.webp", "Cody's Artwork 4024"], ["assets/cody/4025.webp", "Cody's Artwork 4025"], ["assets/cody/4026.webp", "Cody's Artwork 4026"], ["assets/cody/4027.webp", "Cody's Artwork 4027"], ["assets/cody/4028.webp", "Cody's Artwork 4028"], ["assets/cody/4029.webp", "Cody's Artwork 4029"], ["assets/cody/4030.webp", "Cody's Artwork 4030"], ["assets/cody/4032.webp", "Cody's Artwork 4032"], ["assets/cody/4034.webp", "Cody's Artwork 4034"], ["assets/cody/4035.webp", "Cody's Artwork 4035"], ["assets/cody/4037.webp", "Cody's Artwork 4037"], ["assets/cody/4045.webp", "Cody's Artwork 4045"], ["assets/cody/4046.webp", "Cody's Artwork 4046"], ["assets/cody/4047.webp", "Cody's Artwork 4047"], ["assets/cody/4048.webp", "Cody's Artwork 4048"], ["assets/cody/4049.webp", "Cody's Artwork 4049"], ["assets/cody/4050.webp", "Cody's Artwork 4050"], ["assets/cody/4051.webp", "Cody's Artwork 4051"], ["assets/cody/4052.webp", "Cody's Artwork 4052"], ["assets/cody/4053.webp", "Cody's Artwork 4053"], ["assets/cody/4054.webp", "Cody's Artwork 4054"], ["assets/cody/4056.webp", "Cody's Artwork 4056"], ["assets/cody/4058.webp", "Cody's Artwork 4058"], ["assets/cody/4059.webp", "Cody's Artwork 4059"], ["assets/cody/4060.webp", "Cody's Artwork 4060"], ["assets/cody/4061.webp", "Cody's Artwork 4061"], ["assets/cody/4062.webp", "Cody's Artwork 4062"], ["assets/cody/4065.webp", "Cody's Artwork 4065"], ["assets/cody/4067.webp", "Cody's Artwork 4067"], ["assets/cody/4068.webp", "Cody's Artwork 4068"]];
+  const LIB_COLORS = ["amber", "red", "blue", "green", "violet", "grey"];
+  const LIB_HEX = { amber: "#e8a33d", red: "#d9534f", blue: "#7aa2c4", green: "#58b368", violet: "#9a86c8", grey: "#8a8f98" };
+  function libPlace(patch){
+    const c = toXY(map.getCenter());
+    const off = (tokens.length % 5) * 1.5;
+    const tk = Object.assign({ id: newId(), name: "Token", x: Math.min(98, c.x + off), y: Math.min(98, c.y + off), size: 1, color: "amber", hp: null, maxHp: null, img: "", sym: "", status: [], entryId: "" }, patch);
+    const custom = $("libName").value.trim();
+    if (custom) tk.name = custom;
+    tokens.push(tk);
+    saveTokens().then(ok => { drawTokens(); tokenStatusEl.textContent = ok ? `"${tk.name}" placed at the center of the map — drag it into place.` : "That token didn't save — try again."; if (!ok) loadTokens(true); });
+  }
+  function buildLibrary(){
+    $("libSymbols").innerHTML = LIB_SYMBOLS.map(([sym, name, color]) => `<button type="button" class="lib-item" data-sym="${sym}" data-name="${name}" data-color="${color}" title="${name}"><span class="lib-sym" style="background:${LIB_HEX[color]}33;border:2px solid ${LIB_HEX[color]}">${sym}</span><span class="lib-cap">${name}</span></button>`).join("");
+    let discs = LIB_COLORS.map(c => `<button type="button" class="lib-item" data-color="${c}" data-name="Disc"><span class="lib-sym" style="background:${LIB_HEX[c]};border:2px solid ${LIB_HEX[c]}"></span><span class="lib-cap">${c} disc</span></button>`).join("");
+    for (let n = 1; n <= 20; n++) { const c = LIB_COLORS[(n - 1) % LIB_COLORS.length]; discs += `<button type="button" class="lib-item" data-sym="${n}" data-name="Number ${n}" data-color="${c}"><span class="lib-sym" style="background:${LIB_HEX[c]}33;border:2px solid ${LIB_HEX[c]}">${n}</span><span class="lib-cap">Number ${n}</span></button>`; }
+    $("libDiscs").innerHTML = discs;
+    $("libArt").innerHTML = LIB_ART.map(([src, name]) => `<button type="button" class="lib-item" data-img="${src}" data-name="${name}" title="${name}"><img src="${src}" alt="${name}" loading="lazy"><span class="lib-cap">${name}</span></button>`).join("");
+    $("tokenLib").querySelectorAll(".lib-item").forEach(b => b.addEventListener("click", () => {
+      const patch = { name: b.dataset.name || "Token", color: b.dataset.color || "amber" };
+      if (b.dataset.sym) patch.sym = b.dataset.sym;
+      if (b.dataset.img) patch.img = b.dataset.img;
+      libPlace(patch);
+    }));
+  }
+  buildLibrary();
+  $("libBtn").addEventListener("click", () => {
+    const p = $("tokenLib");
+    p.hidden = !p.hidden;
+    $("libBtn").setAttribute("aria-pressed", String(!p.hidden));
+    if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
   $("tokenCancel").addEventListener("click", closeTokenEditor);
   $("tokenDelete").addEventListener("click", async () => {
     if (!editingToken) return;
@@ -2111,6 +2269,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       hp: $("tokenHp").value === "" ? null : parseInt($("tokenHp").value, 10),
       maxHp: $("tokenMaxHp").value === "" ? null : parseInt($("tokenMaxHp").value, 10),
       img: $("tokenImg").value.trim(),
+      sym: $("tokenSym").value.trim().slice(0, 4),
       status: [...draftStatus],
       entryId: $("tokenLink").value,
       gm: $("tokenGm").checked
@@ -2129,8 +2288,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     const units = Math.hypot(b.lng - a.lng, b.lat - a.lat);
     const cells = units / CELL;
     const feet = cells * feetPerSquare;
-    const ft = feet >= 5280 ? `${(feet / 5280).toFixed(2)} mi` : `${Math.round(feet)} ft`;
-    return `${cells.toFixed(1)} sq · ${ft}`;
+    const dist = scaleUnit === "mi" ? `${(feet / 5280).toFixed(2)} mi` : (feet >= 5280 ? `${(feet / 5280).toFixed(2)} mi` : `${Math.round(feet)} ft`);
+    return `${cells.toFixed(1)} ${gridType === "hex" ? "hex" : "sq"} · ${dist}`;
   }
   $("rulerBtn").addEventListener("click", () => {
     rulerOn = !rulerOn;
@@ -2183,6 +2342,35 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   let fogState = { enabled: false, revealed: [] };
   let drawItems = [];
   const drawStatusEl = $("drawStatus");
+  /* Named drawing layers (Shaun, 2026-11-05 — "as many layers as I can
+     get"): every map's draw store carries its own layer list; Shared and
+     GM only always exist, and up to 12 layers can be added per map. Old
+     items only carry a gm flag — layerOf() maps them onto the two
+     original layers so nothing already drawn changes. */
+  const DEFAULT_DRAW_LAYERS = [{ id: "shared", name: "Shared", gm: false, hidden: false }, { id: "gm", name: "GM only", gm: true, hidden: false }];
+  let drawLayers = DEFAULT_DRAW_LAYERS.map(l => ({ ...l }));
+  const layerOf = it => it.layer || (it.gm ? "gm" : "shared");
+  const drawLayerDef = id => drawLayers.find(l => l.id === id) || drawLayers[0];
+  const curDrawColor = () => $("drawColor").value;
+  const curDrawWidth = () => parseInt($("drawWidth").value, 10) || 3;
+  const curDrawFill = () => $("drawFill").checked;
+  function curLayerPatch(){ const def = drawLayerDef($("drawLayerSel").value); return { layer: def.id, gm: !!def.gm }; }
+  function buildLayerUi(){
+    const sel = $("drawLayerSel");
+    const cur = sel.value;
+    sel.innerHTML = drawLayers.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
+    if (drawLayers.some(l => l.id === cur)) sel.value = cur;
+    $("drawLayerChips").innerHTML = drawLayers.map(l =>
+      `<span class="layer-chip">${esc(l.name)} <button type="button" class="chip-eye" data-layer="${l.id}" aria-pressed="${!l.hidden}" title="Show or hide this layer for the whole table">${l.hidden ? "hidden" : "shown"}</button></span>`).join("");
+    $("drawLayerChips").querySelectorAll(".chip-eye").forEach(b => b.addEventListener("click", async () => {
+      const l = drawLayerDef(b.dataset.layer);
+      l.hidden = !l.hidden;
+      buildLayerUi(); renderDraw();
+      const ok = await saveDraw();
+      drawStatusEl.textContent = ok ? `Layer "${l.name}" ${l.hidden ? "hidden" : "shown"} for the whole table.` : "Layer change didn't save — refreshed.";
+      if (!ok) loadDraw(true);
+    }));
+  }
 
   /* ---- GM gate ---- */
   async function getGmPin(){
@@ -2257,10 +2445,12 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", drawKey()).maybeSingle();
     if (error) return;
     drawItems = (data && data.value && Array.isArray(data.value.items)) ? data.value.items : [];
+    if (data && data.value && Array.isArray(data.value.layers) && data.value.layers.length) drawLayers = data.value.layers;
+    buildLayerUi();
     renderDraw();
   }
   async function saveDraw(){
-    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: drawKey(), value: { items: drawItems }, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    const { error } = await db.from(SETTINGS_TABLE).upsert({ key: drawKey(), value: { items: drawItems, layers: drawLayers }, updated_at: new Date().toISOString() }, { onConflict: "key" });
     return !error;
   }
   function uToLatLng(ux, uy){ return [MH - uy, ux]; }
@@ -2270,17 +2460,31 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     const gm = effectiveGm();
     for (const it of drawItems) {
       if (it.gm && !gm) continue;
-      const st = { color: it.color || "#e8a33d", weight: 3, fillColor: it.color || "#e8a33d", interactive: false };
+      const ldef = drawLayerDef(layerOf(it));
+      if (ldef.hidden) continue;
+      if (ldef.gm && !gm) continue;
+      const st = { color: it.color || "#e8a33d", weight: it.w || 3, fillColor: it.color || "#e8a33d", interactive: false };
+      const fo = it.fill === false ? 0 : 0.18;
       if (it.type === "line") drawLayer.addLayer(L.polyline(it.pts.map(p => toLatLng(p[0], p[1])), { ...st, fill: false }));
-      else if (it.type === "rect") drawLayer.addLayer(L.rectangle([toLatLng(it.x, it.y), toLatLng(it.x + it.w, it.y + it.h)], { ...st, fillOpacity: 0.18 }));
-      else if (it.type === "circle") drawLayer.addLayer(L.circle(toLatLng(it.x, it.y), { ...st, radius: it.r / 100 * MW, fillOpacity: 0.18 }));
+      else if (it.type === "poly") drawLayer.addLayer(L.polygon(it.pts.map(p => toLatLng(p[0], p[1])), { ...st, fillOpacity: fo }));
+      else if (it.type === "arrow") {
+        drawLayer.addLayer(L.polyline([toLatLng(it.a[0], it.a[1]), toLatLng(it.b[0], it.b[1])], { ...st, fill: false }));
+        const A = [it.a[0] / 100 * MW, it.a[1] / 100 * MH], B = [it.b[0] / 100 * MW, it.b[1] / 100 * MH];
+        const ang = Math.atan2(B[1] - A[1], B[0] - A[0]), HL = CELL * 0.55;
+        const h1 = [B[0] + HL * Math.cos(ang + 2.6), B[1] + HL * Math.sin(ang + 2.6)];
+        const h2 = [B[0] + HL * Math.cos(ang - 2.6), B[1] + HL * Math.sin(ang - 2.6)];
+        drawLayer.addLayer(L.polygon([uToLatLng(B[0], B[1]), uToLatLng(h1[0], h1[1]), uToLatLng(h2[0], h2[1])], { ...st, fillOpacity: 0.85 }));
+      }
+      else if (it.type === "rect") drawLayer.addLayer(L.rectangle([toLatLng(it.x, it.y), toLatLng(it.x + it.w, it.y + it.h)], { ...st, fillOpacity: fo }));
+      else if (it.type === "circle") drawLayer.addLayer(L.circle(toLatLng(it.x, it.y), { ...st, radius: it.r / 100 * MW, fillOpacity: fo }));
       else if (it.type === "text") drawLayer.addLayer(L.marker(toLatLng(it.x, it.y), { icon: L.divIcon({ className: "atlas-icon", html: `<span class="draw-text" style="color:${it.color || "#f2e7c8"}">${esc(it.text)}</span>`, iconAnchor: [0, 0] }), interactive: false }));
       else if (it.type === "template") {
         const cells = (it.sizeFt || 20) / feetPerSquare;
         const Lun = cells * CELL;
         const o = [it.x / 100 * MW, it.y / 100 * MH];
+        const tfo = it.fill === false ? 0 : 0.22;
         if (it.shape === "circle") {
-          drawLayer.addLayer(L.circle(uToLatLng(o[0], o[1]), { ...st, radius: Lun, fillOpacity: 0.22 }));
+          drawLayer.addLayer(L.circle(uToLatLng(o[0], o[1]), { ...st, radius: Lun, fillOpacity: tfo }));
         } else {
           const a = (it.angle || 0) * Math.PI / 180;
           const end = [o[0] + Lun * Math.cos(a), o[1] + Lun * Math.sin(a)];
@@ -2288,12 +2492,12 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
             const h = Math.atan(0.5);
             const p1 = [o[0] + Lun * Math.cos(a - h), o[1] + Lun * Math.sin(a - h)];
             const p2 = [o[0] + Lun * Math.cos(a + h), o[1] + Lun * Math.sin(a + h)];
-            drawLayer.addLayer(L.polygon([uToLatLng(o[0], o[1]), uToLatLng(p1[0], p1[1]), uToLatLng(p2[0], p2[1])], { ...st, fillOpacity: 0.22 }));
+            drawLayer.addLayer(L.polygon([uToLatLng(o[0], o[1]), uToLatLng(p1[0], p1[1]), uToLatLng(p2[0], p2[1])], { ...st, fillOpacity: tfo }));
           } else {
             const wU = (5 / feetPerSquare) * CELL / 2;
             const pxv = -Math.sin(a), pyv = Math.cos(a);
             const c = [[o[0] + pxv * wU, o[1] + pyv * wU], [end[0] + pxv * wU, end[1] + pyv * wU], [end[0] - pxv * wU, end[1] - pyv * wU], [o[0] - pxv * wU, o[1] - pyv * wU]];
-            drawLayer.addLayer(L.polygon(c.map(p => uToLatLng(p[0], p[1])), { ...st, fillOpacity: 0.22 }));
+            drawLayer.addLayer(L.polygon(c.map(p => uToLatLng(p[0], p[1])), { ...st, fillOpacity: tfo }));
           }
         }
       }
@@ -2302,13 +2506,35 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   $("drawToggle").addEventListener("change", renderDraw);
   $("tokensToggle").addEventListener("change", ev => { if (ev.target.checked) tokenLayer.addTo(map); else map.removeLayer(tokenLayer); });
   $("drawLayerSel").addEventListener("change", () => {
-    if ($("drawLayerSel").value === "gm" && !gmView) { alert("The GM layer needs GM view on."); $("drawLayerSel").value = "shared"; }
+    const def = drawLayerDef($("drawLayerSel").value);
+    if (def.gm && !gmView) { alert("That is a GM-only layer — it needs GM view on."); $("drawLayerSel").value = "shared"; }
   });
+  $("drawAddLayer").addEventListener("click", async () => {
+    if (drawLayers.length >= 12) { alert("That's the layer limit for one map (12)."); return; }
+    const name = prompt("Name the new layer:");
+    if (!name || !name.trim()) return;
+    const id = "layer-" + Date.now().toString(36);
+    drawLayers.push({ id, name: name.trim().slice(0, 30), gm: false, hidden: false });
+    buildLayerUi();
+    $("drawLayerSel").value = id;
+    const ok = await saveDraw();
+    drawStatusEl.textContent = ok ? `Layer "${name.trim().slice(0, 30)}" added — it is now the drawing layer.` : "Layer didn't save — try again.";
+    if (!ok) loadDraw(true);
+  });
+  $("drawColorAny").addEventListener("input", () => {
+    const v = $("drawColorAny").value, sel = $("drawColor");
+    if (![...sel.options].some(o => o.value === v)) { const o = document.createElement("option"); o.value = v; o.textContent = "Custom " + v; sel.appendChild(o); }
+    sel.value = v;
+  });
+  $("drawColor").addEventListener("change", () => { $("drawColorAny").value = $("drawColor").value; });
   $("drawTool").addEventListener("change", () => {
     const t = $("drawTool").value;
     $("tplShapeField").hidden = $("tplSizeField").hidden = t !== "template";
+    $("drawFinish").hidden = t !== "poly";
+    if (t !== "poly") { polyPts = null; previewLayer.clearLayers(); }
     if (t) setArmed("draw"); else setArmed(null);
   });
+  $("drawFinish").addEventListener("click", () => finishPoly());
   $("drawUndo").addEventListener("click", async () => {
     if (!drawItems.length) return;
     drawItems.pop();
@@ -2317,16 +2543,17 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (!ok) loadDraw(true);
   });
   $("drawClear").addEventListener("click", async () => {
-    const gmSel = $("drawLayerSel").value === "gm";
-    if (!confirm(gmSel ? "Clear all GM-layer drawings on this map?" : "Clear all shared drawings on this map? Everybody loses them.")) return;
-    drawItems = drawItems.filter(it => gmSel ? !it.gm : !!it.gm);
+    const selId = $("drawLayerSel").value;
+    const def = drawLayerDef(selId);
+    if (!confirm(`Clear all drawings on the "${def.name}" layer of this map? Everybody loses them.`)) return;
+    drawItems = drawItems.filter(it => layerOf(it) !== selId);
     const ok = await saveDraw(); renderDraw();
-    drawStatusEl.textContent = ok ? "Drawings cleared on that layer." : "Clear didn't save — refreshed.";
+    drawStatusEl.textContent = ok ? `Layer "${def.name}" cleared.` : "Clear didn't save — refreshed.";
     if (!ok) loadDraw(true);
   });
 
   /* ---- Mode arbitration + pointer drawing ---- */
-  let armedMode = null, drawStart = null, drawPts = null;
+  let armedMode = null, drawStart = null, drawPts = null, polyPts = null;
   function setArmed(mode){
     armedMode = mode;
     if (mode && rulerOn) {
@@ -2358,14 +2585,59 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (tool === "text") {
       const text = prompt("Text note:");
       if (text && text.trim()) {
-        drawItems.push({ type: "text", x: p.x, y: p.y, text: text.trim().slice(0, 80), color: $("drawColor").value, gm: $("drawLayerSel").value === "gm" });
+        drawItems.push({ type: "text", x: p.x, y: p.y, text: text.trim().slice(0, 80), color: curDrawColor(), ...curLayerPatch() });
         saveDraw().then(ok => { renderDraw(); drawStatusEl.textContent = ok ? "Note placed." : "Note didn't save."; if (!ok) loadDraw(true); });
       }
       return;
     }
+    if (tool === "poly") {
+      polyPts = polyPts || [];
+      polyPts.push([p.x, p.y]);
+      previewPoly();
+      drawStatusEl.textContent = `${polyPts.length} point${polyPts.length === 1 ? "" : "s"} placed — tap "Finish shape" (or double-tap the map) to close the shape.`;
+      return;
+    }
+    if (tool === "erase") { drawStart = { p, ll: e.latlng, erasing: true }; eraseAt(p); return; }
     drawStart = { p, ll: e.latlng };
     drawPts = tool === "line" ? [[p.x, p.y]] : null;
   });
+  function previewPoly(){
+    previewLayer.clearLayers();
+    if (!polyPts || !polyPts.length) return;
+    const color = curDrawColor();
+    previewLayer.addLayer(L.polyline(polyPts.map(q => toLatLng(q[0], q[1])), { color, weight: curDrawWidth(), interactive: false }));
+    for (const q of polyPts) previewLayer.addLayer(L.circleMarker(toLatLng(q[0], q[1]), { radius: 4, color, fillColor: color, fillOpacity: 1, interactive: false }));
+  }
+  async function finishPoly(){
+    if (!polyPts || polyPts.length < 3) { drawStatusEl.textContent = "A shape needs at least 3 points — tap the map to add more, or switch tools to cancel it."; return; }
+    drawItems.push({ type: "poly", pts: polyPts, color: curDrawColor(), w: curDrawWidth(), fill: curDrawFill(), ...curLayerPatch() });
+    polyPts = null; previewLayer.clearLayers();
+    const ok = await saveDraw(); renderDraw();
+    drawStatusEl.textContent = ok ? "Shape saved — the table sees it." : "Shape didn't save — try again.";
+    if (!ok) loadDraw(true);
+  }
+  function eraseAt(p){
+    const ux = p.x / 100 * MW, uy = p.y / 100 * MH, tol = CELL * 0.45;
+    const seg = (ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1; let t = ((ux - ax) * dx + (uy - ay) * dy) / L2; t = Math.max(0, Math.min(1, t)); return Math.hypot(ux - (ax + t * dx), uy - (ay + t * dy)); };
+    const sel = $("drawLayerSel").value, gm = effectiveGm();
+    for (let i = drawItems.length - 1; i >= 0; i--) {
+      const it = drawItems[i];
+      if (layerOf(it) !== sel) continue;
+      if (it.gm && !gm) continue;
+      const P = q => [q[0] / 100 * MW, q[1] / 100 * MH];
+      let hit = false;
+      if (it.type === "line" || it.type === "poly") { const pts = it.pts.map(P); for (let k = 0; k + 1 < pts.length && !hit; k++) hit = seg(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]) < tol; if (it.type === "poly" && pts.length > 2 && !hit) hit = seg(pts[pts.length - 1][0], pts[pts.length - 1][1], pts[0][0], pts[0][1]) < tol; }
+      else if (it.type === "arrow") { const A = P(it.a), B = P(it.b); hit = seg(A[0], A[1], B[0], B[1]) < tol; }
+      else if (it.type === "rect") { const a = P([it.x, it.y]), b = P([it.x + it.w, it.y + it.h]); hit = ux > Math.min(a[0], b[0]) - tol && ux < Math.max(a[0], b[0]) + tol && uy > Math.min(a[1], b[1]) - tol && uy < Math.max(a[1], b[1]) + tol; }
+      else if (it.type === "circle") { const c = P([it.x, it.y]); hit = Math.hypot(ux - c[0], uy - c[1]) < it.r / 100 * MW + tol; }
+      else if (it.type === "text" || it.type === "template") { const c = P([it.x, it.y]); hit = Math.hypot(ux - c[0], uy - c[1]) < CELL; }
+      if (hit) {
+        drawItems.splice(i, 1);
+        saveDraw().then(ok => { renderDraw(); drawStatusEl.textContent = ok ? "Erased." : "Erase didn't save — refreshed."; if (!ok) loadDraw(true); });
+        return;
+      }
+    }
+  }
   map.on("mousemove", e => {
     if (!drawStart) return;
     const p = toXY(e.latlng);
@@ -2377,11 +2649,14 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     }
     if (armedMode !== "draw") return;
     const tool = $("drawTool").value, color = $("drawColor").value;
-    if (tool === "line" && drawPts) {
+    if (tool === "erase" && drawStart && drawStart.erasing) { eraseAt(p); return; }
+    if (tool === "arrow") {
+      previewLayer.addLayer(L.polyline([drawStart.ll, e.latlng], { color, weight: curDrawWidth(), interactive: false }));
+    } else if (tool === "line" && drawPts) {
       const last = drawPts[drawPts.length - 1];
       const du = Math.hypot((p.x - last[0]) / 100 * MW, (p.y - last[1]) / 100 * MH);
       if (du > 3) drawPts.push([p.x, p.y]);
-      previewLayer.addLayer(L.polyline(drawPts.map(q => toLatLng(q[0], q[1])), { color, weight: 3, interactive: false }));
+      previewLayer.addLayer(L.polyline(drawPts.map(q => toLatLng(q[0], q[1])), { color, weight: curDrawWidth(), interactive: false }));
     } else if (tool === "rect") {
       const r = rectFromDrag(drawStart.p, p);
       previewLayer.addLayer(L.rectangle([toLatLng(r.x, r.y), toLatLng(r.x + r.w, r.y + r.h)], { color, weight: 2, fillColor: color, fillOpacity: 0.18, interactive: false }));
@@ -2392,6 +2667,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       previewLayer.addLayer(L.polyline([drawStart.ll, e.latlng], { color, weight: 2, dashArray: "5 5", interactive: false }));
     }
   });
+  map.on("dblclick", () => { if (armedMode === "draw" && $("drawTool").value === "poly") finishPoly(); });
   map.on("mouseup", async e => {
     if (!drawStart) return;
     const start = drawStart, startPts = drawPts;
@@ -2414,13 +2690,16 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       return;
     }
     if (armedMode !== "draw") return;
-    const tool = $("drawTool").value, color = $("drawColor").value, gm = $("drawLayerSel").value === "gm";
+    const tool = $("drawTool").value, color = $("drawColor").value;
+    if (tool === "erase" || tool === "poly") return;
+    const layerPatch = curLayerPatch();
     let item = null;
-    if (tool === "line" && startPts && startPts.length > 1) item = { type: "line", pts: startPts, color, gm };
-    else if (tool === "rect") { const r = rectFromDrag(start.p, p); if (r.w > 0.1 && r.h > 0.1) item = { type: "rect", ...r, color, gm }; }
+    if (tool === "line" && startPts && startPts.length > 1) item = { type: "line", pts: startPts, color, w: curDrawWidth(), ...layerPatch };
+    else if (tool === "arrow") { const d = Math.hypot((p.x - start.p.x) / 100 * MW, (p.y - start.p.y) / 100 * MH); if (d > 2) item = { type: "arrow", a: [start.p.x, start.p.y], b: [p.x, p.y], color, w: curDrawWidth(), ...layerPatch }; }
+    else if (tool === "rect") { const r = rectFromDrag(start.p, p); if (r.w > 0.1 && r.h > 0.1) item = { type: "rect", ...r, color, w: curDrawWidth(), fill: curDrawFill(), ...layerPatch }; }
     else if (tool === "circle") {
       const rUnits = Math.hypot((p.x - start.p.x) / 100 * MW, (p.y - start.p.y) / 100 * MH);
-      if (rUnits > 2) item = { type: "circle", x: start.p.x, y: start.p.y, r: rUnits / MW * 100, color, gm };
+      if (rUnits > 2) item = { type: "circle", x: start.p.x, y: start.p.y, r: rUnits / MW * 100, color, w: curDrawWidth(), fill: curDrawFill(), ...layerPatch };
     } else if (tool === "template") {
       const shape = $("tplShape").value;
       const sizeFt = Math.max(5, parseInt($("tplSize").value, 10) || 20);
@@ -2429,7 +2708,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
         const dx = (p.x - start.p.x) / 100 * MW, dy = (p.y - start.p.y) / 100 * MH;
         angle = Math.round(Math.atan2(dy, dx) * 180 / Math.PI);
       }
-      item = { type: "template", shape, x: start.p.x, y: start.p.y, sizeFt, angle, color, gm };
+      item = { type: "template", shape, x: start.p.x, y: start.p.y, sizeFt, angle, color, w: curDrawWidth(), fill: curDrawFill(), ...layerPatch };
     }
     if (!item) return;
     drawItems.push(item);
@@ -2445,6 +2724,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   /* Follow map switches; keep fog and drawings fresh. */
   let lastMapId = currentMapId;
   loadFog();
+  buildLayerUi();
   loadDraw();
   applyGmUi();
   setInterval(() => {
