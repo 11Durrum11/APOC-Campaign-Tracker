@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#14171f">
-<meta name="description" content="APOC Survival — the shared Bastion of Last Hope campaign tracker for the whole table.">
+<meta name="description" content="APOC Survival — the Bastion of Last Hope campaign tracker.">
 <title>APOC Survival — Campaign Tracker</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -77,7 +77,7 @@
        side-by-side top bubbles is closed — hero min-height 168 -> 148
        and tighter padding/margins, so the hub block and everything
        under it sits higher on the page. */
-    min-height:148px;margin:0 -16px;padding:6px 24px 6px;
+    min-height:100px;margin:0 -16px;padding:6px 24px 6px;
     display:flex;flex-direction:column;justify-content:flex-start;
     border-bottom:1px solid var(--card-border);
   }
@@ -160,6 +160,7 @@
   .hub-btn:hover,.hub-btn:focus-visible{background:transparent;color:var(--primary);border-color:var(--primary)}
   .hub-btn.primary-link{background:transparent;color:var(--primary);border-color:var(--primary)}
   .hub-btn .hub-name{overflow-wrap:anywhere}
+  .hub-btn .hub-sub{overflow-wrap:anywhere;font-size:.62rem;line-height:1.1;color:var(--muted-foreground);letter-spacing:.02em}
   .thumb-strip{display:flex;gap:2px;justify-content:center;max-width:100%}
   .thumb-strip img{width:9px;height:9px;object-fit:cover;border-radius:3px;border:1px solid var(--card-border)}
   .count-chip{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:11px;padding:0 3px;border-radius:999px;background:transparent;border:1px solid var(--primary);color:var(--primary);font-size:.55rem;font-weight:700;line-height:1}
@@ -386,7 +387,7 @@
     .top-bubbles{grid-template-columns:1fr;position:static;width:auto;margin-top:12px}
     .top-bubbles .sky-panel,.top-bubbles .countdown-panel{grid-column:auto;grid-row:auto}
     .page{padding:0 10px 22px}
-    .hero{margin:0 -10px;min-height:262px;padding:14px 16px 10px}
+    .hero{margin:0 -10px;min-height:236px;padding:14px 16px 10px}
     .countdown-panel{grid-template-columns:1fr}
     .timer{justify-content:flex-start}
     .form-grid{grid-template-columns:1fr}
@@ -437,7 +438,6 @@
     <div class="hero-copy">
       <p class="eyebrow">The Bastion of Last Hope · 2701 DR <span id="siteVersion" hidden style="display:inline-block;margin-left:.45rem;padding:.05rem .45rem;border:1px solid rgba(255,255,255,.35);border-radius:.375rem;font-size:11px;font-weight:600;letter-spacing:.02em;opacity:.85;vertical-align:1px"></span></p>
       <h1>APOC Survival</h1>
-      <p class="hero-sub">One campaign page for the whole table — the tracker, the story, the weather, and Cody's artwork, shared for everybody.</p>
       <!-- Version indicator (Shaun, 2026-11-04; moved up beside the
            year at his word, 2026-11-06): the little badge sits in the
            eyebrow line right after "2701 DR". The text comes from
@@ -510,7 +510,7 @@
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-Weather-Engine/" target="_blank" rel="noopener"><span class="hub-name">The Weather</span></a>
       </div>
       <div class="hub-item">
-        <a class="hub-btn" href="https://11durrum11.github.io/Blendcrafter/" target="_blank" rel="noopener"><span class="hub-name">Blendcrafter</span></a>
+        <a class="hub-btn" href="https://11durrum11.github.io/Blendcrafter/" target="_blank" rel="noopener"><span class="hub-name">Blendcrafter</span><span class="hub-sub">APOC Character Creator</span></a>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-CritGen/" target="_blank" rel="noopener"><span class="hub-name">CritGen APOC</span></a>
@@ -651,13 +651,12 @@
         <button class="btn primary" type="submit">Save campaign status</button>
       </div>
       <p class="status-line" id="statusSaveLine" aria-live="polite"></p>
-      <div class="warning" id="statusSetupNote" hidden>Shared campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
+      <div class="warning" id="statusSetupNote" hidden>Campaign status is being set up. Until the settings table is ready, Save keeps the status on this device and says so plainly.</div>
     </form>
     <hr style="border:none;border-top:1px solid var(--card-border);margin:18px 0">
     <div class="tracker-head">
       <div>
         <p class="eyebrow">Shared board + DM-only browser records</p>
-        <p class="muted" style="margin:4px 0 0">Shared entries are saved to the board for everybody. DM-only records — and every DM secret — stay in the browser that created them.</p>
       </div>
       <button class="btn" id="refreshEntries" type="button">↻ Refresh</button>
     </div>
@@ -680,7 +679,7 @@
         <div class="field">
           <label for="entryScope">Where this entry lives</label>
           <select id="entryScope">
-            <option value="shared">Shared board — everybody sees it</option>
+            <option value="shared">Shared board</option>
             <option value="dm">DM-only — this browser only</option>
           </select>
         </div>
@@ -713,7 +712,7 @@
           <input id="entryPinned" maxlength="300" autocomplete="off">
         </div>
         <div class="field full" id="secretField">
-          <label for="entrySecret">DM secret — this browser only, never sent to the shared board</label>
+          <label for="entrySecret">DM secret — this browser only, never sent to the board</label>
           <textarea id="entrySecret" placeholder="Only stored locally when this entry is DM-only."></textarea>
         </div>
       </div>
@@ -761,8 +760,8 @@
     </figure>
 
     <div class="upload-box">
-      <label for="artUpload"><strong>Add pictures for everybody</strong></label>
-      <p class="muted small" id="artworkSetupNote">Checking the shared artwork bucket…</p>
+      <label for="artUpload"><strong>Add pictures</strong></label>
+      <p class="muted small" id="artworkSetupNote">Checking the artwork bucket…</p>
       <input id="artUpload" type="file" accept="image/*" multiple>
       <p class="status-line" id="artUploadLine" aria-live="polite"></p>
     </div>
@@ -774,7 +773,7 @@
   </div>
 </div>
 
-<noscript><div style="padding:16px;text-align:center">This page needs JavaScript for the shared tracker, countdown, weather, and gallery.</div></noscript>
+<noscript><div style="padding:16px;text-align:center">This page needs JavaScript for the tracker, countdown, weather, and gallery.</div></noscript>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -947,7 +946,7 @@ $("statusForm").addEventListener("submit", async ev => {
   campaignStatus = readStatusFromForm();
   store.set("apoc-campaign-status", JSON.stringify(campaignStatus));
   applySceneAndSky();
-  if (!db) { $("statusSaveLine").textContent = "Saved on this device. The shared status table could not be reached."; return; }
+  if (!db) { $("statusSaveLine").textContent = "Saved on this device. The status table could not be reached."; return; }
   try {
     const { error } = await db.from(SETTINGS_TABLE).upsert(
       { key: STATUS_KEY, value: campaignStatus, updated_at: new Date().toISOString() },
@@ -956,11 +955,11 @@ $("statusForm").addEventListener("submit", async ev => {
     if (error) throw error;
     statusSharedReady = true;
     $("statusSetupNote").hidden = true;
-    $("statusSaveLine").textContent = "Saved — campaign status is shared for everybody.";
+    $("statusSaveLine").textContent = "Saved.";
   } catch(e) {
     statusSharedReady = false;
     $("statusSetupNote").hidden = false;
-    $("statusSaveLine").textContent = "Saved on this device. Shared campaign status is still being set up, so this has not gone to the shared table yet.";
+    $("statusSaveLine").textContent = "Saved on this device. Campaign status is still being set up, so this has not gone to the table yet.";
   }
 });
 
@@ -1182,7 +1181,7 @@ function renderTracker(){
 }
 async function loadSharedEntries(showFailure = true){
   if (!db) {
-    if (showFailure) showEntriesError("The shared board could not be reached — DM-only records in this browser still work below.");
+    if (showFailure) showEntriesError("The board could not be reached — DM-only records in this browser still work below.");
     renderTracker();
     return;
   }
@@ -1192,7 +1191,7 @@ async function loadSharedEntries(showFailure = true){
     sharedEntries = data || [];
     showEntriesError(null);
   } catch(e) {
-    if (showFailure) showEntriesError("Couldn't load the shared board — it may be waking up. DM-only records in this browser still work below; try Refresh in a few seconds.");
+    if (showFailure) showEntriesError("Couldn't load the board — it may be waking up. DM-only records in this browser still work below; try Refresh in a few seconds.");
   }
   renderTracker();
 }
@@ -1203,9 +1202,9 @@ function updateScopeUI(){
   const secretField = $("secretField");
   if (!categoryIsShared && scope === "shared") {
     $("entryScope").value = "dm";
-    $("entryScopeNote").textContent = "Sessions, characters, and loot are not part of the shared-board schema, so this entry stays DM-only in this browser.";
+    $("entryScopeNote").textContent = "Sessions, characters, and loot are not part of the board's schema, so this entry stays DM-only in this browser.";
   } else if (scope === "shared") {
-    $("entryScopeNote").textContent = "This entry will be saved to the shared board for everybody. There is no secret field on a shared entry — secrets are never sent to the board.";
+    $("entryScopeNote").textContent = "There is no secret field on a board entry — secrets are never sent to the board.";
   } else {
     $("entryScopeNote").textContent = "This entry — including its DM secret — is stored only in this browser and never leaves it.";
   }
@@ -1253,8 +1252,8 @@ async function deleteEntry(origin, id){
     localEntries = localEntries.filter(x => String(x.id) !== String(id));
     saveLocalEntries(); renderTracker(); return;
   }
-  if (!confirm(`Delete "${title}" from the shared board? Everybody will stop seeing it.`)) return;
-  if (!db) { showEntriesError("The shared board could not be reached, so that delete did not go through."); return; }
+  if (!confirm(`Delete "${title}" from the board?`)) return;
+  if (!db) { showEntriesError("The board could not be reached, so that delete did not go through."); return; }
   try {
     const { error } = await db.from(ENTRIES_TABLE).delete().eq("id", Number(id));
     if (error) throw error;
@@ -1309,7 +1308,7 @@ $("entryForm").addEventListener("submit", async ev => {
 
   // Shared: explicit field list — no secret key exists on this object.
   const sharedRow = { ...base, visibility:"shared" };
-  if (!db) { showEntriesError("The shared board could not be reached, so that entry was not saved. Switch it to DM-only to keep it in this browser."); return; }
+  if (!db) { showEntriesError("The board could not be reached, so that entry was not saved. Switch it to DM-only to keep it in this browser."); return; }
   try {
     const result = (origin === "shared" && editingId)
       ? await db.from(ENTRIES_TABLE).update(sharedRow).eq("id", Number(editingId))
@@ -1349,7 +1348,7 @@ function renderArtwork(){
   const total = builtins.length + uploadedArt.length;
   $("artworkChip").textContent = total;
   $("galleryCountLine").textContent = uploadedArt.length
-    ? `${total} pictures — Cody's 60, plus ${uploadedArt.length} shared upload${uploadedArt.length === 1 ? "" : "s"}.`
+    ? `${total} pictures — Cody's 60, plus ${uploadedArt.length} uploaded.`
     : "60 pictures by Cody, in his numbered order.";
   document.querySelectorAll("[data-art-src]").forEach(b => b.addEventListener("click", () => {
     $("featuredArt").src = b.dataset.artSrc;
@@ -1359,7 +1358,7 @@ function renderArtwork(){
   }));
   document.querySelectorAll("[data-art-delete]").forEach(el => {
     const del = async () => {
-      if (!confirm("Delete this shared picture for everybody?")) return;
+      if (!confirm("Delete this picture?")) return;
       if (!db) return;
       try {
         const { error } = await db.storage.from(ARTWORK_BUCKET).remove([el.dataset.artDelete]);
@@ -1375,7 +1374,7 @@ async function loadArtwork(){
   renderArtwork();
   if (!db) {
     artworkSharedReady = false;
-    $("artworkSetupNote").textContent = "Shared uploads are being set up — the built-in 60 are here, and uploads can't be shared yet.";
+    $("artworkSetupNote").textContent = "Uploads are being set up — the built-in 60 are here, and uploads can't be added yet.";
     return;
   }
   try {
@@ -1390,12 +1389,12 @@ async function loadArtwork(){
         uploaded: true
       }));
     artworkSharedReady = true;
-    $("artworkSetupNote").textContent = "Uploads go to the shared artwork bucket and show up for everybody.";
+    $("artworkSetupNote").textContent = "";
     renderArtwork();
   } catch(e) {
     artworkSharedReady = false;
     uploadedArt = [];
-    $("artworkSetupNote").textContent = "Shared uploads are being set up — the built-in 60 are here, and uploads can't be shared until the artwork bucket exists.";
+    $("artworkSetupNote").textContent = "Uploads are being set up — the built-in 60 are here, and uploads can't be added until the artwork bucket exists.";
     renderArtwork();
   }
 }
@@ -1403,7 +1402,7 @@ $("artUpload").addEventListener("change", async ev => {
   const files = [...(ev.target.files || [])];
   ev.target.value = "";
   if (!files.length) return;
-  if (!db) { $("artUploadLine").textContent = "Uploads can't be shared right now — the shared backend could not be reached."; return; }
+  if (!db) { $("artUploadLine").textContent = "Uploads can't go up right now — the backend could not be reached."; return; }
   let done = 0;
   for (const file of files) {
     const safe = file.name.replace(/[^\w.\-]+/g, "-").slice(-80) || "picture";
@@ -1413,11 +1412,11 @@ $("artUpload").addEventListener("change", async ev => {
       if (error) throw error;
       done++;
     } catch(e) {
-      $("artUploadLine").textContent = "Shared uploads are being set up — that picture was not uploaded. The built-in gallery is unaffected.";
+      $("artUploadLine").textContent = "Uploads are being set up — that picture was not uploaded. The built-in gallery is unaffected.";
       return;
     }
   }
-  $("artUploadLine").textContent = done ? `Uploaded ${done} picture${done === 1 ? "" : "s"} for everybody.` : "";
+  $("artUploadLine").textContent = done ? `Uploaded ${done} picture${done === 1 ? "" : "s"}.` : "";
   await loadArtwork();
 });
 function openGallery(){
