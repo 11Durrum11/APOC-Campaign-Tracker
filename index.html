@@ -117,13 +117,16 @@
   .small{font-size:.9rem}
 
   /* 2 — Countdown */
-  /* Laptop/desktop (Shaun, 2026-11-06): the two bubbles sit at the
-     hero's top right, stacked — Reconvenes at the very top right,
-     the Sky directly below it. Phones keep them in flow (media query
-     below), stacked full-width under the title. */
-  .top-bubbles{position:absolute;top:12px;right:24px;width:min(430px,44%);display:grid;grid-template-columns:1fr;gap:8px;align-items:start;z-index:3}
+  /* Laptop/desktop (Shaun, 2026-11-07): the two bubbles sit SIDE BY
+     SIDE in the hero's top-right cluster — the Sky on the LEFT, the
+     Table Reconvenes on the RIGHT, same row. (Supersedes the
+     2026-11-06 stacked top-right arrangement.) Phones keep them in
+     flow (media query below), stacked full-width under the title —
+     Reconvenes on top, the Sky directly below it. */
+  .top-bubbles{position:absolute;top:12px;right:24px;width:min(720px,62%);display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;z-index:3}
   .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
-  .top-bubbles .sky-panel{max-width:none}
+  .top-bubbles .sky-panel{max-width:none;grid-column:1;grid-row:1}
+  .top-bubbles .countdown-panel{grid-column:2;grid-row:1}
   .countdown-panel{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
   .countdown-panel .timer{justify-content:flex-start;margin-top:10px}
   .countdown-date{font-size:1.1rem;margin:2px 0 0}
@@ -370,6 +373,7 @@
 
   @media (max-width:760px){
     .top-bubbles{grid-template-columns:1fr;position:static;width:auto;margin-top:24px}
+    .top-bubbles .sky-panel,.top-bubbles .countdown-panel{grid-column:auto;grid-row:auto}
     .page{padding:0 10px 22px}
     .hero{margin:0 -10px;min-height:280px;padding:20px 16px 12px}
     .countdown-panel{grid-template-columns:1fr}
