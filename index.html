@@ -153,12 +153,13 @@
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-wrap:nowrap;margin-top:4px}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
-     SAME size — fixed height 46px for all nine, whatever the label.
-     Content shrinks to fit the footprint, never the other way round:
-     the two-line Blendcrafter label and Cody's thumbs/chip are sized
-     to fit inside 46px. */
+     SAME size — fixed height 47px for all nine, whatever the label:
+     the thinner buttons come UP to the top row's 47px; the top row
+     itself does not shrink. Content shrinks to fit the footprint,
+     never the other way round: the two-line Blendcrafter label and
+     Cody's thumbs/chip are sized to fit inside 47px. */
   .hub-btn{
-    width:100%;min-height:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    width:100%;min-height:47px;height:47px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
     padding:3px 4px;border:1px solid var(--card-border);border-radius:8px;
     background:transparent;color:var(--foreground);text-align:center;text-decoration:none;border-color:var(--card-border);
     font-size:.8rem;line-height:1.15;overflow:hidden;
