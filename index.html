@@ -131,6 +131,12 @@
   .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
   .top-bubbles .sky-panel{max-width:none;grid-column:1;grid-row:1}
   .top-bubbles .countdown-panel{grid-column:2;grid-row:1}
+  /* Top bubbles expand COMPLETELY (Shaun, 2026-11-07): the hero is
+     overflow:hidden at resting height, which clipped an opened
+     bubble's lower half. When either top bubble is open, the hero
+     grows tall enough for the whole panel — nothing clipped, no
+     inner scroll box. The toggle listener below sets .bubble-open. */
+  .hero.bubble-open{min-height:308px}
   .countdown-panel{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
   .countdown-panel .timer{justify-content:flex-start;margin-top:10px}
   .countdown-date{font-size:1.1rem;margin:2px 0 0}
@@ -1046,6 +1052,14 @@ document.addEventListener("click", ev => {
 });
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") { closeHubPops(); closeGallery(); }
+});
+/* Top bubbles (Sky / Reconvenes): when either fold is open, grow the
+   hero so the expanded panel shows completely — no clipping. */
+document.querySelectorAll(".top-bubbles details").forEach(d => {
+  d.addEventListener("toggle", () => {
+    const hero = $("hero");
+    if (hero) hero.classList.toggle("bubble-open", !!document.querySelector(".top-bubbles details[open]"));
+  });
 });
 </script>
 
