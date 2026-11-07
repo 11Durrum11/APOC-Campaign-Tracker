@@ -142,8 +142,9 @@
   /* 3 — Hub */
   /* Hub block (Shaun, 2026-11-07): all nine buttons gathered together
      at the top in ONE block, three by three, every button's resting
-     footprint cut in half (min-height 50px -> 24px, tighter padding,
-     gap and extras). Content a button opens is NOT squeezed into the
+     footprint cut down (tighter padding, gap and extras; uniform
+     fixed height for all nine — see .hub-btn). Content a button
+     opens is NOT squeezed into the
      button's footprint: the panels below the block expand completely
      at full width with no height cap (see .hub-content-panel). */
   .hub-panel{overflow:visible;margin-top:4px;padding-top:6px}
@@ -151,8 +152,13 @@
   .hub-content-panel{margin-top:10px;width:100%;max-height:none}
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-wrap:nowrap;margin-top:4px}
   .hub-item{position:relative;min-width:0}
+  /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
+     SAME size — fixed height 46px for all nine, whatever the label.
+     Content shrinks to fit the footprint, never the other way round:
+     the two-line Blendcrafter label and Cody's thumbs/chip are sized
+     to fit inside 46px. */
   .hub-btn{
-    width:100%;min-height:24px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    width:100%;min-height:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
     padding:3px 4px;border:1px solid var(--card-border);border-radius:8px;
     background:transparent;color:var(--foreground);text-align:center;text-decoration:none;border-color:var(--card-border);
     font-size:.8rem;line-height:1.15;overflow:hidden;
@@ -162,8 +168,8 @@
   .hub-btn .hub-name{overflow-wrap:anywhere}
   .hub-btn .hub-sub{overflow-wrap:anywhere;font-size:.62rem;line-height:1.1;color:var(--muted-foreground);letter-spacing:.02em}
   .thumb-strip{display:flex;gap:2px;justify-content:center;max-width:100%}
-  .thumb-strip img{width:9px;height:9px;object-fit:cover;border-radius:3px;border:1px solid var(--card-border)}
-  .count-chip{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:11px;padding:0 3px;border-radius:999px;background:transparent;border:1px solid var(--primary);color:var(--primary);font-size:.55rem;font-weight:700;line-height:1}
+  .thumb-strip img{width:8px;height:8px;object-fit:cover;border-radius:3px;border:1px solid var(--card-border)}
+  .count-chip{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:10px;padding:0 3px;border-radius:999px;background:transparent;border:1px solid var(--primary);color:var(--primary);font-size:.55rem;font-weight:700;line-height:1}
   .pop{
     position:absolute;top:calc(100% + 9px);left:50%;z-index:60;width:min(250px,76vw);
     transform:translate(-50%,4px);background:var(--popover);color:var(--card-foreground);
@@ -396,7 +402,7 @@
     .counts{grid-template-columns:repeat(3,minmax(0,1fr))}
     .cards{grid-template-columns:1fr}
     .hub-row{gap:3px}
-    .hub-btn{min-height:39px;font-size:.69rem;padding:4px 2px}
+    .hub-btn{min-height:52px;height:52px;font-size:.69rem;padding:4px 2px}
     .thumb-strip img{width:12px;height:12px}
     .count-chip{min-width:20px;height:16px;font-size:.6rem}
     .hub-item:nth-child(4) .pop,.hub-item:nth-child(7) .pop{left:-6px;transform:translate(0,4px)}
