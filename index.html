@@ -181,24 +181,10 @@
   .thumb-strip{display:flex;gap:2px;justify-content:center;max-width:100%}
   .thumb-strip img{width:8px;height:8px;object-fit:cover;border-radius:3px;border:1px solid var(--card-border)}
   .count-chip{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:10px;padding:0 3px;border-radius:999px;background:transparent;border:1px solid var(--primary);color:var(--primary);font-size:.55rem;font-weight:700;line-height:1}
-  .pop{
-    position:absolute;top:calc(100% + 9px);left:50%;z-index:60;width:min(250px,76vw);
-    transform:translate(-50%,4px);background:var(--popover);color:var(--card-foreground);
-    border:1px solid var(--card-border);border-radius:10px;padding:11px 12px;
-    box-shadow:0 18px 42px rgba(0,0,0,.42);font-size:.9rem;line-height:1.4;
-    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .16s ease;
-  }
-  .hub-item:hover .pop,.hub-item:focus-within .pop,.hub-item.pop-open .pop{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
-  .hub-item:first-child .pop{left:0;transform:translate(0,4px)}
-  .hub-item:first-child:hover .pop,.hub-item:first-child:focus-within .pop,.hub-item:first-child.pop-open .pop{transform:translate(0,0)}
-  .hub-item:last-child .pop{left:auto;right:0;transform:translate(0,4px)}
-  .hub-item:last-child:hover .pop,.hub-item:last-child:focus-within .pop,.hub-item:last-child.pop-open .pop{transform:translate(0,0)}
-  .hub-item:nth-child(3) .pop,.hub-item:nth-child(6) .pop{left:auto;right:0;transform:translate(0,4px)}
-  .hub-item:nth-child(3):hover .pop,.hub-item:nth-child(3):focus-within .pop,.hub-item:nth-child(3).pop-open .pop,
-  .hub-item:nth-child(6):hover .pop,.hub-item:nth-child(6):focus-within .pop,.hub-item:nth-child(6).pop-open .pop{transform:translate(0,0)}
-  .hub-item:nth-child(4) .pop,.hub-item:nth-child(7) .pop{left:0;transform:translate(0,4px)}
-  .hub-item:nth-child(4):hover .pop,.hub-item:nth-child(4):focus-within .pop,.hub-item:nth-child(4).pop-open .pop,
-  .hub-item:nth-child(7):hover .pop,.hub-item:nth-child(7):focus-within .pop,.hub-item:nth-child(7).pop-open .pop{transform:translate(0,0)}
+  /* Hub hover pop-ups (.pop) were styled here for a long time but no
+     hub item ever carried one — dead CSS, removed in the 2026-11-08
+     bug sweep. The buttons' labels (and Blendcrafter's sub-line) are
+     the whole interface, as shipped and verified. */
   .draft-badge{display:inline-block;background:#b3541e;color:#fff;border-radius:6px;padding:2px 9px;font-size:.72rem;font-weight:800;letter-spacing:.07em;vertical-align:middle;margin-left:8px}
   .laws-body p{margin:0 0 10px;line-height:1.58}
   .law-item,.canon-item{border:1px solid var(--card-border);border-radius:10px;margin:0 0 8px;background:transparent}
@@ -227,10 +213,10 @@
      rides along inside the entry in a small muted fold, so the two
      can be compared line by line. */
   .canon-item .orig-fold{margin:8px 0 2px;border-top:1px dashed var(--card-border);padding-top:6px}
-  .canon-item .orig-fold summary{cursor:pointer;font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);min-height:0;padding:2px 0;display:block}
-  .canon-item .orig-fold summary::before{content:"\25B8  ";color:var(--muted);font-size:.85em}
+  .canon-item .orig-fold summary{cursor:pointer;font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted-foreground);min-height:0;padding:2px 0;display:block}
+  .canon-item .orig-fold summary::before{content:"\25B8  ";color:var(--muted-foreground);font-size:.85em}
   .canon-item .orig-fold[open ] summary::before{content:"\25BE  "}
-  .canon-item .orig-fold .orig-body{font-size:.92em;color:var(--muted);line-height:1.55;margin-top:4px}
+  .canon-item .orig-fold .orig-body{font-size:.92em;color:var(--muted-foreground);line-height:1.55;margin-top:4px}
   .canon-item .orig-fold .orig-body p{margin:0}
   /* Canon reads as story (Shaun, 2026-11-07): NO bullet points in
      the Canon panel — the World and City entries stand as flowing
@@ -542,17 +528,22 @@
   .mv-locked>.mv-chrome{opacity:1;pointer-events:auto}
   .mv-locked>.mv-chrome .mv-grip{opacity:.35;cursor:default}
   .mv-locked{outline:1px dashed var(--mv-blue-b);outline-offset:-1px}
-  .mv-h{position:absolute;z-index:69;opacity:0;pointer-events:none;touch-action:none}
+  /* Handle rules are scoped to CHILDREN of a piece (.mv-piece>.mv-h):
+     the bare .mv-h class is ALSO the piece's own wide-shape orientation
+     class (applyOrient), and the unscoped rule (opacity:0) made any
+     wide floated piece invisible — the Sky bubble vanished on drag
+     (bug sweep, 2026-11-08). Scoped, the orientation class is inert. */
+  .mv-piece>.mv-h{position:absolute;z-index:69;opacity:0;pointer-events:none;touch-action:none}
   .mv-piece:hover>.mv-h,.mv-piece:focus-within>.mv-h,.mv-piece.mv-active>.mv-h{opacity:1;pointer-events:auto}
-  .mv-h::after{content:"";position:absolute;inset:3px;border:1px solid var(--mv-blue-a);border-radius:3px}
-  .mv-h[data-d="n"]{top:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
-  .mv-h[data-d="s"]{bottom:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
-  .mv-h[data-d="e"]{right:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
-  .mv-h[data-d="w"]{left:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
-  .mv-h[data-d="ne"]{top:-7px;right:-7px;width:16px;height:16px;cursor:nesw-resize}
-  .mv-h[data-d="sw"]{bottom:-7px;left:-7px;width:16px;height:16px;cursor:nesw-resize}
-  .mv-h[data-d="nw"]{top:-7px;left:-7px;width:16px;height:16px;cursor:nwse-resize}
-  .mv-h[data-d="se"]{bottom:-7px;right:-7px;width:16px;height:16px;cursor:nwse-resize}
+  .mv-piece>.mv-h::after{content:"";position:absolute;inset:3px;border:1px solid var(--mv-blue-a);border-radius:3px}
+  .mv-piece>.mv-h[data-d="n"]{top:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
+  .mv-piece>.mv-h[data-d="s"]{bottom:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
+  .mv-piece>.mv-h[data-d="e"]{right:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
+  .mv-piece>.mv-h[data-d="w"]{left:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
+  .mv-piece>.mv-h[data-d="ne"]{top:-7px;right:-7px;width:16px;height:16px;cursor:nesw-resize}
+  .mv-piece>.mv-h[data-d="sw"]{bottom:-7px;left:-7px;width:16px;height:16px;cursor:nesw-resize}
+  .mv-piece>.mv-h[data-d="nw"]{top:-7px;left:-7px;width:16px;height:16px;cursor:nwse-resize}
+  .mv-piece>.mv-h[data-d="se"]{bottom:-7px;right:-7px;width:16px;height:16px;cursor:nwse-resize}
   .mv-locked>.mv-h{display:none}
   body.mv-dragging,body.mv-dragging *{user-select:none !important;-webkit-user-select:none !important}
   /* Reflow to shape — only once a piece is floated/resized: tall and
@@ -581,7 +572,7 @@
   #mvReset:hover,#mvReset:focus-visible{opacity:1;color:var(--mv-blue);border-color:var(--mv-blue)}
   @media (hover:none){
     .mv-chrome{opacity:.55;pointer-events:auto}
-    .mv-h{opacity:.35;pointer-events:auto}
+    .mv-piece>.mv-h{opacity:.35;pointer-events:auto}
     .mv-piece.mv-active>.mv-h{opacity:1}
     .mv-locked>.mv-chrome{opacity:1}
   }
@@ -604,6 +595,11 @@
   #mvEditStatus{font-size:.78rem;color:var(--mv-blue);text-shadow:0 1px 6px rgba(0,0,0,.8);max-width:46vw;text-align:right}
   .mv-edit{display:none}
   body.mv-edit-on .mv-edit{display:inline-flex}
+  /* While editing is unlocked, every piece's chrome (grip / edit /
+     lock) is fully visible AND clickable without needing a hover —
+     the hover-gated pointer-events made the edit buttons unclickable
+     in practice (bug sweep, 2026-11-08). */
+  body.mv-edit-on .mv-chrome{opacity:1;pointer-events:auto}
   body.mv-edit-on [data-text-id]{outline:1px dotted var(--mv-blue-c);outline-offset:1px}
   .mv-editing{outline:2px solid var(--mv-blue) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
 </style>
@@ -642,12 +638,13 @@
       <p class="eyebrow">Every other Sunday · 11:00 AM · Phoenix</p>
       <p class="countdown-date" id="nextSessionLabel">Sunday, November 8, 2026 at 11:00 AM</p>
     </div>
-    <div class="timer" aria-label="Countdown to the next session">
+    <div class="timer" id="cdTimer" aria-label="Countdown to the next session">
       <div><b id="cdDays">—</b><span>Days</span></div>
       <div><b id="cdHours">—</b><span>Hours</span></div>
       <div><b id="cdMins">—</b><span>Minutes</span></div>
       <div><b id="cdSecs">—</b><span>Seconds</span></div>
     </div>
+    <p class="countdown-note muted" id="cdNote" style="margin:6px 0 0;font-size:.85rem">Until the table reconvenes</p>
       </div>
     </details>
   </section>
@@ -1174,6 +1171,13 @@ function tickCountdown(){
   $("nextSessionLabel").textContent = inSession
     ? `The table is gathered now — session began ${label} at 11:00 AM`
     : `${label} at 11:00 AM`;
+  /* The digits count to the session END while a session is running
+     and to the next session's start otherwise — say which, so the
+     numbers never sit under the wrong label (bug sweep, 2026-11-08). */
+  const cdNote = $("cdNote");
+  if (cdNote) cdNote.textContent = inSession ? "Left in today's session" : "Until the table reconvenes";
+  const cdTimer = $("cdTimer");
+  if (cdTimer) cdTimer.setAttribute("aria-label", inSession ? "Time left in today's session" : "Countdown to the next session");
   let diff = Math.max(0, target - now);
   const d = Math.floor(diff / 86400000); diff -= d * 86400000;
   const h = Math.floor(diff / 3600000); diff -= h * 3600000;
@@ -1183,15 +1187,10 @@ function tickCountdown(){
   $("cdMins").textContent = m; $("cdSecs").textContent = s;
 }
 
-/* ================= Hub pop-ups (hover/focus; tap = open, tap again = go) ================= */
-let openHubItem = null;
-function closeHubPops(){
-  document.querySelectorAll(".hub-item.pop-open").forEach(el => el.classList.remove("pop-open"));
-  openHubItem = null;
-}
-function isTouchLike(){
-  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
-}
+/* ================= Hub panels =================
+   (The old hover pop-up machinery was removed in the 2026-11-08 bug
+   sweep: it styled .pop elements that never existed in the markup —
+   dead code. Hub buttons act on the first click/tap, always.) */
 function toggleHubPanel(panelId, btnId){
   const panel = $(panelId), btn = $(btnId);
   if (!panel || !btn) return;
@@ -1221,11 +1220,8 @@ document.querySelectorAll(".hub-btn").forEach(btn => {
     if (btn.dataset.hubAction) { ev.preventDefault(); activateHub(btn); }
   });
 });
-document.addEventListener("click", ev => {
-  if (!ev.target.closest(".hub-item")) closeHubPops();
-});
 document.addEventListener("keydown", ev => {
-  if (ev.key === "Escape") { closeHubPops(); closeGallery(); }
+  if (ev.key === "Escape") { closeGallery(); }
 });
 /* Top bubbles (Sky / Reconvenes): when either fold is open, grow the
    hero so the expanded panel shows completely — no clipping. */
@@ -1307,6 +1303,11 @@ function entryCard(e){
     e.date_label ? `<span class="pill">${esc(e.date_label)}</span>` : ""
   ].join("");
   const art = (e.links || "").match(/assets\/[^\s"']+\.(?:webp|jpg|jpeg|png)/i);
+  /* The card art path lives in links too — never print it as a raw
+     line under the card (bug sweep, 2026-11-08: Saint James showed
+     "assets/saint-james-winged.webp" as stray text). Only real,
+     non-image links are shown. */
+  const shownLinks = (e.links || "").replace(/assets\/[^\s"']+\.(?:webp|jpg|jpeg|png)/gi, "").replace(/\s+/g, " ").trim();
   return `<article class="entry-card">
     ${art ? `<img class="entry-art" src="${esc(art[0])}" alt="${esc(e.title)}" loading="lazy">` : ""}
     <h3>${esc(e.title)}</h3>
@@ -1314,7 +1315,7 @@ function entryCard(e){
     ${e.detail ? `<div class="detail">${esc(e.detail)}</div>` : ""}
     ${e.origin === "dm" && e.secret ? `<div class="secret"><strong>DM secret (this browser only):</strong>\n${esc(e.secret)}</div>` : ""}
     ${e.pinned ? `<div class="pinned">📌 ${esc(e.pinned)}</div>` : ""}
-    ${e.links ? `<div class="links">${linkify(e.links)}</div>` : ""}
+    ${shownLinks ? `<div class="links">${linkify(shownLinks)}</div>` : ""}
     <div class="actions">
       <button type="button" class="btn" data-edit-entry="${esc(String(e.id))}" data-origin="${e.origin}">Edit</button>
       <button type="button" class="btn danger" data-delete-entry="${esc(String(e.id))}" data-origin="${e.origin}">Delete</button>
@@ -2143,7 +2144,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (!(t instanceof Element)) return;
     if (t.closest && t.closest('[contenteditable="true"]')) return; // busy editing
     if (t.closest(".mv-lock") || t.closest(".mv-edit")) return;
-    var grip = t.closest(".mv-grip"), handle = t.closest(".mv-h");
+    var grip = t.closest(".mv-grip"), handle = t.closest(".mv-h[data-d]"); /* [data-d]: the piece itself carries the .mv-h orientation class — never mistake the piece for its own resize handle (bug sweep, 2026-11-08) */
     var mode = null, dir = null, viaGrip = false;
     if (handle && handle.closest(".mv-piece") === p.el) { mode = "resize"; dir = handle.getAttribute("data-d"); }
     else if (grip && grip.closest(".mv-piece") === p.el) { mode = "drag"; viaGrip = true; }
@@ -2372,7 +2373,13 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (editingEl === el) editingEl = null;
     if (!save) { el.innerHTML = el._mvOrig; return; }
     var html = sanitizeHTML(el.innerHTML).trim();
-    if (html && html !== el._mvOrig) { el.innerHTML = html; saveTextEdit(el.getAttribute("data-text-id"), html); }
+    /* Never save an empty edit: a cleared text sanitizes to "<br>",
+       which is truthy — that is how a shared override once blanked a
+       law's paragraph for the whole table (bug sweep, 2026-11-08).
+       An edit with no visible text is a cancel, not a save. */
+    var probe = document.createElement("div"); probe.innerHTML = html;
+    var hasText = (probe.textContent || "").trim().length > 0;
+    if (html && hasText && html !== el._mvOrig) { el.innerHTML = html; saveTextEdit(el.getAttribute("data-text-id"), html); }
     else el.innerHTML = el._mvOrig;
   }
   function onEditBlur(e){ endEdit(e.currentTarget, true); }
