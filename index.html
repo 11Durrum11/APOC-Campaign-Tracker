@@ -232,6 +232,14 @@
   .canon-item .orig-fold[open ] summary::before{content:"\25BE  "}
   .canon-item .orig-fold .orig-body{font-size:.92em;color:var(--muted);line-height:1.55;margin-top:4px}
   .canon-item .orig-fold .orig-body p{margin:0}
+  /* Canon reads as story (Shaun, 2026-11-07): NO bullet points in
+     the Canon panel — the World and City entries stand as flowing
+     prose paragraphs, part of the story rewrite itself. (A DM-side
+     format switch was considered and cancelled by Shaun the same
+     day: "No, just make it more story like... get rid of the bullet
+     points if you have to.") */
+  #canonPanel .canon-item .law-why ul{list-style:none;padding-left:0}
+  #canonPanel .canon-item .law-why li{margin:0 0 12px}
   .canon-item .law-why li:last-child{margin-bottom:0}
   .section-fold{border:none;background:transparent;margin:0;border-radius:0}
   .section-fold>summary{font-size:1.32rem;padding:4px 2px 6px;min-height:44px}
