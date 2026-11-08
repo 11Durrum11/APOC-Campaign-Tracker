@@ -1710,6 +1710,12 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   var EKEY = "apocTrackerEditUnlockedV1";  // edit-lock toggle state
   var LTKEY = "apocTrackerTextLocalV1";    // local-only text overrides (fallback)
   var TEXT_ROW = "text_overrides";
+  /* Padlock icons as inline SVG in currentColor (dark blue via the
+     chrome's --mv-blue) — the 🔒/🔓 emoji render gold/yellow from the
+     OS emoji font no matter what CSS says, and Shaun's dark-blue rule
+     covers the whole moving-ability chrome (2026-11-07). */
+  var LOCK_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor" stroke="none"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  var UNLOCK_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor" stroke="none"/><path d="M8 10V7a4 4 0 0 1 7.8-1.4"/></svg>';
 
   function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
   function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
@@ -1841,7 +1847,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     chrome.innerHTML =
       '<button type="button" class="mv-grip" aria-label="Move this piece" title="Drag to move · double-click to put back">⠿</button>' +
       '<button type="button" class="mv-edit" aria-label="Edit this piece\'s text" title="Edit text">✎</button>' +
-      '<button type="button" class="mv-lock" aria-label="Lock this piece in place" aria-pressed="false" title="Lock this piece in place">🔓</button>';
+      '<button type="button" class="mv-lock" aria-label="Lock this piece in place" aria-pressed="false" title="Lock this piece in place">' + UNLOCK_SVG + '</button>';
     el.appendChild(chrome);
     DIRS.forEach(function(d){
       var h = document.createElement("span");
@@ -1865,7 +1871,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 
   function syncLockUI(p){
     var b = p.el.querySelector(":scope > .mv-chrome .mv-lock");
-    if (b) { b.textContent = p.locked ? "🔒" : "🔓"; b.setAttribute("aria-pressed", p.locked ? "true" : "false"); }
+    if (b) { b.innerHTML = p.locked ? LOCK_SVG : UNLOCK_SVG; b.setAttribute("aria-pressed", p.locked ? "true" : "false"); }
     p.el.classList.toggle("mv-locked", p.locked);
   }
   function toggleLock(p){
@@ -2250,7 +2256,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   exitBtn.textContent = "Exit DM mode";
   exitBtn.title = "Turn DM mode off on this device (the page returns to the clean player view)";
   function syncEditBtn(){
-    editBtn.textContent = editOn ? "🔓 Editing ON" : "🔒 Editing locked";
+    editBtn.innerHTML = (editOn ? UNLOCK_SVG : LOCK_SVG) + (editOn ? " Editing ON" : " Editing locked");
     editBtn.setAttribute("aria-pressed", editOn ? "true" : "false");
     document.body.classList.toggle("mv-edit-on", editOn);
   }
