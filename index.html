@@ -412,7 +412,7 @@
   .tab{border:1px solid var(--card-border);background:var(--secondary);border-radius:999px;padding:5px 10px;min-height:32px}
   .tab:hover{background:var(--accent)}
   .tab.active{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
-  .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:7px;margin-top:10px}
+  .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:7px;margin-top:10px;align-items:start} /* align start: the toolbar's buttons keep their own minimum height instead of stretching to the search input's taller row (v48.1, caught in live measurement: + Add entry rendered 46px tall against its 34px class) */
   .counts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:16px 0}
   .count{background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;min-width:0}
   .count b{display:block;color:var(--primary);font-size:1.45rem;line-height:1.05}
