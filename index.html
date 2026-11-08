@@ -2383,11 +2383,11 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 </script>
 
 <script>
-/* Canon sub-buttons: only one open at a time (Shaun, 2026-11-07).
-   Applies to the three canon folds in the fold row, and — same rule,
-   its own group — to the six law buttons inside the Laws fold.
-   The "Original wording" reference folds inside entries are not
-   buttons in this sense and stay independent. */
+/* Canon sub-buttons: only one open at a time (Shaun, 2026-11-07;
+   "All the buttons... that's the way it should always be").
+   One-at-a-time within each group: the three canon folds in the
+   fold row, the six law buttons inside the Laws fold, and the
+   "Original wording" folds inside the entries. */
 (function(){
   function exclusive(selector){
     var folds = Array.prototype.slice.call(document.querySelectorAll(selector));
@@ -2400,6 +2400,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   }
   exclusive("#canonPanel .canon-fold-row > details.canon-item");
   exclusive("#canonPanel .laws-sub .law-item");
+  exclusive("#canonPanel .orig-fold");
 })();
 </script>
 
