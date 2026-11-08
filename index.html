@@ -202,7 +202,7 @@
   .draft-badge{display:inline-block;background:#b3541e;color:#fff;border-radius:6px;padding:2px 9px;font-size:.72rem;font-weight:800;letter-spacing:.07em;vertical-align:middle;margin-left:8px}
   .laws-body p{margin:0 0 10px;line-height:1.58}
   .law-item,.canon-item{border:1px solid var(--card-border);border-radius:10px;margin:0 0 8px;background:transparent}
-  .law-item summary,.canon-item summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:800;font-size:1.02rem;letter-spacing:.02em;color:var(--foreground);display:flex;align-items:center;gap:9px;min-height:48px}
+  .law-item summary,.canon-item summary{cursor:pointer;list-style:none;padding:9px 12px;font-weight:800;font-size:1.02rem;letter-spacing:.02em;color:var(--foreground);display:flex;align-items:center;gap:9px;min-height:42px}
   .law-item summary::-webkit-details-marker,.canon-item summary::-webkit-details-marker{display:none}
   .law-item summary::before,.canon-item summary::before{content:"\25B8";color:var(--primary);font-size:.95rem;flex:0 0 auto}
   .law-item[open ] summary::before,.canon-item[open ] summary::before{content:"\25BE"}
@@ -266,8 +266,8 @@
   /* DM's Lair panel (Shaun, 2026-11-07, v47.0): its own panel, split
      out of the tracker; every Lair entry carries a "file down" row so
      the Lair can disseminate down to the board's categories. */
-  .lair-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
-  .dissem{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 0 16px;font-size:.9rem}
+  .lair-actions{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .dissem{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:2px 0 12px;font-size:.9rem}
   .dissem select{min-height:32px}
   .canon-item .law-why li:last-child{margin-bottom:0}
   .section-fold{border:none;background:transparent;margin:0;border-radius:0}
@@ -298,7 +298,7 @@
   .map-tools{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
   .map-tools .field{flex:1 1 240px;position:relative}
   .place-results{position:absolute;top:100%;left:0;right:0;z-index:80;margin-top:4px;background:var(--popover);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;box-shadow:0 18px 42px rgba(0,0,0,.42)}
-  .place-results button{display:block;width:100%;text-align:left;padding:10px 12px;min-height:44px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--foreground);font-size:.92rem}
+  .place-results button{display:block;width:100%;text-align:left;padding:8px 12px;min-height:38px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--foreground);font-size:.92rem}
   .place-results button:last-child{border-bottom:none}
   .place-results button:hover,.place-results button:focus-visible{background:var(--accent)}
   .place-results .pr-kind{color:var(--muted-foreground);font-size:.78rem}
@@ -340,7 +340,7 @@
   .tk-label{display:block;text-align:center;margin-top:3px;background:rgba(10,12,16,.8);color:#f2e7c8;padding:2px 7px;border-radius:999px;font-size:.72rem;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.22);width:max-content;margin-left:auto;margin-right:auto}
   body.projecting .tk-label{font-size:1.12rem;padding:4px 12px}
   .status-chips{display:flex;flex-wrap:wrap;gap:7px}
-  .status-chips button{min-height:40px}
+  .status-chips button{min-height:32px;padding:4px 10px}
   .status-chips button[aria-pressed="true"]{background:transparent;color:var(--primary);border-color:var(--primary)}
   .ruler-label{background:rgba(10,12,16,.85);color:#f2e7c8;padding:3px 9px;border-radius:999px;font-size:.8rem;font-weight:700;white-space:nowrap;border:1px solid var(--primary)}
   .scale-input{width:96px}
@@ -386,10 +386,16 @@
   }
   textarea{min-height:96px;resize:vertical}
   input::placeholder,textarea::placeholder{color:var(--muted-foreground)}
-  .button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+  .button-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  /* Minimum footprints (Shaun's cross-surface rule, 2026-11-08,
+     tracker pass v48.0): every action button shrink-wraps its label —
+     tight padding, no inherited 44px touch-box heights. Structural
+     exceptions, flagged in the report: hub tiles keep Shaun's uniform
+     47px grid size; the Canon fold row and law buttons already sit at
+     their 36px minimum from v46. */
   .btn{
     border:1px solid var(--card-border);background:var(--secondary);color:var(--foreground);
-    border-radius:9px;padding:10px 15px;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border-radius:9px;padding:6px 11px;min-height:34px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
   }
   .btn:hover{background:var(--accent);color:var(--accent-foreground)}
   .btn.primary{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
@@ -402,11 +408,11 @@
 
   /* Tracker */
   .tracker-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
-  .tabs{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-  .tab{border:1px solid var(--card-border);background:var(--secondary);border-radius:999px;padding:9px 13px;min-height:42px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tab{border:1px solid var(--card-border);background:var(--secondary);border-radius:999px;padding:5px 10px;min-height:32px}
   .tab:hover{background:var(--accent)}
   .tab.active{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
-  .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:9px;margin-top:15px}
+  .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:7px;margin-top:10px}
   .counts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:16px 0}
   .count{background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;min-width:0}
   .count b{display:block;color:var(--primary);font-size:1.45rem;line-height:1.05}
@@ -423,8 +429,8 @@
   .secret{white-space:pre-wrap;border-left:4px solid var(--primary);background:transparent;padding:9px 11px;margin-top:10px}
   .pinned{margin-top:9px;color:var(--primary)}
   .links{margin-top:9px;overflow-wrap:anywhere}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
-  .actions .btn{min-height:38px;padding:7px 11px}
+  .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .actions .btn{min-height:30px;padding:4px 9px}
   .empty{border:1px dashed var(--border);border-radius:10px;padding:22px;text-align:center;color:var(--muted-foreground)}
   .ai-brief{background:var(--popover);border:1px solid var(--card-border);border-radius:11px;padding:16px;margin-bottom:12px}
   .ai-brief pre{white-space:pre-wrap;font:inherit;background:var(--secondary);border-radius:8px;padding:12px;max-height:360px;overflow:auto}
@@ -568,7 +574,7 @@
   .mv-floated.mv-v .tracker-head{flex-direction:column}
   .mv-floated.mv-v .gallery-head{flex-direction:column}
   #mvReset{
-    position:fixed;right:10px;bottom:10px;z-index:3000;min-height:36px;padding:7px 12px;
+    position:fixed;right:10px;bottom:10px;z-index:3000;min-height:32px;padding:5px 10px;
     border:1px solid var(--card-border);border-radius:999px;background:var(--popover);color:var(--foreground);
     font-size:.8rem;opacity:.82;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
@@ -588,7 +594,7 @@
     position:fixed;right:10px;bottom:10px;z-index:3000;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;
   }
   #mvBar button{
-    min-height:36px;padding:7px 12px;border:1px solid var(--card-border);border-radius:999px;
+    min-height:32px;padding:5px 10px;border:1px solid var(--card-border);border-radius:999px;
     background:var(--popover);color:var(--foreground);font-size:.8rem;opacity:.88;cursor:pointer;
     box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
