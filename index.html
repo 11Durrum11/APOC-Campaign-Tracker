@@ -190,8 +190,12 @@
   .law-item,.canon-item{border:1px solid var(--card-border);border-radius:10px;margin:0 0 8px;background:transparent}
   .law-item summary,.canon-item summary{cursor:pointer;list-style:none;padding:9px 12px;font-weight:800;font-size:1.02rem;letter-spacing:.02em;color:var(--foreground);display:flex;align-items:center;gap:9px;min-height:42px}
   .law-item summary::-webkit-details-marker,.canon-item summary::-webkit-details-marker{display:none}
-  .law-item summary::before,.canon-item summary::before{content:"\25B8";color:var(--primary);font-size:.95rem;flex:0 0 auto}
-  .law-item[open ] summary::before,.canon-item[open ] summary::before{content:"\25BE"}
+  /* Child combinators: a fold's open state must mark ONLY its own
+     summary. With descendant selectors, opening the LAWS fold (a
+     .canon-item) forced the open triangle on all six law summaries
+     inside it, whatever their own state (bug sweep, 2026-11-08). */
+  .law-item>summary::before,.canon-item>summary::before{content:"\25B8";color:var(--primary);font-size:.95rem;flex:0 0 auto}
+  .law-item[open ]>summary::before,.canon-item[open ]>summary::before{content:"\25BE"}
   .law-item summary:hover,.law-item summary:focus-visible,.canon-item summary:hover,.canon-item summary:focus-visible{color:var(--primary)}
   .law-item .law-why,.canon-item .law-why{margin:0 14px 12px 20px;padding:10px 12px;border-left:3px solid var(--primary);line-height:1.58}
   .law-item .law-why p{margin:0}
