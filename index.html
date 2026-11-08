@@ -445,6 +445,77 @@
   .hero::before,.hero[data-sky]::before,.hero::after{background:none}
   .panel,.sky-panel{backdrop-filter:none}
   body::after{display:none}
+
+  /* ===== Movable pieces (Shaun, 2026-11-07): EVERY piece on the page
+     can be moved, resized, reflowed vertical/horizontal and locked in
+     place by the reader, per device. One reusable system (script at
+     the end of body): drag by a piece's six-dot grip or its header,
+     drag its edges/corners to resize, contents reflow to the shape,
+     and a per-piece lock pins it. Layout lives ONLY in this device's
+     localStorage — never in the shared backend. A Reset layout
+     button (bottom right) restores the shipped arrangement. ===== */
+  .mv-piece{position:relative}
+  .mv-ph{visibility:hidden;pointer-events:none}
+  .mv-host{position:relative}
+  .mv-floated{margin:0 !important;max-width:none !important}
+  .mv-scroll{overflow:auto !important}
+  .mv-chrome{
+    position:absolute;top:2px;right:2px;z-index:70;display:flex;gap:2px;
+    opacity:0;pointer-events:none;transition:opacity .15s ease;
+  }
+  .mv-piece:hover>.mv-chrome,.mv-piece:focus-within>.mv-chrome,.mv-piece.mv-active>.mv-chrome{opacity:1;pointer-events:auto}
+  .mv-grip,.mv-lock{
+    width:22px;height:22px;min-height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--card-border);border-radius:6px;background:var(--popover);color:var(--primary);
+    font-size:12px;line-height:1;cursor:grab;touch-action:none;
+  }
+  .mv-lock{cursor:pointer;font-size:11px}
+  .mv-locked>.mv-chrome{opacity:1;pointer-events:auto}
+  .mv-locked>.mv-chrome .mv-grip{opacity:.35;cursor:default}
+  .mv-locked{outline:1px dashed hsla(38,92%,50%,.45);outline-offset:-1px}
+  .mv-h{position:absolute;z-index:69;opacity:0;pointer-events:none;touch-action:none}
+  .mv-piece:hover>.mv-h,.mv-piece:focus-within>.mv-h,.mv-piece.mv-active>.mv-h{opacity:1;pointer-events:auto}
+  .mv-h::after{content:"";position:absolute;inset:3px;border:1px solid hsla(38,92%,50%,.55);border-radius:3px}
+  .mv-h[data-d="n"]{top:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
+  .mv-h[data-d="s"]{bottom:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
+  .mv-h[data-d="e"]{right:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
+  .mv-h[data-d="w"]{left:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
+  .mv-h[data-d="ne"]{top:-7px;right:-7px;width:16px;height:16px;cursor:nesw-resize}
+  .mv-h[data-d="sw"]{bottom:-7px;left:-7px;width:16px;height:16px;cursor:nesw-resize}
+  .mv-h[data-d="nw"]{top:-7px;left:-7px;width:16px;height:16px;cursor:nwse-resize}
+  .mv-h[data-d="se"]{bottom:-7px;right:-7px;width:16px;height:16px;cursor:nwse-resize}
+  .mv-locked>.mv-h{display:none}
+  body.mv-dragging,body.mv-dragging *{user-select:none !important;-webkit-user-select:none !important}
+  /* Reflow to shape — only once a piece is floated/resized: tall and
+     narrow runs its contents in one vertical column; wide and short
+     runs them in one horizontal row. */
+  .mv-floated .hub-btn{height:100% !important;min-height:0}
+  .mv-floated.mv-h .hub-btn{flex-direction:row;gap:6px}
+  .mv-floated.mv-v .form-grid{grid-template-columns:1fr !important}
+  .mv-floated.mv-h .form-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr)) !important}
+  .mv-floated.mv-v .cards{grid-template-columns:1fr !important}
+  .mv-floated.mv-h .cards{grid-template-columns:repeat(auto-fill,minmax(230px,1fr)) !important}
+  .mv-floated.mv-v .counts{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  .mv-floated.mv-v .timer{flex-direction:column;align-items:stretch}
+  .mv-floated.mv-v .tabs{flex-direction:column;align-items:stretch}
+  .mv-floated.mv-v .toolbar{grid-template-columns:1fr !important}
+  .mv-floated.mv-h .toolbar{grid-template-columns:1fr auto auto auto !important}
+  .mv-floated.mv-v .button-row{flex-direction:column;align-items:stretch}
+  .mv-floated.mv-v .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  .mv-floated.mv-v .tracker-head{flex-direction:column}
+  .mv-floated.mv-v .gallery-head{flex-direction:column}
+  #mvReset{
+    position:fixed;right:10px;bottom:10px;z-index:3000;min-height:36px;padding:7px 12px;
+    border:1px solid var(--card-border);border-radius:999px;background:var(--popover);color:var(--foreground);
+    font-size:.8rem;opacity:.82;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.4);
+  }
+  #mvReset:hover,#mvReset:focus-visible{opacity:1;color:var(--primary);border-color:var(--primary)}
+  @media (hover:none){
+    .mv-chrome{opacity:.55;pointer-events:auto}
+    .mv-h{opacity:.35;pointer-events:auto}
+    .mv-piece.mv-active>.mv-h{opacity:1}
+    .mv-locked>.mv-chrome{opacity:1}
+  }
 </style>
 </head>
 <body data-scene="bastion-streets">
@@ -1571,5 +1642,365 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     window.addEventListener('pointerdown', arm); window.addEventListener('keydown', arm); }
 })();
 </script>
+<script>
+"use strict";
+/* ================= Movable pieces (Shaun, 2026-11-07) =================
+   One reusable system: every piece of this page plugs into it.
+   - MOVE: press-and-drag a piece's six-dot grip or its header; a
+     plain press still clicks (drag starts only past a threshold,
+     and a real drag swallows the click that follows it).
+   - RESIZE: drag a floated (or in-place) piece's edges/corners.
+   - REFLOW: tall/narrow pieces run their contents in one vertical
+     column; wide/short pieces in one horizontal row (.mv-v/.mv-h).
+   - LOCK: every piece has its own lock; a locked piece cannot be
+     dragged or resized, but everything inside it still works.
+   - PERSISTENCE: positions, sizes, orientations and locks live in
+     THIS device's localStorage only (key below). Shared content is
+     untouched — layout is personal, never written to the backend.
+   - RESET: the "Reset layout" button restores the shipped layout.
+   Pieces that are re-rendered by the tracker (the tab bar and the
+   board) get their chrome re-injected by a MutationObserver. */
+(function(){
+  var KEY = "apocTrackerMvV1";
+  var records = {};
+  try { records = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { records = {}; }
+  function persist(){
+    try {
+      if (Object.keys(records).length) localStorage.setItem(KEY, JSON.stringify(records));
+      else localStorage.removeItem(KEY);
+    } catch(e) {}
+  }
+  var pieces = [], byId = {}, zTop = 90;
+  var DIRS = ["n","s","e","w","ne","nw","se","sw"];
+
+  function mkPiece(id, el, mode, host, opts){
+    if (!el || byId[id]) return null;
+    opts = opts || {};
+    var p = {
+      id:id, el:el, mode:mode, host:host || null,
+      headSel:opts.head || null, dragSurface:opts.surface || null,
+      selfDrag:!!opts.selfDrag, scroll:!!opts.scroll, autoH:!!opts.autoH,
+      home:{ parent:el.parentNode, next:el.nextSibling },
+      origStyle:el.getAttribute("style"),
+      floated:false, locked:false, orient:"", ph:null
+    };
+    el.classList.add("mv-piece");
+    el.setAttribute("data-mv-id", id);
+    pieces.push(p); byId[id] = p;
+    injectChrome(p);
+    el.addEventListener("pointerdown", function(e){ piecePointerDown(p, e); });
+    if (p.autoH && el.tagName === "DETAILS") {
+      el.addEventListener("toggle", function(){
+        if (p.floated && el.style.height) { el.style.height = ""; savePiece(p); }
+      });
+    }
+    return p;
+  }
+
+  function injectChrome(p){
+    var el = p.el;
+    if (el.querySelector(":scope > .mv-chrome")) return;
+    var chrome = document.createElement("span");
+    chrome.className = "mv-chrome";
+    chrome.innerHTML =
+      '<button type="button" class="mv-grip" aria-label="Move this piece" title="Drag to move · double-click to put back">⠿</button>' +
+      '<button type="button" class="mv-lock" aria-label="Lock this piece in place" aria-pressed="false" title="Lock this piece in place">🔓</button>';
+    el.appendChild(chrome);
+    DIRS.forEach(function(d){
+      var h = document.createElement("span");
+      h.className = "mv-h"; h.setAttribute("data-d", d); h.setAttribute("aria-hidden","true");
+      el.appendChild(h);
+    });
+    chrome.querySelector(".mv-lock").addEventListener("click", function(e){
+      e.stopPropagation(); toggleLock(p);
+    });
+    chrome.querySelector(".mv-grip").addEventListener("dblclick", function(e){
+      e.stopPropagation(); resetPiece(p);
+    });
+    syncLockUI(p);
+  }
+  function ensureChrome(p){ injectChrome(p); }
+
+  function syncLockUI(p){
+    var b = p.el.querySelector(":scope > .mv-chrome .mv-lock");
+    if (b) { b.textContent = p.locked ? "🔒" : "🔓"; b.setAttribute("aria-pressed", p.locked ? "true" : "false"); }
+    p.el.classList.toggle("mv-locked", p.locked);
+  }
+  function toggleLock(p){
+    p.locked = !p.locked;
+    syncLockUI(p);
+    savePiece(p);
+  }
+
+  /* ---------- float / unfloat ---------- */
+  function floatPiece(p, rec){
+    if (p.floated) return;
+    var el = p.el;
+    var rect = el.getBoundingClientRect();
+    var w = rec ? rec.w : Math.round(rect.width);
+    var h = rec ? rec.h : Math.round(rect.height);
+    var ph = document.createElement("div");
+    ph.className = "mv-ph"; ph.setAttribute("aria-hidden","true"); ph.setAttribute("data-mv-ph", p.id);
+    ph.style.width = w + "px"; ph.style.height = (h || Math.round(rect.height)) + "px";
+    if (el.hidden) ph.style.display = "none";
+    el.parentNode.insertBefore(ph, el);
+    p.ph = ph;
+    el.classList.add("mv-floated");
+    if (p.scroll) el.classList.add("mv-scroll");
+    if (p.mode === "page") {
+      var x = rec ? rec.x : Math.round(rect.left);
+      var y = rec ? rec.y : Math.round(rect.top);
+      document.body.appendChild(el);
+      el.style.position = "fixed";
+      el.style.left = x + "px"; el.style.top = y + "px";
+      zTop = Math.min(zTop + 1, 99); el.style.zIndex = String(zTop);
+    } else {
+      p.host.classList.add("mv-host");
+      var lx, ly;
+      if (rec) { lx = rec.x; ly = rec.y; }
+      else {
+        var op = el.offsetParent || p.host;
+        var orr = op.getBoundingClientRect();
+        lx = Math.round(rect.left - orr.left - op.clientLeft);
+        ly = Math.round(rect.top - orr.top - op.clientTop);
+      }
+      el.style.position = "absolute";
+      el.style.left = lx + "px"; el.style.top = ly + "px";
+      el.style.zIndex = "40";
+    }
+    el.style.width = w + "px";
+    if (p.autoH) { if (h > 0) el.style.height = h + "px"; else el.style.height = ""; }
+    else el.style.height = h + "px";
+    p.floated = true;
+    applyOrient(p, rec && rec.o ? rec.o : orientOf(w, h || Math.round(rect.height)));
+  }
+  function unfloat(p){
+    if (!p.floated) return;
+    var el = p.el;
+    if (p.ph) { p.ph.remove(); p.ph = null; }
+    if (p.origStyle === null) el.removeAttribute("style"); else el.setAttribute("style", p.origStyle);
+    el.classList.remove("mv-floated","mv-v","mv-h","mv-scroll");
+    var parent = p.home.parent, next = p.home.next;
+    if (next && next.parentNode === parent) parent.insertBefore(el, next); else parent.appendChild(el);
+    p.floated = false; p.orient = "";
+    if (p.mode === "local") {
+      var stillUsed = pieces.some(function(q){ return q !== p && q.floated && q.host === p.host; });
+      if (!stillUsed) p.host.classList.remove("mv-host");
+    }
+  }
+
+  /* ---------- orientation ---------- */
+  function orientOf(w, h){
+    if (h > w * 1.2) return "v";
+    if (w > h * 1.8) return "h";
+    return "";
+  }
+  function applyOrient(p, o){
+    p.orient = o || "";
+    p.el.classList.toggle("mv-v", p.orient === "v");
+    p.el.classList.toggle("mv-h", p.orient === "h");
+  }
+
+  /* ---------- persistence ---------- */
+  function savePiece(p){
+    if (!p.floated) {
+      if (p.locked) records[p.id] = { l:1 };
+      else delete records[p.id];
+      persist(); return;
+    }
+    var el = p.el;
+    records[p.id] = {
+      m: p.mode,
+      x: parseFloat(el.style.left) || 0,
+      y: parseFloat(el.style.top) || 0,
+      w: parseFloat(el.style.width) || Math.round(el.getBoundingClientRect().width),
+      h: el.style.height ? (parseFloat(el.style.height) || 0) : 0,
+      o: p.orient || "",
+      l: p.locked ? 1 : 0
+    };
+    persist();
+  }
+
+  /* ---------- drag & resize ---------- */
+  var session = null;
+  function suppressClick(p){
+    var h = function(e){
+      var t = e.target;
+      if (t instanceof Element && t.closest(".mv-piece") === p.el) {
+        e.stopPropagation(); e.preventDefault();
+        document.removeEventListener("click", h, true);
+      }
+    };
+    document.addEventListener("click", h, true);
+    setTimeout(function(){ document.removeEventListener("click", h, true); }, 300);
+  }
+  function geom(p){
+    var el = p.el, r = el.getBoundingClientRect();
+    return {
+      x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0,
+      w: el.style.width ? (parseFloat(el.style.width) || r.width) : r.width,
+      h: el.style.height ? (parseFloat(el.style.height) || r.height) : r.height
+    };
+  }
+  function setRect(p, x, y, w, h, setH){
+    var el = p.el;
+    el.style.left = Math.round(x) + "px"; el.style.top = Math.round(y) + "px";
+    if (w != null) el.style.width = Math.round(w) + "px";
+    if (setH && h != null) el.style.height = Math.round(h) + "px";
+  }
+  function piecePointerDown(p, e){
+    if (session) return;
+    if (e.button !== undefined && e.button > 0) return;
+    var t = e.target;
+    if (!(t instanceof Element)) return;
+    if (t.closest(".mv-lock")) return;
+    var grip = t.closest(".mv-grip"), handle = t.closest(".mv-h");
+    var mode = null, dir = null, viaGrip = false;
+    if (handle && handle.closest(".mv-piece") === p.el) { mode = "resize"; dir = handle.getAttribute("data-d"); }
+    else if (grip && grip.closest(".mv-piece") === p.el) { mode = "drag"; viaGrip = true; }
+    else if (p.dragSurface) { var ds = t.closest(p.dragSurface); if (ds && ds.closest(".mv-piece") === p.el) mode = "drag"; }
+    if (!mode && p.headSel) {
+      var hd = t.closest(p.headSel);
+      if (hd && hd.closest(".mv-piece") === p.el && !t.closest("input,select,textarea,a,button")) mode = "drag";
+    }
+    if (!mode && p.selfDrag && t === p.el) mode = "drag";
+    if (!mode || p.locked) return;
+    session = { p:p, mode:mode, dir:dir, viaGrip:viaGrip, sx:e.clientX, sy:e.clientY, moved:false, base:null, fx:0, fy:0 };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  }
+  function onMove(e){
+    var s = session; if (!s) return;
+    var dx = e.clientX - s.sx, dy = e.clientY - s.sy;
+    if (!s.moved) {
+      if (Math.hypot(dx, dy) < 7) return;
+      s.moved = true;
+      document.body.classList.add("mv-dragging");
+      if (!s.p.floated) floatPiece(s.p, null);
+      s.base = geom(s.p); s.fx = s.sx; s.fy = s.sy;
+    }
+    var p = s.p, b = s.base, mx = e.clientX - s.fx, my = e.clientY - s.fy;
+    if (s.mode === "drag") {
+      setRect(p, b.x + mx, b.y + my, null, null, false);
+    } else {
+      var x = b.x, y = b.y, w = b.w, h = b.h, d = s.dir;
+      var minW = 64, minH = 36;
+      if (d.indexOf("e") >= 0) w = b.w + mx;
+      if (d.indexOf("s") >= 0) h = b.h + my;
+      if (d.indexOf("w") >= 0) { w = b.w - mx; x = b.x + mx; }
+      if (d.indexOf("n") >= 0) { h = b.h - my; y = b.y + my; }
+      if (w < minW) { if (d.indexOf("w") >= 0) x = b.x + (b.w - minW); w = minW; }
+      if (h < minH) { if (d.indexOf("n") >= 0) y = b.y + (b.h - minH); h = minH; }
+      setRect(p, x, y, w, h, true);
+      applyOrient(p, orientOf(w, h));
+    }
+    if (e.cancelable) e.preventDefault();
+  }
+  function onUp(){
+    var s = session; session = null;
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+    document.body.classList.remove("mv-dragging");
+    if (!s) return;
+    if (s.moved) { savePiece(s.p); suppressClick(s.p); }
+    else if (s.viaGrip) { s.p.el.classList.toggle("mv-active"); }
+  }
+
+  /* ---------- reset ---------- */
+  function resetPiece(p){
+    delete records[p.id]; persist();
+    if (p.floated) unfloat(p);
+    if (p.locked) { p.locked = false; syncLockUI(p); }
+    p.el.classList.remove("mv-v","mv-h","mv-active");
+  }
+  function resetAll(){
+    records = {}; persist();
+    pieces.filter(function(p){ return p.mode === "local"; }).forEach(resetPieceKeep);
+    pieces.filter(function(p){ return p.mode === "page"; }).forEach(resetPieceKeep);
+    function resetPieceKeep(p){
+      if (p.floated) unfloat(p);
+      if (p.locked) { p.locked = false; syncLockUI(p); }
+      p.el.classList.remove("mv-v","mv-h","mv-active");
+    }
+  }
+
+  /* ================= registry: every piece plugs in here ================= */
+  mkPiece("heroCopy", document.querySelector(".hero-copy"), "page", null, { head: "h1, .eyebrow" });
+  mkPiece("skyBubble", document.querySelector(".top-bubbles .sky-panel"), "page", null, { head: "summary" });
+  mkPiece("countBubble", document.querySelector(".top-bubbles .countdown-panel"), "page", null, { head: "summary" });
+  document.querySelectorAll(".hub-item").forEach(function(item, i){
+    var btn = item.querySelector(".hub-btn");
+    var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
+    mkPiece(id, item, "page", null, { surface: ".hub-btn" });
+  });
+  mkPiece("lawsPanel", document.getElementById("lawsPanel"), "page", null, { head: ".eyebrow", scroll: true });
+  mkPiece("canonPanel", document.getElementById("canonPanel"), "page", null, { head: ".eyebrow", scroll: true });
+  mkPiece("trackerPanel", document.getElementById("trackerPanel"), "page", null, { head: ".eyebrow", scroll: true });
+
+  var lawsPanelEl = document.getElementById("lawsPanel");
+  var canonPanelEl = document.getElementById("canonPanel");
+  var trackerPanelEl = document.getElementById("trackerPanel");
+  document.querySelectorAll("#lawsPanel .law-item").forEach(function(el, i){
+    mkPiece("law-" + (i + 1), el, "local", lawsPanelEl, { head: "summary", autoH: true });
+  });
+  document.querySelectorAll("#canonPanel .canon-item").forEach(function(el, i){
+    mkPiece("canon-" + (i + 1), el, "local", canonPanelEl, { head: "summary", autoH: true });
+  });
+  mkPiece("statusForm", document.getElementById("statusForm"), "local", trackerPanelEl, {});
+  mkPiece("trackerHead", trackerPanelEl.querySelector(".tracker-head"), "local", trackerPanelEl, { head: ".eyebrow", selfDrag: true });
+  mkPiece("trackerTabs", document.getElementById("trackerTabs"), "local", trackerPanelEl, { selfDrag: true });
+  mkPiece("toolbar", trackerPanelEl.querySelector(".toolbar"), "local", trackerPanelEl, { selfDrag: true });
+  mkPiece("entryForm", document.getElementById("entryForm"), "local", trackerPanelEl, { head: "#entryFormHeading" });
+  mkPiece("trackerContent", document.getElementById("trackerContent"), "local", trackerPanelEl, { scroll: true });
+  mkPiece("galleryPanel", document.querySelector(".gallery-panel"), "local", document.getElementById("galleryOverlay"), { head: ".gallery-head", scroll: true });
+
+  /* ---------- restore saved layout (this device only) ---------- */
+  pieces.forEach(function(p){
+    var rec = records[p.id];
+    if (!rec) return;
+    if (rec.l) { p.locked = true; syncLockUI(p); }
+    if (typeof rec.x === "number" && typeof rec.y === "number" && rec.w) {
+      var rr = { x: rec.x, y: rec.y, w: rec.w, h: rec.h || 0, o: rec.o || "" };
+      if (p.mode === "page") {
+        rr.x = Math.max(0, Math.min(rr.x, Math.max(0, window.innerWidth - 70)));
+        rr.y = Math.max(0, Math.min(rr.y, Math.max(0, window.innerHeight - 34)));
+      }
+      floatPiece(p, rr);
+    }
+  });
+
+  /* A floated panel's placeholder follows its hidden state, so closing
+     a hub panel never leaves a phantom gap in the page. */
+  var phObserver = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      var p = byId[m.target.getAttribute && m.target.getAttribute("data-mv-id")];
+      if (p && p.ph) p.ph.style.display = m.target.hidden ? "none" : "";
+    });
+  });
+  pieces.forEach(function(p){
+    if (p.mode === "page") phObserver.observe(p.el, { attributes: true, attributeFilter: ["hidden"] });
+  });
+
+  /* The tracker re-renders the tab bar and the board: keep their
+     chrome (grip, lock, resize handles) attached. */
+  ["trackerTabs", "trackerContent"].forEach(function(id){
+    var p = byId[id];
+    if (!p) return;
+    new MutationObserver(function(){ ensureChrome(p); }).observe(p.el, { childList: true });
+  });
+
+  /* ---------- Reset layout control ---------- */
+  var resetBtn = document.createElement("button");
+  resetBtn.type = "button";
+  resetBtn.id = "mvReset";
+  resetBtn.textContent = "↺ Reset layout";
+  resetBtn.title = "Put every moved, resized or locked piece back to the shipped layout (this device only)";
+  resetBtn.addEventListener("click", resetAll);
+  document.body.appendChild(resetBtn);
+})();
+</script>
+
 </body>
 </html>
