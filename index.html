@@ -2382,5 +2382,26 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 })();
 </script>
 
+<script>
+/* Canon sub-buttons: only one open at a time (Shaun, 2026-11-07).
+   Applies to the three canon folds in the fold row, and — same rule,
+   its own group — to the six law buttons inside the Laws fold.
+   The "Original wording" reference folds inside entries are not
+   buttons in this sense and stay independent. */
+(function(){
+  function exclusive(selector){
+    var folds = Array.prototype.slice.call(document.querySelectorAll(selector));
+    folds.forEach(function(f){
+      f.addEventListener("toggle", function(){
+        if (!f.open) return;
+        folds.forEach(function(o){ if (o !== f && o.open) o.open = false; });
+      });
+    });
+  }
+  exclusive("#canonPanel .canon-fold-row > details.canon-item");
+  exclusive("#canonPanel .laws-sub .law-item");
+})();
+</script>
+
 </body>
 </html>
