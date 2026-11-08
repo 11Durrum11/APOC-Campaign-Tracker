@@ -210,6 +210,16 @@
   .law-item .law-why,.canon-item .law-why{margin:0 14px 12px 20px;padding:10px 12px;border-left:3px solid var(--primary);line-height:1.58}
   .law-item .law-why p{margin:0}
   .canon-item .law-why ul{margin:0;padding-left:18px}
+  /* City Canon text two sizes bigger (Shaun, voice call 2026-11-07):
+     body text in the City Canon fold only, 1rem -> 1.25rem. World
+     Canon and everything else unchanged. */
+  #canonPanel .city-canon{font-size:1.25rem}
+  /* The Laws sub-button inside City Canon (Shaun, 2026-11-07): a
+     canon-item fold nested at the end of the City Canon fold, set
+     off from the entries above it. Its law titles keep the standard
+     fold size; the reasoning text inherits City Canon's 1.25rem. */
+  .laws-sub{margin:10px 0 0}
+  .laws-sub>summary{font-size:1.02rem}
   .canon-item .law-why li{margin:0 0 9px;line-height:1.56}
   .canon-item .law-why li:last-child{margin-bottom:0}
   .section-fold{border:none;background:transparent;margin:0;border-radius:0}
@@ -633,48 +643,15 @@
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-VTT/" target="_blank" rel="noopener"><span class="hub-name">Maps</span></a>
       </div>
       <div class="hub-item">
-        <button class="hub-btn" type="button" data-hub-action="laws" aria-expanded="false" id="lawsButton"><span class="hub-name">Laws of the Bastion</span></button>
-      </div>
-      <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="canon" aria-expanded="false" id="canonButton"><span class="hub-name">Canon</span></button>
       </div>
     </div>
   </section>
 
 
-  <!-- Laws + Canon live behind their hub buttons only -->
-  <section class="panel hub-content-panel" id="lawsPanel" hidden aria-label="Laws of the Bastion">
-    <p class="eyebrow">Bastion of Last Hope · 2701 DR</p>
-    <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
-    <div class="laws-body">
-      <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
-      <details class="law-item">
-        <summary>WHO MAKES THE LAW</summary>
-        <div class="law-why"><p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>WHO CARRIES IT</summary>
-        <div class="law-why"><p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE GATES</summary>
-        <div class="law-why"><p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>CONTRACTS ARE THE CITY'S TRUE CODE</summary>
-        <div class="law-why"><p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE ONE ABSOLUTE</summary>
-        <div class="law-why"><p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p></div>
-      </details>
-      <details class="law-item">
-        <summary>THE STANDING TOLERANCES</summary>
-        <div class="law-why"><p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p></div>
-      </details>
-    </div>
-    <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
-  </section>
+  <!-- Canon lives behind its hub button; the Laws of the Bastion now
+       live inside City Canon as a sub-button (Shaun, 2026-11-07). -->
+
 
   <section class="panel hub-content-panel" id="canonPanel" hidden aria-label="World and City Canon">
     <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
@@ -696,7 +673,7 @@
         <li><strong>Currency:</strong> book standard — 10 cp = 1 sp, 10 sp = 1 gp, 1 pp = 10 gp; no electrum.</li>
       </ul></div>
     </details>
-    <details class="canon-item">
+    <details class="canon-item city-canon">
       <summary>CITY CANON — THE BASTION OF LAST HOPE</summary>
       <div class="law-why"><ul>
         <li><strong>The Bastion IS Waterdeep:</strong> everything Waterdeep was, the Bastion still carries in its bones. Waterdeep's Forgotten Realms history is the Bastion's own pre-APOC past — its streets, its wards, its Palace and Castle, Undermountain yawning below it — all of it happened here, to this city, before the world ended. The Ruins of Undermountain are core Bastion material, and Shaun's sourcebook #6 was built from the original City of Waterdeep book, because there was never any other foundation to build on: the city did not start over after the APOC. It refused to. What stands in 2701 DR is Waterdeep a thousand years after the end of the world, renamed by survival — Waterdeep is its original name, and the Bastion of Last Hope is the name it carries now, the name it earned by being one of the four places on the planet that did not fall.</li>
@@ -723,6 +700,40 @@
         <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands). Inside the walls, raw magic is not merely a crime but a blasphemy against survival itself — the city remembers what uncontrolled power did to the world — while beyond the wall the principle stands unenforced, one more law the badlands ignore.</li>
         <li><strong>Slavery &amp; Warforged:</strong> abolition is RECENT, and it happened because of the Warforged. They were created, not born — built as labor and as soldiers, "just toasters" in the phrase of everyone who owned one — until they gained sentience and the city had to decide what a person is. It is about 1965 for the Warforged: a long couple of decades of 1965, unfinished — free on paper, lesser in practice, second-class citizens in the towers they may well have built. The in-world slur for them is "toi" (T-O-I), and it carries the full weight such words carry; the world's bigotry is represented in the material as it is, not sanitized. The Warforged thread runs through everything else in the city: they are why slavery ended, they are part of why the consortiums' armies look as they do, and their unfinished freedom is the loudest proof that the city which does not like change can still be changed — slowly, and at cost.</li>
       </ul></div>
+      <details class="canon-item laws-sub">
+        <summary>LAWS OF THE BASTION</summary>
+        <div class="law-why">
+          <p class="muted"><strong>Part 1: Foundations.</strong> Canon — locked in by Shaun on 2026-11-06. Built from Document #6's own scattered law content and Shaun's confirmed 2701 canon.</p>
+          <div class="laws-body">
+            <p>The Bastion has no single law book, and it does not need one. Law in the Bastion is not a code you consult; it is the shape of the city itself — the thumb on every street, the name on every contract, the watchman on the corner who is also the judge. A citizen does not ask what the law says. A citizen asks what the watch will say, and already knows the answer closely enough to behave.</p>
+            <details class="law-item">
+              <summary>WHO MAKES THE LAW</summary>
+              <div class="law-why"><p>At the top sit the Open Lords, and law comes down from them the way decrees come off Gilder's press — the press is restricted to the Bastion's own use, and the Councils print their rulings and distribute them through the city. A law is a physical thing you can hold: a printed decree, posted and handed out, its text owned by the city that made it. Nobody else prints the law.</p></div>
+            </details>
+            <details class="law-item">
+              <summary>WHO CARRIES IT</summary>
+              <div class="law-why"><p>Two forces, two directions. The city guard faces outward — the wall, the towers, the gates — and the city watch faces inward; the watch is the law a citizen actually lives under. Under Commander Captain Rulathon, who reports to the Open Lords, the watch is the Bastion's police: every ward has its civilars, its guard posts, its skulk and its arcanum, and the base of it all is the Palace. In a city packed this tight, life boiling over in every mega-structure, the watch carries a Dredd-like weight: judgment and enforcement arrive in the same person, on the same street corner.</p></div>
+            </details>
+            <details class="law-item">
+              <summary>THE GATES</summary>
+              <div class="law-why"><p>Entry is the first law every outsider meets. The guard controls access and the watch observes those who enter, pursues fugitives, and escorts visitors in — because nobody enters the Bastion without business there or work for somebody. No tourists, no drifters; you are in the Bastion because the Bastion has a use for you, on a contract or an errand, and when the business ends, so does the welcome.</p></div>
+            </details>
+            <details class="law-item">
+              <summary>CONTRACTS ARE THE CITY'S TRUE CODE</summary>
+              <div class="law-why"><p>Everything runs on contracts — an apple cart's pitch, a guildhall's charter, the rights to a mining town out in the wastes — and every contract is temporary. Law between citizens, guilds, and consortiums is contract law: they sell to each other, they do not give; they build what each other needs to bolster their individual armies; and when a contract dispute cannot be settled inside the walls, it is settled out in the badlands. The watch enforces contracts inside the city. Outside, the parties enforce their own.</p></div>
+            </details>
+            <details class="law-item">
+              <summary>THE ONE ABSOLUTE</summary>
+              <div class="law-why"><p>Raw magic is absolutely forbidden within the walls. Not licensed, not taxed, not tolerated in small amounts — forbidden. Raw magic blights; a city of mega-structures, floor upon floor of life stacked forty stories deep, cannot afford blight in its foundations. What the mythal keeps out at the border of the sky, the law keeps out at the level of the street.</p></div>
+            </details>
+            <details class="law-item">
+              <summary>THE STANDING TOLERANCES</summary>
+              <div class="law-why"><p>What the law does not forbid, it mostly ignores — so long as the flow of commerce is not interfered with. Every faith may keep its festivals, every guild its holy days and processions, so long as they do not violate the law or interfere with the flow of commerce; the Lord's Court itself closes on Ahghairon's Day. And inside the watch itself, bodies like the South Brigade Precinct fight the criminal element and corruption in the watch's own ranks.</p></div>
+            </details>
+          </div>
+          <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
+        </div>
+      </details>
     </details>
   </section>
 
@@ -1120,7 +1131,7 @@ function toggleHubPanel(panelId, btnId){
   if (!panel || !btn) return;
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
-  ["lawsButton", "canonButton", "trackerButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
+  ["canonButton", "trackerButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
   if (opening) {
@@ -1135,8 +1146,6 @@ function activateHub(btn){
     if ($("trackerPanel").hidden) toggleHubPanel("trackerPanel", "trackerButton");
     setActiveTab("journal");
     $("trackerPanel").scrollIntoView({ behavior:"smooth", block:"start" });
-  } else if (action === "laws") {
-    toggleHubPanel("lawsPanel", "lawsButton");
   } else if (action === "canon") {
     toggleHubPanel("canonPanel", "canonButton");
   } else if (action === "gallery") {
@@ -1732,8 +1741,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     ".hero-copy h1", "#hubHeading",
     ".countdown-panel .eyebrow", ".section-fold > summary",
     ".hub-name", ".hub-sub",
-    "#lawsPanel > .eyebrow", "#canonPanel > .eyebrow", "#trackerPanel > .eyebrow",
-    "#lawsPanel > p.muted", "#lawsPanel .laws-body > p",
+    "#canonPanel > .eyebrow", "#trackerPanel > .eyebrow",
+    ".laws-sub p.muted", ".laws-sub .laws-body > p",
     ".law-item > summary", ".canon-item > summary",
     ".law-why p", ".law-why li",
     "#statusForm label", "#statusForm button[type=\"submit\"]",
@@ -1741,7 +1750,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     "#addEntryBtn", "#copyBriefBtn",
     "#entryForm label", "#entryForm button[type=\"submit\"]", "#cancelEntryBtn"
   ];
-  var PROSE_SEL = "#lawsPanel .laws-body > p, #lawsPanel > p.muted, .law-why p, .law-why li";
+  var PROSE_SEL = ".laws-sub .laws-body > p, .laws-sub p.muted, .law-why p, .law-why li";
   var SKIP_IDS = { skyFact:1, skyNote:1, nextSessionLabel:1, siteVersion:1, ambBtn:1, artworkChip:1, entryFormHeading:1 };
   var textEls = [];
   (function stampTextIds(){
@@ -2085,15 +2094,13 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
     mkPiece(id, item, "page", null, { surface: ".hub-btn" });
   });
-  mkPiece("lawsPanel", document.getElementById("lawsPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("canonPanel", document.getElementById("canonPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("trackerPanel", document.getElementById("trackerPanel"), "page", null, { head: ".eyebrow", scroll: true });
 
-  var lawsPanelEl = document.getElementById("lawsPanel");
   var canonPanelEl = document.getElementById("canonPanel");
   var trackerPanelEl = document.getElementById("trackerPanel");
-  document.querySelectorAll("#lawsPanel .law-item").forEach(function(el, i){
-    mkPiece("law-" + (i + 1), el, "local", lawsPanelEl, { head: "summary", autoH: true });
+  document.querySelectorAll(".laws-sub .law-item").forEach(function(el, i){
+    mkPiece("law-" + (i + 1), el, "local", canonPanelEl, { head: "summary", autoH: true });
   });
   document.querySelectorAll("#canonPanel .canon-item").forEach(function(el, i){
     mkPiece("canon-" + (i + 1), el, "local", canonPanelEl, { head: "summary", autoH: true });
@@ -2103,9 +2110,9 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
      every stand-alone prose paragraph of the laws body are pieces in
      their own right, same treatment as everything else. The canon
      folds' prose already rides inside the canon pieces. */
-  document.querySelectorAll("#lawsPanel > p.muted, #lawsPanel .laws-body > p").forEach(function(el, i){
+  document.querySelectorAll(".laws-sub p.muted, .laws-sub .laws-body > p").forEach(function(el, i){
     el.classList.add("mv-self");
-    mkPiece("bastion-text-" + (i + 1), el, "local", lawsPanelEl, { surface: ".mv-self" });
+    mkPiece("bastion-text-" + (i + 1), el, "local", canonPanelEl, { surface: ".mv-self" });
   });
   document.querySelectorAll("#canonPanel > p").forEach(function(el, i){
     el.classList.add("mv-self");
