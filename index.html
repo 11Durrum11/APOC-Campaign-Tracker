@@ -620,6 +620,13 @@
      (bug sweep, 2026-11-08, two verification rounds). Bottom-right
      is clear of both top bubbles. */
   .hero-copy>.mv-chrome{top:auto;bottom:2px}
+  /* Rule 5 (Shaun, 2026-11-08): a piece dropped ON another piece
+     nests inside it — an indented child block under the host,
+     keeping its own grip, lock, and edit controls. Dragging a
+     nested piece back out floats it again; Reset un-nests. */
+  .mv-nested{margin:8px 0 6px 12px;border-left:3px solid var(--mv-blue-b);padding-left:8px}
+  .mv-nested>.mv-h{display:none}
+  .mv-drop-ok{outline:2px solid var(--mv-blue) !important;outline-offset:1px}
   body.mv-edit-on [data-text-id]{outline:1px dotted var(--mv-blue-c);outline-offset:1px}
   .mv-editing{outline:2px solid var(--mv-blue) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
 </style>
@@ -1984,7 +1991,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       selfDrag:!!opts.selfDrag, scroll:!!opts.scroll, autoH:!!opts.autoH,
       home:{ parent:el.parentNode, next:el.nextSibling },
       origStyle:el.getAttribute("style"),
-      floated:false, locked:false, orient:"", ph:null
+      floated:false, locked:false, orient:"", ph:null, nested:null
     };
     el.classList.add("mv-piece");
     el.setAttribute("data-mv-id", id);
@@ -2084,8 +2091,20 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     applyOrient(p, rec && rec.o ? rec.o : orientOf(w, h || Math.round(rect.height)));
   }
   function unfloat(p){
-    if (!p.floated) return;
+    if (!p.floated && !p.nested) return;
     var el = p.el;
+    if (p.nested) {
+      /* Un-nest: back to the piece's home slot, shipped styles. */
+      p.nested = null;
+      el.classList.remove("mv-nested");
+      if (p.ph) { p.ph.remove(); p.ph = null; }
+      if (p.origStyle === null) el.removeAttribute("style"); else el.setAttribute("style", p.origStyle);
+      el.classList.remove("mv-floated","mv-v","mv-h","mv-scroll");
+      var hp = p.home.parent, hn = p.home.next;
+      if (hn && hn.parentNode === hp) hp.insertBefore(el, hn); else hp.appendChild(el);
+      p.orient = "";
+      return;
+    }
     if (p.ph) { p.ph.remove(); p.ph = null; }
     if (p.origStyle === null) el.removeAttribute("style"); else el.setAttribute("style", p.origStyle);
     el.classList.remove("mv-floated","mv-v","mv-h","mv-scroll");
@@ -2110,8 +2129,79 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     p.el.classList.toggle("mv-h", p.orient === "h");
   }
 
+  /* ---------- Rule 5: nesting (Shaun, 2026-11-08) ----------
+     Drag a piece ONTO another piece and it nests inside/under the
+     host — not a swap, not a reorder. Dragging a nested piece out
+     floats it again. The three hub-content panels are views, not
+     furniture: they can neither nest nor host. One record field:
+     { nest: hostId }. Cycles are impossible: a piece can never
+     drop onto itself or onto anything inside it. */
+  var NO_NEST = { trackerPanel:1, canonPanel:1, lairPanel:1 };
+  function nestHostAt(p, x, y){
+    if (NO_NEST[p.id]) return null;
+    var best = null, bestArea = Infinity;
+    pieces.forEach(function(q){
+      if (q === p || NO_NEST[q.id]) return;
+      if (q.mode !== p.mode) return;
+      if (p.mode === "local" && q.host !== p.host) return;
+      if (p.el.contains(q.el)) return; /* never into its own child */
+      if (q.el.offsetParent === null && q.el.style.position !== "fixed") return; /* hidden (e.g. inside a closed panel) */
+      var r = q.el.getBoundingClientRect();
+      if (r.width < 20 || r.height < 20) return;
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        var a = r.width * r.height;
+        if (a < bestArea) { bestArea = a; best = q; }
+      }
+    });
+    return best;
+  }
+  function nestPiece(p, host, restoring){
+    if (!host || host === p || p.el.contains(host.el)) return false;
+    if (p.ph) { p.ph.remove(); p.ph = null; }
+    if (p.origStyle === null) p.el.removeAttribute("style"); else p.el.setAttribute("style", p.origStyle);
+    p.el.classList.remove("mv-floated","mv-v","mv-h","mv-scroll","mv-active");
+    p.el.classList.add("mv-nested");
+    host.el.appendChild(p.el);
+    p.nested = host; p.floated = false; p.orient = "";
+    if (!restoring) savePiece(p);
+    return true;
+  }
+  function detachNested(p){
+    /* A nested piece starts a drag: lift it out to a float at its
+       current on-screen spot, placeholder at its home slot. */
+    var el = p.el, rect = el.getBoundingClientRect();
+    p.nested = null;
+    el.classList.remove("mv-nested");
+    var ph = document.createElement("div");
+    ph.className = "mv-ph"; ph.setAttribute("aria-hidden","true"); ph.setAttribute("data-mv-ph", p.id);
+    ph.style.width = Math.round(rect.width) + "px"; ph.style.height = Math.round(rect.height) + "px";
+    var hp = p.home.parent, hn = p.home.next;
+    if (hn && hn.parentNode === hp) hp.insertBefore(ph, hn); else hp.appendChild(ph);
+    p.ph = ph;
+    el.classList.add("mv-floated");
+    if (p.scroll) el.classList.add("mv-scroll");
+    if (p.mode === "page") {
+      document.body.appendChild(el);
+      el.style.position = "fixed";
+      el.style.left = Math.round(rect.left) + "px"; el.style.top = Math.round(rect.top) + "px";
+      zTop = Math.min(zTop + 1, 99); el.style.zIndex = String(zTop);
+    } else {
+      p.host.classList.add("mv-host");
+      var orr = p.host.getBoundingClientRect();
+      el.style.position = "absolute";
+      el.style.left = Math.round(rect.left - orr.left - p.host.clientLeft) + "px";
+      el.style.top = Math.round(rect.top - orr.top - p.host.clientTop) + "px";
+      el.style.zIndex = "40";
+    }
+    el.style.width = Math.round(rect.width) + "px";
+    if (!p.autoH) el.style.height = Math.round(rect.height) + "px";
+    p.floated = true;
+    applyOrient(p, orientOf(rect.width, rect.height));
+  }
+
   /* ---------- persistence ---------- */
   function savePiece(p){
+    if (p.nested) { records[p.id] = { nest: p.nested.id, l: p.locked ? 1 : 0 }; persist(); return; }
     if (!p.floated) {
       if (p.locked) records[p.id] = { l:1 };
       else delete records[p.id];
@@ -2187,8 +2277,17 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (Math.hypot(dx, dy) < 7) return;
       s.moved = true;
       document.body.classList.add("mv-dragging");
-      if (!s.p.floated) floatPiece(s.p, null);
+      if (!s.p.floated) { if (s.p.nested) detachNested(s.p); else floatPiece(s.p, null); }
       s.base = geom(s.p); s.fx = s.sx; s.fy = s.sy;
+    }
+    s.cx = e.clientX; s.cy = e.clientY;
+    if (s.moved && s.mode === "drag") {
+      var hot = nestHostAt(s.p, e.clientX, e.clientY);
+      if (s.hot !== hot) {
+        if (s.hot) s.hot.el.classList.remove("mv-drop-ok");
+        s.hot = hot;
+        if (hot) hot.el.classList.add("mv-drop-ok");
+      }
     }
     var p = s.p, b = s.base, mx = e.clientX - s.fx, my = e.clientY - s.fy;
     if (s.mode === "drag") {
@@ -2214,14 +2313,21 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     window.removeEventListener("pointercancel", onUp);
     document.body.classList.remove("mv-dragging");
     if (!s) return;
-    if (s.moved) { savePiece(s.p); suppressClick(s.p); }
+    if (s.hot) { s.hot.el.classList.remove("mv-drop-ok"); s.hot = null; }
+    if (s.moved) {
+      /* Rule 5: ending a drag with the pointer over another piece
+         nests the dragged piece inside it. */
+      var host = (s.mode === "drag" && typeof s.cx === "number") ? nestHostAt(s.p, s.cx, s.cy) : null;
+      if (!(host && nestPiece(s.p, host))) savePiece(s.p);
+      suppressClick(s.p);
+    }
     else if (s.viaGrip) { s.p.el.classList.toggle("mv-active"); }
   }
 
   /* ---------- reset ---------- */
   function resetPiece(p){
     delete records[p.id]; persist();
-    if (p.floated) unfloat(p);
+    unfloat(p);
     if (p.locked) { p.locked = false; syncLockUI(p); }
     p.el.classList.remove("mv-v","mv-h","mv-active");
   }
@@ -2230,7 +2336,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     pieces.filter(function(p){ return p.mode === "local"; }).forEach(resetOne);
     pieces.filter(function(p){ return p.mode === "page"; }).forEach(resetOne);
     function resetOne(p){
-      if (p.floated) unfloat(p);
+      unfloat(p);
       if (p.locked) { p.locked = false; syncLockUI(p); }
       p.el.classList.remove("mv-v","mv-h","mv-active");
     }
@@ -2305,6 +2411,15 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       }
       floatPiece(p, rr);
     }
+  });
+
+  /* Rule 5: restore nests AFTER floats, so a host sits in its final
+     place before its nested pieces move into it. */
+  pieces.forEach(function(p){
+    var rec = records[p.id];
+    if (!rec || !rec.nest) return;
+    var host = byId[rec.nest];
+    if (host && host !== p) nestPiece(p, host, true);
   });
 
   /* A floated panel's placeholder follows its hidden state. */
@@ -2426,7 +2541,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   var resetBtn = document.createElement("button");
   resetBtn.type = "button"; resetBtn.id = "mvResetLayout";
   resetBtn.textContent = "↺ Reset layout";
-  resetBtn.title = "Put every moved, resized or locked piece back to the shipped layout (this device only)";
+  resetBtn.title = "Put every moved, resized, nested or locked piece back to the shipped layout (this device only)";
   var resetTextsBtn = document.createElement("button");
   resetTextsBtn.type = "button"; resetTextsBtn.id = "mvResetTexts";
   resetTextsBtn.textContent = "Reset texts";
