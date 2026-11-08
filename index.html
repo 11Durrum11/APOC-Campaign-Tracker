@@ -2164,7 +2164,15 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     p.el.classList.add("mv-nested");
     host.el.appendChild(p.el);
     p.nested = host; p.floated = false; p.orient = "";
-    if (!restoring) savePiece(p);
+    if (!restoring) {
+      /* A nest into a CLOSED fold is invisible until the fold opens
+         — the piece looks vanished (diagnosed live 2026-11-08: a
+         60px prose drag nested into THE GATES law, shut at the
+         time). A deliberate drop opens its host so the result is
+         always seen. Restores leave folds as they are. */
+      if (host.el.tagName === "DETAILS" && !host.el.open) host.el.open = true;
+      savePiece(p);
+    }
     return true;
   }
   function detachNested(p){
