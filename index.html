@@ -131,7 +131,8 @@
      2026-11-06 stacked top-right arrangement.) Phones keep them in
      flow (media query below), stacked full-width under the title —
      Reconvenes on top, the Sky directly below it. */
-  .top-bubbles{position:absolute;top:8px;right:24px;width:min(720px,62%);display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;z-index:3}
+  .top-bubbles{position:absolute;top:8px;right:24px;width:min(720px,62%);display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;z-index:3;pointer-events:none}
+  .top-bubbles .sky-panel,.top-bubbles .countdown-panel{pointer-events:auto}
   .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
   .top-bubbles .sky-panel{max-width:none;grid-column:1;grid-row:1}
   .top-bubbles .countdown-panel{grid-column:2;grid-row:1}
@@ -375,6 +376,15 @@
     padding:10px 11px;min-height:44px;
   }
   textarea{min-height:96px;resize:vertical}
+  /* Dropdown scheme — ONE uniform high-contrast look on every select
+     and its open list (Shaun's platform-wide rule, 2026-11-08: no
+     white-on-white anywhere). The field background var(--popover) is
+     fully transparent, which can leave an open native list on a
+     default white background with near-white text in some browsers;
+     selects and options therefore carry an explicit opaque dark
+     background with light text. */
+  select{background:hsl(222 20% 13%);color:var(--foreground);color-scheme:dark}
+  select option{background:hsl(222 20% 13%);color:var(--foreground)}
   input::placeholder,textarea::placeholder{color:var(--muted-foreground)}
   .button-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
   /* Minimum footprints (Shaun's cross-surface rule, 2026-11-08,
@@ -604,6 +614,12 @@
      the hover-gated pointer-events made the edit buttons unclickable
      in practice (bug sweep, 2026-11-08). */
   body.mv-edit-on .mv-chrome{opacity:1;pointer-events:auto}
+  /* The hero title piece's control cluster sits at its bottom-right:
+     at the top-right it was visible through the translucent Sky
+     bubble but unclickable — the bubble's box covers that corner
+     (bug sweep, 2026-11-08, two verification rounds). Bottom-right
+     is clear of both top bubbles. */
+  .hero-copy>.mv-chrome{top:auto;bottom:2px}
   body.mv-edit-on [data-text-id]{outline:1px dotted var(--mv-blue-c);outline-offset:1px}
   .mv-editing{outline:2px solid var(--mv-blue) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
 </style>
