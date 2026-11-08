@@ -1748,7 +1748,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
    - RESET: "Reset layout" restores the shipped arrangement on this
      device; "Reset texts" (in the DM bar) clears DM text edits. */
 (function(){
-  var LKEY = "apocTrackerMvV1";            // layout records (DM devices)
+  var LKEY = "apocTrackerMvV2";            // layout records (DM devices) — v2 (v44.2): v1 geometry predates the v42/v44 Canon restructure and stranded/mangled the Canon pieces on Shaun's device (folds visible on hover, unopenable, City Canon displaced). Locks migrate; positions do not.
   var DMKEY = "apocTrackerDMV1";           // DM-mode flag (this device)
   var EKEY = "apocTrackerEditUnlockedV1";  // edit-lock toggle state
   var LTKEY = "apocTrackerTextLocalV1";    // local-only text overrides (fallback)
@@ -1851,6 +1851,22 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   /* ================= layout records ================= */
   var records = {};
   try { records = JSON.parse(lsGet(LKEY) || "{}") || {}; } catch(e) { records = {}; }
+  /* One-time migration from the v1 store: carry over ONLY pure lock
+     records ({l:1} with no saved geometry) — every saved position from
+     the old Canon structure is dropped, so all pieces fall back to the
+     shipped layout — then retire the v1 key. */
+  try {
+    var oldRaw = lsGet("apocTrackerMvV1");
+    if (oldRaw) {
+      var oldRecs = JSON.parse(oldRaw || "{}") || {};
+      Object.keys(oldRecs).forEach(function(k){
+        var r = oldRecs[k];
+        if (r && r.l && typeof r.x !== "number" && !records[k]) records[k] = { l: 1 };
+      });
+      lsDel("apocTrackerMvV1");
+      if (Object.keys(records).length) lsSet(LKEY, JSON.stringify(records));
+    }
+  } catch(e) {}
   function persist(){
     if (Object.keys(records).length) lsSet(LKEY, JSON.stringify(records));
     else lsDel(LKEY);
