@@ -1927,6 +1927,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   function floatPiece(p, rec){
     if (p.floated) return;
     var el = p.el;
+    if (el.hidden && p.mode === "page") return; /* a hidden page piece has no real rect; floating it can only strand it off-screen. Local pieces inside a hidden panel are safe: their saved record carries the full geometry. */
     var rect = el.getBoundingClientRect();
     var w = rec ? rec.w : Math.round(rect.width);
     var h = rec ? rec.h : Math.round(rect.height);
@@ -2164,6 +2165,20 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var rec = records[p.id];
     if (!rec) return;
     if (rec.l) { p.locked = true; syncLockUI(p); }
+    if (p.el.classList && p.el.classList.contains("hub-content-panel")) {
+      /* Panels are toggled views, not furniture: NEVER restore one
+         floated. A stale saved position strands the panel off-screen
+         (or as a sliver at the screen edge), so its hub button looks
+         dead — Shaun, 2026-11-07: Canon would not open on his device
+         while a clean browser opened it fine. Drop the saved float
+         for panel pieces; the record self-heals on this load. */
+      if (typeof rec.x === "number" || typeof rec.y === "number" || rec.w) {
+        delete rec.x; delete rec.y; delete rec.w; delete rec.h; delete rec.o;
+        if (rec.l) records[p.id] = { l: 1 }; else delete records[p.id];
+        persist();
+      }
+      return;
+    }
     if (typeof rec.x === "number" && typeof rec.y === "number" && rec.w) {
       var rr = { x: rec.x, y: rec.y, w: rec.w, h: rec.h || 0, o: rec.o || "" };
       if (p.mode === "page") {
