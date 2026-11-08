@@ -2145,6 +2145,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (q.mode !== p.mode) return;
       if (p.mode === "local" && q.host !== p.host) return;
       if (p.el.contains(q.el)) return; /* never into its own child */
+      if (q.el.contains(p.el)) return; /* never into its own ancestor: an in-flow piece (e.g. a Bastion prose block inside the Laws fold) must not be teleported into the container that already holds it by an ordinary short drag — caught live 2026-11-08, when a 60px body-drag of a prose paragraph nested it into its own fold and it vanished from view */
       if (q.el.offsetParent === null && q.el.style.position !== "fixed") return; /* hidden (e.g. inside a closed panel) */
       var r = q.el.getBoundingClientRect();
       if (r.width < 20 || r.height < 20) return;
