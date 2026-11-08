@@ -246,6 +246,16 @@
      by side at minimum footprint and an open law takes the full
      width. */
   #canonPanel .laws-sub{margin:10px 0 2px}
+  /* Canon fold row (Shaun, 2026-11-07 ~21:16): World Canon, City
+     Canon and the Laws of the Bastion at minimum footprint, side by
+     side in one row — so opening one never shunts the others to the
+     bottom. The opened fold drops to a full-width row of its own
+     beneath the buttons and expands completely. */
+  #canonPanel .canon-fold-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:start;grid-auto-flow:dense}
+  #canonPanel .canon-fold-row .canon-item{margin:0}
+  #canonPanel .canon-fold-row .canon-item > summary{min-height:36px;padding:6px 8px;font-size:.82rem;line-height:1.25;text-align:center;justify-content:center}
+  #canonPanel .canon-fold-row .canon-item[open ]{grid-column:1/-1;grid-row:2}
+  #canonPanel .canon-fold-row .canon-item[open ] > summary{min-height:47px;font-size:1.02rem;text-align:left;justify-content:flex-start}
   #canonPanel .laws-body{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:start}
   #canonPanel .laws-body > p{grid-column:1/-1;margin:0 0 4px}
   #canonPanel .laws-sub .law-item{margin:0}
@@ -688,6 +698,7 @@
 
   <section class="panel hub-content-panel" id="canonPanel" hidden aria-label="World and City Canon">
     <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
+    <div class="canon-fold-row">
     <details class="canon-item">
       <summary>WORLD CANON</summary>
       <div class="law-why"><ul>
@@ -768,6 +779,7 @@
           <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
         </div>
     </details>
+    </div>
   </section>
 
 
