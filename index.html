@@ -454,6 +454,11 @@
      and a per-piece lock pins it. Layout lives ONLY in this device's
      localStorage — never in the shared backend. A Reset layout
      button (bottom right) restores the shipped arrangement. ===== */
+  /* Treatment chrome is DARK BLUE (Shaun, standing correction
+     2026-11-07): every outline/highlight the moving ability shows —
+     drag/selection outline, grips, resize handles, locks, edit
+     marks — is dark blue, never the theme gold/orange. */
+  .mv-piece,#mvBar,#mvReset{--mv-blue:hsl(222,89%,47%);--mv-blue-a:hsla(222,89%,55%,.6);--mv-blue-b:hsla(222,89%,55%,.5);--mv-blue-c:hsla(222,89%,55%,.45)}
   .mv-piece{position:relative}
   .mv-ph{visibility:hidden;pointer-events:none}
   .mv-host{position:relative}
@@ -464,18 +469,18 @@
     opacity:0;pointer-events:none;transition:opacity .15s ease;
   }
   .mv-piece:hover>.mv-chrome,.mv-piece:focus-within>.mv-chrome,.mv-piece.mv-active>.mv-chrome{opacity:1;pointer-events:auto}
-  .mv-grip,.mv-lock{
+  .mv-grip,.mv-lock,.mv-edit{
     width:22px;height:22px;min-height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;
-    border:1px solid var(--card-border);border-radius:6px;background:var(--popover);color:var(--primary);
+    border:1px solid var(--card-border);border-radius:6px;background:var(--popover);color:var(--mv-blue);
     font-size:12px;line-height:1;cursor:grab;touch-action:none;
   }
   .mv-lock{cursor:pointer;font-size:11px}
   .mv-locked>.mv-chrome{opacity:1;pointer-events:auto}
   .mv-locked>.mv-chrome .mv-grip{opacity:.35;cursor:default}
-  .mv-locked{outline:1px dashed hsla(38,92%,50%,.45);outline-offset:-1px}
+  .mv-locked{outline:1px dashed var(--mv-blue-b);outline-offset:-1px}
   .mv-h{position:absolute;z-index:69;opacity:0;pointer-events:none;touch-action:none}
   .mv-piece:hover>.mv-h,.mv-piece:focus-within>.mv-h,.mv-piece.mv-active>.mv-h{opacity:1;pointer-events:auto}
-  .mv-h::after{content:"";position:absolute;inset:3px;border:1px solid hsla(38,92%,50%,.55);border-radius:3px}
+  .mv-h::after{content:"";position:absolute;inset:3px;border:1px solid var(--mv-blue-a);border-radius:3px}
   .mv-h[data-d="n"]{top:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
   .mv-h[data-d="s"]{bottom:-6px;left:20px;right:20px;height:12px;cursor:ns-resize}
   .mv-h[data-d="e"]{right:-6px;top:20px;bottom:20px;width:12px;cursor:ew-resize}
@@ -509,7 +514,7 @@
     border:1px solid var(--card-border);border-radius:999px;background:var(--popover);color:var(--foreground);
     font-size:.8rem;opacity:.82;cursor:pointer;box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
-  #mvReset:hover,#mvReset:focus-visible{opacity:1;color:var(--primary);border-color:var(--primary)}
+  #mvReset:hover,#mvReset:focus-visible{opacity:1;color:var(--mv-blue);border-color:var(--mv-blue)}
   @media (hover:none){
     .mv-chrome{opacity:.55;pointer-events:auto}
     .mv-h{opacity:.35;pointer-events:auto}
@@ -529,13 +534,13 @@
     background:var(--popover);color:var(--foreground);font-size:.8rem;opacity:.88;cursor:pointer;
     box-shadow:0 10px 26px rgba(0,0,0,.4);
   }
-  #mvBar button:hover,#mvBar button:focus-visible{opacity:1;color:var(--primary);border-color:var(--primary)}
-  #mvEditToggle[aria-pressed="true"]{color:var(--primary);border-color:var(--primary);opacity:1}
-  #mvEditStatus{font-size:.78rem;color:var(--primary);text-shadow:0 1px 6px rgba(0,0,0,.8);max-width:46vw;text-align:right}
+  #mvBar button:hover,#mvBar button:focus-visible{opacity:1;color:var(--mv-blue);border-color:var(--mv-blue)}
+  #mvEditToggle[aria-pressed="true"]{color:var(--mv-blue);border-color:var(--mv-blue);opacity:1}
+  #mvEditStatus{font-size:.78rem;color:var(--mv-blue);text-shadow:0 1px 6px rgba(0,0,0,.8);max-width:46vw;text-align:right}
   .mv-edit{display:none}
   body.mv-edit-on .mv-edit{display:inline-flex}
-  body.mv-edit-on [data-text-id]{outline:1px dotted hsla(38,92%,50%,.4);outline-offset:1px}
-  .mv-editing{outline:2px solid var(--primary) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
+  body.mv-edit-on [data-text-id]{outline:1px dotted var(--mv-blue-c);outline-offset:1px}
+  .mv-editing{outline:2px solid var(--mv-blue) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
 </style>
 </head>
 <body data-scene="bastion-streets">
