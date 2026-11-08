@@ -263,6 +263,12 @@
   #canonPanel .laws-sub .law-item[open ]{grid-column:1/-1}
   #canonPanel .laws-sub .law-item[open ] > summary{text-align:left;justify-content:flex-start}
   @media (max-width:640px){ #canonPanel .laws-body{grid-template-columns:repeat(2,1fr)} }
+  /* DM's Lair panel (Shaun, 2026-11-07, v47.0): its own panel, split
+     out of the tracker; every Lair entry carries a "file down" row so
+     the Lair can disseminate down to the board's categories. */
+  .lair-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .dissem{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:2px 0 16px;font-size:.9rem}
+  .dissem select{min-height:32px}
   .canon-item .law-why li:last-child{margin-bottom:0}
   .section-fold{border:none;background:transparent;margin:0;border-radius:0}
   .section-fold>summary{font-size:1.32rem;padding:4px 2px 6px;min-height:44px}
@@ -670,7 +676,7 @@
         </button>
       </div>
       <div class="hub-item">
-        <a class="hub-btn" href="#tracker" data-hub-action="aidm"><span class="hub-name">DM's Lair</span></a>
+        <a class="hub-btn" href="#lair" id="lairButton" data-hub-action="aidm" aria-expanded="false"><span class="hub-name">DM's Lair</span></a>
       </div>
       <div class="hub-item">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-Weather-Engine/" target="_blank" rel="noopener"><span class="hub-name">The Weather</span></a>
@@ -695,6 +701,16 @@
        in the Canon panel as a sub-button right beside City Canon
        (Shaun, 2026-11-07). -->
 
+
+  <section class="panel hub-content-panel" id="lairPanel" hidden aria-label="DM's Lair">
+    <p class="eyebrow">DM's Lair</p>
+    <div class="ai-brief"><h3 style="margin-top:0">AI DM session brief</h3><pre id="lairBriefText"></pre></div>
+    <div class="lair-actions">
+      <button type="button" class="btn" id="lairCopyBriefBtn">Copy AI DM brief</button>
+      <button type="button" class="btn" id="lairAddBtn">Add to the Lair</button>
+    </div>
+    <div id="lairContent"></div>
+  </section>
 
   <section class="panel hub-content-panel" id="canonPanel" hidden aria-label="World and City Canon">
     <p class="eyebrow">APOC Survival · Compiled 2026-11-06</p>
@@ -837,7 +853,6 @@
     <div class="toolbar">
       <input type="search" id="entrySearch" placeholder="Search the tracker…" aria-label="Search the tracker">
       <button class="btn primary" id="addEntryBtn" type="button">+ Add entry</button>
-      <button class="btn" id="copyBriefBtn" type="button" hidden>Copy AI DM brief</button>
       <button class="btn" id="ambBtn" type="button" aria-pressed="false" title="Toggle animated scenes and ambient sound">🔇 Ambience off</button>
     </div>
 
@@ -1176,7 +1191,7 @@ function toggleHubPanel(panelId, btnId){
   if (!panel || !btn) return;
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
-  ["canonButton", "trackerButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
+  ["canonButton", "trackerButton", "lairButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
   if (opening) {
@@ -1188,9 +1203,7 @@ function activateHub(btn){
   if (action === "tracker") {
     toggleHubPanel("trackerPanel", "trackerButton");
   } else if (action === "aidm") {
-    if ($("trackerPanel").hidden) toggleHubPanel("trackerPanel", "trackerButton");
-    setActiveTab("journal");
-    $("trackerPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+    toggleHubPanel("lairPanel", "lairButton");
   } else if (action === "canon") {
     toggleHubPanel("canonPanel", "canonButton");
   } else if (action === "gallery") {
@@ -1235,7 +1248,6 @@ const TABS = [
   { id:"people", label:"People", cats:["npc","character"] },
   { id:"quests", label:"Quests", cats:["quest"] },
   { id:"world", label:"World", cats:["location","faction","loot"] },
-  { id:"journal", label:"Journal & AI DM", cats:["aidm","session"] },
   { id:"time", label:"Timeline & Calendar", cats:["timeline","event"] },
   { id:"lore", label:"Lore & Threads", cats:["note","thread"] }
 ];
@@ -1338,9 +1350,6 @@ function renderTracker(){
         : `<div class="empty">Nothing here yet.</div>`)
       : "");
   } else {
-    if (activeTab === "journal") {
-      html += `<div class="ai-brief"><h3 style="margin-top:0">AI DM session brief</h3><pre id="aiBriefText">${esc(aiDmBrief())}</pre></div>`;
-    }
     const list = entries.filter(e => tab.cats.includes(e.category)).filter(entryMatches);
     html += list.length
       ? `<div class="cards">${list.map(entryCard).join("")}</div>`
@@ -1349,7 +1358,7 @@ function renderTracker(){
   $("trackerContent").innerHTML = html;
   const rt = $("trackerContent").querySelector("#recentToggle");
   if (rt) rt.addEventListener("click", () => { recentOpen = !recentOpen; renderTracker(); });
-  $("copyBriefBtn").hidden = activeTab !== "journal";
+  if (typeof renderLair === "function") renderLair();
   $("trackerContent").querySelectorAll("[data-edit-entry]").forEach(b =>
     b.addEventListener("click", () => openEntryForm(b.dataset.origin, b.dataset.editEntry)));
   $("trackerContent").querySelectorAll("[data-delete-entry]").forEach(b =>
@@ -1442,11 +1451,64 @@ $("addEntryBtn").addEventListener("click", () => openEntryForm());
 $("cancelEntryBtn").addEventListener("click", () => { $("entryForm").hidden = true; });
 $("refreshEntries").addEventListener("click", () => { loadSharedEntries(); loadCampaignStatus(); loadArtwork(); });
 $("entrySearch").addEventListener("input", ev => { entryQuery = ev.target.value; renderTracker(); });
-$("copyBriefBtn").addEventListener("click", async () => {
+/* ============ DM's Lair — its own panel (Shaun, 2026-11-07) ============
+   The Lair holds the journal (AI DM + session entries) and the AI DM
+   session brief, split out of the tracker panel. DISSEMINATE DOWN:
+   every Lair card carries a "File down to" row — filing an entry
+   re-categories it onto the shared board (or the DM-local store), so
+   what starts in the Lair lands in People / Quests / World / Timeline
+   / Lore below it. One record, one home at a time — never a copy. */
+const LAIR_CATS = ["aidm", "session"];
+function lairTargets(e){
+  const pool = e.origin === "shared" ? SHARED_CATEGORIES : Object.keys(CAT_LABEL);
+  return pool.filter(c => !LAIR_CATS.includes(c));
+}
+function renderLair(){
+  const host = $("lairContent");
+  if (!host) return;
+  const brief = $("lairBriefText");
+  if (brief) brief.textContent = aiDmBrief();
+  const list = allEntries().filter(e => LAIR_CATS.includes(e.category)).filter(entryMatches);
+  host.innerHTML = list.length
+    ? `<div class="cards">` + list.map(e => {
+        const opts = lairTargets(e).map(c => `<option value="${c}">${esc(CAT_LABEL[c])}</option>`).join("");
+        return `<div class="lair-wrap">${entryCard(e)}<div class="dissem"><label>File down to: <select data-dissem-sel="${esc(String(e.id))}" data-origin="${e.origin}">${opts}</select></label><button type="button" class="btn" data-dissem="${esc(String(e.id))}" data-origin="${e.origin}">Send down</button></div></div>`;
+      }).join("") + `</div>`
+    : `<div class="empty">Nothing in the Lair yet — add the first entry.</div>`;
+  host.querySelectorAll("[data-edit-entry]").forEach(b =>
+    b.addEventListener("click", () => { toggleHubPanel("trackerPanel", "trackerButton"); openEntryForm(b.dataset.origin, b.dataset.editEntry); }));
+  host.querySelectorAll("[data-delete-entry]").forEach(b =>
+    b.addEventListener("click", () => deleteEntry(b.dataset.origin, b.dataset.deleteEntry)));
+  host.querySelectorAll("[data-dissem]").forEach(b =>
+    b.addEventListener("click", () => {
+      const sel = [...host.querySelectorAll("[data-dissem-sel]")].find(s => s.dataset.dissemSel === b.dataset.dissem && s.dataset.origin === b.dataset.origin);
+      if (sel) disseminateEntry(b.dataset.origin, b.dataset.dissem, sel.value);
+    }));
+}
+async function disseminateEntry(origin, id, target){
+  if (origin === "dm") {
+    const e = localEntries.find(x => String(x.id) === String(id));
+    if (!e) return;
+    e.category = target;
+    saveLocalEntries(); renderTracker(); return;
+  }
+  if (!db) { showEntriesError("The board could not be reached, so that entry was not filed down."); return; }
+  try {
+    const { error } = await db.from(ENTRIES_TABLE).update({ category: target }).eq("id", Number(id));
+    if (error) throw error;
+    await loadSharedEntries();
+  } catch(err) { showEntriesError("That filing didn't go through — try Refresh and again."); }
+}
+$("lairCopyBriefBtn").addEventListener("click", async () => {
   const text = aiDmBrief();
-  try { await navigator.clipboard.writeText(text); $("copyBriefBtn").textContent = "Copied ✓"; }
-  catch(e) { $("copyBriefBtn").textContent = "Copy failed — select the brief text"; }
-  setTimeout(() => { $("copyBriefBtn").textContent = "Copy AI DM brief"; }, 2200);
+  try { await navigator.clipboard.writeText(text); $("lairCopyBriefBtn").textContent = "Copied ✓"; }
+  catch(e) { $("lairCopyBriefBtn").textContent = "Copy failed — select the brief text"; }
+  setTimeout(() => { $("lairCopyBriefBtn").textContent = "Copy AI DM brief"; }, 2200);
+});
+$("lairAddBtn").addEventListener("click", () => {
+  toggleHubPanel("trackerPanel", "trackerButton");
+  openEntryForm();
+  if ([...$("entryCategory").options].some(o => o.value === "aidm")) $("entryCategory").value = "aidm";
 });
 $("entryForm").addEventListener("submit", async ev => {
   ev.preventDefault();
@@ -1786,13 +1848,13 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     ".hero-copy h1", "#hubHeading",
     ".countdown-panel .eyebrow", ".section-fold > summary",
     ".hub-name", ".hub-sub",
-    "#canonPanel > .eyebrow", "#trackerPanel > .eyebrow",
+    "#canonPanel > .eyebrow", "#trackerPanel > .eyebrow", "#lairPanel > .eyebrow",
     ".laws-sub p.muted", ".laws-sub .laws-body > p",
     ".law-item > summary", ".canon-item > summary",
     ".law-why p", ".law-why li",
     "#statusForm label", "#statusForm button[type=\"submit\"]",
     ".tracker-head .eyebrow", "#refreshEntries",
-    "#addEntryBtn", "#copyBriefBtn",
+    "#addEntryBtn", "#lairCopyBriefBtn", "#lairAddBtn",
     "#entryForm label", "#entryForm button[type=\"submit\"]", "#cancelEntryBtn"
   ];
   var PROSE_SEL = ".laws-sub .laws-body > p, .laws-sub p.muted, .law-why p, .law-why li";
@@ -2156,6 +2218,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
     mkPiece(id, item, "page", null, { surface: ".hub-btn" });
   });
+  mkPiece("lairPanel", document.getElementById("lairPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("canonPanel", document.getElementById("canonPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("trackerPanel", document.getElementById("trackerPanel"), "page", null, { head: ".eyebrow", scroll: true });
 
