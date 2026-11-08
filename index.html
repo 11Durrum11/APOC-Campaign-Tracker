@@ -214,11 +214,12 @@
      body text in the City Canon fold only, 1rem -> 1.25rem. World
      Canon and everything else unchanged. */
   #canonPanel .city-canon{font-size:1.25rem}
-  /* The Laws sub-button inside City Canon (Shaun, 2026-11-07): a
-     canon-item fold nested at the end of the City Canon fold, set
-     off from the entries above it. Its law titles keep the standard
-     fold size; the reasoning text inherits City Canon's 1.25rem. */
-  .laws-sub{margin:10px 0 0}
+  /* The Laws sub-button (Shaun, 2026-11-07): a canon-item fold in
+     the Canon panel sitting right beside the City Canon fold (it
+     started nested at the end of City Canon; Shaun moved it up next
+     to it). Its law titles keep the standard fold size; its body
+     text carries the same 1.25rem as City Canon. */
+  .laws-sub{margin:10px 0 0;font-size:1.25rem}
   .laws-sub>summary{font-size:1.02rem}
   .canon-item .law-why li{margin:0 0 9px;line-height:1.56}
   .canon-item .law-why li:last-child{margin-bottom:0}
@@ -649,8 +650,9 @@
   </section>
 
 
-  <!-- Canon lives behind its hub button; the Laws of the Bastion now
-       live inside City Canon as a sub-button (Shaun, 2026-11-07). -->
+  <!-- Canon lives behind its hub button; the Laws of the Bastion sit
+       in the Canon panel as a sub-button right beside City Canon
+       (Shaun, 2026-11-07). -->
 
 
   <section class="panel hub-content-panel" id="canonPanel" hidden aria-label="World and City Canon">
@@ -700,6 +702,7 @@
         <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands). Inside the walls, raw magic is not merely a crime but a blasphemy against survival itself — the city remembers what uncontrolled power did to the world — while beyond the wall the principle stands unenforced, one more law the badlands ignore.</li>
         <li><strong>Slavery &amp; Warforged:</strong> abolition is RECENT, and it happened because of the Warforged. They were created, not born — built as labor and as soldiers, "just toasters" in the phrase of everyone who owned one — until they gained sentience and the city had to decide what a person is. It is about 1965 for the Warforged: a long couple of decades of 1965, unfinished — free on paper, lesser in practice, second-class citizens in the towers they may well have built. The in-world slur for them is "toi" (T-O-I), and it carries the full weight such words carry; the world's bigotry is represented in the material as it is, not sanitized. The Warforged thread runs through everything else in the city: they are why slavery ended, they are part of why the consortiums' armies look as they do, and their unfinished freedom is the loudest proof that the city which does not like change can still be changed — slowly, and at cost.</li>
       </ul></div>
+    </details>
       <details class="canon-item laws-sub">
         <summary>LAWS OF THE BASTION</summary>
         <div class="law-why">
@@ -734,7 +737,6 @@
           <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
         </div>
       </details>
-    </details>
   </section>
 
 
