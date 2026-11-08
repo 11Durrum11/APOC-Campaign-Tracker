@@ -516,6 +516,26 @@
     .mv-piece.mv-active>.mv-h{opacity:1}
     .mv-locked>.mv-chrome{opacity:1}
   }
+
+  /* ===== v41: DM bar + in-place text editing (Shaun, 2026-11-07) =====
+     The DM bar exists ONLY in DM mode (it is created by script on DM
+     devices; player devices never get the element). The Edit Lock
+     toggle lives here, default LOCKED. ===== */
+  #mvBar{
+    position:fixed;right:10px;bottom:10px;z-index:3000;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;
+  }
+  #mvBar button{
+    min-height:36px;padding:7px 12px;border:1px solid var(--card-border);border-radius:999px;
+    background:var(--popover);color:var(--foreground);font-size:.8rem;opacity:.88;cursor:pointer;
+    box-shadow:0 10px 26px rgba(0,0,0,.4);
+  }
+  #mvBar button:hover,#mvBar button:focus-visible{opacity:1;color:var(--primary);border-color:var(--primary)}
+  #mvEditToggle[aria-pressed="true"]{color:var(--primary);border-color:var(--primary);opacity:1}
+  #mvEditStatus{font-size:.78rem;color:var(--primary);text-shadow:0 1px 6px rgba(0,0,0,.8);max-width:46vw;text-align:right}
+  .mv-edit{display:none}
+  body.mv-edit-on .mv-edit{display:inline-flex}
+  body.mv-edit-on [data-text-id]{outline:1px dotted hsla(38,92%,50%,.4);outline-offset:1px}
+  .mv-editing{outline:2px solid var(--primary) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
 </style>
 </head>
 <body data-scene="bastion-streets">
@@ -1644,31 +1664,142 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 </script>
 <script>
 "use strict";
-/* ================= Movable pieces (Shaun, 2026-11-07) =================
-   One reusable system: every piece of this page plugs into it.
+/* ================= Movable pieces + DM text editing (Shaun, 2026-11-07) =================
+   THE DM/PLAYER SPLIT (Shaun, confirmed twice): this whole treatment
+   is DM-ONLY. On a device without DM mode, NONE of it exists — no
+   grips, no resize handles, no locks, no edit affordances, no layout
+   controls; players see the page exactly as shipped (plus whatever
+   shared text the DM has set for everybody). DM mode is switched on
+   per device by opening the page once with ?dm=1 (or #dm); the flag
+   then lives in that device's localStorage until "Exit DM mode".
+   There is deliberately NO on-page unlock for players to find.
+
+   In DM mode, one reusable system, every piece plugged into it:
    - MOVE: press-and-drag a piece's six-dot grip or its header; a
-     plain press still clicks (drag starts only past a threshold,
-     and a real drag swallows the click that follows it).
-   - RESIZE: drag a floated (or in-place) piece's edges/corners.
-   - REFLOW: tall/narrow pieces run their contents in one vertical
-     column; wide/short pieces in one horizontal row (.mv-v/.mv-h).
-   - LOCK: every piece has its own lock; a locked piece cannot be
-     dragged or resized, but everything inside it still works.
-   - PERSISTENCE: positions, sizes, orientations and locks live in
-     THIS device's localStorage only (key below). Shared content is
-     untouched — layout is personal, never written to the backend.
-   - RESET: the "Reset layout" button restores the shipped layout.
-   Pieces that are re-rendered by the tracker (the tab bar and the
-   board) get their chrome re-injected by a MutationObserver. */
+     plain press still clicks (threshold + click suppression).
+   - RESIZE: drag a piece's edges/corners. REFLOW: tall/narrow runs
+     contents in one vertical column; wide/short in one row.
+   - LOCK: every piece has its own lock (layout lock, per piece).
+   - Layout (positions/sizes/orientations/piece locks) persists in
+     THIS device's localStorage only — never shared.
+   - EDITING (separate from layout): static labels, headers, titles,
+     button names and prose blocks are editable in place, behind the
+     EDIT LOCK toggle in the DM bar (bottom right). DEFAULT = LOCKED:
+     nothing is editable and double-clicks do nothing. Flip it on to
+     edit (double-click a text, or use a piece's pencil), off when
+     done; the toggle state persists per device. Edits to static text
+     save as overrides in the SHARED store (site_settings row
+     "text_overrides") so the whole table sees them; if the shared
+     store cannot be reached, the edit is kept on this device only
+     and the DM bar says so. Script-driven text (sky fact/note,
+     next-session label, counts, tab labels, entry cards, status
+     lines) is data, not static text, and is NOT part of editing.
+   - ARTWORK IS HANDS-OFF: nothing inside Cody's Artwork overlay is
+     editable and the artwork is never altered; only the gallery
+     panel's layout is a piece, like everything else.
+   - RESET: "Reset layout" restores the shipped arrangement on this
+     device; "Reset texts" (in the DM bar) clears DM text edits. */
 (function(){
-  var KEY = "apocTrackerMvV1";
-  var records = {};
-  try { records = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e) { records = {}; }
-  function persist(){
+  var LKEY = "apocTrackerMvV1";            // layout records (DM devices)
+  var DMKEY = "apocTrackerDMV1";           // DM-mode flag (this device)
+  var EKEY = "apocTrackerEditUnlockedV1";  // edit-lock toggle state
+  var LTKEY = "apocTrackerTextLocalV1";    // local-only text overrides (fallback)
+  var TEXT_ROW = "text_overrides";
+
+  function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function lsSet(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  function lsDel(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+  /* ---------- shared store handle (the page's own Supabase client) ---------- */
+  var sharedDb = null, settingsTable = "site_settings";
+  try { if (typeof db !== "undefined") sharedDb = db; } catch(e) {}
+  try { if (typeof SETTINGS_TABLE !== "undefined") settingsTable = SETTINGS_TABLE; } catch(e) {}
+
+  /* ---------- static-text registry (deterministic ids) ---------- */
+  var EDIT_SEL = [
+    ".hero-copy h1", "#hubHeading",
+    ".countdown-panel .eyebrow", ".section-fold > summary",
+    ".hub-name", ".hub-sub",
+    "#lawsPanel > .eyebrow", "#canonPanel > .eyebrow", "#trackerPanel > .eyebrow",
+    "#lawsPanel > p.muted", "#lawsPanel .laws-body > p",
+    ".law-item > summary", ".canon-item > summary",
+    ".law-why p", ".law-why li",
+    "#statusForm label", "#statusForm button[type=\"submit\"]",
+    ".tracker-head .eyebrow", "#refreshEntries",
+    "#addEntryBtn", "#copyBriefBtn",
+    "#entryForm label", "#entryForm button[type=\"submit\"]", "#cancelEntryBtn"
+  ];
+  var PROSE_SEL = "#lawsPanel .laws-body > p, #lawsPanel > p.muted, .law-why p, .law-why li";
+  var SKIP_IDS = { skyFact:1, skyNote:1, nextSessionLabel:1, siteVersion:1, ambBtn:1, artworkChip:1, entryFormHeading:1 };
+  var textEls = [];
+  (function stampTextIds(){
+    var seen = new Set(), n = 0;
+    EDIT_SEL.forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){
+        if (seen.has(el)) return; seen.add(el);
+        if (el.closest("#galleryOverlay")) return;              // artwork: hands-off
+        if (el.id && SKIP_IDS[el.id]) return;                   // script-driven text
+        if (el.querySelector && el.querySelector("#siteVersion")) return; // version badge line
+        n += 1;
+        var id = "tx" + n;
+        el.setAttribute("data-text-id", id);
+        if (el.matches(PROSE_SEL)) el.setAttribute("data-mv-prose", "1");
+        textEls.push(el);
+      });
+    });
+  })();
+
+  /* ---------- text overrides: load & apply for EVERYONE ---------- */
+  var sharedTexts = {}, localTexts = {}, textOverrides = {};
+  try { localTexts = JSON.parse(lsGet(LTKEY) || "{}") || {}; } catch(e) { localTexts = {}; }
+  function applyTextMap(map){
+    Object.keys(map || {}).forEach(function(id){
+      var el = document.querySelector('[data-text-id="' + id + '"]');
+      if (el && !el.isContentEditable) el.innerHTML = map[id];
+    });
+  }
+  function rebuildOverrides(){
+    textOverrides = {};
+    Object.keys(localTexts).forEach(function(k){ textOverrides[k] = localTexts[k]; });
+    Object.keys(sharedTexts).forEach(function(k){ textOverrides[k] = sharedTexts[k]; });
+  }
+  rebuildOverrides();
+  applyTextMap(textOverrides);
+  var sharedTextsReady = null;
+  if (sharedDb) {
+    sharedTextsReady = sharedDb.from(settingsTable).select("value").eq("key", TEXT_ROW).maybeSingle()
+      .then(function(res){
+        var v = res && res.data ? res.data.value : null;
+        if (typeof v === "string") { try { v = JSON.parse(v); } catch(e) { v = null; } }
+        if (v && typeof v === "object") { sharedTexts = v; rebuildOverrides(); applyTextMap(textOverrides); }
+      })
+      .catch(function(){});
+  }
+
+  /* ================= DM GATE ================= */
+  var dmOn = lsGet(DMKEY) === "1";
+  if (!dmOn) {
     try {
-      if (Object.keys(records).length) localStorage.setItem(KEY, JSON.stringify(records));
-      else localStorage.removeItem(KEY);
+      var qs = new URLSearchParams(location.search);
+      if (qs.get("dm") === "1" || location.hash === "#dm") {
+        dmOn = true; lsSet(DMKEY, "1");
+        /* Clean the activation out of the address bar, so the URL
+           Shaun shares or bookmarks is the plain page and Exit DM
+           is not undone by a reload on the activation URL. */
+        qs.delete("dm");
+        var clean = location.pathname + (qs.toString() ? "?" + qs.toString() : "") + (location.hash === "#dm" ? "" : location.hash);
+        history.replaceState(null, "", clean);
+      }
     } catch(e) {}
+  }
+  if (!dmOn) return; // PLAYER VIEW: no treatment UI of any kind.
+
+  /* ================= layout records ================= */
+  var records = {};
+  try { records = JSON.parse(lsGet(LKEY) || "{}") || {}; } catch(e) { records = {}; }
+  function persist(){
+    if (Object.keys(records).length) lsSet(LKEY, JSON.stringify(records));
+    else lsDel(LKEY);
   }
   var pieces = [], byId = {}, zTop = 90;
   var DIRS = ["n","s","e","w","ne","nw","se","sw"];
@@ -1704,6 +1835,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     chrome.className = "mv-chrome";
     chrome.innerHTML =
       '<button type="button" class="mv-grip" aria-label="Move this piece" title="Drag to move · double-click to put back">⠿</button>' +
+      '<button type="button" class="mv-edit" aria-label="Edit this piece\'s text" title="Edit text">✎</button>' +
       '<button type="button" class="mv-lock" aria-label="Lock this piece in place" aria-pressed="false" title="Lock this piece in place">🔓</button>';
     el.appendChild(chrome);
     DIRS.forEach(function(d){
@@ -1713,6 +1845,11 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     });
     chrome.querySelector(".mv-lock").addEventListener("click", function(e){
       e.stopPropagation(); toggleLock(p);
+    });
+    chrome.querySelector(".mv-edit").addEventListener("click", function(e){
+      e.stopPropagation();
+      var t = p.el.querySelector("[data-text-id]");
+      if (t) beginEdit(t);
     });
     chrome.querySelector(".mv-grip").addEventListener("dblclick", function(e){
       e.stopPropagation(); resetPiece(p);
@@ -1853,7 +1990,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (e.button !== undefined && e.button > 0) return;
     var t = e.target;
     if (!(t instanceof Element)) return;
-    if (t.closest(".mv-lock")) return;
+    if (t.closest && t.closest('[contenteditable="true"]')) return; // busy editing
+    if (t.closest(".mv-lock") || t.closest(".mv-edit")) return;
     var grip = t.closest(".mv-grip"), handle = t.closest(".mv-h");
     var mode = null, dir = null, viaGrip = false;
     if (handle && handle.closest(".mv-piece") === p.el) { mode = "resize"; dir = handle.getAttribute("data-d"); }
@@ -1917,9 +2055,9 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   }
   function resetAll(){
     records = {}; persist();
-    pieces.filter(function(p){ return p.mode === "local"; }).forEach(resetPieceKeep);
-    pieces.filter(function(p){ return p.mode === "page"; }).forEach(resetPieceKeep);
-    function resetPieceKeep(p){
+    pieces.filter(function(p){ return p.mode === "local"; }).forEach(resetOne);
+    pieces.filter(function(p){ return p.mode === "page"; }).forEach(resetOne);
+    function resetOne(p){
       if (p.floated) unfloat(p);
       if (p.locked) { p.locked = false; syncLockUI(p); }
       p.el.classList.remove("mv-v","mv-h","mv-active");
@@ -1948,6 +2086,19 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   document.querySelectorAll("#canonPanel .canon-item").forEach(function(el, i){
     mkPiece("canon-" + (i + 1), el, "local", canonPanelEl, { head: "summary", autoH: true });
   });
+  /* The Bastion of Last Hope's own prose blocks (Shaun: "To include
+     the Bastion of the Last Hope") — the Laws panel's intro line and
+     every stand-alone prose paragraph of the laws body are pieces in
+     their own right, same treatment as everything else. The canon
+     folds' prose already rides inside the canon pieces. */
+  document.querySelectorAll("#lawsPanel > p.muted, #lawsPanel .laws-body > p").forEach(function(el, i){
+    el.classList.add("mv-self");
+    mkPiece("bastion-text-" + (i + 1), el, "local", lawsPanelEl, { surface: ".mv-self" });
+  });
+  document.querySelectorAll("#canonPanel > p").forEach(function(el, i){
+    el.classList.add("mv-self");
+    mkPiece("bastion-canon-text-" + (i + 1), el, "local", canonPanelEl, { surface: ".mv-self" });
+  });
   mkPiece("statusForm", document.getElementById("statusForm"), "local", trackerPanelEl, {});
   mkPiece("trackerHead", trackerPanelEl.querySelector(".tracker-head"), "local", trackerPanelEl, { head: ".eyebrow", selfDrag: true });
   mkPiece("trackerTabs", document.getElementById("trackerTabs"), "local", trackerPanelEl, { selfDrag: true });
@@ -1956,7 +2107,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   mkPiece("trackerContent", document.getElementById("trackerContent"), "local", trackerPanelEl, { scroll: true });
   mkPiece("galleryPanel", document.querySelector(".gallery-panel"), "local", document.getElementById("galleryOverlay"), { head: ".gallery-head", scroll: true });
 
-  /* ---------- restore saved layout (this device only) ---------- */
+  /* ---------- restore saved layout (this DM device only) ---------- */
   pieces.forEach(function(p){
     var rec = records[p.id];
     if (!rec) return;
@@ -1971,8 +2122,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     }
   });
 
-  /* A floated panel's placeholder follows its hidden state, so closing
-     a hub panel never leaves a phantom gap in the page. */
+  /* A floated panel's placeholder follows its hidden state. */
   var phObserver = new MutationObserver(function(muts){
     muts.forEach(function(m){
       var p = byId[m.target.getAttribute && m.target.getAttribute("data-mv-id")];
@@ -1983,22 +2133,157 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (p.mode === "page") phObserver.observe(p.el, { attributes: true, attributeFilter: ["hidden"] });
   });
 
-  /* The tracker re-renders the tab bar and the board: keep their
-     chrome (grip, lock, resize handles) attached. */
+  /* The tracker re-renders the tab bar and the board: keep chrome attached. */
   ["trackerTabs", "trackerContent"].forEach(function(id){
     var p = byId[id];
     if (!p) return;
     new MutationObserver(function(){ ensureChrome(p); }).observe(p.el, { childList: true });
   });
 
-  /* ---------- Reset layout control ---------- */
+  /* ================= EDITING (behind the Edit Lock) ================= */
+  var editOn = lsGet(EKEY) === "1";
+  var editingEl = null;
+  function sanitizeHTML(html){
+    var tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    tmp.querySelectorAll("script,style,iframe,object,embed,link,meta,title").forEach(function(n){ n.remove(); });
+    tmp.querySelectorAll("*").forEach(function(n){
+      Array.from(n.attributes || []).forEach(function(a){
+        if (/^on/i.test(a.name) || (a.name === "href" && /^\s*javascript:/i.test(a.value))) n.removeAttribute(a.name);
+      });
+    });
+    return tmp.innerHTML;
+  }
+  function setEditStatus(msg){
+    var s = document.getElementById("mvEditStatus");
+    if (s) { s.textContent = msg || ""; if (msg) setTimeout(function(){ if (s.textContent === msg) s.textContent = ""; }, 4200); }
+  }
+  function saveTextEdit(id, html){
+    textOverrides[id] = html;
+    if (!sharedDb) {
+      localTexts[id] = html; lsSet(LTKEY, JSON.stringify(localTexts));
+      setEditStatus("Saved on this device only (shared store unreachable).");
+      return Promise.resolve(false);
+    }
+    var payload = {};
+    Object.keys(textOverrides).forEach(function(k){ payload[k] = textOverrides[k]; });
+    return Promise.resolve(sharedTextsReady).then(function(){
+      Object.keys(sharedTexts).forEach(function(k){ if (!(k in payload)) payload[k] = sharedTexts[k]; });
+      payload[id] = html;
+      return sharedDb.from(settingsTable).upsert(
+      { key: TEXT_ROW, value: payload, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    }).then(function(res){
+      if (res && res.error) throw res.error;
+      sharedTexts = payload;
+      if (id in localTexts) { delete localTexts[id]; lsSet(LTKEY, JSON.stringify(localTexts)); }
+      setEditStatus("Saved — the whole table sees it.");
+      return true;
+    }).catch(function(){
+      localTexts[id] = html; lsSet(LTKEY, JSON.stringify(localTexts));
+      setEditStatus("Shared save failed — kept on this device only.");
+      return false;
+    });
+  }
+  function beginEdit(el){
+    if (!editOn || !el || el.isContentEditable) return;
+    editingEl = el;
+    el._mvOrig = el.innerHTML;
+    el.contentEditable = "true";
+    el.classList.add("mv-editing");
+    el.focus();
+    try {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    } catch(e) {}
+    el.addEventListener("blur", onEditBlur);
+    el.addEventListener("keydown", onEditKey);
+  }
+  function endEdit(el, save){
+    el.removeEventListener("blur", onEditBlur);
+    el.removeEventListener("keydown", onEditKey);
+    el.contentEditable = "false";
+    el.classList.remove("mv-editing");
+    if (editingEl === el) editingEl = null;
+    if (!save) { el.innerHTML = el._mvOrig; return; }
+    var html = sanitizeHTML(el.innerHTML).trim();
+    if (html && html !== el._mvOrig) { el.innerHTML = html; saveTextEdit(el.getAttribute("data-text-id"), html); }
+    else el.innerHTML = el._mvOrig;
+  }
+  function onEditBlur(e){ endEdit(e.currentTarget, true); }
+  function onEditKey(e){
+    var el = e.currentTarget;
+    if (e.key === "Escape") { e.preventDefault(); endEdit(el, false); }
+    else if (e.key === "Enter" && !el.hasAttribute("data-mv-prose")) { e.preventDefault(); el.blur(); }
+  }
+  document.addEventListener("dblclick", function(e){
+    if (!editOn) return;
+    var t = e.target;
+    if (!(t instanceof Element)) return;
+    var el = t.closest("[data-text-id]");
+    if (el) { e.preventDefault(); beginEdit(el); }
+  });
+
+  /* ================= DM bar: Edit Lock · Reset layout · Reset texts · Exit DM ================= */
+  var bar = document.createElement("div");
+  bar.id = "mvBar";
+  var editBtn = document.createElement("button");
+  editBtn.type = "button"; editBtn.id = "mvEditToggle";
+  var statusSpan = document.createElement("span");
+  statusSpan.id = "mvEditStatus"; statusSpan.setAttribute("aria-live", "polite");
   var resetBtn = document.createElement("button");
-  resetBtn.type = "button";
-  resetBtn.id = "mvReset";
+  resetBtn.type = "button"; resetBtn.id = "mvResetLayout";
   resetBtn.textContent = "↺ Reset layout";
   resetBtn.title = "Put every moved, resized or locked piece back to the shipped layout (this device only)";
+  var resetTextsBtn = document.createElement("button");
+  resetTextsBtn.type = "button"; resetTextsBtn.id = "mvResetTexts";
+  resetTextsBtn.textContent = "Reset texts";
+  resetTextsBtn.title = "Clear all DM text edits (shared + this device) and restore the shipped wording";
+  var exitBtn = document.createElement("button");
+  exitBtn.type = "button"; exitBtn.id = "mvDmExit";
+  exitBtn.textContent = "Exit DM mode";
+  exitBtn.title = "Turn DM mode off on this device (the page returns to the clean player view)";
+  function syncEditBtn(){
+    editBtn.textContent = editOn ? "🔓 Editing ON" : "🔒 Editing locked";
+    editBtn.setAttribute("aria-pressed", editOn ? "true" : "false");
+    document.body.classList.toggle("mv-edit-on", editOn);
+  }
+  editBtn.addEventListener("click", function(){
+    if (!editOn && editingEl) endEdit(editingEl, true);
+    editOn = !editOn;
+    lsSet(EKEY, editOn ? "1" : "0");
+    if (!editOn && editingEl) endEdit(editingEl, true);
+    syncEditBtn();
+    setEditStatus(editOn ? "Editing unlocked — double-click any text to change it." : "Editing locked.");
+  });
   resetBtn.addEventListener("click", resetAll);
-  document.body.appendChild(resetBtn);
+  resetTextsBtn.addEventListener("click", function(){
+    var done = function(){
+      textEls.forEach(function(el){
+        /* restore shipped wording by reloading without overrides */
+      });
+      lsDel(LTKEY);
+      location.reload();
+    };
+    if (sharedDb) {
+      sharedDb.from(settingsTable).upsert(
+        { key: TEXT_ROW, value: {}, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      ).then(done).catch(done);
+    } else done();
+  });
+  exitBtn.addEventListener("click", function(){
+    lsDel(DMKEY);
+    location.reload();
+  });
+  bar.appendChild(statusSpan);
+  bar.appendChild(editBtn);
+  bar.appendChild(resetBtn);
+  bar.appendChild(resetTextsBtn);
+  bar.appendChild(exitBtn);
+  document.body.appendChild(bar);
+  syncEditBtn();
 })();
 </script>
 
