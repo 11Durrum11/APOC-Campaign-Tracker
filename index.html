@@ -240,6 +240,18 @@
      points if you have to.") */
   #canonPanel .canon-item .law-why ul{list-style:none;padding-left:0}
   #canonPanel .canon-item .law-why li{margin:0 0 12px}
+  /* Laws inside City Canon (Shaun's 18:28 set, go-ahead 2026-11-07,
+     shipped v44.0): the Laws fold nests in City Canon as a sub-button
+     pulled up tight under the entries; the six laws sit side by side
+     at minimum footprint and an open law takes the full width. */
+  #canonPanel .laws-sub{margin:8px 0 0}
+  #canonPanel .laws-body{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:start}
+  #canonPanel .laws-body > p{grid-column:1/-1;margin:0 0 4px}
+  #canonPanel .laws-sub .law-item{margin:0}
+  #canonPanel .laws-sub .law-item > summary{min-height:36px;padding:6px 8px;font-size:.8rem;line-height:1.25;text-align:center;justify-content:center}
+  #canonPanel .laws-sub .law-item[open ]{grid-column:1/-1}
+  #canonPanel .laws-sub .law-item[open ] > summary{text-align:left;justify-content:flex-start}
+  @media (max-width:640px){ #canonPanel .laws-body{grid-template-columns:repeat(2,1fr)} }
   .canon-item .law-why li:last-child{margin-bottom:0}
   .section-fold{border:none;background:transparent;margin:0;border-radius:0}
   .section-fold>summary{font-size:1.32rem;padding:4px 2px 6px;min-height:44px}
@@ -719,8 +731,7 @@
         <li><strong>The Laws (locked in by Shaun, 2026-11-06):</strong> in the Bastion, everything is a written contract, every contract is temporary, and breaking a contract is the core crime from which all other crimes descend. At the gates the duty splits: the Guard controls access, while the Watch observes everyone who enters, pursues fugitives, and escorts visitors through a city they are only visiting. The Watch serves under Captain Rulathon, who reports to the Open Lords; every ward keeps its civilars, its guard posts, its skulk and its arcanum, all of it based at the Palace, and above every court sits the Lord's Court, whose word is final. The law is a printed thing: rulings and decrees come off the city's restricted presses — Gilder's — and no other press may print them. What the law tolerates, it tolerates for commerce's sake: faiths and festivals go on freely so long as they break no law and do not interfere with the flow of trade. And when nothing else remains, the Gray Hands answer — directly to the Open Lords, and only then. The Walking Statues stir against any creature of Huge size or greater caught in destructive, hostile action against the city, and defend themselves when seriously attacked. Inside the administration itself, the South Brigade Precinct hunts crime and corruption in the city's own ranks. The civil side of the code runs on the same contract logic: breaking terms, letting a debt run past its term, fraud, selling outside your contract, blocking commerce — these are answered with fines, restitution, or labor under contract. Crimes against the city itself cut deeper: raw magic; attempted summoning or extra-dimensional working; violence in the towers; theft from the city stores, the wall, or the war effort; forgery of a contract, a decree, or a gate pass; smuggling in, or harboring, anything the mythal bars; private war inside the walls; treason. Those are answered with imprisonment, expulsion beyond the wall, or death.<details class="orig-fold"><summary>Original wording</summary><div class="orig-body"><p><strong>The Laws (LOCKED CANON 2026-11-06):</strong> everything is a written, temporary contract; breaking a contract is the core crime; gates split Guard (access) / Watch (observes entrants, pursues fugitives, escorts visitors); Watch under Captain Rulathon reporting to the Open Lords (ward civilars, guard posts, a skulk, an arcanum per ward; base: the Palace); Lord's Court final; rulings/decrees printed on the city's restricted presses (Gilder's); faiths/festivals tolerated so long as they violate no law and don't interfere with commerce; Gray Hands answer directly to the Open Lords, called only when nothing else remains; Walking Statues act against any Huge+ creature engaged in destructive/hostile activity against the city and defend themselves against serious attack; South Brigade Precinct fights crime and corruption inside the administration. Civil side folded in as canon: civil offenses (breaking terms, unpaid debt past term, fraud, selling outside your contract, blocking commerce) punished by fine/restitution/labor under contract; crimes against the city (raw magic, attempted summoning/extra-dimensional working, violence in the towers, theft from city stores/wall/war effort, forgery of contract/decree/gate pass, smuggling or harboring what the mythal bars, private war inside the walls, treason) punished by imprisonment, expulsion beyond the wall, or death.</p></div></details></li>
         <li><strong>Raw magic scope:</strong> forbidden in principle EVERYWHERE; enforceable only inside the Bastion (no Watch in the badlands). Inside the walls, raw magic is not merely a crime but a blasphemy against survival itself — the city remembers what uncontrolled power did to the world — while beyond the wall the principle stands unenforced, one more law the badlands ignore.</li>
         <li><strong>Slavery &amp; Warforged:</strong> abolition is RECENT, and it happened because of the Warforged. They were created, not born — built as labor and as soldiers, "just toasters" in the phrase of everyone who owned one — until they gained sentience and the city had to decide what a person is. It is about 1965 for the Warforged: a long couple of decades of 1965, unfinished — free on paper, lesser in practice, second-class citizens in the towers they may well have built. The in-world slur for them is "toi" (T-O-I), and it carries the full weight such words carry; the world's bigotry is represented in the material as it is, not sanitized. The Warforged thread runs through everything else in the city: they are why slavery ended, they are part of why the consortiums' armies look as they do, and their unfinished freedom is the loudest proof that the city which does not like change can still be changed — slowly, and at cost.</li>
-      </ul></div>
-    </details>
+      </ul>
       <details class="canon-item laws-sub">
         <summary>LAWS OF THE BASTION</summary>
         <div class="law-why">
@@ -755,6 +766,8 @@
           <p class="muted small">Part 2 — Waterdeep's Code Legal: crimes &amp; punishments by class of offense, adapted to 2701 DR — comes as proposed amendments when the source book is pulled, folded in only with Shaun's ruling.</p>
         </div>
       </details>
+      </div>
+    </details>
   </section>
 
 
