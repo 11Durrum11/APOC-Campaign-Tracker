@@ -76,8 +76,12 @@
        Brought up further (Shaun, 2026-11-07): the dead space under the
        side-by-side top bubbles is closed — hero min-height 168 -> 148
        and tighter padding/margins, so the hub block and everything
-       under it sits higher on the page. */
-    min-height:100px;margin:0 -16px;padding:6px 24px 6px;
+       under it sits higher on the page.
+       Closed entirely (Shaun, 2026-11-12, v51.6): the top bubbles
+       are gone (they live in the hub now), so the hero is exactly
+       title-height on EVERY screen — no dead space above the hub,
+       nothing to scroll past before anything is open. */
+    min-height:0;margin:0 -16px;padding:6px 24px 6px;
     display:flex;flex-direction:column;justify-content:flex-start;
     border-bottom:1px solid var(--card-border);
   }
@@ -464,8 +468,7 @@
 
   @media (max-width:760px){
     .page{padding:0 10px 22px}
-    .hero{margin:0 -10px;min-height:236px;padding:14px 16px 10px}
-    .countdown-panel{grid-template-columns:1fr}
+    .hero{margin:0 -10px;min-height:0;padding:10px 16px 8px}
     .timer{justify-content:flex-start}
     .form-grid{grid-template-columns:1fr}
     .toolbar{grid-template-columns:1fr 1fr}
