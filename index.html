@@ -164,6 +164,8 @@
   body.mv-edit-on .hub-item{touch-action:none} /* editing on: a touch-drag on a hub button reshuffles it instead of scrolling the page (v51.7) */
   .hub-item.mv-reorder{opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:60;position:relative}
   .hub-item.mv-insert{box-shadow:inset 3px 0 0 var(--primary)}
+  .hub-item.mv-carry{outline:3px solid var(--mv-blue);outline-offset:1px}
+  .hub-item.mv-carry .hub-btn{color:var(--primary);border-color:var(--mv-blue)}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -2418,6 +2420,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
           else if (!s.insertBefore) urow.appendChild(s.p.el);
           saveHubOrder();
         }
+        s.p.el.__justDragged = true;
+        setTimeout(function(){ s.p.el.__justDragged = false; }, 400);
         suppressClick(s.p);
       } else {
         /* Rule 5: ending a drag with the pointer over another piece
@@ -2481,6 +2485,46 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var keys = Array.prototype.map.call(row.querySelectorAll(".hub-item"), function(it){ return hubKey(it); });
     lsSet(HUBKEY, JSON.stringify(keys));
   }
+  /* Tap-to-swap (v51.8): dragging is unreliable on touch phones
+     (scroll and long-press fight the drag), so with Editing ON a tap
+     on a hub button picks it up and a tap on a second button swaps
+     the two — plain clicks, no drag physics. The order saves through
+     the same saveHubOrder as the drag path. */
+  var hubCarry = null;
+  function hubName(item){
+    var nm = item.querySelector(".hub-name");
+    return (nm && nm.textContent) || "that button";
+  }
+  document.addEventListener("click", function(e){
+    if (!document.body.classList.contains("mv-edit-on")) {
+      if (hubCarry) { hubCarry.classList.remove("mv-carry"); hubCarry = null; }
+      return;
+    }
+    var t = e.target;
+    if (!(t instanceof Element)) return;
+    var row = document.getElementById("hubRow");
+    var item = t.closest(".hub-item");
+    if (!row || !item || !row.contains(item)) return;
+    if (t.closest(".mv-lock") || t.closest(".mv-edit") || t.closest(".mv-grip")) return;
+    if (item.__justDragged) return;
+    e.preventDefault(); e.stopPropagation();
+    if (!hubCarry) {
+      hubCarry = item; item.classList.add("mv-carry");
+      setEditStatus("Moving " + hubName(item) + " — tap the button it should swap with; tap it again to put it back.");
+    } else if (hubCarry === item) {
+      item.classList.remove("mv-carry"); hubCarry = null;
+      setEditStatus("Put back. Nothing moved.");
+    } else {
+      var a = hubCarry, b = item;
+      var aNext = a.nextSibling, bNext = b.nextSibling;
+      if (aNext === b) row.insertBefore(b, a);
+      else if (bNext === a) row.insertBefore(a, b);
+      else { row.insertBefore(a, bNext); row.insertBefore(b, aNext); }
+      a.classList.remove("mv-carry"); hubCarry = null;
+      saveHubOrder();
+      setEditStatus("Swapped " + hubName(a) + " with " + hubName(b) + " — order saved on this device.");
+    }
+  }, true);
   document.querySelectorAll(".hub-item").forEach(function(item, i){
     var btn = item.querySelector(".hub-btn");
     var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
