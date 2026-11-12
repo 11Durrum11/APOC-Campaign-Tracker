@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Crystal Sphere Map — Realmspace</title>
+    <style>
+      :root {
+        --bg: hsl(222 22% 10%);
+        --bg-deep: hsl(222 24% 7%);
+        --panel: hsl(222 20% 14%);
+        --panel-2: hsl(222 18% 17%);
+        --ink: hsl(42 38% 88%);
+        --ink-dim: hsl(42 18% 66%);
+        --ink-faint: hsl(42 14% 52%);
+        --amber: hsl(38 92% 50%);
+        --amber-soft: hsl(38 80% 62%);
+        --line: hsl(222 16% 28%);
+        --line-soft: hsl(222 16% 22%);
+        --wall: hsl(210 30% 62%);
+        --radius: 10px;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      button, select { min-height: 2.25rem; font-family: inherit; }
+      main { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+
+      header.page-head { border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.25rem; }
+      header.page-head h1 { font-size: 1.9rem; line-height: 1.15; margin: 0 0 .4rem; font-weight: normal; letter-spacing: .01em; }
+      header.page-head h1 .sphere-name { color: var(--amber-soft); }
+      header.page-head p { margin: 0; color: var(--ink-dim); max-width: 62ch; }
+      .head-meta { display: flex; flex-wrap: wrap; gap: .45rem 1.4rem; margin-top: .7rem; font-size: .86rem; color: var(--ink-faint); }
+      .head-meta b { color: var(--ink-dim); font-weight: normal; }
+
+      h2 { font-size: 1.3rem; font-weight: normal; margin: 0 0 .6rem; color: var(--ink); }
+      h2 .accent { color: var(--amber-soft); }
+      section { margin-top: 2.2rem; }
+      p.lede { color: var(--ink-dim); max-width: 68ch; margin: 0 0 1rem; }
+
+      /* ---------- Map layout ---------- */
+      .map-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.25rem; align-items: start; }
+      @media (max-width: 880px) { .map-grid { grid-template-columns: 1fr; } }
+
+      .map-frame {
+        background: var(--bg-deep);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: .5rem;
+      }
+      .map-frame svg { display: block; width: 100%; height: auto; }
+      .map-tools { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 0 0 .8rem; }
+      .tool-btn {
+        background: var(--panel-2); color: var(--ink); border: 1px solid var(--line);
+        border-radius: 6px; padding: .35rem .8rem; font-size: .9rem; cursor: pointer;
+      }
+      .tool-btn:hover { border-color: var(--amber); color: var(--amber-soft); }
+      .tool-btn[aria-pressed="true"] { border-color: var(--amber); color: var(--amber-soft); }
+      .map-note { font-size: .85rem; color: var(--ink-faint); margin: 0; }
+
+      /* ---------- Orrery SVG ---------- */
+      .orbit-ring { fill: none; stroke: var(--line-soft); stroke-width: 1; }
+      .sphere-wall { fill: none; stroke: var(--wall); stroke-width: 2; opacity: .75; }
+      .gods-ring { fill: none; stroke: var(--amber); stroke-width: 1.5; stroke-dasharray: 7 9; opacity: .55; }
+      .gods-hit { fill: none; stroke: transparent; stroke-width: 26; cursor: pointer; }
+      .wall-hit { fill: none; stroke: transparent; stroke-width: 20; cursor: pointer; }
+      .star { fill: hsl(42 30% 80%); }
+      .spin { transform-box: view-box; transform-origin: center; animation: spin var(--dur, 60s) linear infinite; }
+      .cspin { transform-box: fill-box; transform-origin: center; animation: spinrev var(--dur, 60s) linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes spinrev { to { transform: rotate(-360deg); } }
+      .paused .spin, .paused .cspin { animation-play-state: paused; }
+      .body { cursor: pointer; outline: none; }
+      .body .hit { fill: transparent; }
+      .body .halo { fill: none; stroke: var(--amber); stroke-width: 1.6; opacity: 0; }
+      .body.selected .halo, .body:focus .halo, .body:hover .halo { opacity: 1; }
+      .body.selected .body-name { fill: var(--amber-soft); }
+      .body-name, .body-dist, .sat-name, .wall-label, .gods-label, .gods-sub { pointer-events: none; }
+      .body-name {
+        fill: var(--ink); font-size: 14.5px; text-anchor: middle; font-family: Georgia, serif;
+        paint-order: stroke; stroke: var(--bg-deep); stroke-width: 4px; stroke-linejoin: round;
+      }
+      .body-dist {
+        fill: var(--ink-dim); font-size: 10.5px; text-anchor: middle; font-family: Georgia, serif;
+        paint-order: stroke; stroke: var(--bg-deep); stroke-width: 3.5px; stroke-linejoin: round;
+      }
+      .sat-name {
+        fill: var(--ink-dim); font-size: 10.5px; text-anchor: middle; font-family: Georgia, serif;
+        paint-order: stroke; stroke: var(--bg-deep); stroke-width: 3.5px; stroke-linejoin: round;
+      }
+      .wall-label { fill: var(--wall); font-size: 13px; letter-spacing: .18em; text-anchor: middle; font-family: Georgia, serif; opacity: .9; }
+      .gods-label { fill: var(--amber-soft); font-size: 14px; letter-spacing: .22em; text-anchor: middle; font-family: Georgia, serif; }
+      .gods-sub { fill: var(--ink-dim); font-size: 11.5px; letter-spacing: .06em; text-anchor: middle; font-family: Georgia, serif; }
+      .glyth-ring { fill: none; stroke: hsl(38 45% 66%); stroke-width: 1.6; opacity: .8; }
+      .vine { fill: none; stroke: hsl(120 28% 52%); stroke-width: 1.6; opacity: .75; }
+
+      /* ---------- Detail panel ---------- */
+      .detail {
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+        padding: 1.1rem 1.15rem 1.2rem; position: sticky; top: 1rem;
+      }
+      @media (max-width: 880px) { .detail { position: static; } }
+      .detail .place-tag { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--amber-soft); margin: 0 0 .25rem; }
+      .detail h2 { font-size: 1.55rem; margin: 0 0 .8rem; }
+      .detail dl { margin: 0; }
+      .detail .row { border-top: 1px solid var(--line-soft); padding: .55rem 0; }
+      .detail .row:first-child { border-top: none; padding-top: 0; }
+      .detail dt { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: .15rem; }
+      .detail dd { margin: 0; }
+      .detail dd.not-recorded { color: var(--ink-faint); font-style: italic; }
+      .detail .dist-big { font-size: 1.15rem; color: var(--amber-soft); }
+
+      /* ---------- Table ---------- */
+      .table-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
+      table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+      caption { text-align: left; padding: .8rem 1rem; color: var(--ink-dim); font-size: .9rem; }
+      th, td { padding: .55rem .8rem; text-align: left; vertical-align: top; }
+      thead th { font-size: .76rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); font-weight: normal; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+      tbody tr { border-top: 1px solid var(--line-soft); cursor: pointer; }
+      tbody tr:first-child { border-top: none; }
+      tbody tr:hover { background: var(--panel-2); }
+      tbody tr.selected { background: var(--panel-2); box-shadow: inset 3px 0 0 var(--amber); }
+      td.num, th.num { text-align: right; white-space: nowrap; }
+      td .sub { display: block; color: var(--ink-faint); font-size: .83rem; }
+      tr.sat td:first-child { padding-left: 1.9rem; }
+      tr.sat td .body-cell::before { content: "— "; color: var(--ink-faint); }
+      @media (max-width: 560px) {
+        table { font-size: .86rem; }
+        th, td { padding: .5rem .5rem; }
+        td .sub { font-size: .78rem; }
+        .hide-sm { display: none; }
+      }
+
+      /* ---------- Campaign state ---------- */
+      .cut-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+      .cut-item { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; }
+      .cut-item h3 { margin: 0 0 .4rem; font-size: 1.05rem; font-weight: normal; color: var(--amber-soft); }
+      .cut-item p { margin: 0; color: var(--ink-dim); font-size: .95rem; }
+      .cut-item .tool-btn { margin-top: .7rem; }
+
+      .unsettled { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.2rem; }
+      .unsettled ul { margin: 0; padding-left: 1.25rem; color: var(--ink-dim); }
+      .unsettled li { margin: .35rem 0; }
+      .unsettled li::marker { color: var(--amber); }
+
+      /* ---------- Spelljammer layer ---------- */
+      .sj-intro { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+      .sj-block { margin-top: 1.4rem; }
+      .sj-block h3 { font-size: 1.12rem; font-weight: normal; color: var(--amber-soft); margin: 0 0 .35rem; }
+      .sj-block h3 .count { color: var(--ink-faint); font-size: .85rem; }
+      .sj-block > p { color: var(--ink-dim); max-width: 68ch; margin: 0 0 .7rem; font-size: .96rem; }
+      .name-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .35rem; }
+      .name-list li { background: var(--panel); border: 1px solid var(--line-soft); border-radius: 6px; padding: .22rem .55rem; font-size: .88rem; color: var(--ink); }
+      .name-list li .qual { color: var(--ink-faint); font-size: .82rem; }
+      .name-list li.hidden-by-filter { display: none; }
+      .fleet-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; margin-top: 1rem; }
+      .fleet-card h3 { font-size: 1.08rem; font-weight: normal; color: var(--amber-soft); margin: 0 0 .3rem; }
+      .fleet-card h3 .count { color: var(--ink-faint); font-size: .85rem; }
+      .fleet-card > p { color: var(--ink-dim); margin: 0 0 .7rem; font-size: .95rem; max-width: 68ch; }
+      .fleet-card .name-list li { background: var(--panel-2); }
+      .homebrew-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .7rem; margin: 0 0 .8rem; }
+      .homebrew-ship { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: .7rem .8rem; font-size: 1rem; color: var(--ink); text-align: center; }
+      .people-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .7rem; }
+      .people-grid .person { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .65rem .8rem; text-align: center; font-size: 1rem; }
+      .sj-filter { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1rem 0 .2rem; }
+      .sj-filter label { font-size: .9rem; color: var(--ink-dim); }
+      .sj-filter input {
+        background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+        padding: .45rem .7rem; font-family: inherit; font-size: .95rem; min-height: 2.25rem; flex: 1 1 200px; max-width: 340px;
+      }
+      .sj-filter input:focus { outline: 2px solid var(--amber); outline-offset: 1px; }
+      .sj-filter .filter-note { font-size: .85rem; color: var(--ink-faint); margin: 0; }
+      .era-label { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); margin: .8rem 0 .35rem; }
+
+      footer { margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1rem; color: var(--ink-faint); font-size: .86rem; max-width: 72ch; }
+      footer p { margin: .3rem 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-head">
+        <h1>Realmspace — <span class="sphere-name">Map of the Crystal Sphere</span></h1>
+        <p>Every world, moon, and rock placed inside the sphere, in order out from the Sun — the published placements, and what the Closing changed about them. Tap any body on the orrery, or any row in the table, to open its record. Below the placements rides the whole Spelljammer layer Shaun has brought into the game — ships, helms, peoples, spells, and gear — kept here as canon.</p>
+        <div class="head-meta">
+          <span><b>Record:</b> Realmspace (SJR2), the original governs</span>
+          <span><b>Sphere radius:</b> 3,200 million miles</span>
+          <span><b>Worlds:</b> Eight planets, Sun at center</span>
+        </div>
+      </header>
+
+      <div class="map-tools">
+        <button class="tool-btn" id="turnToggle" type="button" aria-pressed="false">Pause the turning</button>
+        <p class="map-note">Orbit rings are compressed to fit the page — every distance is given true in the labels, the record panel, and the table. The turning is illustrative, not to scale.</p>
+      </div>
+
+      <div class="map-grid">
+        <div class="map-frame" id="mapFrame">
+          <svg id="orrery" viewBox="0 0 1160 1160" role="img" aria-label="Orrery diagram of Realmspace: the Sun at the center, eight planets on their orbit rings, moons at Toril, Glyth, Garden, and H'Catha, the crystal sphere wall, and the gods beyond it"></svg>
+        </div>
+
+        <aside class="detail" id="detailPanel" aria-live="polite">
+          <p class="place-tag" id="dPlaceTag"></p>
+          <h2 id="dName"></h2>
+          <dl>
+            <div class="row">
+              <dt>Place</dt>
+              <dd id="dPlace"></dd>
+            </div>
+            <div class="row">
+              <dt>Body</dt>
+              <dd id="dType"></dd>
+            </div>
+            <div class="row">
+              <dt>Distance from the Sun</dt>
+              <dd class="dist-big" id="dDist"></dd>
+            </div>
+            <div class="row">
+              <dt>Moons &amp; satellites</dt>
+              <dd id="dMoons"></dd>
+            </div>
+            <div class="row">
+              <dt>Placement — the published record</dt>
+              <dd id="dPlacement"></dd>
+            </div>
+            <div class="row">
+              <dt>Since the APOC</dt>
+              <dd id="dApoc"></dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+
+      <section aria-labelledby="tableHead">
+        <h2 id="tableHead">All placements, <span class="accent">in order from the Sun</span></h2>
+        <div class="table-wrap">
+          <table>
+            <caption>Spelljamming distances from the Sun, in millions of miles, per the published record. Select a row to open that body's record.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Body</th>
+                <th scope="col" class="hide-sm">Kind</th>
+                <th scope="col" class="num">Distance</th>
+                <th scope="col" class="hide-sm">Moons &amp; satellites</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="cutHead">
+        <h2 id="cutHead">Since the APOC — <span class="accent">the Closing, called the Cut</span></h2>
+        <p class="lede">A thousand years after the apocalypse, the placements above stand exactly as the record sets them. What changed is not where things are — it is what can reach them.</p>
+        <div class="cut-list">
+          <div class="cut-item">
+            <h3>Scarred shut</h3>
+            <p>The sphere is scarred shut. Nothing crosses the wall in either direction, and all planar travel is severed — permanently.</p>
+          </div>
+          <div class="cut-item">
+            <h3>The gods are outside</h3>
+            <p>The gods are beyond the wall. They can see in, but they cannot touch, interact with, or influence anything inside the sphere.</p>
+            <button class="tool-btn" type="button" data-select="gods">Show the Gods on the map</button>
+          </div>
+          <div class="cut-item">
+            <h3>The Fog of Life</h3>
+            <p>From Toril's surface, neither sun nor stars are seen. The Fog of Life fills the sky — grey light and grey dark. The Sun still burns at the center; it is simply never seen.</p>
+            <button class="tool-btn" type="button" data-select="toril">Show Toril on the map</button>
+          </div>
+          <div class="cut-item">
+            <h3>Power is drawn, not granted</h3>
+            <p>The gods' silence changes nothing about the placements. Inside the sphere, power is drawn, not granted — every world sits where the record put it.</p>
+          </div>
+          <div class="cut-item">
+            <h3>The other worlds</h3>
+            <p>In and of themselves, the other planets have not directly been touched by portals — no rifts opened on them. But incursions have been made by the demons, with Toril as the demons' home base for those incursions.</p>
+            <button class="tool-btn" type="button" data-select="glyth">Show an outer world on the map</button>
+          </div>
+          <div class="cut-item">
+            <h3>Stations of the sphere</h3>
+            <p>The Rock of Brawl still floats anchored above the Bastion, out in deep space off Toril's surface — a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record.</p>
+            <button class="tool-btn" type="button" data-select="rockofbrawl">Show the Rock of Brawl</button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sjHead">
+        <h2 id="sjHead">The Spelljammer layer — <span class="accent">canon in this sphere</span></h2>
+        <p class="lede">Spelljammer is Shaun's standing exception, and it stands here in full: everything he has brought into the game — the ships and their deck plans, the helms, the peoples of space, the spells, the gear, and how it all works — is canon for this sphere and rides on this map. The APOC state still governs it all: the wall stays scarred shut, there is no planar travel, and there is no summoning. What sails, sails inside the sphere.</p>
+
+        <div class="sj-intro">
+          <div class="cut-item">
+            <h3>How it works</h3>
+            <p>A ship flies because a helm drinks a spellcaster's power and turns it into motion. Around every hull rides an envelope of air the crew breathes; gravity settles along a plane through the ship, so decks hold "down" even in the void. Beyond the sphere wall lies the Phlogiston, the rainbow flow between spheres — sailed for ages before the Cut, and cut off now with everything else outside.</p>
+          </div>
+          <div class="cut-item">
+            <h3>Under the Cut</h3>
+            <p>The workings themselves never changed — helms still answer, air still holds, ships still ply wildspace between the worlds on the orrery above. What the Closing took is the way out: the old portal craft is kept in the record as written, but nothing crosses the scarred wall, in either direction, ever.</p>
+          </div>
+        </div>
+
+        <div class="sj-block">
+          <h3>The workings, whole <span class="count">— the incorporated record, topic by topic</span></h3>
+          <p>Every part of how spelljamming works, as it stands in the game:</p>
+          <ul class="name-list">
+            <li>The Helm</li><li>Ship's Rating</li><li>Two Speeds</li><li>Air Envelope</li><li>Ship's Air</li><li>Gravity Planes</li><li>Hull &amp; Saves</li><li>Shipboard Combat</li><li>The Phlogiston</li><li>Spheres &amp; Wildspace</li><li>Maneuver Classes</li><li>Tonnage</li><li>Helm Endurance</li><li>Series &amp; Pool Helms</li><li>Lifejammers &amp; Death Helms</li><li>Furnaces &amp; Forges</li><li>Sailing the Flow</li><li>Dangers of the Flow</li><li>Personal Air</li><li>Helm Warfare</li><li>Cosmic Storms</li><li>In APOC</li>
+          </ul>
+        </div>
+
+        <div class="sj-block">
+          <h3>Peoples of space <span class="count">— eight peoples with records in the game</span></h3>
+          <p>The sphere is not empty between its worlds. These peoples sail it, trade across it, and war over it — and behind them all stand the Arcane, the helm-dealers who sell the engines of flight to everyone and answer to no one, and the spacefaring lizard men, known from the record's prose.</p>
+          <div class="people-grid">
+            <div class="person">Dracon</div>
+            <div class="person">Giff</div>
+            <div class="person">Grommam</div>
+            <div class="person">Hadozee</div>
+            <div class="person">Hurwaet</div>
+            <div class="person">Rastipede</div>
+            <div class="person">Scro</div>
+            <div class="person">Xixchil</div>
+          </div>
+        </div>
+
+        <div class="sj-block">
+          <h3>Helms &amp; engines <span class="count">— every named type in the game</span></h3>
+          <p>What moves everything on this map. Spellcasters sit the classic helms; furnaces burn magic itself for fuel; forges are rowed by dwarven muscle and craft; an orbus is a beholder, bred to be an engine; lifejammers drink life instead of spells, and death helms drink the sitter. Beyond the named types, the record also carries spelljamming and tactical-only helms priced across every hull size and speed, helm batteries that store power for the taking, and two helms named inside ship records — the thri-kreen Crystal Throne and the Insectare helm.</p>
+          <ul class="name-list">
+            <li>Series Helm</li><li>Minor Helm</li><li>Major Helm</li><li>Furnace</li><li>Artifurnace</li><li>Death Helm <span class="qual">(Deathjammer)</span></li><li>Pool Helm</li><li>Ki Helm</li><li>Grand Helm</li><li>Radiant Helm</li><li>Bardic Helm</li><li>Forge <span class="qual">(Dwarven Engine)</span></li><li>Orbus <span class="qual">(Beholder Engine)</span></li><li>Pump Helm <span class="qual">(The Pump)</span></li><li>Beacon Helm</li><li>Gnomish Helm</li><li>Crown of the Stars</li><li>Non-Magical Engines</li><li>Lifejammer</li><li>Charge Forcer</li><li>Life Forcer</li>
+          </ul>
+        </div>
+
+        <div class="sj-block">
+          <h3>The spellcraft of space <span class="count">— every spelljamming spell in the game</span></h3>
+          <p>The magic that keeps crews breathing and helms turning: air made from nothing, ratings and maneuverability coaxed higher, helms created — and helms destroyed — and the old portal craft, kept as written under the Cut.</p>
+          <p class="era-label">From the boxed set</p>
+          <ul class="name-list">
+            <li>Locate Portal</li><li>Chill Fire</li><li>Enhance Rating</li><li>Create Air</li><li>Contact Home Power</li><li>Detect Powers</li><li>Softwood</li><li>Create Portal</li><li>Enhance Maneuverability</li><li>Create Minor Helm</li><li>Create Major Helm</li>
+          </ul>
+          <p class="era-label">From the wider line</p>
+          <ul class="name-list">
+            <li>Airsphere</li><li>Arcane Runes</li><li>Read Arcane Runes</li><li>Spark Burst</li><li>Flyfield</li><li>Disable Helm</li><li>Collapse Portal</li><li>Create Atmosphere</li><li>Destroy Minor Helm</li><li>Destroy Major Helm</li><li>Summon Cosmic Storm</li><li>Debris Barrier</li><li>Sunflare</li><li>Sunstrike</li><li>Sungate</li><li>Sunscream</li><li>Sunshield</li>
+          </ul>
+        </div>
+
+        <div class="sj-filter">
+          <label for="fleetFilter">Find a ship in the fleets below:</label>
+          <input id="fleetFilter" type="search" placeholder="Try “Mammoth”, “Wasp”, “Vodoni”…" autocomplete="off" />
+          <p class="filter-note" id="filterNote" aria-live="polite"></p>
+        </div>
+
+        <div class="fleet-card">
+          <h3>The boxed-set fleet <span class="count">— the original hulls, from Shaun's own copy of Adventures in Space</span></h3>
+          <p>The first fleet of the sphere: elven wings grown rather than built, beholder tyrant ships, the mind flayers' nautiloids, the neogi's spider hulls, the dwarven citadel that is a flying mountain town — and above them all, The Spelljammer itself, the great living ship no fleet owns. The groundling hulls at the end are ordinary sea ships that fly when a helm is set in them.</p>
+          <ul class="name-list">
+            <li>Flitter <span class="qual">(Elven Flitter)</span></li><li>Mosquito</li><li>Caravel</li><li>Dragonfly</li><li>Damselfly</li><li>Wasp</li><li>Tyrant Ship <span class="qual">(Beholder Tyrant Ship)</span></li><li>Tradesman</li><li>Gnomish Sidewheeler</li><li>Nautiloid <span class="qual">(Mind Flayer Nautiloid)</span></li><li>Neogi Mindspider</li><li>Galleon</li><li>Squid Ship</li><li>Dragonship</li><li>Hammership</li><li>Man-o-War <span class="qual">(Elven Man-o-War)</span></li><li>Neogi Deathspider</li><li>Armada <span class="qual">(Elven Armada)</span></li><li>Citadel <span class="qual">(Dwarven Citadel)</span></li><li>The Spelljammer</li><li>Coaster <span class="qual">(groundling hull)</span></li><li>Cog <span class="qual">(groundling hull)</span></li><li>Longship <span class="qual">(groundling hull)</span></li><li>Dromond <span class="qual">(groundling hull)</span></li><li>Drakkar <span class="qual">(groundling hull)</span></li><li>Great Galley <span class="qual">(groundling hull)</span></li>
+          </ul>
+          <p style="margin:.7rem 0 0;">Carried in the same record: the <b>Dracon Large Dart</b>, the dracons' ship weapon.</p>
+        </div>
+
+        <div class="fleet-card">
+          <h3>The wider fleet, first gathering <span class="count">— hulls drawn from Lost Ships, the War Captain's Companion, The Legend of Spelljammer, and the wider line</span></h3>
+          <p>Lost ships raised back into service, the Wa fleet from the east, Vodoni scouts ranging ahead of their empire, a flying library, a flying pyramid, and the Great Bombard — a ship built around a single Giant Cannon, which stands in the ship-weapons record in its own right.</p>
+          <ul class="name-list">
+            <li>Angelship</li><li>Antlership</li><li>Argosy</li><li>Barge of Ptah</li><li>Batship</li><li>Battle Dolphin</li><li>Bolaship</li><li>Bloatfly</li><li>Cargo Barge</li><li>Catamaran</li><li>Clipper</li><li>Cuttle Command</li><li>Eagle Ship</li><li>Eel Ship</li><li>Goblin Blade</li><li>Great Bombard</li><li>Hammerhead</li><li>Jade Spider</li><li>Jade Spider Commandship</li><li>Junk</li><li>Klicklikak</li><li>Lamprey Ship</li><li>Leaf Ship</li><li>Leech</li><li>Locust <span class="qual">(Wa)</span></li><li>Mammoth</li><li>Mantis</li><li>Armada, Monarch Class</li><li>Nightwolf <span class="qual">(Vodoni Scout)</span></li><li>Octopus</li><li>Pyramid Ship</li><li>Quentin's Libraria</li><li>Scorpion</li><li>Shrike</li><li>Spacesea Giant Galleon</li><li>Thorn Ship</li><li>Tsunami <span class="qual">(Wa)</span></li><li>Tyrant Scout Ship</li><li>Urchin</li><li>Man-o-War, Archaic</li>
+          </ul>
+        </div>
+
+        <div class="fleet-card">
+          <h3>The wider fleet, second gathering <span class="count">— the hulls gathered afterward, read from the printed ship cards and catalogs</span></h3>
+          <p>The rest of the sphere's traffic: Vodoni killers and butchers, the Smalljammer that grows into greatness, a ship that is a garden and an ark at once, ships of crystal and stone, and the humble life boats and rock-hopper skiffs that keep crews alive when the great hulls fail.</p>
+          <ul class="name-list">
+            <li>Quad of Thay</li><li>Triop</li><li>Unity Ship</li><li>Whaleship</li><li>Gnomish Whelk</li><li>Illithid Dreadnought</li><li>Smalljammer</li><li>Hunter-Killer <span class="qual">(Vodoni Assassin)</span></li><li>Werewolf <span class="qual">(Vodoni Butcher)</span></li><li>The Vul <span class="qual">(Imperial War Galley)</span></li><li>Deathglory</li><li>Porcupine Ship <span class="qual">(Spine-Ship)</span></li><li>Skeleton Ship <span class="qual">(Boneship)</span></li><li>Space Leviathan</li><li>Stoneship</li><li>Swan Ship</li><li>Turtle Ship <span class="qual">(Battle Boat)</span></li><li>Vipership <span class="qual">(DarkViper)</span></li><li>Wreckboat</li><li>Dinotherium</li><li>Archimperator <span class="qual">(Kingship)</span></li><li>Doombat</li><li>Crystal Ship</li><li>Thoric Tradesman</li><li>Lanceship</li><li>Battlewagon</li><li>Corbina</li><li>Hummingbird</li><li>Iambus</li><li>Radiant Ship</li><li>Uspo</li><li>Zoocraft <span class="qual">(Gardenship, Ark)</span></li><li>Scalpel Ship</li><li>Skiff <span class="qual">(Rock Hopper Skiff)</span></li><li>Peddleship</li><li>Vagabond</li><li>Xebec</li><li>Yacht <span class="qual">(Arcane Yacht)</span></li><li>Dwarven Mining Ship</li><li>Dolphin Shuttle</li><li>Life Boat</li>
+          </ul>
+        </div>
+
+        <div class="fleet-card">
+          <h3>Shaun's own fleet <span class="count">— six homebrew warships, on major helms</span></h3>
+          <p>Not found in any book: Shaun's own spelljamming warships, built from his own hand and sailing this sphere as surely as any printed hull. All six share one standard fit — free turrets, an ammunition distribution system, heavy cannon, and the ever-present risk written into the black powder misfires table.</p>
+          <div class="homebrew-grid">
+            <div class="homebrew-ship">Fubu</div>
+            <div class="homebrew-ship">Helebalu</div>
+            <div class="homebrew-ship">Isseum</div>
+            <div class="homebrew-ship">The Lady's Grace</div>
+            <div class="homebrew-ship">Loperwood</div>
+            <div class="homebrew-ship">The Enemy Battleship</div>
+          </div>
+          <ul class="name-list">
+            <li>Free Turret <span class="qual">(ship weapon mount)</span></li><li>Ammunition Distribution System</li><li>Heavy Cannon</li><li>Black Powder Misfires <span class="qual">(table)</span></li>
+          </ul>
+        </div>
+
+        <div class="fleet-card">
+          <h3>Airships <span class="count">— the sky fleet that flies without a helm</span></h3>
+          <p>Not every flying ship in the game rides a spelljamming helm. These hulls fly on engines of their own — arcane and divine, elemental air and fire, fiendish, necrotic, vampiric, or plain oil and wood burned in a boiler — and among their crews walks the Airship Saboteur, who makes a profession of unmaking them.</p>
+          <ul class="name-list">
+            <li>Airship <span class="qual">(Sprint Freighter)</span></li><li>Airship <span class="qual">(Asherake Sunshadow)</span></li><li>Airship <span class="qual">(Dwarven Waraxe)</span></li><li>Airship <span class="qual">(Fleshstalker)</span></li><li>Airship <span class="qual">(Elvish Cloudleaper)</span></li><li>Airship <span class="qual">(Elvish Skyscout)</span></li><li>Airship <span class="qual">(Spindire Dragonship)</span></li>
+          </ul>
+          <p class="era-label">Engines &amp; fittings</p>
+          <ul class="name-list">
+            <li>Airship Engine — Arcane</li><li>Airship Engine — Divine</li><li>Airship Engine — Elemental, Air</li><li>Airship Engine — Elemental, Fire</li><li>Airship Engine — Energy</li><li>Airship Engine — Fiendish</li><li>Airship Engine — Necrotic</li><li>Airship Engine — Oil-Burning</li><li>Airship Engine — Vampiric</li><li>Airship Engine — Wood-Burning</li><li>Reactive Map</li><li>Engine Swivel</li><li>Fire Thrower <span class="qual">(airship weapon)</span></li><li>Airship Saboteur <span class="qual">(prestige class)</span></li>
+          </ul>
+        </div>
+
+        <div class="fleet-card">
+          <h3>Sea ships <span class="count">— the wet fleet, era by era</span></h3>
+          <p>The ships of Toril's own waters stand in the same record — the hulls a helm turns into spelljammers, and the fleets every port in the sphere knows. Among them sails one named vessel: the galleon <b>Sunken Dreams</b>.</p>
+          <p class="era-label">Longship era</p>
+          <ul class="name-list"><li>Longboat</li><li>Longship</li><li>Drakkar</li></ul>
+          <p class="era-label">Galley era</p>
+          <ul class="name-list"><li>Fusta</li><li>Galley</li><li>Galeass</li><li>Great Galley</li><li>Brigantine</li></ul>
+          <p class="era-label">Early merchant ships</p>
+          <ul class="name-list"><li>Cog</li><li>Round Ship</li><li>Grain Ship</li></ul>
+          <p class="era-label">Carrack era</p>
+          <ul class="name-list"><li>Caravel</li><li>Small Carrack</li><li>Large Carrack</li><li>Great Carrack</li><li>Xebec</li></ul>
+          <p class="era-label">Galleon era</p>
+          <ul class="name-list"><li>Galleon</li><li>Merchant</li><li>Man-o-War</li><li>Royal Galleon</li><li>Frigate</li></ul>
+          <p class="era-label">Small ships</p>
+          <ul class="name-list"><li>Ketch</li><li>Polacre</li><li>Keelboat</li><li>Pinnace</li><li>Yacht</li><li>Fishing Boat</li><li>Sailboat</li></ul>
+          <p class="era-label">Fantastic ships</p>
+          <ul class="name-list"><li>Dwarven Knorr</li><li>Dwarven Skaid</li><li>Elven Fusta</li><li>Elven Galley</li><li>Gnomish Paddlewheeler</li><li>Gnomish Fluit</li><li>Orcish Dromon</li></ul>
+        </div>
+
+        <div class="sj-block">
+          <h3>Ship weapons &amp; combat <span class="count">— the standard armament, in three weights</span></h3>
+          <p>What the fleets shoot with, from stone and bolt to the Giant Cannon of the Great Bombard:</p>
+          <ul class="name-list">
+            <li>Ship Ballista <span class="qual">(Light / Medium / Heavy)</span></li><li>Ship Stonethrower <span class="qual">(Light / Medium / Heavy)</span></li><li>Ship Catapult <span class="qual">(Light / Medium / Heavy)</span></li><li>Ship Bombard <span class="qual">(Light / Medium / Heavy)</span></li><li>Ship Jettison <span class="qual">(Light / Medium / Heavy)</span></li><li>Standard Turret</li><li>Free Turret</li><li>Giant Cannon</li><li>Dracon Large Dart</li><li>Heavy Cannon <span class="qual">(Shaun's fleet)</span></li>
+          </ul>
+        </div>
+
+        <div class="sj-block">
+          <h3>Sailing gear &amp; enhancements <span class="count">— a dozen enchantments for a working ship</span></h3>
+          <p>Magic worked into hull and rigging, carried alongside the fleets — with the spell Delay Sinking, the feat God's Favor, and a table of a hundred ship names for the naming of new hulls:</p>
+          <ul class="name-list">
+            <li>Animated Oars</li><li>Arcane Anchor</li><li>Bowsprit of War</li><li>Enchanted Cannonball</li><li>Fear Guard Figurehead</li><li>Gunwale of Deflection</li><li>Keel of Unearthly Strength</li><li>Living Mast and Sail</li><li>Resilient Hull Plank</li><li>Sails of Speed</li><li>Self-Repairing Sails</li><li>Trusted Wheel</li><li>Delay Sinking <span class="qual">(spell)</span></li><li>God's Favor <span class="qual">(feat)</span></li><li>100 Ship Names <span class="qual">(table)</span></li>
+          </ul>
+        </div>
+
+        <div class="sj-block">
+          <h3>Deck plans <span class="count">— the plans kept with the ships</span></h3>
+          <p>A ship on this map is not just a name: the plans of its decks are kept with it, sheet by sheet, ready to walk. Plans ride on the records of the Sprint Freighter, Dragonfly, Dragonship, Drakkar, Hammership, Nautiloid, Neogi Mindspider, Squid Ship, Tradesman, Wasp, Angelship, Archaic Man-o-War, Bloatfly, Cargo Barge, Cuttle Command, Deathglory, Dwarven Mining Ship, Eel Ship, Goblin Blade, Hummingbird, Lamprey Ship, Leaf Ship — whose sheet also covers the Thorn Ship — Mammoth, Mantis, Monarch Armada, Nightwolf, Octopus, Porcupine Ship, Pyramid Ship, Quad of Thay, Quentin's Libraria, Shrike, Skeleton Ship, Swan Ship, Turtle Ship, Unity Ship, Vipership, Vodoni Hunter-Killer, Vodoni Werewolf, and Wreckboat.</p>
+          <p>Some sheets belong to named vessels rather than classes: the Dragonfly <i>Terigamar</i>, the Drakkar <i>Raven</i>, the Hammership <i>Barracuda</i>, the Mindspider <i>Collector</i>, the Nautiloid <i>Void Reaper</i>, the Squid Ship <i>Frostfire</i>, the Vipership <i>Mithril Serpent</i>, and a drow Wasp. Shaun's own maps collection keeps plan sheets of its own — three for the DeathGlory (top deck; fore, flying and aft decks; cargo deck) and two for the Ogre Mammoth (cargo and upper decks; main and top decks), the only ships whose plans live in every keeping at once — and its catalog records an image of the Rock of Bral, the great port of wildspace, kept distinct from the Rock of Brawl that rides above the Bastion on the orrery, together with a Spelljammer Academy map and the boxed set's own sphere map.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="unsettledHead">
+        <h2 id="unsettledHead">What the record <span class="accent">has not settled</span></h2>
+        <div class="unsettled">
+          <ul>
+            <li>Where the dead go, now that the planes are cut.</li>
+            <li>The outcomes and extent of the demon incursions on the other worlds, world by world.</li>
+            <li>Whether anything has crossed the wall in a thousand years — nothing recorded says it has.</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <p>Placements, body types, and distances follow the published Realmspace record (SJR2). Post-apocalypse state is recorded only where the campaign record settles it; everywhere else the record is left honestly blank.</p>
+        <p>The Spelljammer layer is compiled from the campaign's own incorporated records: the boxed set (Shaun's copy of Spelljammer: Adventures in Space), the wider 2e line gathered into the game (Lost Ships, War Captain's Companion, The Legend of Spelljammer, The Astromundi Cluster, and more), Bastion Press Airships, Pirates!, Shaun's own homebrew ships and files, and the deck plans kept in his maps collection.</p>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        var NOT_RECORDED = "Not recorded \u2014 the record does not say.";
+        var SVGNS = "http://www.w3.org/2000/svg";
+        var CX = 580, CY = 580, WALL_R = 460, GODS_R = 522;
+
+        function orbitR(distM) { return WALL_R * Math.pow(distM / 3200, 0.45); }
+        function polar(r, deg) {
+          var a = (deg - 90) * Math.PI / 180;
+          return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+        }
+        function el(tag, attrs, parent) {
+          var n = document.createElementNS(SVGNS, tag);
+          for (var k in attrs) n.setAttribute(k, attrs[k]);
+          if (parent) parent.appendChild(n);
+          return n;
+        }
+        function txt(parent, x, y, str, cls) {
+          var t = el("text", { x: x, y: y, "class": cls }, parent);
+          t.textContent = str;
+          return t;
+        }
+
+        /* ---------------- Data: the published record + APOC state ---------------- */
+        var BODIES = [
+          {
+            id: "sun", name: "The Sun", placeTag: "Center of the sphere", place: "Center \u2014 every placement is measured out from it",
+            type: "Spherical fire body", distM: 0, distLabel: "0 \u2014 the center", distShort: "center",
+            moons: "None \u2014 the worlds orbit it",
+            placement: "The published record sets the Sun at the center of the sphere, a spherical fire body; every distance in Realmspace runs out from it.",
+            apoc: "It still burns at the sphere\u2019s center \u2014 but it is never seen from Toril\u2019s surface. The Fog of Life fills the sky there: grey light and grey dark, no visible sun, no stars.",
+            r: 37, fill: "hsl(42 95% 58%)", angle: 0, dur: 0
+          },
+          {
+            id: "anadia", name: "Anadia", placeTag: "1st planet", place: "First planet out from the Sun",
+            type: "Spherical earth body", distM: 50, distLabel: "50 million miles", distShort: "50M mi",
+            moons: "None in the record",
+            placement: "First planet from the Sun in the published record.",
+            apoc: NOT_RECORDED,
+            r: 9, fill: "hsl(28 42% 52%)", angle: 305, dur: 26
+          },
+          {
+            id: "coliar", name: "Coliar", placeTag: "2nd planet", place: "Second planet out from the Sun",
+            type: "Spherical air body \u2014 a gas giant", distM: 100, distLabel: "100 million miles", distShort: "100M mi",
+            moons: "None in the record",
+            placement: "Second planet from the Sun in the published record \u2014 a spherical air body, a gas giant.",
+            apoc: NOT_RECORDED,
+            r: 20, fill: "hsl(200 32% 62%)", angle: 140, dur: 36
+          },
+          {
+            id: "toril", name: "Toril", placeTag: "3rd planet \u2014 the campaign world", place: "Third planet out from the Sun",
+            type: "Spherical earth body", distM: 200, distLabel: "200 million miles", distShort: "200M mi",
+            moons: "Sel\u00fbne, its one true moon; the Tears of Sel\u00fbne trailing her; Dragon Rock in its vicinity",
+            placement: "Third planet from the Sun in the published record \u2014 a spherical earth body with one true moon, Sel\u00fbne, and the Tears of Sel\u00fbne trailing her.",
+            apoc: "The Fog of Life fills the sky: from the surface, neither sun nor stars are seen \u2014 grey light and grey dark only. The gods are silent beyond the wall, and power here is drawn, not granted. Toril is also the demons\u2019 home base \u2014 the incursions onto the other worlds are launched from here.",
+            r: 13, fill: "hsl(158 32% 46%)", angle: 22, dur: 50
+          },
+          {
+            id: "selune", satelliteOf: "toril", name: "Sel\u00fbne", placeTag: "Moon of Toril", place: "Toril\u2019s one true moon",
+            type: "Spherical earth body", distM: null, distLabel: "In Toril\u2019s orbit \u2014 200 million miles from the Sun", distShort: "",
+            moons: "Trailed by the Tears of Sel\u00fbne",
+            placement: "Toril\u2019s one true moon in the published record \u2014 a spherical earth body with lands and peoples of its own.",
+            apoc: NOT_RECORDED
+          },
+          {
+            id: "tears", satelliteOf: "toril", name: "The Tears of Sel\u00fbne", placeTag: "Asteroid cluster", place: "Trailing Sel\u00fbne in Toril\u2019s orbit",
+            type: "Asteroid cluster \u2014 a string of rocky shards", distM: null, distLabel: "In Toril\u2019s orbit \u2014 200 million miles from the Sun", distShort: "",
+            moons: "The cluster itself is many shards; Dragon Rock is its named rock (below)",
+            placement: "An asteroid cluster trailing Sel\u00fbne \u2014 a string of rocky shards following the moon around Toril.",
+            apoc: NOT_RECORDED
+          },
+          {
+            id: "dragonrock", satelliteOf: "toril", name: "Dragon Rock", placeTag: "Named asteroid", place: "Free-floating in Toril\u2019s vicinity",
+            type: "Asteroid \u2014 a trading rock", distM: null, distLabel: "In Toril\u2019s vicinity \u2014 200 million miles from the Sun", distShort: "",
+            moons: "None \u2014 it is itself a satellite rock of Toril\u2019s neighborhood",
+            placement: "A named asteroid of Toril\u2019s vicinity in the published record \u2014 a free-floating trading rock.",
+            apoc: NOT_RECORDED
+          },
+          {
+            id: "rockofbrawl", satelliteOf: "toril", name: "The Rock of Brawl", placeTag: "Station \u2014 anchored above the Bastion", place: "Anchored above the Bastion, out in deep space off Toril\u2019s surface",
+            type: "Station \u2014 a floating rock", distM: null, distLabel: "Off Toril\u2019s surface \u2014 Toril lies 200 million miles from the Sun", distShort: "",
+            moons: "None \u2014 it is itself a station in Toril\u2019s neighborhood",
+            placement: "The published Realmspace record does not place it; it stands in the campaign record as a station off Toril. Not to be confused with Dragon Rock, the published record\u2019s trading rock.",
+            apoc: "It still floats, anchored above the Bastion, out in deep space off Toril\u2019s surface \u2014 a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record."
+          },
+          {
+            id: "karpri", name: "Karpri", placeTag: "4th planet", place: "Fourth planet out from the Sun",
+            type: "Spherical water body", distM: 300, distLabel: "300 million miles", distShort: "300M mi",
+            moons: "None in the record",
+            placement: "Fourth planet from the Sun in the published record \u2014 a spherical water body.",
+            apoc: NOT_RECORDED,
+            r: 11, fill: "hsl(190 45% 50%)", angle: 205, dur: 60
+          },
+          {
+            id: "chandos", name: "Chandos", placeTag: "5th planet", place: "Fifth planet out from the Sun",
+            type: "Spherical water body", distM: 400, distLabel: "400 million miles", distShort: "400M mi",
+            moons: "None in the record",
+            placement: "Fifth planet from the Sun in the published record \u2014 a spherical water body.",
+            apoc: NOT_RECORDED,
+            r: 12, fill: "hsl(214 38% 52%)", angle: 262, dur: 68
+          },
+          {
+            id: "glyth", name: "Glyth", placeTag: "6th planet", place: "Sixth planet out from the Sun",
+            type: "Spherical earth body, ringed", distM: 1000, distLabel: "1,000 million miles", distShort: "1,000M mi",
+            moons: "Three moons",
+            placement: "Sixth planet from the Sun in the published record \u2014 a ringed spherical earth body, orbited by three moons.",
+            apoc: NOT_RECORDED,
+            r: 14, fill: "hsl(36 40% 50%)", angle: 96, dur: 98
+          },
+          {
+            id: "garden", name: "Garden", placeTag: "7th planet", place: "Seventh planet out from the Sun",
+            type: "Cluster of seven earth bodies, bound by Yggdrasil\u2019s Child", distM: 1200, distLabel: "1,200 million miles", distShort: "1,200M mi",
+            moons: "Eleven moons",
+            placement: "Seventh planet from the Sun in the published record \u2014 not one world but seven earth bodies held together by a colossal plant, Yggdrasil\u2019s Child, orbited by eleven moons.",
+            apoc: NOT_RECORDED,
+            r: 15, fill: "hsl(110 30% 46%)", angle: 168, dur: 110
+          },
+          {
+            id: "hcatha", name: "H\u2019Catha", placeTag: "8th planet \u2014 outermost world", place: "Eighth and outermost planet, the last world before the sphere wall",
+            type: "Disk-shaped water body", distM: 1600, distLabel: "1,600 million miles", distShort: "1,600M mi",
+            moons: "Two moons",
+            placement: "Eighth and outermost planet in the published record \u2014 a disk-shaped water body, orbited by two moons, the last world before the sphere wall.",
+            apoc: NOT_RECORDED,
+            r: 15, fill: "hsl(196 42% 56%)", angle: 48, dur: 130
+          },
+          {
+            id: "wall", name: "The Crystal Sphere Wall", placeTag: "Boundary of the sphere", place: "The boundary of Realmspace, in every direction",
+            type: "The crystal sphere wall", distM: 3200, distLabel: "3,200 million miles \u2014 the radius of the sphere", distShort: "3,200M mi",
+            moons: "None \u2014 everything placed lies inside it",
+            placement: "The crystal sphere wall bounds Realmspace at a radius of 3,200 million miles in every direction.",
+            apoc: "Scarred shut \u2014 the Closing, called the Cut. Nothing crosses the wall in either direction, and all planar travel is severed, permanently."
+          },
+          {
+            id: "gods", name: "The Gods", placeTag: "Outside the sphere", place: "Beyond the crystal sphere wall",
+            type: "A presence outside the sphere \u2014 not a body within it", distM: null, distLabel: "Outside the wall \u2014 beyond 3,200 million miles", distShort: "",
+            moons: "None \u2014 they hold nothing inside the sphere",
+            placement: "No placement inside the sphere: the published placements end at the wall.",
+            apoc: "The gods are outside the sphere. They can see in \u2014 but they cannot touch, interact with, or influence anything inside. Power within is drawn, not granted."
+          }
+        ];
+        var byId = {};
+        BODIES.forEach(function (b) { byId[b.id] = b; });
+
+        /* Shaun's ruling (2026-11-11): the other worlds were never touched by
+           portals directly, but demon incursions reached them from Toril. */
+        var OTHER_WORLD_APOC = "In itself, never directly touched by portals \u2014 no rifts opened on it. But incursions have been made by the demons, launched from Toril, the demons\u2019 home base.";
+        ["anadia", "coliar", "karpri", "chandos", "glyth", "garden", "hcatha", "selune", "tears"].forEach(function (id) {
+          byId[id].apoc = OTHER_WORLD_APOC;
+        });
+
+        var svg = document.getElementById("orrery");
+        var frame = document.getElementById("mapFrame");
+
+        /* ---------------- Static field: stars, gods band, wall ---------------- */
+        var starSeed = 1234567;
+        function rnd() { starSeed = (starSeed * 1103515245 + 12345) % 2147483648; return starSeed / 2147483648; }
+        var stars = el("g", {}, svg);
+        for (var i = 0; i < 190; i++) {
+          var sa = rnd() * Math.PI * 2, sr = 30 + rnd() * (WALL_R - 40);
+          el("circle", { cx: CX + sr * Math.cos(sa), cy: CY + sr * Math.sin(sa), r: (rnd() * 1.3 + 0.4).toFixed(2), "class": "star", opacity: (0.25 + rnd() * 0.5).toFixed(2) }, stars);
+        }
+
+        var godsG = el("g", { "class": "body", id: "g-gods", tabindex: "0", role: "button", "aria-label": "The Gods, outside the sphere" }, svg);
+        el("circle", { cx: CX, cy: CY, r: GODS_R, "class": "gods-ring" }, godsG);
+        el("circle", { cx: CX, cy: CY, r: GODS_R, "class": "gods-hit" }, godsG);
+        txt(godsG, CX, 30, "THE GODS \u2014 OUTSIDE THE WALL", "gods-label");
+        txt(godsG, CX, 52, "they see in \u2014 they cannot touch, interact, or influence", "gods-sub");
+
+        var wallG = el("g", { "class": "body", id: "g-wall", tabindex: "0", role: "button", "aria-label": "The Crystal Sphere Wall" }, svg);
+        el("circle", { cx: CX, cy: CY, r: WALL_R, "class": "sphere-wall" }, wallG);
+        el("circle", { cx: CX, cy: CY, r: WALL_R, "class": "wall-hit" }, wallG);
+        txt(wallG, CX, CY + WALL_R - 16, "THE CRYSTAL SPHERE WALL \u00b7 3,200 MILLION MILES", "wall-label");
+
+        /* ---------------- Orbit rings ---------------- */
+        BODIES.forEach(function (b) {
+          if (b.distM > 0 && b.id !== "wall") el("circle", { cx: CX, cy: CY, r: orbitR(b.distM), "class": "orbit-ring" }, svg);
+        });
+
+        /* ---------------- Body drawing ---------------- */
+        function moonDots(parent, cx, cy, count, orbitRad, size) {
+          for (var m = 0; m < count; m++) {
+            var a = (m / count) * Math.PI * 2 + 0.6;
+            el("circle", { cx: cx + orbitRad * Math.cos(a), cy: cy + orbitRad * Math.sin(a), r: size, fill: "hsl(42 16% 66%)" }, parent);
+          }
+        }
+
+        function makeBodyGroup(b, cx, cy) {
+          var g = el("g", { "class": "body", id: "g-" + b.id, tabindex: "0", role: "button", "aria-label": b.name + ", " + b.placeTag }, svg);
+          var hitR = Math.max(b.r + 4, 17);
+          el("circle", { cx: cx, cy: cy, r: hitR + 6, "class": "halo" }, g);
+          return g;
+        }
+
+        function labelGroup(parent, b, cx, cy, nameY) {
+          var lg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, parent);
+          txt(lg, cx, cy + nameY, b.name, "body-name");
+          if (b.distShort) txt(lg, cx, cy + nameY + 15, b.distShort, "body-dist");
+          return lg;
+        }
+
+        function drawSun(b) {
+          var g = makeBodyGroup(b, CX, CY);
+          el("circle", { cx: CX, cy: CY, r: 52, fill: "hsl(42 95% 55%)", opacity: "0.14" }, g);
+          el("circle", { cx: CX, cy: CY, r: b.r, fill: b.fill }, g);
+          el("circle", { cx: CX, cy: CY, r: b.r, fill: "none", stroke: "hsl(38 92% 50%)", "stroke-width": "1.5" }, g);
+          el("circle", { cx: CX, cy: CY, r: Math.max(b.r + 4, 17), "class": "hit" }, g);
+          var lg = el("g", {}, g);
+          txt(lg, CX, CY - 48, "The Sun", "body-name");
+        }
+
+        function drawTorilSystem(b) {
+          var R = orbitR(b.distM), pos = polar(R, b.angle), px = pos[0], py = pos[1];
+          var spin = el("g", { "class": "spin", style: "--dur:" + b.dur + "s" }, svg);
+          var g = makeBodyGroup(b, px, py); spin.appendChild(g);
+          el("circle", { cx: px, cy: py, r: b.r, fill: b.fill }, g);
+          el("ellipse", { cx: px - 3, cy: py - 3, rx: 6, ry: 4, fill: "hsl(210 45% 45%)", opacity: "0.65" }, g);
+          el("circle", { cx: px, cy: py, r: 17, "class": "hit" }, g);
+          labelGroup(spin, b, px, py, -24);
+
+          /* Selûne */
+          var sx = px + 30, sy = py - 18;
+          var sg = el("g", { "class": "body", id: "g-selune", tabindex: "0", role: "button", "aria-label": "Sel\u00fbne, moon of Toril" }, spin);
+          el("circle", { cx: sx, cy: sy, r: 13, "class": "halo" }, sg);
+          el("circle", { cx: sx, cy: sy, r: 5.5, fill: "hsl(42 22% 72%)" }, sg);
+          el("circle", { cx: sx, cy: sy, r: 15, "class": "hit" }, sg);
+          var slg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
+          txt(slg, sx, sy - 11, "Sel\u00fbne", "sat-name");
+
+          /* The Tears of Selûne — shards trailing the moon */
+          var tg = el("g", { "class": "body", id: "g-tears", tabindex: "0", role: "button", "aria-label": "The Tears of Sel\u00fbne, asteroid cluster" }, spin);
+          el("circle", { cx: sx + 24, cy: sy + 12, r: 14, "class": "halo" }, tg);
+          var shards = [[16, 7, 2.4], [23, 11, 1.8], [29, 16, 2.8], [21, 18, 1.5], [33, 9, 1.6], [27, 23, 1.9]];
+          shards.forEach(function (s) { el("circle", { cx: sx + s[0], cy: sy + s[1], r: s[2], fill: "hsl(30 14% 58%)" }, tg); });
+          el("circle", { cx: sx + 24, cy: sy + 13, r: 16, "class": "hit" }, tg);
+          var tlg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
+          txt(tlg, sx + 26, sy + 36, "the Tears", "sat-name");
+
+          /* Dragon Rock */
+          var dx = px - 32, dy = py + 22;
+          var dg = el("g", { "class": "body", id: "g-dragonrock", tabindex: "0", role: "button", "aria-label": "Dragon Rock, asteroid" }, spin);
+          el("circle", { cx: dx, cy: dy, r: 11, "class": "halo" }, dg);
+          el("polygon", { points: (dx - 4) + "," + (dy + 2) + " " + (dx) + "," + (dy - 4.5) + " " + (dx + 4.5) + "," + (dy - 1) + " " + (dx + 2.5) + "," + (dy + 4) + " " + (dx - 2.5) + "," + (dy + 4.2), fill: "hsl(24 30% 55%)" }, dg);
+          el("circle", { cx: dx, cy: dy, r: 14, "class": "hit" }, dg);
+          var dlg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
+          txt(dlg, dx - 2, dy + 20, "Dragon Rock", "sat-name");
+
+          /* The Rock of Brawl — station anchored above the Bastion */
+          var bx = px - 30, by = py - 37;
+          el("line", { x1: px - 8, y1: py - 10, x2: bx + 3, y2: by + 5, stroke: "hsl(42 20% 55%)", "stroke-width": "1", "stroke-dasharray": "3 3", opacity: "0.85" }, spin);
+          var bg = el("g", { "class": "body", id: "g-rockofbrawl", tabindex: "0", role: "button", "aria-label": "The Rock of Brawl, station anchored above the Bastion" }, spin);
+          el("circle", { cx: bx, cy: by, r: 12, "class": "halo" }, bg);
+          el("polygon", { points: (bx - 6) + "," + (by + 1) + " " + (bx - 2) + "," + (by - 5.5) + " " + (bx + 4) + "," + (by - 4) + " " + (bx + 6.5) + "," + (by + 2) + " " + (bx + 2) + "," + (by + 5.5) + " " + (bx - 3.5) + "," + (by + 5), fill: "hsl(205 14% 60%)" }, bg);
+          el("rect", { x: bx - 1.4, y: by - 8.5, width: 2.8, height: 4.5, fill: "hsl(38 92% 50%)" }, bg);
+          el("circle", { cx: bx, cy: by, r: 14, "class": "hit" }, bg);
+          var blg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
+          txt(blg, bx, by - 13, "Rock of Brawl", "sat-name");
+        }
+
+        function drawPlanet(b) {
+          var R = orbitR(b.distM), pos = polar(R, b.angle), px = pos[0], py = pos[1];
+          var spin = el("g", { "class": "spin", style: "--dur:" + b.dur + "s" }, svg);
+          var g = makeBodyGroup(b, px, py); spin.appendChild(g);
+          el("circle", { cx: px, cy: py, r: Math.max(b.r + 4, 17), "class": "hit" }, g);
+
+          if (b.id === "glyth") {
+            el("ellipse", { cx: px, cy: py, rx: 27, ry: 8.5, "class": "glyth-ring", transform: "rotate(-18 " + px + " " + py + ")" }, g);
+            el("circle", { cx: px, cy: py, r: b.r, fill: b.fill }, g);
+            moonDots(g, px, py, 3, 24, 2.6);
+          } else if (b.id === "garden") {
+            var offs = [[0, 0, 6.5], [-11, -6, 4.6], [10, -8, 5], [-8, 9, 5.2], [11, 8, 4.4], [-1, -13, 4], [3, 14, 4.2]];
+            el("path", { d: "M " + (px - 11) + " " + (py - 6) + " Q " + px + " " + (py - 18) + " " + (px + 10) + " " + (py - 8) + " Q " + (px + 16) + " " + (py + 2) + " " + (px + 11) + " " + (py + 8) + " Q " + px + " " + (py + 18) + " " + (px - 8) + " " + (py + 9) + " Q " + (px - 16) + " " + (py) + " " + (px - 11) + " " + (py - 6), "class": "vine" }, g);
+            offs.forEach(function (o) { el("circle", { cx: px + o[0], cy: py + o[1], r: o[2], fill: b.fill }, g); });
+            moonDots(g, px, py, 11, 27, 1.7);
+          } else if (b.id === "hcatha") {
+            el("ellipse", { cx: px, cy: py, rx: 24, ry: 8, fill: b.fill }, g);
+            el("ellipse", { cx: px, cy: py, rx: 24, ry: 8, fill: "none", stroke: "hsl(196 50% 72%)", "stroke-width": "1" }, g);
+            el("ellipse", { cx: px - 6, cy: py - 2, rx: 8, ry: 2.6, fill: "hsl(200 55% 74%)", opacity: "0.7" }, g);
+            moonDots(g, px, py, 2, 31, 2.8);
+          } else {
+            el("circle", { cx: px, cy: py, r: b.r, fill: b.fill }, g);
+            if (b.id === "coliar") {
+              el("ellipse", { cx: px, cy: py - 5, rx: 19, ry: 4.5, fill: "hsl(205 40% 74%)", opacity: "0.55" }, g);
+              el("ellipse", { cx: px, cy: py + 6, rx: 17, ry: 4, fill: "hsl(195 35% 52%)", opacity: "0.6" }, g);
+            }
+            if (b.id === "anadia") el("circle", { cx: px - 2.5, cy: py - 2, r: 3.4, fill: "hsl(95 26% 44%)", opacity: "0.7" }, g);
+          }
+          labelGroup(spin, b, px, py, -(b.r + 14));
+        }
+
+        BODIES.forEach(function (b) {
+          if (b.id === "sun") drawSun(b);
+          else if (b.id === "toril") drawTorilSystem(b);
+          else if (b.r) drawPlanet(b);
+        });
+
+        /* ---------------- Selection + detail panel ---------------- */
+        var selectedId = null;
+        var dPlaceTag = document.getElementById("dPlaceTag"),
+            dName = document.getElementById("dName"),
+            dPlace = document.getElementById("dPlace"),
+            dType = document.getElementById("dType"),
+            dDist = document.getElementById("dDist"),
+            dMoons = document.getElementById("dMoons"),
+            dPlacement = document.getElementById("dPlacement"),
+            dApoc = document.getElementById("dApoc");
+
+        function select(id, scroll) {
+          var b = byId[id]; if (!b) return;
+          selectedId = id;
+          var nodes = svg.querySelectorAll(".body");
+          for (var i = 0; i < nodes.length; i++) nodes[i].classList.toggle("selected", nodes[i].id === "g-" + id);
+          var rows = document.querySelectorAll("#tableBody tr");
+          for (var j = 0; j < rows.length; j++) rows[j].classList.toggle("selected", rows[j].getAttribute("data-id") === id);
+          dPlaceTag.textContent = b.placeTag;
+          dName.textContent = b.name;
+          dPlace.textContent = b.place;
+          dType.textContent = b.type;
+          dDist.textContent = b.distLabel;
+          dMoons.textContent = b.moons;
+          dPlacement.textContent = b.placement;
+          dApoc.textContent = b.apoc;
+          dApoc.classList.toggle("not-recorded", b.apoc === NOT_RECORDED);
+          if (scroll) document.getElementById("detailPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function bindBody(id) {
+          var g = document.getElementById("g-" + id);
+          if (!g) return;
+          g.addEventListener("click", function (ev) { ev.stopPropagation(); select(id, false); });
+          g.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(id, true); }
+          });
+        }
+        BODIES.forEach(function (b) { bindBody(b.id); });
+
+        document.querySelectorAll("[data-select]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            select(btn.getAttribute("data-select"), false);
+            frame.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        });
+
+        /* ---------------- Placements table ---------------- */
+        var tbody = document.getElementById("tableBody");
+        BODIES.forEach(function (b) {
+          if (b.id === "gods") return;
+          var tr = document.createElement("tr");
+          tr.setAttribute("data-id", b.id);
+          if (b.satelliteOf) tr.className = "sat";
+          tr.setAttribute("tabindex", "0");
+          var distCell = b.id === "wall" ? "3,200 <span class='sub'>radius, every direction</span>"
+            : b.distM === null ? "\u2014 <span class='sub'>orbits Toril</span>"
+            : b.distM === 0 ? "0 <span class='sub'>the center</span>"
+            : b.distM.toLocaleString("en-US");
+          tr.innerHTML =
+            "<td><span class='body-cell'>" + b.name + "</span><span class='sub'>" + b.placeTag + "</span></td>" +
+            "<td class='hide-sm'>" + b.type + "</td>" +
+            "<td class='num'>" + distCell + "</td>" +
+            "<td class='hide-sm'>" + b.moons + "</td>";
+          tr.addEventListener("click", function () { select(b.id, false); });
+          tr.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(b.id, false); }
+          });
+          tbody.appendChild(tr);
+        });
+
+        /* ---------------- Turning toggle ---------------- */
+        var toggle = document.getElementById("turnToggle");
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var turning = !reduceMotion;
+        function applyTurning() {
+          frame.classList.toggle("paused", !turning);
+          toggle.textContent = turning ? "Pause the turning" : "Resume the turning";
+          toggle.setAttribute("aria-pressed", turning ? "false" : "true");
+        }
+        toggle.addEventListener("click", function () { turning = !turning; applyTurning(); });
+        applyTurning();
+
+        select("toril", false);
+      })();
+    </script>
+    <script>
+      (function () {
+        var input = document.getElementById("fleetFilter");
+        var note = document.getElementById("filterNote");
+        if (!input) return;
+        var cards = Array.prototype.slice.call(document.querySelectorAll(".fleet-card"));
+        cards.forEach(function (card) {
+          card.setAttribute("data-total", card.querySelectorAll(".name-list li").length);
+        });
+        function apply() {
+          var q = input.value.trim().toLowerCase();
+          var shown = 0, total = 0;
+          cards.forEach(function (card) {
+            var items = card.querySelectorAll(".name-list li");
+            var cardShown = 0;
+            items.forEach(function (li) {
+              total++;
+              var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+              li.classList.toggle("hidden-by-filter", !hit);
+              if (hit) { cardShown++; shown++; }
+            });
+            var labels = card.querySelectorAll(".era-label");
+            labels.forEach(function (lab) {
+              if (!q) { lab.style.display = ""; return; }
+              var list = lab.nextElementSibling;
+              var any = false;
+              if (list) list.querySelectorAll("li").forEach(function (li) { if (!li.classList.contains("hidden-by-filter")) any = true; });
+              lab.style.display = any ? "" : "none";
+            });
+            card.style.display = (!q || cardShown > 0) ? "" : "none";
+          });
+          note.textContent = q ? (shown + " of " + total + " ship records match \u201c" + input.value.trim() + "\u201d") : "";
+        }
+        input.addEventListener("input", apply);
+      })();
+    </script>
+  </body>
+</html>
