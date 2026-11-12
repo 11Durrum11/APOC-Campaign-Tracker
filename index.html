@@ -131,19 +131,14 @@
      2026-11-06 stacked top-right arrangement.) Phones keep them in
      flow (media query below), stacked full-width under the title —
      Reconvenes on top, the Sky directly below it. */
-  .top-bubbles{position:absolute;top:8px;right:24px;width:min(720px,62%);display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;z-index:3;pointer-events:none}
-  .top-bubbles .sky-panel,.top-bubbles .countdown-panel{pointer-events:auto}
-  .top-bubbles .panel,.top-bubbles .sky-panel{margin-top:0}
-  .top-bubbles .sky-panel{max-width:none;grid-column:1;grid-row:1}
-  .top-bubbles .countdown-panel{grid-column:2;grid-row:1}
+  /* (The Sky and Reconvenes lived up here as the two top bubbles
+     until v51.5 — Shaun moved them into the hub as buttons 11–12.) */
   /* Top bubbles expand COMPLETELY (Shaun, 2026-11-07): the hero is
      overflow:hidden at resting height, which clipped an opened
      bubble's lower half. When either top bubble is open, the hero
      grows tall enough for the whole panel — nothing clipped, no
      inner scroll box. The toggle listener below sets .bubble-open. */
-  .hero.bubble-open{min-height:308px}
-  .countdown-panel{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
-  .countdown-panel .timer{justify-content:flex-start;margin-top:10px}
+  #reconPanel .timer{justify-content:flex-start;margin-top:10px}
   .countdown-date{font-size:1.1rem;margin:2px 0 0}
   .timer{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
   .timer div{min-width:64px;text-align:center;background:var(--secondary);border:1px solid var(--border);border-radius:10px;padding:6px 8px}
@@ -162,7 +157,8 @@
   .hub-panel h2{margin-bottom:2px}
   .hub-content-panel{margin-top:10px;width:100%;max-height:none}
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-wrap:nowrap;margin-top:4px}
-  .hub-row .hub-item:nth-child(10){grid-column:2}
+  .hub-item.mv-reorder{opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:60;position:relative}
+  .hub-item.mv-insert{box-shadow:inset 3px 0 0 var(--primary)}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -467,8 +463,6 @@
   .notice strong{color:var(--foreground)}
 
   @media (max-width:760px){
-    .top-bubbles{grid-template-columns:1fr;position:static;width:auto;margin-top:12px}
-    .top-bubbles .sky-panel,.top-bubbles .countdown-panel{grid-column:auto;grid-row:auto}
     .page{padding:0 10px 22px}
     .hero{margin:0 -10px;min-height:236px;padding:14px 16px 10px}
     .countdown-panel{grid-template-columns:1fr}
@@ -658,35 +652,6 @@
           .catch(function () {});
       </script>
     </div>
-    <div class="top-bubbles">
-    <section class="panel countdown-panel" aria-label="The table reconvenes">
-    <details class="canon-item section-fold">
-      <summary>The table reconvenes</summary>
-      <div class="fold-body">
-    <div>
-      <p class="eyebrow">Every other Sunday · 11:00 AM · Phoenix</p>
-      <p class="countdown-date" id="nextSessionLabel">Sunday, November 8, 2026 at 11:00 AM</p>
-    </div>
-    <div class="timer" id="cdTimer" aria-label="Countdown to the next session">
-      <div><b id="cdDays">—</b><span>Days</span></div>
-      <div><b id="cdHours">—</b><span>Hours</span></div>
-      <div><b id="cdMins">—</b><span>Minutes</span></div>
-      <div><b id="cdSecs">—</b><span>Seconds</span></div>
-    </div>
-    <p class="countdown-note muted" id="cdNote" style="margin:6px 0 0;font-size:.85rem">Until the table reconvenes</p>
-      </div>
-    </details>
-  </section>
-    <section class="sky-panel" aria-label="The sky right now">
-      <details class="canon-item section-fold">
-        <summary>The sky — right now</summary>
-        <div class="fold-body">
-      <p class="sky-fact" id="skyFact">Regular fog over the Bastion — steady, thick, England-like. Only regular fog ever falls inside the walls.</p>
-      <p class="sky-note" id="skyNote">Out in the badlands all around the Bastion, the set weather rules. The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
-        </div>
-      </details>
-    </section>
-    </div>
   </header>
 
   <!-- 2 / The table reconvenes -->
@@ -729,7 +694,13 @@
         <button class="hub-btn" type="button" data-hub-action="canon" aria-expanded="false" id="canonButton"><span class="hub-name">Canon</span></button>
       </div>
       <div class="hub-item">
+        <button class="hub-btn" type="button" data-hub-action="sky" aria-expanded="false" id="skyButton"><span class="hub-name">The Sky — Right Now</span></button>
+      </div>
+      <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="cosmetology" aria-expanded="false" id="cosmetologyButton"><span class="hub-name">Cosmetology</span></button>
+      </div>
+      <div class="hub-item">
+        <button class="hub-btn" type="button" data-hub-action="reconvenes" aria-expanded="false" id="reconButton"><span class="hub-name">The Table Reconvenes</span></button>
       </div>
     </div>
   </section>
@@ -888,6 +859,24 @@
     <p class="eyebrow">APOC Survival · Cosmetology</p>
     <p>The Crystal Sphere — Realmspace as it stands in the APOC, the worlds and the stations between them. <a href="sphere.html" target="_blank" rel="noopener">Open the map on its own page</a></p>
     <iframe src="sphere.html" title="Crystal Sphere Map — Realmspace" loading="lazy"></iframe>
+  </section>
+
+  <section class="panel hub-content-panel" id="skyPanel" hidden aria-label="The sky right now">
+    <p class="eyebrow">APOC Survival · The Sky — Right Now</p>
+    <p class="sky-fact" id="skyFact">Regular fog over the Bastion — steady, thick, England-like. Only regular fog ever falls inside the walls.</p>
+    <p class="sky-note" id="skyNote">Out in the badlands all around the Bastion, the set weather rules. The Fog of Life is inert and untouchable. The sky is grey or worse: no sun, no stars, no moon.</p>
+  </section>
+
+  <section class="panel hub-content-panel" id="reconPanel" hidden aria-label="The table reconvenes">
+    <p class="eyebrow">Every other Sunday · 11:00 AM · Phoenix</p>
+    <p class="countdown-date" id="nextSessionLabel">Sunday, November 8, 2026 at 11:00 AM</p>
+    <div class="timer" id="cdTimer" aria-label="Countdown to the next session">
+      <div><b id="cdDays">—</b><span>Days</span></div>
+      <div><b id="cdHours">—</b><span>Hours</span></div>
+      <div><b id="cdMins">—</b><span>Minutes</span></div>
+      <div><b id="cdSecs">—</b><span>Seconds</span></div>
+    </div>
+    <p class="countdown-note muted" id="cdNote" style="margin:6px 0 0;font-size:.85rem">Until the table reconvenes</p>
   </section>
 
   <section class="panel hub-content-panel" id="trackerPanel" hidden aria-label="Campaign Status Tracker">
@@ -1284,7 +1273,7 @@ function toggleHubPanel(panelId, btnId){
   if (!panel || !btn) return;
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
-  ["canonButton", "trackerButton", "lairButton", "cosmetologyButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
+  ["canonButton", "trackerButton", "lairButton", "cosmetologyButton", "skyButton", "reconButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
   if (opening) {
@@ -1301,6 +1290,10 @@ function activateHub(btn){
     toggleHubPanel("canonPanel", "canonButton");
   } else if (action === "cosmetology") {
     toggleHubPanel("cosmetologyPanel", "cosmetologyButton");
+  } else if (action === "sky") {
+    toggleHubPanel("skyPanel", "skyButton");
+  } else if (action === "reconvenes") {
+    toggleHubPanel("reconPanel", "reconButton");
   } else if (action === "gallery") {
     openGallery();
   }
@@ -1312,14 +1305,6 @@ document.querySelectorAll(".hub-btn").forEach(btn => {
 });
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") { closeGallery(); }
-});
-/* Top bubbles (Sky / Reconvenes): when either fold is open, grow the
-   hero so the expanded panel shows completely — no clipping. */
-document.querySelectorAll(".top-bubbles details").forEach(d => {
-  d.addEventListener("toggle", () => {
-    const hero = $("hero");
-    if (hero) hero.classList.toggle("bubble-open", !!document.querySelector(".top-bubbles details[open]"));
-  });
 });
 </script>
 
@@ -2199,12 +2184,14 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
      furniture: they can neither nest nor host. One record field:
      { nest: hostId }. Cycles are impossible: a piece can never
      drop onto itself or onto anything inside it. */
-  var NO_NEST = { trackerPanel:1, canonPanel:1, lairPanel:1, cosmetologyPanel:1 };
+  var NO_NEST = { trackerPanel:1, canonPanel:1, lairPanel:1, cosmetologyPanel:1, skyPanel:1, reconPanel:1 };
   function nestHostAt(p, x, y){
     if (NO_NEST[p.id]) return null;
+    if (p.hubItem) return null; /* hub buttons reshuffle in their grid; they never nest */
     var best = null, bestArea = Infinity;
     pieces.forEach(function(q){
       if (q === p || NO_NEST[q.id]) return;
+      if (q.hubItem) return; /* …and never host a nest */
       if (q.mode !== p.mode) return;
       if (p.mode === "local" && q.host !== p.host) return;
       if (p.el.contains(q.el)) return; /* never into its own child */
@@ -2336,6 +2323,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (hd && hd.closest(".mv-piece") === p.el && !t.closest("input,select,textarea,a,button")) mode = "drag";
     }
     if (!mode && p.selfDrag && t === p.el) mode = "drag";
+    if (p.hubItem && mode) mode = "drag"; /* hub buttons: any drag is a reshuffle drag */
     if (!mode || p.locked) return;
     session = { p:p, mode:mode, dir:dir, viaGrip:viaGrip, sx:e.clientX, sy:e.clientY, moved:false, base:null, fx:0, fy:0 };
     window.addEventListener("pointermove", onMove);
@@ -2349,8 +2337,35 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (Math.hypot(dx, dy) < 7) return;
       s.moved = true;
       document.body.classList.add("mv-dragging");
-      if (!s.p.floated) { if (s.p.nested) detachNested(s.p); else floatPiece(s.p, null); }
+      if (s.p.hubItem) { s.p.el.classList.add("mv-reorder"); }
+      else if (!s.p.floated) { if (s.p.nested) detachNested(s.p); else floatPiece(s.p, null); }
       s.base = geom(s.p); s.fx = s.sx; s.fy = s.sy;
+    }
+    if (s.p.hubItem && s.moved) {
+      /* Reshuffle: the button rides the pointer (transform only — the
+         grid does not reflow mid-drag); the marked sibling is the slot
+         it will take on drop. */
+      s.p.el.style.transform = "translate(" + dx + "px," + dy + "px)";
+      var hrow = document.getElementById("hubRow");
+      var before = null;
+      if (hrow) {
+        var sibs = hrow.querySelectorAll(".hub-item");
+        for (var si = 0; si < sibs.length; si++) {
+          var sib = sibs[si];
+          if (sib === s.p.el) continue;
+          var r = sib.getBoundingClientRect();
+          var midX = r.left + r.width / 2;
+          if (e.clientY < r.top || (e.clientY <= r.bottom && e.clientX < midX)) { before = sib; break; }
+        }
+      }
+      if (s.marked !== before) {
+        if (s.marked) s.marked.classList.remove("mv-insert");
+        s.marked = before;
+        if (before) before.classList.add("mv-insert");
+      }
+      s.insertBefore = before;
+      if (e.cancelable) e.preventDefault();
+      return;
     }
     s.cx = e.clientX; s.cy = e.clientY;
     if (s.moved && s.mode === "drag") {
@@ -2387,11 +2402,26 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (!s) return;
     if (s.hot) { s.hot.el.classList.remove("mv-drop-ok"); s.hot = null; }
     if (s.moved) {
-      /* Rule 5: ending a drag with the pointer over another piece
-         nests the dragged piece inside it. */
-      var host = (s.mode === "drag" && typeof s.cx === "number") ? nestHostAt(s.p, s.cx, s.cy) : null;
-      if (!(host && nestPiece(s.p, host))) savePiece(s.p);
-      suppressClick(s.p);
+      if (s.p.hubItem) {
+        /* Reshuffle drop: move the button to the marked slot and keep
+           the new order. No float, no nest, no layout record. */
+        s.p.el.classList.remove("mv-reorder");
+        s.p.el.style.transform = "";
+        if (s.marked) { s.marked.classList.remove("mv-insert"); s.marked = null; }
+        var urow = document.getElementById("hubRow");
+        if (urow) {
+          if (s.insertBefore && s.insertBefore !== s.p.el) urow.insertBefore(s.p.el, s.insertBefore);
+          else if (!s.insertBefore) urow.appendChild(s.p.el);
+          saveHubOrder();
+        }
+        suppressClick(s.p);
+      } else {
+        /* Rule 5: ending a drag with the pointer over another piece
+           nests the dragged piece inside it. */
+        var host = (s.mode === "drag" && typeof s.cx === "number") ? nestHostAt(s.p, s.cx, s.cy) : null;
+        if (!(host && nestPiece(s.p, host))) savePiece(s.p);
+        suppressClick(s.p);
+      }
     }
     else if (s.viaGrip) { s.p.el.classList.toggle("mv-active"); }
   }
@@ -2416,17 +2446,49 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 
   /* ================= registry: every piece plugs in here ================= */
   mkPiece("heroCopy", document.querySelector(".hero-copy"), "page", null, { head: "h1, .eyebrow" });
-  mkPiece("skyBubble", document.querySelector(".top-bubbles .sky-panel"), "page", null, { head: "summary" });
-  mkPiece("countBubble", document.querySelector(".top-bubbles .countdown-panel"), "page", null, { head: "summary" });
+  /* Hub reshuffle (Shaun, 2026-11-12): the hub buttons reorder INSIDE
+     their grid — drag one and it takes the slot it drops on; the order
+     persists per device. Hub items never float and never nest: the
+     grid is their home. (The Sky and the Table Reconvenes joined the
+     hub as buttons in v51.5; their old hero-bubble pieces are gone.) */
+  function hubKey(item){
+    var nm = item.querySelector(".hub-name");
+    var t = ((nm && nm.textContent) || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return t || "hub";
+  }
+  var HUBKEY = "apocTrackerHubOrderV1";
+  (function applyHubOrder(){
+    var row = document.getElementById("hubRow");
+    if (!row) return;
+    var saved = null;
+    try { saved = JSON.parse(lsGet(HUBKEY) || "null"); } catch(e) { saved = null; }
+    if (!saved || !saved.length) return;
+    var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
+    var byKey = {};
+    items.forEach(function(it){ byKey[hubKey(it)] = it; });
+    var ordered = [];
+    saved.forEach(function(k){ if (byKey[k]) { ordered.push(byKey[k]); delete byKey[k]; } });
+    items.forEach(function(it){ var k = hubKey(it); if (byKey[k]) { ordered.push(it); delete byKey[k]; } });
+    ordered.forEach(function(it){ row.appendChild(it); });
+  })();
+  function saveHubOrder(){
+    var row = document.getElementById("hubRow");
+    if (!row) return;
+    var keys = Array.prototype.map.call(row.querySelectorAll(".hub-item"), function(it){ return hubKey(it); });
+    lsSet(HUBKEY, JSON.stringify(keys));
+  }
   document.querySelectorAll(".hub-item").forEach(function(item, i){
     var btn = item.querySelector(".hub-btn");
     var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
-    mkPiece(id, item, "page", null, { surface: ".hub-btn" });
+    var hp = mkPiece(id, item, "page", null, { surface: ".hub-btn" });
+    if (hp) hp.hubItem = true;
   });
   mkPiece("lairPanel", document.getElementById("lairPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("canonPanel", document.getElementById("canonPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("trackerPanel", document.getElementById("trackerPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("cosmetologyPanel", document.getElementById("cosmetologyPanel"), "page", null, { head: ".eyebrow", scroll: true });
+  mkPiece("skyPanel", document.getElementById("skyPanel"), "page", null, { head: ".eyebrow", scroll: true });
+  mkPiece("reconPanel", document.getElementById("reconPanel"), "page", null, { head: ".eyebrow", scroll: true });
 
   var canonPanelEl = document.getElementById("canonPanel");
   var trackerPanelEl = document.getElementById("trackerPanel");
@@ -2462,13 +2524,15 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var rec = records[p.id];
     if (!rec) return;
     if (rec.l) { p.locked = true; syncLockUI(p); }
-    if (p.el.classList && p.el.classList.contains("hub-content-panel")) {
+    if (p.hubItem || (p.el.classList && p.el.classList.contains("hub-content-panel"))) {
       /* Panels are toggled views, not furniture: NEVER restore one
          floated. A stale saved position strands the panel off-screen
          (or as a sliver at the screen edge), so its hub button looks
          dead — Shaun, 2026-11-07: Canon would not open on his device
          while a clean browser opened it fine. Drop the saved float
-         for panel pieces; the record self-heals on this load. */
+         for panel pieces; the record self-heals on this load. Hub
+         buttons get the same treatment (v51.5): they live in their
+         grid and reshuffle there — a saved float self-heals away. */
       if (typeof rec.x === "number" || typeof rec.y === "number" || rec.w) {
         delete rec.x; delete rec.y; delete rec.w; delete rec.h; delete rec.o;
         if (rec.l) records[p.id] = { l: 1 }; else delete records[p.id];
@@ -2491,6 +2555,7 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   pieces.forEach(function(p){
     var rec = records[p.id];
     if (!rec || !rec.nest) return;
+    if (p.hubItem) return; /* hub buttons never nest (v51.5) */
     var host = byId[rec.nest];
     if (host && host !== p) nestPiece(p, host, true);
   });
