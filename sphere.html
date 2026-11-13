@@ -183,6 +183,71 @@
 
       footer { margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1rem; color: var(--ink-faint); font-size: .86rem; max-width: 72ch; }
       footer p { margin: .3rem 0; }
+
+      /* ---------- Pulled Spelljammer images ---------- */
+      .sj-figure { margin: 1rem 0 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+      .sj-figure a { display: block; }
+      .sj-figure img { display: block; width: 100%; height: auto; }
+      .sj-figure figcaption { padding: .6rem .85rem .7rem; font-size: .88rem; color: var(--ink-dim); line-height: 1.45; }
+      .sj-figure figcaption b { color: var(--ink); font-weight: normal; }
+      .sphere-figure { margin: 0 0 1.25rem; }
+      .station-figure { margin-top: .8rem; }
+      .station-figure figcaption { font-size: .85rem; }
+      .figure-stack { display: grid; gap: 1rem; margin-top: 1rem; }
+      .figure-narrow { max-width: 560px; margin-left: auto; margin-right: auto; width: 100%; }
+
+      /* ===== PHONE ONLY (max-width:880px) — footprint-shrinking + all info into collapsible headers. Desktop/wide rules above are untouched. ===== */
+      @media (max-width: 880px) {
+        main { padding: .7rem .65rem 1.4rem; }
+        header.page-head { padding-bottom: .45rem; margin-bottom: .55rem; }
+        header.page-head h1 { font-size: 1.42rem; margin-bottom: .15rem; }
+        section { margin-top: 1rem; }
+        h2 { font-size: 1.12rem; margin: 0; }
+        .map-grid { gap: .6rem; }
+        .map-frame { padding: .25rem; }
+        .map-tools { gap: .4rem; margin-bottom: .5rem; flex-wrap: nowrap; }
+        .tool-btn, button.tool-btn { min-height: 1.85rem; padding: .22rem .55rem; font-size: .82rem; border-radius: 5px; line-height: 1.2; }
+        .map-note { display: none; flex-basis: 100%; font-size: .8rem; }
+        .map-tools.note-open .map-note { display: block; }
+        .note-toggle { flex: 0 0 auto; }
+        .detail { position: static; padding: .55rem .7rem .65rem; }
+        .detail h2 { font-size: 1.25rem; margin: 0; }
+        .detail .place-tag { margin: 0; font-size: .72rem; }
+        .detail .row { padding: .4rem 0; }
+        .cut-list, .sj-intro { gap: .55rem; }
+        .cut-item, .fleet-card { padding: .55rem .7rem .65rem; }
+        .cut-item h3, .fleet-card h3, .sj-block h3 { font-size: 1rem; margin: 0; }
+        .sj-block { margin-top: .55rem; }
+        .sj-filter { margin: .55rem 0 .2rem; gap: .4rem; }
+        .sj-filter input { min-height: 1.9rem; padding: .3rem .55rem; font-size: .9rem; }
+        .name-list { gap: .28rem; }
+        .name-list li { padding: .16rem .45rem; font-size: .84rem; }
+        .people-grid, .homebrew-grid { gap: .45rem; }
+        .people-grid .person, .homebrew-ship { padding: .45rem .5rem; font-size: .92rem; }
+        .unsettled { padding: .55rem .7rem .65rem; }
+        .table-wrap { border-radius: 8px; }
+        footer { margin-top: 1.2rem; padding-top: .55rem; }
+        /* Collapsible headers — closed shows header ONLY */
+        .collapsible > .collapse-body { display: none; }
+        .collapsible.open > .collapse-body { display: block; margin-top: .55rem; }
+        .collapsible > .collapse-head, .collapse-head {
+          cursor: pointer; -webkit-tap-highlight-color: transparent;
+          display: flex !important; align-items: center; justify-content: space-between; gap: .6rem;
+          background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px;
+          padding: .48rem .65rem !important; margin: 0 !important; width: 100%;
+          text-align: left; color: var(--ink);
+        }
+        header.page-head > .collapse-head { background: transparent; border: none; padding-left: 0 !important; padding-right: 0 !important; }
+        .detail > .collapse-head { background: transparent; border: none; padding: 0 !important; display: block !important; }
+        .collapse-head::after { content: "▸"; flex: 0 0 auto; color: var(--amber-soft); font-size: .95rem; line-height: 1; }
+        .collapsible.open > .collapse-head::after { content: "▾"; }
+        .detail.collapsible.open > .collapse-head::after { float: right; }
+        .footer-head { font-family: Georgia, serif; font-size: 1rem; }
+        .collapsible { min-height: 0; }
+        section.collapsible, footer.collapsible { background: transparent; }
+        .cut-item.collapsible, .fleet-card.collapsible, .sj-block.collapsible { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .45rem .55rem; }
+        .sj-block.collapsible > .collapse-head, .cut-item.collapsible > .collapse-head, .fleet-card.collapsible > .collapse-head { background: transparent; border: none; padding: .2rem .15rem !important; }
+      }
     </style>
   </head>
   <body>
@@ -196,6 +261,11 @@
           <span><b>Worlds:</b> Eight planets, Sun at center</span>
         </div>
       </header>
+
+      <figure class="sj-figure sphere-figure">
+        <a href="assets/sphere-artwork.png"><img src="assets/sphere-artwork.png" alt="Sphere artwork from the boxed set: The Spelljammer shown in dorsal and port view, surrounded by her deck plans" /></a>
+        <figcaption><b>Sphere artwork — the boxed set's Spelljammer sheet.</b> The great living ship in dorsal and port view, with her deck plans laid out around her: landing deck, gardens, towers, council chambers, captain's quarters, stores, and market.</figcaption>
+      </figure>
 
       <div class="map-tools">
         <button class="tool-btn" id="turnToggle" type="button" aria-pressed="false">Pause the turning</button>
@@ -286,8 +356,12 @@
           </div>
           <div class="cut-item">
             <h3>Stations of the sphere</h3>
-            <p>The Rock of Brawl still floats anchored above the Bastion, out in deep space off Toril's surface — a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record.</p>
-            <button class="tool-btn" type="button" data-select="rockofbrawl">Show the Rock of Brawl</button>
+            <p>The Rock of Bral — spelled B-R-A-L, pronounced “brawl” — still floats anchored above the Bastion, out in deep space off Toril's surface — a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record.</p>
+            <figure class="sj-figure station-figure">
+              <a href="assets/rock-of-bral.jpg"><img src="assets/rock-of-bral.jpg" alt="Map of the Rock of Bral: the city spread across the rock, with its docks, markets, Lake Bral, and Prince Andru's Castle, and a side view showing the underside and gravity plane" /></a>
+              <figcaption><b>The Rock of Bral.</b> The station's own map — the city on the rock, its docks and markets, Lake Bral, and Prince Andru's Castle, with the underside, the Citadel, and the gravity plane shown at upper left.</figcaption>
+            </figure>
+            <button class="tool-btn" type="button" data-select="rockofbral">Show the Rock of Bral</button>
           </div>
         </div>
       </section>
@@ -448,7 +522,17 @@
         <div class="sj-block">
           <h3>Deck plans <span class="count">— the plans kept with the ships</span></h3>
           <p>A ship on this map is not just a name: the plans of its decks are kept with it, sheet by sheet, ready to walk. Plans ride on the records of the Sprint Freighter, Dragonfly, Dragonship, Drakkar, Hammership, Nautiloid, Neogi Mindspider, Squid Ship, Tradesman, Wasp, Angelship, Archaic Man-o-War, Bloatfly, Cargo Barge, Cuttle Command, Deathglory, Dwarven Mining Ship, Eel Ship, Goblin Blade, Hummingbird, Lamprey Ship, Leaf Ship — whose sheet also covers the Thorn Ship — Mammoth, Mantis, Monarch Armada, Nightwolf, Octopus, Porcupine Ship, Pyramid Ship, Quad of Thay, Quentin's Libraria, Shrike, Skeleton Ship, Swan Ship, Turtle Ship, Unity Ship, Vipership, Vodoni Hunter-Killer, Vodoni Werewolf, and Wreckboat.</p>
-          <p>Some sheets belong to named vessels rather than classes: the Dragonfly <i>Terigamar</i>, the Drakkar <i>Raven</i>, the Hammership <i>Barracuda</i>, the Mindspider <i>Collector</i>, the Nautiloid <i>Void Reaper</i>, the Squid Ship <i>Frostfire</i>, the Vipership <i>Mithril Serpent</i>, and a drow Wasp. Shaun's own maps collection keeps plan sheets of its own — three for the DeathGlory (top deck; fore, flying and aft decks; cargo deck) and two for the Ogre Mammoth (cargo and upper decks; main and top decks), the only ships whose plans live in every keeping at once — and its catalog records an image of the Rock of Bral, the great port of wildspace, kept distinct from the Rock of Brawl that rides above the Bastion on the orrery, together with a Spelljammer Academy map and the boxed set's own sphere map.</p>
+          <p>Some sheets belong to named vessels rather than classes: the Dragonfly <i>Terigamar</i>, the Drakkar <i>Raven</i>, the Hammership <i>Barracuda</i>, the Mindspider <i>Collector</i>, the Nautiloid <i>Void Reaper</i>, the Squid Ship <i>Frostfire</i>, the Vipership <i>Mithril Serpent</i>, and a drow Wasp. Shaun's own maps collection keeps plan sheets of its own — three for the DeathGlory (top deck; fore, flying and aft decks; cargo deck) and two for the Ogre Mammoth (cargo and upper decks; main and top decks), the only ships whose plans live in every keeping at once.</p>
+          <div class="figure-stack">
+            <figure class="sj-figure">
+              <a href="assets/sj-box-map2.jpg"><img src="assets/sj-box-map2.jpg" alt="The boxed set's map of The Spelljammer: the great living ship in plan, with her city, dimensions, and armament" /></a>
+              <figcaption><b>The boxed set's map — The Spelljammer.</b> From Shaun's copy of <i>Adventures in Space</i>: the great living ship in plan, three-quarters of a mile across, with her city in the tail, her dimensions, and her armament.</figcaption>
+            </figure>
+            <figure class="sj-figure figure-narrow">
+              <a href="assets/spelljammer-academy.jpg"><img src="assets/spelljammer-academy.jpg" alt="Spelljammer Academy map: the Academy tower with inset plans for the Bridge Quarters, Sky Dock, Spelljammer Nexus, Simulations Deck, Cadet Quarters, Gymnasium, Stores, Sea Dock, and Administration" /></a>
+              <figcaption><b>Spelljammer Academy — map.</b> The Academy tower, level by level: Bridge Quarters, Sky Dock, the Spelljammer Nexus, Simulations Deck, Cadet Quarters, Gymnasium, Stores, Sea Dock, and Administration.</figcaption>
+            </figure>
+          </div>
         </div>
       </section>
 
@@ -548,10 +632,10 @@
             apoc: NOT_RECORDED
           },
           {
-            id: "rockofbrawl", satelliteOf: "toril", name: "The Rock of Brawl", placeTag: "Station \u2014 anchored above the Bastion", place: "Anchored above the Bastion, out in deep space off Toril\u2019s surface",
+            id: "rockofbral", satelliteOf: "toril", name: "The Rock of Bral", placeTag: "Station \u2014 anchored above the Bastion", place: "Anchored above the Bastion, out in deep space off Toril\u2019s surface",
             type: "Station \u2014 a floating rock", distM: null, distLabel: "Off Toril\u2019s surface \u2014 Toril lies 200 million miles from the Sun", distShort: "",
             moons: "None \u2014 it is itself a station in Toril\u2019s neighborhood",
-            placement: "The published Realmspace record does not place it; it stands in the campaign record as a station off Toril. Not to be confused with Dragon Rock, the published record\u2019s trading rock.",
+            placement: "The published Rock of Bral itself \u2014 spelled B-R-A-L and pronounced \u201cbrawl\u201d \u2014 the great port of wildspace. In this sphere it stands anchored above the Bastion, off Toril. Not to be confused with Dragon Rock, the published record\u2019s separate trading rock.",
             apoc: "It still floats, anchored above the Bastion, out in deep space off Toril\u2019s surface \u2014 a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record."
           },
           {
@@ -715,16 +799,16 @@
           var dlg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
           txt(dlg, dx - 2, dy + 20, "Dragon Rock", "sat-name");
 
-          /* The Rock of Brawl — station anchored above the Bastion */
+          /* The Rock of Bral — station anchored above the Bastion */
           var bx = px - 30, by = py - 37;
           el("line", { x1: px - 8, y1: py - 10, x2: bx + 3, y2: by + 5, stroke: "hsl(42 20% 55%)", "stroke-width": "1", "stroke-dasharray": "3 3", opacity: "0.85" }, spin);
-          var bg = el("g", { "class": "body", id: "g-rockofbrawl", tabindex: "0", role: "button", "aria-label": "The Rock of Brawl, station anchored above the Bastion" }, spin);
+          var bg = el("g", { "class": "body", id: "g-rockofbral", tabindex: "0", role: "button", "aria-label": "The Rock of Bral, station anchored above the Bastion" }, spin);
           el("circle", { cx: bx, cy: by, r: 12, "class": "halo" }, bg);
           el("polygon", { points: (bx - 6) + "," + (by + 1) + " " + (bx - 2) + "," + (by - 5.5) + " " + (bx + 4) + "," + (by - 4) + " " + (bx + 6.5) + "," + (by + 2) + " " + (bx + 2) + "," + (by + 5.5) + " " + (bx - 3.5) + "," + (by + 5), fill: "hsl(205 14% 60%)" }, bg);
           el("rect", { x: bx - 1.4, y: by - 8.5, width: 2.8, height: 4.5, fill: "hsl(38 92% 50%)" }, bg);
           el("circle", { cx: bx, cy: by, r: 14, "class": "hit" }, bg);
           var blg = el("g", { "class": "cspin", style: "--dur:" + b.dur + "s" }, spin);
-          txt(blg, bx, by - 13, "Rock of Brawl", "sat-name");
+          txt(blg, bx, by - 13, "Rock of Bral", "sat-name");
         }
 
         function drawPlanet(b) {
@@ -884,6 +968,85 @@
           note.textContent = q ? (shown + " of " + total + " ship records match \u201c" + input.value.trim() + "\u201d") : "";
         }
         input.addEventListener("input", apply);
+      })();
+    </script>
+    <script>
+      /* PHONE ONLY: restructure into collapsible headers. Runs only at <=880px, so the wide/laptop DOM and layout are left exactly as built. */
+      (function () {
+        if (!window.matchMedia || !window.matchMedia("(max-width: 880px)").matches) return;
+        function makeCollapsible(container, headEl, contentNodes) {
+          if (!container || !headEl || !contentNodes || !contentNodes.length) return null;
+          var body = document.createElement("div");
+          body.className = "collapse-body";
+          contentNodes.forEach(function (n) { if (n && n !== headEl) body.appendChild(n); });
+          container.appendChild(body);
+          container.classList.add("collapsible");
+          headEl.classList.add("collapse-head");
+          headEl.setAttribute("role", "button");
+          headEl.setAttribute("tabindex", "0");
+          headEl.setAttribute("aria-expanded", "false");
+          function toggle() {
+            var open = container.classList.toggle("open");
+            headEl.setAttribute("aria-expanded", open ? "true" : "false");
+          }
+          headEl.addEventListener("click", function (ev) { if (ev.target.closest && ev.target.closest("button, a, input")) return; toggle(); });
+          headEl.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(); } });
+          return body;
+        }
+        function childrenExcept(container, except) {
+          return Array.prototype.slice.call(container.childNodes).filter(function (n) { return n !== except && !(n.nodeType === 3 && !n.textContent.trim()); });
+        }
+        /* Sub-items first, then their parent sections */
+        document.querySelectorAll(".cut-item").forEach(function (item) {
+          var h = item.querySelector("h3"); if (!h) return;
+          makeCollapsible(item, h, childrenExcept(item, h));
+        });
+        document.querySelectorAll(".sj-block, .fleet-card").forEach(function (item) {
+          var h = item.querySelector("h3"); if (!h) return;
+          makeCollapsible(item, h, childrenExcept(item, h));
+        });
+        /* Detail panel: place-tag + name form the header, the record (dl) nests inside */
+        (function () {
+          var panel = document.getElementById("detailPanel"); if (!panel) return;
+          var tag = panel.querySelector(".place-tag"), name = panel.querySelector("h2"), dl = panel.querySelector("dl");
+          if (!name || !dl) return;
+          var headWrap = document.createElement("div");
+          if (tag) headWrap.appendChild(tag);
+          headWrap.appendChild(name);
+          panel.insertBefore(headWrap, dl);
+          makeCollapsible(panel, headWrap, [dl]);
+        })();
+        /* Page head: intro + meta nest inside the title header */
+        (function () {
+          var head = document.querySelector("header.page-head"); if (!head) return;
+          var h1 = head.querySelector("h1"); if (!h1) return;
+          makeCollapsible(head, h1, childrenExcept(head, h1));
+        })();
+        /* Each top-level section: its h2 is the header, everything else nests inside */
+        document.querySelectorAll("main > section").forEach(function (sec) {
+          var h = sec.querySelector(":scope > h2"); if (!h) return;
+          makeCollapsible(sec, h, childrenExcept(sec, h));
+        });
+        /* Footer: give it a header on phone only, notes nest inside */
+        (function () {
+          var f = document.querySelector("footer"); if (!f) return;
+          var head = document.createElement("div");
+          head.className = "footer-head"; head.textContent = "Record notes & sources";
+          var rest = childrenExcept(f, null);
+          f.insertBefore(head, f.firstChild);
+          makeCollapsible(f, head, rest);
+        })();
+        /* Map note: minimum footprint — hidden behind a small Note toggle on phone */
+        (function () {
+          var tools = document.querySelector(".map-tools"); if (!tools) return;
+          var btn = document.createElement("button");
+          btn.type = "button"; btn.className = "tool-btn note-toggle"; btn.textContent = "Note"; btn.setAttribute("aria-pressed", "false");
+          btn.addEventListener("click", function () {
+            var open = tools.classList.toggle("note-open");
+            btn.setAttribute("aria-pressed", open ? "true" : "false");
+          });
+          tools.appendChild(btn);
+        })();
       })();
     </script>
   </body>
