@@ -474,11 +474,12 @@
     .counts{grid-template-columns:repeat(3,minmax(0,1fr))}
     .cards{grid-template-columns:1fr}
     /* Phone canon headers (Shaun, 2026-11-13): TWO columns so every
-       header reads in full; an opened fold drops below the header
-       rows at full width. Desktop keeps its five-across row. */
+       header reads in full; an opened fold always drops to the row
+       below ALL the headers, at full width, so the headers stay
+       together at the top. Desktop keeps its five-across row. */
     #canonPanel .canon-fold-row{grid-template-columns:repeat(2,minmax(0,1fr))}
     #canonPanel .canon-fold-row .canon-item > summary{font-size:.95rem;min-height:44px}
-    #canonPanel .canon-fold-row .canon-item[open ]{grid-row:auto}
+    #canonPanel .canon-fold-row .canon-item[open ]{grid-row:3}
     .hub-row{gap:3px}
     .hub-btn{min-height:52px;height:52px;font-size:.69rem;padding:4px 2px}
     .thumb-strip img{width:12px;height:12px}
