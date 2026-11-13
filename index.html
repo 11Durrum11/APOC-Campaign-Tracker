@@ -239,11 +239,10 @@
   #canonPanel .story-fold{margin:2px 0 4px}
   #canonPanel .story-fold>summary{cursor:pointer;list-style:none;font-weight:800;font-size:.96rem;letter-spacing:.02em;color:var(--foreground);padding:6px 2px}
   #canonPanel .story-fold .law-why p{margin:0 0 10px}
-  #canonPanel .map-nest{margin:10px 0 4px}
-  #canonPanel .map-nest>summary{cursor:pointer;list-style:none;font-weight:800;font-size:1rem;letter-spacing:.02em;color:var(--foreground);padding:6px 2px}
-  #canonPanel .map-nest p{margin:2px 0 8px}
-  #canonPanel .map-nest iframe{width:100%;height:82vh;min-height:480px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
-  #canonPanel .canon-fold-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:start;grid-auto-flow:dense}
+  #canonPanel .map-fold .map-body{margin:2px 10px 12px}
+  #canonPanel .map-fold p{margin:2px 0 8px}
+  #canonPanel .map-fold iframe{width:100%;height:82vh;min-height:480px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
+  #canonPanel .canon-fold-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:start;grid-auto-flow:dense}
   #canonPanel .canon-fold-row .canon-item{margin:0}
   #canonPanel .canon-fold-row .canon-item > summary{min-height:36px;padding:6px 8px;font-size:.82rem;line-height:1.25;text-align:center;justify-content:center}
   #canonPanel .canon-fold-row .canon-item[open ]{grid-column:1/-1;grid-row:2}
@@ -747,12 +746,14 @@
         <li><strong>Maps:</strong> for the shape of the world, the standing references are the 3rd Edition map of Faerûn and the AideDD Faerûn Interactive Map — the world as it was drawn before the end, with one change written across it: where the old maps say Waterdeep, read the Bastion of Last Hope. The city renamed itself by surviving, and the maps and materials at this table carry the new name.</li>
         <li><strong>Currency:</strong> money kept the book's old standard, because some things even the end of the world did not change: ten copper pieces to a silver, ten silver to a gold, and a platinum piece worth ten gold. There is no electrum.</li>
       </ul></div>
-    <details class="map-nest">
-          <summary>THE WORLD AT LARGE</summary>
-          <p>The world beyond the walls — the held cities, the Badlands and its regions, and every placed road, ruin, and record, with their pictures. <a href="my-world.html" target="_blank" rel="noopener">Open the map on its own page</a></p>
-          <iframe src="my-world.html" title="The World at Large — the overland map" loading="lazy"></iframe>
-        </details>
-        </details>
+    </details>
+    <details class="canon-item map-fold">
+      <summary>THE WORLD AT LARGE</summary>
+      <div class="map-body">
+        <p>The world beyond the walls — the held cities, the Badlands and its regions, and every placed road, ruin, and record, with their pictures. <a href="my-world.html" target="_blank" rel="noopener">Open the map on its own page</a></p>
+        <iframe src="my-world.html" title="The World at Large — the overland map" loading="lazy"></iframe>
+      </div>
+    </details>
     <details class="canon-item city-canon">
       <summary>CITY CANON — THE BASTION OF LAST HOPE</summary>
       <figure style="margin:.9rem 0 .4rem">
