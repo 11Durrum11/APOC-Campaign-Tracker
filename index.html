@@ -473,10 +473,14 @@
     .toolbar input{grid-column:1/-1}
     .counts{grid-template-columns:repeat(3,minmax(0,1fr))}
     .cards{grid-template-columns:1fr}
-    /* Phone hub (Shaun, 2026-11-13): TWO columns so every button
-       label reads in full; desktop keeps its three-across row. */
-    .hub-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
-    .hub-btn{min-height:54px;height:54px;font-size:.8rem;padding:4px 4px}
+    /* Phone canon headers (Shaun, 2026-11-13): TWO columns so every
+       header reads in full; an opened fold drops below the header
+       rows at full width. Desktop keeps its five-across row. */
+    #canonPanel .canon-fold-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #canonPanel .canon-fold-row .canon-item > summary{font-size:.95rem;min-height:44px}
+    #canonPanel .canon-fold-row .canon-item[open ]{grid-row:auto}
+    .hub-row{gap:3px}
+    .hub-btn{min-height:52px;height:52px;font-size:.69rem;padding:4px 2px}
     .thumb-strip img{width:12px;height:12px}
     .count-chip{min-width:20px;height:16px;font-size:.6rem}
     .hub-item:nth-child(4) .pop,.hub-item:nth-child(7) .pop{left:-6px;transform:translate(0,4px)}
