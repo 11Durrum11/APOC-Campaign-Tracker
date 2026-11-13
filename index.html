@@ -2005,7 +2005,6 @@ $("tavernClear").addEventListener("click", async () => {
 $("tavernBanner").addEventListener("click", () => { $("tavernBanner").hidden = true; openGallery(); });
 (async function tavernNotifySetup(){
   const btn = $("tavernNotify");
-  if (!("Notification" in window)) return;
   const VAPID_PUBLIC = "BO6D2w3Cxw5b0U90-ZhWf9VGd5fKNhFwKM2k-sjnm46svKbQn-d_hWlpxkMM6V3mgUsyXN-9EYN9sa00A-CUsqY";
   const pushSupported = ("serviceWorker" in navigator) && ("PushManager" in window);
   btn.hidden = false;
@@ -2037,11 +2036,15 @@ $("tavernBanner").addEventListener("click", () => { $("tavernBanner").hidden = t
   async function sync(){
     const sub = await currentSub();
     store.set("apoc-tavern-push", sub ? "1" : "0");
-    btn.textContent = sub ? "🔔 Push on — even when closed"
-      : (store.get("apoc-tavern-notify") === "1" && Notification.permission === "granted") ? "🔔 Notifications on" : "🔔 Notify me";
+    const localOn = ("Notification" in window) && store.get("apoc-tavern-notify") === "1" && Notification.permission === "granted";
+    btn.textContent = sub ? "🔔 Push on — even when closed" : localOn ? "🔔 Notifications on" : "🔔 Notify me";
   }
   await sync();
   btn.addEventListener("click", async () => {
+    if (!("Notification" in window)) {
+      $("tavernLine").textContent = "This browser can't take notifications here — on iPhone, add this page to your Home Screen first, open it from there, then tap Notify me. In-page alerts still work here.";
+      return;
+    }
     try {
       const perm = await Notification.requestPermission();
       store.set("apoc-tavern-notify", perm === "granted" ? "1" : "0");
