@@ -473,8 +473,10 @@
     .toolbar input{grid-column:1/-1}
     .counts{grid-template-columns:repeat(3,minmax(0,1fr))}
     .cards{grid-template-columns:1fr}
-    .hub-row{gap:3px}
-    .hub-btn{min-height:52px;height:52px;font-size:.69rem;padding:4px 2px}
+    /* Phone hub (Shaun, 2026-11-13): TWO columns so every button
+       label reads in full; desktop keeps its three-across row. */
+    .hub-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+    .hub-btn{min-height:54px;height:54px;font-size:.8rem;padding:4px 4px}
     .thumb-strip img{width:12px;height:12px}
     .count-chip{min-width:20px;height:16px;font-size:.6rem}
     .hub-item:nth-child(4) .pop,.hub-item:nth-child(7) .pop{left:-6px;transform:translate(0,4px)}
