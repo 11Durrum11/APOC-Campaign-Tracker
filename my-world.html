@@ -1607,9 +1607,11 @@
            reads — site_settings, key "map_markers", value {markers:[...]} —
            read here with the same project and public key the VTT's own
            client ships. When a pin is moved, added, or rewritten at the
-           table, this atlas renders the same set. This page is the table's
-           face, so only pins the whole table sees may ever render:
-           kind "place" and gm exactly false, nothing else, on any path.
+           table, this atlas renders the same set. This is the DM's own
+           overland map, so its Places layer renders in DM view: live pins
+           of kind "place" render whatever their gm value — only the kind
+           screen applies here (the held cities stay player view and are
+           never this layer's pins; they render their own way).
            Any failure — the library missing, no answer inside the timeout,
            an error, an empty value, a shape that does not parse, or nothing
            renderable left after screening — leaves the baked placements
@@ -1634,7 +1636,7 @@
         }
         function livePlace(mk, bakedById) {
           if (!mk || typeof mk !== "object") return null;
-          if (mk.kind !== "place" || mk.gm !== false) return null;
+          if (mk.kind !== "place") return null;
           var id = typeof mk.id === "string" ? mk.id : "";
           var name = typeof mk.name === "string" ? mk.name.trim() : "";
           if (!id || !name) return null;
