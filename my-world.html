@@ -277,7 +277,7 @@
         <p class="lede">The world as it stands a thousand years after the end: three cities holding on the Sword Coast and the Silver Marches, and everywhere the cities are not, the Badlands — blighted ground, hatestorm country, demon enclaves, the claimed lands of the Kingdom of the Undead, and wilds no one claims at all. One grey sky lies over all of it. The Fog of Life covers the whole surface of the world; it does not cross the mythals, it does not go underground, and no sun and no stars have been seen through it since the day it came.</p>
         <div class="head-meta">
           <span><b>Scale</b> — every hex is 15 miles</span>
-          <span><b>Places</b> — 120 on the atlas, each with its pictures and its record</span>
+          <span><b>Places</b> — <span id="placesCount">120</span> on the atlas, each with its pictures and its record</span>
           <span><b>Survey</b> — traced from the old atlas; detail deepens the closer you go</span>
           <span><b>The fourth city</b> — Marrakesh walks, and is never pinned</span>
         </div>
@@ -1247,6 +1247,7 @@
 ]
 ;
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       "use strict";
       (function () {
@@ -1436,15 +1437,18 @@
             g.classList.toggle("selected", g.getAttribute("data-pin-id") === id);
           });
         }
+        function paras(text) {
+          return String(text).split(/\n\s*\n/).map(function (t) { return "<p>" + esc(t.trim()) + "</p>"; }).join("");
+        }
         function showPlace(p, fly) {
           selectPin(p.id);
           var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record">✕</button>';
           html += "<h2>" + esc(p.name) + "</h2>";
           html += '<p class="kind-line">' + esc(p.zone) + " · the Badlands and the held world</p>";
           html += figuresHTML(p);
-          if (p.desc) html += "<h3>The placement</h3><p>" + esc(p.desc) + "</p>";
-          if (p.story) html += "<h3>Since the APOC</h3><p>" + esc(p.story) + "</p>";
-          if (p.hook) html += "<h3>A traveller&rsquo;s hook</h3><p>" + esc(p.hook) + "</p>";
+          if (p.desc) html += "<h3>The placement</h3>" + paras(p.desc);
+          if (p.story) html += "<h3>Since the APOC</h3>" + paras(p.story);
+          if (p.hook) html += "<h3>A traveller&rsquo;s hook</h3>" + paras(p.hook);
           html += '<p class="coords-line">Atlas position ' + p.x.toFixed(1) + " / " + p.y.toFixed(1) + " — carried on the same bearings as the overland atlas.</p>";
           record.innerHTML = html;
           wireFigures(p);
@@ -1536,25 +1540,29 @@
         regionList.querySelectorAll("[data-region-chip]").forEach(function (btn) {
           btn.addEventListener("click", function () { showRegion(REGIONS[Number(btn.getAttribute("data-region-chip"))]); });
         });
-        var zones = [];
-        PLACES.forEach(function (p) { if (zones.indexOf(p.zone) < 0) zones.push(p.zone); });
-        var zoneFolds = document.getElementById("zoneFolds");
-        zones.forEach(function (z) {
-          var list = PLACES.filter(function (p) { return p.zone === z; });
-          var det = document.createElement("details");
-          det.className = "fold";
-          det.innerHTML = "<summary>" + esc(z) + ' <span class="count">— ' + list.length + " places</span></summary>" +
-            '<div class="fold-body"><div class="place-list">' +
-            list.map(function (p) { return '<button type="button" class="place-chip" data-place-chip="' + esc(p.id) + '">' + esc(p.name) + "</button>"; }).join("") +
-            "</div></div>";
-          zoneFolds.appendChild(det);
-        });
-        zoneFolds.querySelectorAll("[data-place-chip]").forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            var p = PLACES.find(function (pl) { return pl.id === btn.getAttribute("data-place-chip"); });
-            if (p) showPlace(p, true);
+        function buildZoneFolds() {
+          var zones = [];
+          PLACES.forEach(function (p) { if (zones.indexOf(p.zone) < 0) zones.push(p.zone); });
+          var zoneFolds = document.getElementById("zoneFolds");
+          zoneFolds.innerHTML = "";
+          zones.forEach(function (z) {
+            var list = PLACES.filter(function (p) { return p.zone === z; });
+            var det = document.createElement("details");
+            det.className = "fold";
+            det.innerHTML = "<summary>" + esc(z) + ' <span class="count">— ' + list.length + " places</span></summary>" +
+              '<div class="fold-body"><div class="place-list">' +
+              list.map(function (p) { return '<button type="button" class="place-chip" data-place-chip="' + esc(p.id) + '">' + esc(p.name) + "</button>"; }).join("") +
+              "</div></div>";
+            zoneFolds.appendChild(det);
           });
-        });
+          zoneFolds.querySelectorAll("[data-place-chip]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var p = PLACES.find(function (pl) { return pl.id === btn.getAttribute("data-place-chip"); });
+              if (p) showPlace(p, true);
+            });
+          });
+        }
+        buildZoneFolds();
 
         /* ---------- search ---------- */
         var search = document.getElementById("placeSearch");
@@ -1593,6 +1601,132 @@
             ghost.setAttribute("transform", "translate(" + (40 * 24) + "," + (88 * 16.04) + ")");
           }
         }
+
+        /* ---------- live places: the VTT's shared pin set ----------
+           The overland pins live in the same Supabase store the APOC VTT
+           reads — site_settings, key "map_markers", value {markers:[...]} —
+           read here with the same project and public key the VTT's own
+           client ships. When a pin is moved, added, or rewritten at the
+           table, this atlas renders the same set. This page is the table's
+           face, so only pins the whole table sees may ever render:
+           kind "place" and gm exactly false, nothing else, on any path.
+           Any failure — the library missing, no answer inside the timeout,
+           an error, an empty value, a shape that does not parse, or nothing
+           renderable left after screening — leaves the baked placements
+           above exactly as they are. */
+        var SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
+        var CODY_EXCLUDED = /(?:^|\D)(?:4001|4033|4036|4055)(?:\D|$)/;
+        var SVGNS = "http://www.w3.org/2000/svg";
+
+        function parseNote(note) {
+          var text = String(note == null ? "" : note).replace(/\r\n/g, "\n");
+          var story = text, hooks = [];
+          var m = text.match(/\n[ \t]*Plot hooks:[ \t]*\n/);
+          if (m) {
+            story = text.slice(0, m.index);
+            text.slice(m.index + m[0].length).split("\n").forEach(function (line) {
+              var t = line.trim();
+              if (t.charAt(0) === "•") hooks.push(t.slice(1).trim());
+            });
+          }
+          return { story: story.trim(), hook: hooks.join("\n\n") };
+        }
+        function livePlace(mk, bakedById) {
+          if (!mk || typeof mk !== "object") return null;
+          if (mk.kind !== "place" || mk.gm !== false) return null;
+          var id = typeof mk.id === "string" ? mk.id : "";
+          var name = typeof mk.name === "string" ? mk.name.trim() : "";
+          if (!id || !name) return null;
+          /* Marrakesh walks and is never pinned, whatever the store says. */
+          if (/marrakesh/i.test(id) || /marrakesh/i.test(name)) return null;
+          if (CODY_EXCLUDED.test(id)) return null;
+          var x = Number(mk.x), y = Number(mk.y);
+          if (!isFinite(x) || !isFinite(y) || x < 0 || x > 100 || y < 0 || y > 100) return null;
+          var imgs = [];
+          if (Array.isArray(mk.imgs)) mk.imgs.forEach(function (u) {
+            if (typeof u === "string" && /^https:\/\//i.test(u)) imgs.push(u);
+          });
+          var parts = parseNote(mk.note);
+          var baked = bakedById[id];
+          return {
+            id: id, name: name, x: x, y: y,
+            zone: baked ? baked.zone : "Added at the table",
+            desc: "", story: parts.story, hook: parts.hook, imgs: imgs
+          };
+        }
+        function renderLivePins() {
+          var layer = document.getElementById("pinsLayer");
+          while (layer.firstChild) layer.removeChild(layer.firstChild);
+          PLACES.forEach(function (p) {
+            var g = document.createElementNS(SVGNS, "g");
+            g.setAttribute("class", "pin-group");
+            g.setAttribute("data-pin-id", p.id);
+            g.setAttribute("transform", "translate(" + Math.round(p.x * (WORLD_W / 100)) + "," + Math.round(p.y * (WORLD_H / 100)) + ")");
+            var hit = document.createElementNS(SVGNS, "circle");
+            hit.setAttribute("class", "pin-hit");
+            hit.setAttribute("r", "24");
+            hit.setAttribute("fill", "transparent");
+            var title = document.createElementNS(SVGNS, "title");
+            title.textContent = p.name;
+            hit.appendChild(title);
+            var dot = document.createElementNS(SVGNS, "circle");
+            dot.setAttribute("class", "pin-dot");
+            dot.setAttribute("r", "8.5");
+            var label = document.createElementNS(SVGNS, "text");
+            label.setAttribute("class", "pin-label place-label");
+            label.setAttribute("x", "15");
+            label.setAttribute("y", "6");
+            label.setAttribute("font-size", "24");
+            label.textContent = p.name;
+            g.appendChild(hit);
+            g.appendChild(dot);
+            g.appendChild(label);
+            g.addEventListener("click", function (e) {
+              e.stopPropagation();
+              var pl = PLACES.find(function (q) { return q.id === p.id; });
+              if (pl) showPlace(pl, false);
+            });
+            layer.appendChild(g);
+          });
+        }
+        function applyLivePlaces(markers) {
+          var bakedById = {};
+          PLACES.forEach(function (p) { bakedById[p.id] = p; });
+          var seen = {}, live = [];
+          markers.forEach(function (mk) {
+            var p = livePlace(mk, bakedById);
+            if (p && !seen[p.id]) { seen[p.id] = true; live.push(p); }
+          });
+          if (!live.length) return; /* nothing renderable — keep the baked set */
+          PLACES = live;
+          renderLivePins();
+          buildZoneFolds();
+          var countEl = document.getElementById("placesCount");
+          if (countEl) countEl.textContent = String(live.length);
+          if (selectedId) {
+            var cur = PLACES.find(function (p) { return p.id === selectedId; });
+            if (cur) showPlace(cur, false); else showDefault();
+          }
+        }
+        function loadLivePlaces() {
+          try {
+            if (!window.supabase) return;
+            var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 10000); });
+            var query = Promise.resolve(db.from("site_settings").select("value").eq("key", "map_markers").maybeSingle())
+              .then(function (res) { return res; }, function () { return null; });
+            Promise.race([query, timeout]).then(function (res) {
+              try {
+                if (!res || res.error || !res.data || !res.data.value) return;
+                var markers = res.data.value.markers;
+                if (!Array.isArray(markers) || !markers.length) return;
+                applyLivePlaces(markers);
+              } catch (e) { /* keep the baked placements */ }
+            });
+          } catch (e) { /* keep the baked placements */ }
+        }
+        loadLivePlaces();
 
         showDefault();
         fit();
