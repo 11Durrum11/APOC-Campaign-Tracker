@@ -455,6 +455,30 @@
   .gallery-item img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
   .gallery-item figcaption{padding:6px 7px;font-size:.78rem;color:var(--muted-foreground);display:flex;justify-content:space-between;gap:5px}
   .gallery-item .mini-delete{color:#f0b1b1;cursor:pointer}
+  /* The Tavern chat room (2026-11-13): shared messages on the same
+     backend as the rest of the page; pictures show inline, PDFs and
+     every other file ride as share cards. */
+  .tavern-chat{border:1px solid var(--border);border-radius:9px;background:var(--popover);padding:10px;margin:12px 0 4px}
+  .tavern-chat-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .tavern-chat-head h3{margin:0}
+  .tavern-chat-tools{display:flex;gap:6px;flex-wrap:wrap}
+  .tavern-stream{max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:8px 2px;margin-top:6px}
+  .tavern-empty{color:var(--muted-foreground);font-size:.85rem;text-align:center;padding:10px 0}
+  .tavern-msg{border:1px solid var(--border);border-radius:8px;padding:7px 9px;background:transparent}
+  .tavern-meta{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--muted-foreground)}
+  .tavern-who{font-weight:700;color:var(--foreground);font-size:.82rem}
+  .tavern-text{margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .tavern-img{display:block;max-width:100%;max-height:320px;border-radius:6px;margin-top:5px}
+  .tavern-file{display:flex;gap:8px;align-items:center;margin-top:5px;padding:8px;border:1px solid var(--border);border-radius:8px;color:var(--foreground);text-decoration:none;overflow-wrap:anywhere}
+  .tavern-file:hover{border-color:var(--primary)}
+  .tavern-form{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tavern-form input[type="text"]{padding:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #tavernName{flex:1 1 110px;min-width:0}
+  #tavernText{flex:2 1 170px;min-width:0}
+  .tavern-attach{cursor:pointer;display:inline-flex;align-items:center}
+  .tavern-badge{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--primary);color:#14100a;font-size:.68rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;z-index:3}
+  #tavernBanner{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:200;max-width:min(92vw,520px);background:var(--popover);border:1px solid var(--primary);border-radius:10px;padding:9px 13px;color:var(--foreground);cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.45);font-size:.9rem}
+  #tavernBanner .tavern-who{color:var(--primary)}
   .upload-box{border:1px dashed var(--input);border-radius:10px;padding:12px;margin-top:14px}
 
   /* Bottom notice */
@@ -678,6 +702,7 @@
             <img src="assets/cody/3974.webp" alt=""><img src="assets/cody/3975.webp" alt=""><img src="assets/cody/3976.webp" alt="">
           </span>
           <span class="count-chip" id="artworkChip">60</span>
+          <span class="tavern-badge" id="tavernBadge" hidden>0</span>
         </button>
       </div>
       <div class="hub-item">
@@ -1027,6 +1052,8 @@
 
 </div>
 
+<div id="tavernBanner" hidden role="status"></div>
+
 <!-- The Tavern overlay (Cody's artwork gallery; renamed at Shaun's order, 2026-11-13) -->
 <div class="overlay" id="galleryOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="galleryHeading">
   <div class="gallery-panel">
@@ -1037,6 +1064,26 @@
       </div>
       <button class="btn" id="galleryClose" type="button">Close ✕</button>
     </div>
+
+    <section class="tavern-chat" aria-label="The Tavern chat room">
+      <div class="tavern-chat-head">
+        <h3>The Common Room</h3>
+        <div class="tavern-chat-tools">
+          <button class="btn" id="tavernNotify" type="button" hidden>🔔 Notify me</button>
+          <button class="btn" id="tavernClear" type="button">Clear the room</button>
+        </div>
+      </div>
+      <div class="tavern-stream" id="tavernStream" aria-live="polite"></div>
+      <p class="status-line" id="tavernLine" aria-live="polite"></p>
+      <form class="tavern-form" id="tavernForm">
+        <input id="tavernName" type="text" maxlength="40" placeholder="Your name" aria-label="Your name" autocomplete="name">
+        <input id="tavernText" type="text" maxlength="500" placeholder="Say something…" aria-label="Message">
+        <label class="btn tavern-attach" for="tavernFile" aria-label="Share a file" title="Share a picture, PDF, or file">📎</label>
+        <input id="tavernFile" type="file" hidden>
+        <button class="btn" id="tavernSend" type="submit">Post</button>
+      </form>
+      <p class="muted small" style="margin:6px 0 0">Tap 📎 to share a picture, a PDF, or any file with the table. Pictures show right here in the room.</p>
+    </section>
 
     <figure class="featured">
       <img id="featuredArt" src="assets/cody/3974.webp" alt="Cody's campaign picture 3974">
@@ -1765,6 +1812,8 @@ function openGallery(){
   document.body.style.overflow = "hidden";
   $("galleryClose").focus();
   loadArtwork();
+  loadTavernChat();
+  tavernRefreshBadge();
 }
 function closeGallery(){
   if ($("galleryOverlay").hidden) return;
@@ -1775,6 +1824,197 @@ function closeGallery(){
 }
 $("galleryClose").addEventListener("click", closeGallery);
 $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galleryOverlay")) closeGallery(); });
+
+/* ================= The Tavern chat room =================
+   The common room: shared messages for the whole table, riding the
+   same site_settings store as the campaign status — one row, key
+   "tavern_chat", value {messages:[...]}. New word reaches everybody:
+   a realtime subscription when the backend offers it, a steady
+   refresh behind it, an unread badge on The Tavern button, a banner
+   across the page, and a browser notification for anyone who turns
+   Notify me on. Files ride the artwork bucket under tavern/ (never
+   the gallery's own list): pictures render in the room, PDFs and
+   every other file ride as share cards. */
+const TAVERN_KEY = "tavern_chat";
+const TAVERN_MAX_MESSAGES = 200;
+const TAVERN_MAX_FILE = 25 * 1024 * 1024;
+let tavernMessages = [];
+let tavernLoaded = false;
+let tavernPosting = false;
+let tavernSeenId = store.get("apoc-tavern-seen") || "";
+let tavernSessionIds = new Set();
+let tavernBannerTimer = null;
+
+function tavernMsgHTML(m){
+  const when = new Date(m.ts).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" });
+  let body = "";
+  if (m.file && m.file.url) {
+    if (m.file.kind === "image") {
+      body += `<a href="${esc(m.file.url)}" target="_blank" rel="noopener"><img class="tavern-img" src="${esc(m.file.url)}" alt="Shared picture — ${esc(m.file.name)}" loading="lazy"></a>`;
+    } else {
+      const icon = m.file.kind === "pdf" ? "📄" : "📎";
+      const size = m.file.size ? ` · ${m.file.size >= 1048576 ? (m.file.size / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(m.file.size / 1024)) + " KB"}` : "";
+      body += `<a class="tavern-file" href="${esc(m.file.url)}" target="_blank" rel="noopener"><span>${icon}</span><span>${esc(m.file.name)}<span class="muted">${size}</span></span></a>`;
+    }
+  }
+  if (m.text) body += `<div class="tavern-text">${linkify(m.text)}</div>`;
+  return `<div class="tavern-msg"><div class="tavern-meta"><span class="tavern-who">${esc(m.name)}</span><span>${when}</span></div>${body}</div>`;
+}
+function renderTavernChat(keepScroll){
+  const stream = $("tavernStream");
+  const nearBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight < 90;
+  stream.innerHTML = tavernMessages.length
+    ? tavernMessages.map(tavernMsgHTML).join("")
+    : `<div class="tavern-empty">No word yet — the room is quiet.</div>`;
+  if (!keepScroll || nearBottom) stream.scrollTop = stream.scrollHeight;
+}
+function tavernUnreadCount(){
+  if (!tavernSeenId) return tavernMessages.length;
+  const idx = tavernMessages.findIndex(m => m.id === tavernSeenId);
+  return idx === -1 ? tavernMessages.length : tavernMessages.length - idx - 1;
+}
+function tavernRefreshBadge(){
+  const badge = $("tavernBadge");
+  if (!$("galleryOverlay").hidden) { badge.hidden = true; return; }
+  const u = tavernUnreadCount();
+  badge.textContent = u;
+  badge.hidden = u === 0;
+}
+function tavernMarkSeen(){
+  const last = tavernMessages[tavernMessages.length - 1];
+  if (last) { tavernSeenId = last.id; store.set("apoc-tavern-seen", tavernSeenId); }
+  tavernRefreshBadge();
+}
+function tavernAnnounce(newMsgs){
+  const fresh = newMsgs.filter(m => !tavernSessionIds.has(m.id));
+  if (!fresh.length) return;
+  const last = fresh[fresh.length - 1];
+  const preview = last.text ? last.text
+    : (last.file ? `shared ${last.file.kind === "image" ? "a picture" : "a file"}: ${last.file.name}` : "");
+  const banner = $("tavernBanner");
+  banner.innerHTML = `🍺 <span class="tavern-who">${esc(last.name)}</span> in The Tavern — ${esc(preview.slice(0, 90))}`;
+  banner.hidden = false;
+  clearTimeout(tavernBannerTimer);
+  tavernBannerTimer = setTimeout(() => { banner.hidden = true; }, 12000);
+  try {
+    if (store.get("apoc-tavern-notify") === "1" && "Notification" in window && Notification.permission === "granted") {
+      new Notification(`The Tavern — ${last.name}`, { body: preview.slice(0, 120) });
+    }
+  } catch(e) {}
+}
+async function loadTavernChat(){
+  if (!db || tavernPosting) return;
+  try {
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", TAVERN_KEY).maybeSingle();
+    if (error) throw error;
+    const incoming = (data && data.value && Array.isArray(data.value.messages)) ? data.value.messages : [];
+    const known = new Set(tavernMessages.map(m => m.id));
+    const newMsgs = incoming.filter(m => !known.has(m.id));
+    const changed = newMsgs.length > 0 || incoming.length !== tavernMessages.length;
+    tavernMessages = incoming;
+    if (!tavernLoaded) {
+      tavernLoaded = true;
+      renderTavernChat(false);
+      if (!$("galleryOverlay").hidden) tavernMarkSeen(); else tavernRefreshBadge();
+      return;
+    }
+    if (changed) renderTavernChat(true);
+    if (newMsgs.length) tavernAnnounce(newMsgs);
+    if (!$("galleryOverlay").hidden) tavernMarkSeen(); else tavernRefreshBadge();
+  } catch(e) { /* the room retries on the next refresh */ }
+}
+async function postTavern(file){
+  const name = $("tavernName").value.trim();
+  const text = $("tavernText").value.trim();
+  if (!name) { $("tavernLine").textContent = "Put your name on it first — the room keeps no anonymous word."; $("tavernName").focus(); return; }
+  if (!text && !file) { $("tavernText").focus(); return; }
+  if (!db) { $("tavernLine").textContent = "The room can't be reached right now — try again in a moment."; return; }
+  store.set("apoc-tavern-name", name);
+  tavernPosting = true;
+  $("tavernSend").disabled = true;
+  try {
+    let fileMeta = null;
+    if (file) {
+      if (file.size > TAVERN_MAX_FILE) { $("tavernLine").textContent = "That file is over 25 MB — too heavy for the room."; return; }
+      $("tavernLine").textContent = `Sharing ${file.name}…`;
+      const safe = file.name.replace(/[^\w.\-]+/g, "-").slice(-80) || "file";
+      const path = `tavern/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safe}`;
+      const { error: upErr } = await db.storage.from(ARTWORK_BUCKET).upload(path, file, { upsert:false, contentType:file.type || undefined });
+      if (upErr) throw upErr;
+      const url = db.storage.from(ARTWORK_BUCKET).getPublicUrl(path).data.publicUrl;
+      const kind = (file.type || "").startsWith("image/") ? "image"
+        : ((file.type === "application/pdf") || /\.pdf$/i.test(file.name)) ? "pdf" : "file";
+      fileMeta = { path, url, name: file.name, kind, size: file.size };
+    }
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", TAVERN_KEY).maybeSingle();
+    if (error) throw error;
+    const msgs = (data && data.value && Array.isArray(data.value.messages)) ? data.value.messages : [];
+    const msg = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), name, text, ts: Date.now() };
+    if (fileMeta) msg.file = fileMeta;
+    msgs.push(msg);
+    const trimmed = msgs.slice(-TAVERN_MAX_MESSAGES);
+    const { error: wErr } = await db.from(SETTINGS_TABLE).upsert(
+      { key: TAVERN_KEY, value: { messages: trimmed }, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    if (wErr) throw wErr;
+    tavernSessionIds.add(msg.id);
+    tavernMessages = trimmed;
+    renderTavernChat(false);
+    tavernMarkSeen();
+    $("tavernText").value = "";
+    $("tavernLine").textContent = "";
+  } catch(e) {
+    $("tavernLine").textContent = "That didn't reach the room — try again.";
+  } finally {
+    tavernPosting = false;
+    $("tavernSend").disabled = false;
+  }
+}
+$("tavernForm").addEventListener("submit", ev => { ev.preventDefault(); postTavern(null); });
+$("tavernFile").addEventListener("change", ev => {
+  const file = (ev.target.files || [])[0];
+  ev.target.value = "";
+  if (file) postTavern(file);
+});
+$("tavernName").addEventListener("change", () => store.set("apoc-tavern-name", $("tavernName").value.trim()));
+$("tavernName").value = store.get("apoc-tavern-name") || "";
+$("tavernClear").addEventListener("click", async () => {
+  if (!confirm("Clear the room? Every message and shared file in The Tavern goes.")) return;
+  if (!db) return;
+  try {
+    const paths = tavernMessages.filter(m => m.file && m.file.path).map(m => m.file.path);
+    const { error } = await db.from(SETTINGS_TABLE).upsert(
+      { key: TAVERN_KEY, value: { messages: [] }, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+    if (error) throw error;
+    tavernMessages = [];
+    renderTavernChat(false);
+    tavernMarkSeen();
+    $("tavernLine").textContent = "The room is cleared.";
+    if (paths.length) { try { await db.storage.from(ARTWORK_BUCKET).remove(paths); } catch(e) {} }
+  } catch(e) { $("tavernLine").textContent = "The clear didn't go through — try again."; }
+});
+$("tavernBanner").addEventListener("click", () => { $("tavernBanner").hidden = true; openGallery(); });
+(function tavernNotifySetup(){
+  const btn = $("tavernNotify");
+  if (!("Notification" in window)) return;
+  const sync = () => { btn.textContent = (store.get("apoc-tavern-notify") === "1" && Notification.permission === "granted") ? "🔔 Notifications on" : "🔔 Notify me"; };
+  btn.hidden = false;
+  sync();
+  btn.addEventListener("click", async () => {
+    try {
+      const perm = await Notification.requestPermission();
+      store.set("apoc-tavern-notify", perm === "granted" ? "1" : "0");
+    } catch(e) {}
+    sync();
+  });
+})();
+loadTavernChat();
+renderTavernChat(false);
+setInterval(() => { if ($("galleryOverlay").hidden) loadTavernChat(); }, 20000);
+setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
 
 /* ================= Init ================= */
 (function init(){
@@ -1793,6 +2033,11 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
         .on("postgres_changes", { event:"*", schema:"public", table:ENTRIES_TABLE }, () => loadSharedEntries(false))
         .subscribe();
     } catch(e) { /* realtime is a bonus; the 60-second refresh stands */ }
+    try {
+      db.channel("tavern-live")
+        .on("postgres_changes", { event:"*", schema:"public", table:SETTINGS_TABLE, filter:`key=eq.${TAVERN_KEY}` }, () => loadTavernChat())
+        .subscribe();
+    } catch(e) { /* the tavern refresh stands behind it */ }
   }
 })();
 </script>
