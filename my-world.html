@@ -1565,12 +1565,32 @@
         buildZoneFolds();
 
         /* ---------- search ---------- */
+        /* Matching is normalized on both sides: case is folded, accents are
+           dropped, and every run of punctuation or spacing becomes one
+           space — so "St James", "St-James", and "ST-JAMES" all find the
+           record named "ST-JAMES — Booze and Magic". If no name contains
+           the whole phrase, a record still matches when every word typed
+           appears somewhere in its name, in any order. */
+        function normName(s) {
+          return String(s == null ? "" : s)
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+        }
+        function nameMatches(name, q) {
+          var n = normName(name);
+          if (n.indexOf(q) >= 0) return true;
+          var words = n.split(" ");
+          return q.split(" ").every(function (w) { return words.indexOf(w) >= 0; });
+        }
         var search = document.getElementById("placeSearch");
         search.addEventListener("change", function () {
-          var q = search.value.trim().toLowerCase();
+          var q = normName(search.value);
           if (!q) return;
-          var hit = PLACES.find(function (p) { return p.name.toLowerCase().indexOf(q) >= 0; }) ||
-                    CITIES.find(function (c) { return c.name.toLowerCase().indexOf(q) >= 0; });
+          var hit = PLACES.find(function (p) { return nameMatches(p.name, q); }) ||
+                    CITIES.find(function (c) { return nameMatches(c.name, q); });
           if (hit && hit.x != null) { if (hit.zone) showPlace(hit, true); else showCity(hit); }
         });
         search.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); search.dispatchEvent(new Event("change")); } });
