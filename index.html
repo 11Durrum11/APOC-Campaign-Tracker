@@ -161,11 +161,6 @@
   .hub-panel h2{margin-bottom:2px}
   .hub-content-panel{margin-top:10px;width:100%;max-height:none}
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-wrap:nowrap;margin-top:4px}
-  body.mv-edit-on .hub-item{touch-action:none} /* editing on: a touch-drag on a hub button reshuffles it instead of scrolling the page (v51.7) */
-  .hub-item.mv-reorder{opacity:.92;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:60;position:relative}
-  .hub-item.mv-insert{box-shadow:inset 3px 0 0 var(--primary)}
-  .hub-item.mv-carry{outline:3px solid var(--mv-blue);outline-offset:1px}
-  .hub-item.mv-carry .hub-btn{color:var(--primary);border-color:var(--mv-blue)}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -2194,11 +2189,9 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   var NO_NEST = { trackerPanel:1, canonPanel:1, lairPanel:1, cosmetologyPanel:1, skyPanel:1, reconPanel:1 };
   function nestHostAt(p, x, y){
     if (NO_NEST[p.id]) return null;
-    if (p.hubItem) return null; /* hub buttons reshuffle in their grid; they never nest */
     var best = null, bestArea = Infinity;
     pieces.forEach(function(q){
       if (q === p || NO_NEST[q.id]) return;
-      if (q.hubItem) return; /* …and never host a nest */
       if (q.mode !== p.mode) return;
       if (p.mode === "local" && q.host !== p.host) return;
       if (p.el.contains(q.el)) return; /* never into its own child */
@@ -2330,7 +2323,6 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (hd && hd.closest(".mv-piece") === p.el && !t.closest("input,select,textarea,a,button")) mode = "drag";
     }
     if (!mode && p.selfDrag && t === p.el) mode = "drag";
-    if (p.hubItem && mode) mode = "drag"; /* hub buttons: any drag is a reshuffle drag */
     if (!mode || p.locked) return;
     session = { p:p, mode:mode, dir:dir, viaGrip:viaGrip, sx:e.clientX, sy:e.clientY, moved:false, base:null, fx:0, fy:0 };
     window.addEventListener("pointermove", onMove);
@@ -2344,35 +2336,8 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
       if (Math.hypot(dx, dy) < 7) return;
       s.moved = true;
       document.body.classList.add("mv-dragging");
-      if (s.p.hubItem) { s.p.el.classList.add("mv-reorder"); }
-      else if (!s.p.floated) { if (s.p.nested) detachNested(s.p); else floatPiece(s.p, null); }
+      if (!s.p.floated) { if (s.p.nested) detachNested(s.p); else floatPiece(s.p, null); }
       s.base = geom(s.p); s.fx = s.sx; s.fy = s.sy;
-    }
-    if (s.p.hubItem && s.moved) {
-      /* Reshuffle: the button rides the pointer (transform only — the
-         grid does not reflow mid-drag); the marked sibling is the slot
-         it will take on drop. */
-      s.p.el.style.transform = "translate(" + dx + "px," + dy + "px)";
-      var hrow = document.getElementById("hubRow");
-      var before = null;
-      if (hrow) {
-        var sibs = hrow.querySelectorAll(".hub-item");
-        for (var si = 0; si < sibs.length; si++) {
-          var sib = sibs[si];
-          if (sib === s.p.el) continue;
-          var r = sib.getBoundingClientRect();
-          var midX = r.left + r.width / 2;
-          if (e.clientY < r.top || (e.clientY <= r.bottom && e.clientX < midX)) { before = sib; break; }
-        }
-      }
-      if (s.marked !== before) {
-        if (s.marked) s.marked.classList.remove("mv-insert");
-        s.marked = before;
-        if (before) before.classList.add("mv-insert");
-      }
-      s.insertBefore = before;
-      if (e.cancelable) e.preventDefault();
-      return;
     }
     s.cx = e.clientX; s.cy = e.clientY;
     if (s.moved && s.mode === "drag") {
@@ -2409,28 +2374,11 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     if (!s) return;
     if (s.hot) { s.hot.el.classList.remove("mv-drop-ok"); s.hot = null; }
     if (s.moved) {
-      if (s.p.hubItem) {
-        /* Reshuffle drop: move the button to the marked slot and keep
-           the new order. No float, no nest, no layout record. */
-        s.p.el.classList.remove("mv-reorder");
-        s.p.el.style.transform = "";
-        if (s.marked) { s.marked.classList.remove("mv-insert"); s.marked = null; }
-        var urow = document.getElementById("hubRow");
-        if (urow) {
-          if (s.insertBefore && s.insertBefore !== s.p.el) urow.insertBefore(s.p.el, s.insertBefore);
-          else if (!s.insertBefore) urow.appendChild(s.p.el);
-          saveHubOrder();
-        }
-        s.p.el.__justDragged = true;
-        setTimeout(function(){ s.p.el.__justDragged = false; }, 400);
-        suppressClick(s.p);
-      } else {
-        /* Rule 5: ending a drag with the pointer over another piece
-           nests the dragged piece inside it. */
-        var host = (s.mode === "drag" && typeof s.cx === "number") ? nestHostAt(s.p, s.cx, s.cy) : null;
-        if (!(host && nestPiece(s.p, host))) savePiece(s.p);
-        suppressClick(s.p);
-      }
+      /* Rule 5: ending a drag with the pointer over another piece
+         nests the dragged piece inside it. */
+      var host = (s.mode === "drag" && typeof s.cx === "number") ? nestHostAt(s.p, s.cx, s.cy) : null;
+      if (!(host && nestPiece(s.p, host))) savePiece(s.p);
+      suppressClick(s.p);
     }
     else if (s.viaGrip) { s.p.el.classList.toggle("mv-active"); }
   }
@@ -2455,83 +2403,12 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
 
   /* ================= registry: every piece plugs in here ================= */
   mkPiece("heroCopy", document.querySelector(".hero-copy"), "page", null, { head: "h1, .eyebrow" });
-  /* Hub reshuffle (Shaun, 2026-11-12): the hub buttons reorder INSIDE
-     their grid — drag one and it takes the slot it drops on; the order
-     persists per device. Hub items never float and never nest: the
-     grid is their home. (The Sky and the Table Reconvenes joined the
-     hub as buttons in v51.5; their old hero-bubble pieces are gone.) */
-  function hubKey(item){
-    var nm = item.querySelector(".hub-name");
-    var t = ((nm && nm.textContent) || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    return t || "hub";
-  }
-  var HUBKEY = "apocTrackerHubOrderV1";
-  (function applyHubOrder(){
-    var row = document.getElementById("hubRow");
-    if (!row) return;
-    var saved = null;
-    try { saved = JSON.parse(lsGet(HUBKEY) || "null"); } catch(e) { saved = null; }
-    if (!saved || !saved.length) return;
-    var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
-    var byKey = {};
-    items.forEach(function(it){ byKey[hubKey(it)] = it; });
-    var ordered = [];
-    saved.forEach(function(k){ if (byKey[k]) { ordered.push(byKey[k]); delete byKey[k]; } });
-    items.forEach(function(it){ var k = hubKey(it); if (byKey[k]) { ordered.push(it); delete byKey[k]; } });
-    ordered.forEach(function(it){ row.appendChild(it); });
-  })();
-  function saveHubOrder(){
-    var row = document.getElementById("hubRow");
-    if (!row) return;
-    var keys = Array.prototype.map.call(row.querySelectorAll(".hub-item"), function(it){ return hubKey(it); });
-    lsSet(HUBKEY, JSON.stringify(keys));
-  }
-  /* Tap-to-swap (v51.8): dragging is unreliable on touch phones
-     (scroll and long-press fight the drag), so with Editing ON a tap
-     on a hub button picks it up and a tap on a second button swaps
-     the two — plain clicks, no drag physics. The order saves through
-     the same saveHubOrder as the drag path. */
-  var hubCarry = null;
-  function hubName(item){
-    var nm = item.querySelector(".hub-name");
-    return (nm && nm.textContent) || "that button";
-  }
-  document.addEventListener("click", function(e){
-    if (!document.body.classList.contains("mv-edit-on")) {
-      if (hubCarry) { hubCarry.classList.remove("mv-carry"); hubCarry = null; }
-      return;
-    }
-    var t = e.target;
-    if (!(t instanceof Element)) return;
-    var row = document.getElementById("hubRow");
-    var item = t.closest(".hub-item");
-    if (!row || !item || !row.contains(item)) return;
-    if (t.closest(".mv-lock") || t.closest(".mv-edit") || t.closest(".mv-grip")) return;
-    if (item.__justDragged) return;
-    e.preventDefault(); e.stopPropagation();
-    if (!hubCarry) {
-      hubCarry = item; item.classList.add("mv-carry");
-      setEditStatus("Moving " + hubName(item) + " — tap the button it should swap with; tap it again to put it back.");
-    } else if (hubCarry === item) {
-      item.classList.remove("mv-carry"); hubCarry = null;
-      setEditStatus("Put back. Nothing moved.");
-    } else {
-      var a = hubCarry, b = item;
-      var aNext = a.nextSibling, bNext = b.nextSibling;
-      if (aNext === b) row.insertBefore(b, a);
-      else if (bNext === a) row.insertBefore(a, b);
-      else { row.insertBefore(a, bNext); row.insertBefore(b, aNext); }
-      a.classList.remove("mv-carry"); hubCarry = null;
-      saveHubOrder();
-      setEditStatus("Swapped " + hubName(a) + " with " + hubName(b) + " — order saved on this device.");
-    }
-  }, true);
-  document.querySelectorAll(".hub-item").forEach(function(item, i){
-    var btn = item.querySelector(".hub-btn");
-    var id = "hub-" + (btn && (btn.id || btn.getAttribute("data-hub-action")) || String(i + 1));
-    var hp = mkPiece(id, item, "page", null, { surface: ".hub-btn" });
-    if (hp) hp.hubItem = true;
-  });
+  /* Hub buttons are plain buttons (Shaun, 2026-11-12): the lock/move
+     treatment is REMOVED from them — no grips, no drag, no reshuffle,
+     no saved order. They stay in their grid in the authored order and
+     simply open their panels. The pieces around them (panels, heads,
+     canon and law items) keep the full treatment as before. */
+
   mkPiece("lairPanel", document.getElementById("lairPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("canonPanel", document.getElementById("canonPanel"), "page", null, { head: ".eyebrow", scroll: true });
   mkPiece("trackerPanel", document.getElementById("trackerPanel"), "page", null, { head: ".eyebrow", scroll: true });
@@ -2573,15 +2450,13 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
     var rec = records[p.id];
     if (!rec) return;
     if (rec.l) { p.locked = true; syncLockUI(p); }
-    if (p.hubItem || (p.el.classList && p.el.classList.contains("hub-content-panel"))) {
+    if (p.el.classList && p.el.classList.contains("hub-content-panel")) {
       /* Panels are toggled views, not furniture: NEVER restore one
          floated. A stale saved position strands the panel off-screen
          (or as a sliver at the screen edge), so its hub button looks
          dead — Shaun, 2026-11-07: Canon would not open on his device
          while a clean browser opened it fine. Drop the saved float
-         for panel pieces; the record self-heals on this load. Hub
-         buttons get the same treatment (v51.5): they live in their
-         grid and reshuffle there — a saved float self-heals away. */
+         for panel pieces; the record self-heals on this load. */
       if (typeof rec.x === "number" || typeof rec.y === "number" || rec.w) {
         delete rec.x; delete rec.y; delete rec.w; delete rec.h; delete rec.o;
         if (rec.l) records[p.id] = { l: 1 }; else delete records[p.id];
@@ -2604,7 +2479,6 @@ $("galleryOverlay").addEventListener("click", ev => { if (ev.target === $("galle
   pieces.forEach(function(p){
     var rec = records[p.id];
     if (!rec || !rec.nest) return;
-    if (p.hubItem) return; /* hub buttons never nest (v51.5) */
     var host = byId[rec.nest];
     if (host && host !== p) nestPiece(p, host, true);
   });
