@@ -1845,6 +1845,12 @@ let tavernSeenId = store.get("apoc-tavern-seen") || "";
 let tavernSessionIds = new Set();
 let tavernBannerTimer = null;
 
+function tavernDeviceId(){
+  let d = store.get("apoc-tavern-dev") || "";
+  if (!d) { d = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); store.set("apoc-tavern-dev", d); }
+  return d;
+}
+
 function tavernMsgHTML(m){
   const when = new Date(m.ts).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" });
   let body = "";
@@ -1897,7 +1903,7 @@ function tavernAnnounce(newMsgs){
   clearTimeout(tavernBannerTimer);
   tavernBannerTimer = setTimeout(() => { banner.hidden = true; }, 12000);
   try {
-    if (store.get("apoc-tavern-notify") === "1" && "Notification" in window && Notification.permission === "granted") {
+    if (store.get("apoc-tavern-notify") === "1" && store.get("apoc-tavern-push") !== "1" && "Notification" in window && Notification.permission === "granted") {
       new Notification(`The Tavern — ${last.name}`, { body: preview.slice(0, 120) });
     }
   } catch(e) {}
@@ -1949,7 +1955,7 @@ async function postTavern(file){
     const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", TAVERN_KEY).maybeSingle();
     if (error) throw error;
     const msgs = (data && data.value && Array.isArray(data.value.messages)) ? data.value.messages : [];
-    const msg = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), name, text, ts: Date.now() };
+    const msg = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), name, text, ts: Date.now(), dev: tavernDeviceId() };
     if (fileMeta) msg.file = fileMeta;
     msgs.push(msg);
     const trimmed = msgs.slice(-TAVERN_MAX_MESSAGES);
@@ -1997,20 +2003,68 @@ $("tavernClear").addEventListener("click", async () => {
   } catch(e) { $("tavernLine").textContent = "The clear didn't go through — try again."; }
 });
 $("tavernBanner").addEventListener("click", () => { $("tavernBanner").hidden = true; openGallery(); });
-(function tavernNotifySetup(){
+(async function tavernNotifySetup(){
   const btn = $("tavernNotify");
   if (!("Notification" in window)) return;
-  const sync = () => { btn.textContent = (store.get("apoc-tavern-notify") === "1" && Notification.permission === "granted") ? "🔔 Notifications on" : "🔔 Notify me"; };
+  const VAPID_PUBLIC = "BO6D2w3Cxw5b0U90-ZhWf9VGd5fKNhFwKM2k-sjnm46svKbQn-d_hWlpxkMM6V3mgUsyXN-9EYN9sa00A-CUsqY";
+  const pushSupported = ("serviceWorker" in navigator) && ("PushManager" in window);
   btn.hidden = false;
-  sync();
+  const b64 = buf => buf ? btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "") : "";
+  async function currentSub(){
+    if (!pushSupported) return null;
+    try {
+      const reg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise(res => setTimeout(() => res(null), 4000))
+      ]);
+      return reg ? await reg.pushManager.getSubscription() : null;
+    } catch(e) { return null; }
+  }
+  async function saveSub(sub){
+    if (!db) return;
+    const rec = { endpoint: sub.endpoint, keys: { p256dh: b64(sub.getKey("p256dh")), auth: b64(sub.getKey("auth")) }, dev: tavernDeviceId(), name: $("tavernName").value.trim() };
+    try {
+      const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", "tavern_push_subs").maybeSingle();
+      let subs = (data && data.value && Array.isArray(data.value.subs)) ? data.value.subs : [];
+      subs = subs.filter(s => s.endpoint !== rec.endpoint && s.dev !== rec.dev);
+      subs.push(rec);
+      await db.from(SETTINGS_TABLE).upsert(
+        { key: "tavern_push_subs", value: { subs }, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+    } catch(e) {}
+  }
+  async function sync(){
+    const sub = await currentSub();
+    store.set("apoc-tavern-push", sub ? "1" : "0");
+    btn.textContent = sub ? "🔔 Push on — even when closed"
+      : (store.get("apoc-tavern-notify") === "1" && Notification.permission === "granted") ? "🔔 Notifications on" : "🔔 Notify me";
+  }
+  await sync();
   btn.addEventListener("click", async () => {
     try {
       const perm = await Notification.requestPermission();
       store.set("apoc-tavern-notify", perm === "granted" ? "1" : "0");
-    } catch(e) {}
+      if (perm === "granted" && pushSupported) {
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          const keyBytes = Uint8Array.from(atob(VAPID_PUBLIC.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes });
+        }
+        await saveSub(sub);
+        $("tavernLine").textContent = "Push is on for this device — word from the room now reaches you even with the page closed, like a text.";
+      } else if (perm === "granted") {
+        $("tavernLine").textContent = "This browser can't take push with the page closed — on iPhone, add this page to your Home Screen first, open it from there, then tap Notify me. In-page alerts still work here.";
+      }
+    } catch(e) {
+      $("tavernLine").textContent = "Push didn't take on this browser — on iPhone, add this page to your Home Screen first, open it from there, then tap Notify me. In-page alerts still work here.";
+    }
     sync();
   });
 })();
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+if (new URLSearchParams(location.search).get("tavern") === "1") openGallery();
 loadTavernChat();
 renderTavernChat(false);
 setInterval(() => { if ($("galleryOverlay").hidden) loadTavernChat(); }, 20000);
