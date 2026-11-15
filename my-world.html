@@ -52,8 +52,8 @@
       /* ---------- layout ---------- */
       .map-grid { display: grid; grid-template-columns: minmax(0,1fr) 350px; gap: 1.1rem; align-items: start; }
       @media (max-width: 640px) {
-        .map-hint { bottom: 3.3rem; max-width: 58%; }
-        .scale-note { bottom: .5rem; }
+        .map-hint { bottom: .5rem; max-width: 54%; font-size: .72rem; padding: .2rem .5rem; }
+        .scale-note { bottom: .5rem; font-size: .72rem; padding: .2rem .5rem; }
       }
       @media (max-width: 920px) { .map-grid { grid-template-columns: 1fr; } }
 
@@ -71,7 +71,7 @@
       .search-wrap { flex: 1 1 180px; min-width: 150px; }
       .search-wrap input {
         width: 100%; background: var(--bg-deep); color: var(--ink); border: 1px solid var(--line);
-        border-radius: 6px; padding: .4rem .7rem; font-size: .95rem;
+        border-radius: 6px; padding: .4rem .7rem; font-size: 1rem;
       }
       .search-wrap input::placeholder { color: var(--ink-faint); }
       .layer-label { font-size: .82rem; color: var(--ink-faint); letter-spacing: .04em; }
@@ -251,12 +251,15 @@
       footer.colophon { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: .8rem; font-size: .85rem; color: var(--ink-faint); max-width: 78ch; }
 
       @media (max-width: 640px) {
-        .map-hint { bottom: 3.3rem; max-width: 58%; }
-        .scale-note { bottom: .5rem; }
+        .map-hint { bottom: .5rem; max-width: 54%; font-size: .72rem; padding: .2rem .5rem; }
+        .scale-note { bottom: .5rem; font-size: .72rem; padding: .2rem .5rem; }
       }
       @media (max-width: 920px) {
         .record { position: static; max-height: none; }
-        .viewport { height: 62vh; min-height: 300px; }
+        /* Phone/tablet: the frame takes the world's own shape, so the
+           fitted map fills it edge to edge instead of floating in a tall
+           dark void with the corner notes stranded over the map. */
+        .viewport { height: auto; aspect-ratio: 2400 / 1604; min-height: 230px; }
         header.page-head p.lede, header.page-head .head-meta { display: none; }
         header.page-head.expanded p.lede, header.page-head.expanded .head-meta { display: flex; }
         header.page-head.expanded p.lede { display: block; }
@@ -422,12 +425,14 @@
 <g data-svg-layer="hexes" class="layer-off"><rect x="0" y="0" width="2400" height="1604" fill="url(#hexp)"/></g>
 <g id="citiesLayer">
 <g data-city-id="bral" class="city-hit" transform="translate(276,26)">
+<circle class="city-hit-area" r="40" fill="transparent"/>
 <line class="bral-tether" x1="0" y1="14" x2="0" y2="247"/>
 <path d="M-26,10 L-14,-8 L0,-16 L16,-9 L27,8 L12,15 L-10,15 Z" fill="hsl(30 16% 46%)" stroke="hsl(42 40% 66%)" stroke-width="2"/>
 <circle cx="0" cy="0" r="4" fill="var(--amber)"/>
 <text class="place-label" x="36" y="4" font-size="24">The Rock of Bral — anchored above the Bastion</text>
 <title>The Rock of Bral</title></g>
 <g data-city-id="bastion" class="city-hit" transform="translate(276,313)">
+<circle class="city-hit-area" r="52" fill="transparent"/>
 <circle class="city-glow" cx="0" cy="0" r="46" fill="none" stroke="hsl(42 45% 60%)" stroke-width="2" opacity="0.55"/>
 <path d="M-95,26 A98,98 0 0 1 -95,-26" fill="none" stroke="hsl(205 45% 58%)" stroke-width="3" opacity="0.8"/>
 <circle cx="-98" cy="0" r="34" fill="none" stroke="var(--amber-soft)" stroke-width="3"/>
@@ -442,6 +447,7 @@
 <text class="place-label" x="52" y="14" font-size="21" fill="var(--ink-dim)">of Last Hope — the Cut and the Heart on the water</text>
 <title>The Bastion of Last Hope</title></g>
 <g data-city-id="silverymoon" class="city-hit" transform="translate(564,128)">
+<circle class="city-hit-area" r="40" fill="transparent"/>
 <path d="M0,-34 L9,-11 L33,-11 L14,4 L21,27 L0,13 L-21,27 L-14,4 L-33,-11 L-9,-11 Z" fill="hsl(210 14% 58%)" stroke="hsl(222 24% 10%)" stroke-width="2"/>
 <rect x="-4" y="-52" width="8" height="20" fill="hsl(20 30% 40%)"/>
 <rect x="12" y="-46" width="7" height="15" fill="hsl(20 30% 40%)"/>
@@ -450,6 +456,7 @@
 <text class="place-label" x="44" y="18" font-size="20" fill="var(--ink-dim)">the front-line battle station</text>
 <title>Silverymoon</title></g>
 <g data-city-id="sundabar" class="city-hit" transform="translate(684,136)">
+<circle class="city-hit-area" r="40" fill="transparent"/>
 <rect x="-24" y="-24" width="48" height="48" rx="4" fill="hsl(36 22% 44%)" stroke="hsl(222 24% 10%)" stroke-width="2"/>
 <rect x="-30" y="-30" width="11" height="11" fill="hsl(36 22% 44%)" stroke="hsl(222 24% 10%)"/>
 <rect x="19" y="-30" width="11" height="11" fill="hsl(36 22% 44%)" stroke="hsl(222 24% 10%)"/>
@@ -500,6 +507,7 @@
 </g>
 <g data-svg-layer="places">
 <g id="marrakeshGhost" class="marrakesh-ghost" data-city-id="marrakesh" transform="translate(1776,1412)">
+<circle class="city-hit-area" r="40" fill="transparent"/>
 <path d="M-190,58 Q-90,30 0,50 Q100,70 190,38" transform="translate(0,-52)" fill="none" stroke="hsl(42 30% 70%)" stroke-width="2" stroke-dasharray="3 9" opacity="0.35"/>
 <ellipse cx="0" cy="14" rx="46" ry="15" fill="hsl(42 30% 66%)" opacity="0.5"/>
 <path d="M-30,-16 L-24,-34 M-8,-20 L-4,-40 M14,-19 L20,-36 M32,-12 L40,-26" stroke="hsl(42 35% 72%)" stroke-width="4" opacity="0.6"/>
@@ -1247,7 +1255,7 @@
 ]
 ;
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
     <script>
       "use strict";
       (function () {
@@ -1270,8 +1278,28 @@
           if (w <= vw) view.tx = (vw - w) / 2;
           if (h <= vh) view.ty = (vh - h) / 2;
         }
+        /* Touch targets are sized on screen, not in world units: at the
+           whole-world fit on a phone the scale is ~0.14, where the drawn
+           r=24 hit circle shrinks to ~7px across — untappable. The hit
+           circles (and, modestly, the pin dots) grow as the scale falls
+           so a pin keeps a ~40px target and a visible dot at any zoom.
+           Radii are capped so close neighbours do not swallow each
+           other's centres. Runs only when the scale changes, so panning
+           never pays for it. */
+        var hitScale = 0;
+        function updateHitAreas(force) {
+          if (!force && Math.abs(view.scale - hitScale) / hitScale < 0.03) return;
+          hitScale = view.scale;
+          var pinR = Math.max(24, Math.min(120, 20 / view.scale));
+          var dotR = Math.max(8.5, Math.min(30, 3 / view.scale));
+          var cityR = Math.max(40, Math.min(95, 22 / view.scale));
+          document.querySelectorAll(".pin-hit").forEach(function (el) { el.setAttribute("r", pinR.toFixed(1)); });
+          document.querySelectorAll(".pin-dot").forEach(function (el) { el.setAttribute("r", dotR.toFixed(1)); });
+          document.querySelectorAll(".city-hit-area").forEach(function (el) { el.setAttribute("r", cityR.toFixed(1)); });
+        }
         function apply() {
           clampView();
+          updateHitAreas(false);
           world.style.transform = "translate(" + view.tx + "px," + view.ty + "px) scale(" + view.scale + ")";
           world.classList.toggle("show-labels", view.scale > 0.85);
           world.classList.toggle("z-mid", view.scale > 0.5);
@@ -1718,6 +1746,7 @@
             });
             layer.appendChild(g);
           });
+          updateHitAreas(true);
         }
         function applyLivePlaces(markers) {
           var bakedById = {};
