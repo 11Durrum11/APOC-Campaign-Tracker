@@ -1632,10 +1632,15 @@
            of kind "place" render whatever their gm value — only the kind
            screen applies here (the held cities stay player view and are
            never this layer's pins; they render their own way).
+           A pin shelved in the VTT's tray (tray:true) renders nowhere
+           here either: it is excluded from the rendered set, so it has
+           no pin, no index entry, and no search hit on this map. If
+           every otherwise-renderable pin is shelved, the Places layer
+           renders empty — that is a live result, not a failure.
            Any failure — the library missing, no answer inside the timeout,
            an error, an empty value, a shape that does not parse, or nothing
-           renderable left after screening — leaves the baked placements
-           above exactly as they are. */
+           renderable left after screening for any other reason — leaves
+           the baked placements above exactly as they are. */
         var SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
         var SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
         var CODY_EXCLUDED = /(?:^|\D)(?:4001|4033|4036|4055)(?:\D|$)/;
@@ -1656,6 +1661,8 @@
         }
         function livePlace(mk, bakedById) {
           if (!mk || typeof mk !== "object") return null;
+          /* Shelved in the VTT tray — renders nowhere on this map. */
+          if (mk.tray === true) return null;
           if (mk.kind !== "place") return null;
           var id = typeof mk.id === "string" ? mk.id : "";
           var name = typeof mk.name === "string" ? mk.name.trim() : "";
@@ -1720,7 +1727,20 @@
             var p = livePlace(mk, bakedById);
             if (p && !seen[p.id]) { seen[p.id] = true; live.push(p); }
           });
-          if (!live.length) return; /* nothing renderable — keep the baked set */
+          if (!live.length) {
+            /* Empty only counts as a live result when shelving alone
+               explains it — i.e. some record would render here if its
+               tray flag were lifted. Any other all-screened-out set
+               keeps the baked fallback exactly as before. */
+            var trayBlocked = markers.some(function (mk) {
+              if (!mk || mk.tray !== true) return false;
+              var lifted = {};
+              for (var k in mk) lifted[k] = mk[k];
+              lifted.tray = false;
+              return !!livePlace(lifted, bakedById);
+            });
+            if (!trayBlocked) return; /* nothing renderable — keep the baked set */
+          }
           PLACES = live;
           renderLivePins();
           buildZoneFolds();
