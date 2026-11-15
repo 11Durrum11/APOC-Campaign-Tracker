@@ -218,6 +218,14 @@
         .tool-btn, button.tool-btn { min-height: 1.85rem; padding: .22rem .55rem; font-size: .82rem; border-radius: 5px; line-height: 1.2; }
         .map-note { display: none; flex-basis: 100%; font-size: .8rem; }
         .map-tools.note-open .map-note { display: block; }
+        /* Orrery labels: the 1160-unit diagram renders ~360px wide on a phone, so the
+           desktop text sizes land at 3-5px. Enlarged here (phone only) to stay legible. */
+        .body-name { font-size: 24px; }
+        .body-dist { font-size: 17px; }
+        .sat-name { font-size: 17px; }
+        .gods-label { font-size: 20px; }
+        .gods-sub { font-size: 16px; }
+        .wall-label { font-size: 19px; }
         .note-toggle { flex: 0 0 auto; }
         .detail { position: static; padding: .55rem .7rem .65rem; }
         .detail h2 { font-size: 1.25rem; margin: 0; }
@@ -241,15 +249,16 @@
         .collapsible.open > .collapse-body { display: block; margin-top: .55rem; }
         .collapsible > .collapse-head, .collapse-head {
           cursor: pointer; -webkit-tap-highlight-color: transparent;
-          display: flex !important; align-items: center; justify-content: space-between; gap: .6rem;
+          display: flex !important; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: .35rem .6rem;
           background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px;
           padding: .48rem .65rem !important; margin: 0 !important; width: 100%;
           text-align: left; color: var(--ink);
         }
         header.page-head > .collapse-head { background: transparent; border: none; padding-left: 0 !important; padding-right: 0 !important; }
         .detail > .collapse-head { background: transparent; border: none; padding: 0 !important; display: block !important; }
-        .collapse-head::after { content: "▸"; flex: 0 0 auto; color: var(--amber-soft); font-size: .95rem; line-height: 1; }
+        .collapse-head::after { content: "▸"; flex: 0 0 auto; margin-left: auto; color: var(--amber-soft); font-size: .95rem; line-height: 1; }
         .collapsible.open > .collapse-head::after { content: "▾"; }
+        .detail.collapsible > .collapse-head::after { float: right; margin-left: .6rem; }
         .detail.collapsible.open > .collapse-head::after { float: right; }
         .footer-head { font-family: Georgia, serif; font-size: 1rem; }
         .collapsible { min-height: 0; }
@@ -1233,6 +1242,124 @@
             btn.setAttribute("aria-pressed", open ? "true" : "false");
           });
           tools.appendChild(btn);
+        })();
+        /* Touch targets: the drawn hit circles are 9-13px wide on a phone screen.
+           Widen them (phone only) so worlds and satellites can actually be tapped.
+           Planets get r=30; the Toril-cluster satellites get r=24 — their centres
+           sit as close as ~27 units (Selûne to the Tears), so a wider circle
+           would swallow a neighbour's centre and make it untappable. */
+        (function () {
+          document.querySelectorAll("#orrery .body .hit").forEach(function (c) {
+            var r = parseFloat(c.getAttribute("r")) || 0;
+            if (r < 30) c.setAttribute("r", "30");
+          });
+          ["g-selune", "g-tears", "g-dragonrock", "g-rockofbral"].forEach(function (id) {
+            var c = document.querySelector("#" + id + " .hit");
+            if (c) c.setAttribute("r", "24");
+          });
+          var gh = document.querySelector(".gods-hit");
+          if (gh) gh.setAttribute("stroke-width", "48");
+          var wh = document.querySelector(".wall-hit");
+          if (wh) wh.setAttribute("stroke-width", "44");
+        })();
+        /* Toril-cluster labels (phone only): the phone captures showed the
+           previous small shifts were NOT enough in the actual render — at
+           phone scale (1160 units across ~360px) the labels' dark halos sit
+           ~1px apart and the words run together: "Toril / 200M mi" into
+           "Selûne", "Rock of Bral" onto Toril's name, "the Tears" cramped
+           against "Dragon Rock". The cluster is one rigid rotating frame,
+           so its label centres keep fixed distances but every connecting
+           direction occurs as it turns; two upright label boxes stay clear
+           at EVERY moment only when their centre distance exceeds
+           sqrt(((w1+w2)/2)^2 + ((h1+h2)/2)^2). The fix fans the four
+           satellite labels out to ~125-140 units from Toril — far enough
+           that every pair clears that bound with room to spare, halo
+           included — each in its own body's rough direction, with a short
+           dashed leader from the body to its label so the pairing still
+           reads. Toril's own name + distance stay by the planet.
+           Desktop positions untouched. */
+        (function () {
+          var torilG = document.getElementById("g-toril");
+          var spin = torilG && torilG.parentNode;
+          if (!spin) return;
+          var SVGNS = "http://www.w3.org/2000/svg";
+          /* dx/dy shift each label from its drawn spot; w/h are its rendered
+             box (text + halo) used to stop the leader line at the box edge.
+             bodyId locates the body the leader starts from. */
+          var fan = {
+            "Selûne": { dx: 72, dy: -35, w: 50, h: 24, bodyId: "g-selune" },
+            "the Tears": { dx: 66, dy: 10, w: 67, h: 24, bodyId: "g-tears" },
+            "Dragon Rock": { dx: -68, dy: 36, w: 98, h: 24, bodyId: "g-dragonrock" },
+            "Rock of Bral": { dx: -78, dy: -30, w: 103, h: 24, bodyId: "g-rockofbral" }
+          };
+          spin.querySelectorAll("text").forEach(function (t) {
+            var f = fan[t.textContent];
+            if (!f) return;
+            var x = (parseFloat(t.getAttribute("x")) || 0) + f.dx;
+            var y = (parseFloat(t.getAttribute("y")) || 0) + f.dy;
+            t.setAttribute("x", x);
+            t.setAttribute("y", y);
+            f.lx = x; f.ly = y - 6; /* label box centre: the baseline sits ~6 units below it */
+          });
+          Object.keys(fan).forEach(function (name) {
+            var f = fan[name];
+            if (typeof f.lx !== "number") return;
+            var bg = document.getElementById(f.bodyId);
+            var bc = bg && bg.querySelector("circle");
+            if (!bc) return;
+            var bx = parseFloat(bc.getAttribute("cx")), by = parseFloat(bc.getAttribute("cy"));
+            var vx = f.lx - bx, vy = f.ly - by;
+            var len = Math.sqrt(vx * vx + vy * vy);
+            if (!len) return;
+            var ux = vx / len, uy = vy / len;
+            var tx = Math.abs(ux) > 0.001 ? (f.w / 2) / Math.abs(ux) : Infinity;
+            var ty = Math.abs(uy) > 0.001 ? (f.h / 2) / Math.abs(uy) : Infinity;
+            var stop = Math.min(tx, ty) + 5;
+            var line = document.createElementNS(SVGNS, "line");
+            line.setAttribute("x1", bx); line.setAttribute("y1", by);
+            line.setAttribute("x2", f.lx - ux * stop); line.setAttribute("y2", f.ly - uy * stop);
+            line.setAttribute("stroke", "hsl(42 20% 55%)");
+            line.setAttribute("stroke-width", "1");
+            line.setAttribute("stroke-dasharray", "3 3");
+            line.setAttribute("opacity", "0.55");
+            spin.insertBefore(line, spin.firstChild);
+          });
+        })();
+        /* Entries open IN VIEW: selecting a body on the orrery or a row in the
+           table opens the record panel and brings it into view (the desktop
+           click path only updates the panel, which on a phone sits shut,
+           below the map or above the table). "Show on the map" buttons open
+           the record too, without stealing the scroll to the map. */
+        (function () {
+          var panel = document.getElementById("detailPanel");
+          if (!panel) return;
+          function openDetail(scroll) {
+            if (!panel.classList.contains("open")) {
+              panel.classList.add("open");
+              var head = panel.querySelector(".collapse-head");
+              if (head) head.setAttribute("aria-expanded", "true");
+            }
+            if (scroll) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+          var svg = document.getElementById("orrery");
+          if (svg) {
+            svg.addEventListener("click", function (ev) {
+              if (ev.target && ev.target.closest && ev.target.closest(".body")) openDetail(true);
+            });
+            svg.addEventListener("keydown", function (ev) {
+              if (ev.key === "Enter" || ev.key === " ") openDetail(true);
+            });
+          }
+          var tbody = document.getElementById("tableBody");
+          if (tbody) {
+            tbody.addEventListener("click", function () { openDetail(true); });
+            tbody.addEventListener("keydown", function (ev) {
+              if (ev.key === "Enter" || ev.key === " ") openDetail(true);
+            });
+          }
+          document.querySelectorAll("[data-select]").forEach(function (btn) {
+            btn.addEventListener("click", function () { openDetail(false); });
+          });
         })();
       })();
     </script>
