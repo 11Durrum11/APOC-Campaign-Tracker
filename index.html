@@ -161,6 +161,13 @@
   .hub-panel h2{margin-bottom:2px}
   .hub-content-panel{margin-top:10px;width:100%;max-height:none}
   .hub-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;flex-wrap:nowrap;margin-top:4px}
+  /* Small Share notation on the hub (Shaun, 2026-11-17): a slim
+     right-aligned row above the button grid; tapping Share opens the
+     system share sheet where available, else copies the page link. */
+  .hub-share-row{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin:0 0 2px}
+  .hub-share-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
+  .hub-share-btn:hover,.hub-share-btn:focus-visible{opacity:1}
+  .hub-share-note{font-size:11.5px;opacity:.85}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -692,6 +699,29 @@
 
   <!-- 3 / APOC System Hub -->
   <section class="panel hub-panel" id="system" aria-labelledby="hubHeading">
+    <div class="hub-share-row"><span class="hub-share-note" id="hubShareNote" role="status" aria-live="polite"></span><button class="hub-share-btn" type="button" id="hubShareBtn" aria-label="Share this page">&#8599; Share</button></div>
+    <script>
+      (function () {
+        var btn = document.getElementById("hubShareBtn");
+        var note = document.getElementById("hubShareNote");
+        if (!btn) return;
+        var url = "https://11durrum11.github.io/APOC-Campaign-Tracker/";
+        function say(msg) {
+          if (!note) return;
+          note.textContent = msg;
+          setTimeout(function () { note.textContent = ""; }, 2600);
+        }
+        btn.addEventListener("click", function () {
+          if (navigator.share) {
+            navigator.share({ title: "APOC Survival — Campaign Tracker", url: url }).catch(function () {});
+          } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () { say("Link copied"); }, function () { say(url); });
+          } else {
+            say(url);
+          }
+        });
+      })();
+    </script>
     <div class="hub-row" id="hubRow">
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="tracker" aria-expanded="false" id="trackerButton"><span class="hub-name">Campaign Status Tracker</span></button>
