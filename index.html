@@ -168,6 +168,15 @@
   .hub-share-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
   .hub-share-btn:hover,.hub-share-btn:focus-visible{opacity:1}
   .hub-share-note{font-size:11.5px;opacity:.85}
+  /* Phone-only hub arranging (Shaun, 2026-11-18): on the phone the
+     hub buttons can be unlocked, dragged into a new order, and given
+     bigger or smaller footprints (grid spans), with a lock to set
+     them back to working as buttons. The lock row and the size
+     steppers exist only at phone width; the saved layout applies
+     only at phone width — the desktop hub never changes. */
+  .hub-lock-row{display:none}
+  .hub-lock-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
+  .hub-size{display:none}
   /* Share menu (Shaun, 2026-11-18 — "shareable to every available
      aspect", both halves): every shareable piece of the campaign
      gets a row; where the device has a share sheet the row shares
@@ -527,6 +536,17 @@
     #canonPanel .canon-fold-row .canon-item > summary{font-size:.95rem;min-height:44px}
     #canonPanel .canon-fold-row .canon-item[open ]{grid-row:3}
     .hub-row{gap:3px}
+    .hub-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:2px 0}
+    .hub-lock-btn{min-height:34px;padding:.3rem .7rem}
+    body.hub-custom #hubRow,body.hub-arranging #hubRow{grid-auto-flow:dense;grid-auto-rows:52px}
+    body.hub-custom #hubRow .hub-item-under-cosmo{grid-column:auto}
+    body.hub-custom #hubRow .hub-btn,body.hub-arranging #hubRow .hub-btn{height:100%}
+    body.hub-arranging #hubRow .hub-btn{touch-action:none;cursor:grab}
+    body.hub-arranging .hub-item.dragging{opacity:.55}
+    body.hub-arranging .hub-item.drop-target .hub-btn{border-color:var(--primary);border-style:dashed}
+    body.hub-arranging .hub-size{display:flex;position:absolute;left:2px;right:2px;bottom:2px;z-index:3;gap:2px;align-items:stretch;justify-content:center}
+    .hub-size button{font:inherit;font-size:.6rem;font-weight:700;line-height:1;padding:.28rem .3rem;border:1px solid var(--card-border);border-radius:5px;background:hsl(222,20%,14%);color:var(--foreground);cursor:pointer;min-width:26px;min-height:26px}
+    .hub-size .hub-size-read{display:flex;align-items:center;font-size:.6rem;font-weight:700;padding:0 .2rem;color:var(--foreground)}
     .hub-btn{min-height:52px;height:52px;font-size:.69rem;padding:4px 2px}
     .thumb-strip img{width:12px;height:12px}
     .count-chip{min-width:20px;height:16px;font-size:.6rem}
@@ -839,11 +859,15 @@
         });
       })();
     </script>
+    <div class="hub-lock-row" id="hubLockRow">
+      <button type="button" class="hub-lock-btn" id="hubLayoutResetBtn" hidden>Reset layout</button>
+      <button type="button" class="hub-lock-btn" id="hubLockBtn" aria-pressed="false" title="Unlock to drag the hub buttons into your own order and size them; lock to use them as buttons again">&#128275; Move buttons</button>
+    </div>
     <div class="hub-row" id="hubRow">
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="tracker">
         <button class="hub-btn" type="button" data-hub-action="tracker" aria-expanded="false" id="trackerButton"><span class="hub-name">Campaign Status Tracker</span></button>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="tavern">
         <button class="hub-btn" type="button" data-hub-action="gallery" aria-haspopup="dialog" aria-expanded="false" id="galleryButton">
           <span class="hub-name">The Tavern</span>
           <span class="thumb-strip" aria-hidden="true">
@@ -853,41 +877,219 @@
           <span class="tavern-badge" id="tavernBadge" hidden>0</span>
         </button>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="lair">
         <a class="hub-btn" href="#lair" id="lairButton" data-hub-action="aidm" aria-expanded="false"><span class="hub-name">DM's Lair</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="weather">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-Weather-Engine/" target="_blank" rel="noopener"><span class="hub-name">The Weather</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="blendcrafter">
         <a class="hub-btn" href="https://11durrum11.github.io/Blendcrafter/" target="_blank" rel="noopener"><span class="hub-name">Blendcrafter</span><span class="hub-sub">APOC Character Creator</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="critgen">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-CritGen/" target="_blank" rel="noopener"><span class="hub-name">CritGen APOC</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="vtt">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-VTT/" target="_blank" rel="noopener"><span class="hub-name">APOC VTT</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="encounter">
         <a class="hub-btn" href="https://11durrum11.github.io/APOC-Encounter-Generator/" target="_blank" rel="noopener"><span class="hub-name">Encounter Generator</span></a>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="canon">
         <button class="hub-btn" type="button" data-hub-action="canon" aria-expanded="false" id="canonButton"><span class="hub-name">Canon</span></button>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="sky">
         <button class="hub-btn" type="button" data-hub-action="sky" aria-expanded="false" id="skyButton"><span class="hub-name">The Sky — Right Now</span></button>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="cosmetology">
         <button class="hub-btn" type="button" data-hub-action="cosmetology" aria-expanded="false" id="cosmetologyButton"><span class="hub-name">Cosmetology</span></button>
       </div>
-      <div class="hub-item">
+      <div class="hub-item" data-hub-key="reconvenes">
         <button class="hub-btn" type="button" data-hub-action="reconvenes" aria-expanded="false" id="reconButton"><span class="hub-name">The Table Reconvenes</span></button>
       </div>
-      <div class="hub-item hub-item-under-cosmo">
+      <div class="hub-item hub-item-under-cosmo" data-hub-key="johnshouse">
         <a class="hub-btn" href="initiative.html" target="_blank" rel="noopener"><span class="hub-name">John's House</span><span class="hub-sub">Initiative Tracker</span></a>
       </div>
     </div>
   </section>
+
+  <script>
+  /* Phone-only hub arranging (Shaun, 2026-11-18): unlock with the
+     lock button, then drag hub buttons into a new order (drop one
+     on top of another to swap them) and size them with the W/H
+     steppers (footprint in grid cells: width 1–3, height 1–2).
+     Locking puts the buttons back to working as buttons. The saved
+     order and sizes live per device in localStorage and apply ONLY
+     at phone width; the desktop hub always keeps the shipped order.
+     Every load starts locked — arranging is a deliberate session,
+     never a state the table stumbles into mid-game. */
+  (function () {
+    var row = document.getElementById("hubRow");
+    var lockBtn = document.getElementById("hubLockBtn");
+    var resetBtn = document.getElementById("hubLayoutResetBtn");
+    if (!row || !lockBtn || !resetBtn) return;
+    var KEY = "apoc-hub-layout-v1";
+    var mq = window.matchMedia("(max-width: 760px)");
+    var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
+    var shipped = items.map(function (it) { return it.getAttribute("data-hub-key"); });
+    var arranging = false;
+
+    function load() {
+      try { var raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
+      catch (e) { return null; }
+    }
+    function save(layout) {
+      try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch (e) {}
+    }
+    function keysInDom() {
+      return Array.prototype.slice.call(row.children).map(function (it) {
+        return it.getAttribute("data-hub-key");
+      });
+    }
+    function sizesInDom() {
+      var out = {};
+      items.forEach(function (it) {
+        var c = parseInt(it.style.gridColumn.replace(/[^0-9]/g, "") || "1", 10);
+        var r = parseInt(it.style.gridRow.replace(/[^0-9]/g, "") || "1", 10);
+        if (c !== 1 || r !== 1) out[it.getAttribute("data-hub-key")] = [c, r];
+      });
+      return out;
+    }
+    function currentLayout() { return { order: keysInDom(), sizes: sizesInDom() }; }
+
+    function applyLayout() {
+      var layout = load();
+      if (!mq.matches || !layout || !layout.order) {
+        shipped.forEach(function (k) {
+          var it = row.querySelector('[data-hub-key="' + k + '"]');
+          if (it) row.appendChild(it);
+        });
+        items.forEach(function (it) { it.style.gridColumn = ""; it.style.gridRow = ""; });
+        document.body.classList.remove("hub-custom");
+        return;
+      }
+      layout.order.forEach(function (k) {
+        var it = row.querySelector('[data-hub-key="' + k + '"]');
+        if (it) row.appendChild(it);
+      });
+      items.forEach(function (it) {
+        var sz = (layout.sizes || {})[it.getAttribute("data-hub-key")] || [1, 1];
+        it.style.gridColumn = "span " + sz[0];
+        it.style.gridRow = "span " + sz[1];
+        var read = it.querySelector(".hub-size-read");
+        if (read) read.textContent = sz[0] + "×" + sz[1];
+      });
+      document.body.classList.add("hub-custom");
+    }
+
+    function buildSteppers() {
+      items.forEach(function (it) {
+        if (it.querySelector(".hub-size")) return;
+        var bar = document.createElement("div");
+        bar.className = "hub-size";
+        bar.innerHTML =
+          '<button type="button" data-sz="w-" title="Narrower">W−</button>' +
+          '<button type="button" data-sz="w+" title="Wider">W+</button>' +
+          '<span class="hub-size-read" title="Footprint: width × height">1×1</span>' +
+          '<button type="button" data-sz="h-" title="Shorter">H−</button>' +
+          '<button type="button" data-sz="h+" title="Taller">H+</button>';
+        it.appendChild(bar);
+      });
+    }
+
+    function setArranging(on) {
+      arranging = on;
+      document.body.classList.toggle("hub-arranging", on);
+      lockBtn.textContent = on ? "\uD83D\uDD12 Lock buttons" : "\uD83D\uDD13 Move buttons";
+      lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      resetBtn.hidden = !on;
+    }
+
+    lockBtn.addEventListener("click", function () { setArranging(!arranging); });
+    resetBtn.addEventListener("click", function () {
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      applyLayout();
+    });
+
+    /* While arranging, a tap on a hub button does nothing — no panel
+       opens, no link follows. Size-stepper taps are exempt. */
+    row.addEventListener("click", function (ev) {
+      if (arranging && !ev.target.closest("[data-sz]")) {
+        ev.preventDefault(); ev.stopPropagation();
+      }
+    }, true);
+
+    row.addEventListener("click", function (ev) {
+      var btn = ev.target.closest && ev.target.closest("[data-sz]");
+      if (!btn || !arranging) return;
+      var item = btn.closest(".hub-item");
+      var c = parseInt(item.style.gridColumn.replace(/[^0-9]/g, "") || "1", 10);
+      var r = parseInt(item.style.gridRow.replace(/[^0-9]/g, "") || "1", 10);
+      var kind = btn.getAttribute("data-sz");
+      if (kind === "w-") c = Math.max(1, c - 1);
+      if (kind === "w+") c = Math.min(3, c + 1);
+      if (kind === "h-") r = Math.max(1, r - 1);
+      if (kind === "h+") r = Math.min(2, r + 1);
+      item.style.gridColumn = "span " + c;
+      item.style.gridRow = "span " + r;
+      var read = item.querySelector(".hub-size-read");
+      if (read) read.textContent = c + "×" + r;
+      document.body.classList.add("hub-custom");
+      save(currentLayout());
+    });
+
+    /* Drag to swap: press, move past a few pixels, drop on another
+       button. Pointer events cover touch and mouse alike. */
+    var dragItem = null, dragTarget = null, startX = 0, startY = 0, dragging = false;
+    row.addEventListener("pointerdown", function (ev) {
+      if (!arranging) return;
+      if (ev.target.closest("[data-sz]")) return;
+      var item = ev.target.closest && ev.target.closest(".hub-item");
+      if (!item) return;
+      dragItem = item; dragTarget = null; dragging = false;
+      startX = ev.clientX; startY = ev.clientY;
+      try { item.setPointerCapture(ev.pointerId); } catch (e) {}
+    });
+    row.addEventListener("pointermove", function (ev) {
+      if (!arranging || !dragItem) return;
+      if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 9) {
+        dragging = true;
+        dragItem.classList.add("dragging");
+      }
+      if (!dragging) return;
+      var el = document.elementFromPoint(ev.clientX, ev.clientY);
+      var t = el && el.closest ? el.closest(".hub-item") : null;
+      if (t && t !== dragItem) {
+        if (dragTarget) dragTarget.classList.remove("drop-target");
+        dragTarget = t; t.classList.add("drop-target");
+      }
+    });
+    function endDrag(ev) {
+      if (!dragItem) return;
+      if (dragging && dragTarget && dragTarget !== dragItem) {
+        var kids = Array.prototype.slice.call(row.children);
+        var i = kids.indexOf(dragItem), j = kids.indexOf(dragTarget);
+        kids[i] = dragTarget; kids[j] = dragItem;
+        kids.forEach(function (k) { row.appendChild(k); });
+        document.body.classList.add("hub-custom");
+        save(currentLayout());
+      }
+      if (dragTarget) dragTarget.classList.remove("drop-target");
+      dragItem.classList.remove("dragging");
+      dragItem = null; dragTarget = null; dragging = false;
+    }
+    row.addEventListener("pointerup", endDrag);
+    row.addEventListener("pointercancel", endDrag);
+
+    if (mq.addEventListener) mq.addEventListener("change", function () {
+      if (!mq.matches) setArranging(false);
+      applyLayout();
+    });
+
+    buildSteppers();
+    applyLayout();
+  })();
+  </script>
 
 
   <!-- Canon lives behind its hub button; the Laws of the Bastion sit
