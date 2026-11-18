@@ -400,7 +400,7 @@ function initLog(text){
 }
 function initSnapshot(){
   try {
-    initUndoStack.push(JSON.stringify({ list: initState.list, turnId: initState.turnId, round: initState.round, started: initState.started, manual: initState.manual, log: initState.log }));
+    initUndoStack.push(JSON.stringify({ list: initState.list, turnId: initState.turnId, round: initState.round, started: initState.started, manual: initState.manual }));
     if (initUndoStack.length > 10) initUndoStack.shift();
   } catch (e) {}
 }
@@ -410,8 +410,11 @@ function initUndo(){
   try {
     const v = JSON.parse(s);
     initState.list = v.list; initState.turnId = v.turnId; initState.round = v.round;
-    initState.started = v.started; initState.manual = v.manual; initState.log = v.log;
+    initState.started = v.started; initState.manual = v.manual;
   } catch (e) { return; }
+  /* The combat log is a record of the fight, not board state: it
+     is never rewound, even when the act it describes is undone. */
+  initTallyText = "";
   saveInitiative(); renderInitiative();
 }
 function archiveInitiative(){
