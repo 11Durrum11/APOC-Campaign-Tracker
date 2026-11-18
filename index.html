@@ -217,7 +217,11 @@
   #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
   #initiativePanel .init-chip{background:#fff;color:#000;border-radius:999px;padding:.12rem .3rem .12rem .6rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.25rem}
   #initiativePanel .init-chip button{font:inherit;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
-  #initiativePanel .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+  /* Action buttons on TOP (Shaun, 2026-11-18): the controls sit
+     right under the header / Now-Next line, above the form and the
+     combatant list, and stick to the top of the view while a long
+     list scrolls under them. */
+  #initiativePanel .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.55rem 0;padding:.45rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
   #initiativePanel .init-saved{margin-top:1rem}
   #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
@@ -1145,6 +1149,14 @@
       <span class="init-round" id="initRound">Round 1</span>
     </div>
     <p class="init-nownext" id="initNowNext"></p>
+    <div class="init-controls">
+      <button type="button" class="btn" id="initNextBtn">Next turn</button>
+      <button type="button" class="btn" id="initPrevBtn">Prev turn</button>
+      <button type="button" class="btn" id="initRollAllBtn">Roll ALL</button>
+      <button type="button" class="btn" id="initResetBtn">Back to top</button>
+      <button type="button" class="btn" id="initCombatResetBtn">Reset combat</button>
+      <button type="button" class="btn" id="initClearBtn">Clear all</button>
+    </div>
     <div class="init-form">
       <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name">
       <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll">
@@ -1154,14 +1166,6 @@
       <button type="button" class="btn" id="initAddBtn">Add</button>
     </div>
     <div class="init-list" id="initList"></div>
-    <div class="init-controls">
-      <button type="button" class="btn" id="initNextBtn">Next turn</button>
-      <button type="button" class="btn" id="initPrevBtn">Prev turn</button>
-      <button type="button" class="btn" id="initRollAllBtn">Roll ALL</button>
-      <button type="button" class="btn" id="initResetBtn">Back to top</button>
-      <button type="button" class="btn" id="initCombatResetBtn">Reset combat</button>
-      <button type="button" class="btn" id="initClearBtn">Clear all</button>
-    </div>
     <div class="init-saved" id="initSaved"></div>
   </section>
 
