@@ -187,45 +187,45 @@
 <body data-scene="bastion-streets">
 <div class="page">
   <div class="init-topbar">
-    <a class="btn" href="index.html">&#8592; Campaign Hub</a>
+    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <span class="init-brand">APOC Survival &middot; 2511 DR</span>
   </div>
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
-      <span class="init-round" id="initRound">Round 1</span>
-      <span class="init-clock" id="initClock">⏱ 0:06</span>
+      <span class="init-round" id="initRound" title="The current round of the fight">Round 1</span>
+      <span class="init-clock" id="initClock" title="Fight time so far — every round is 6 seconds, so Round 10 is one minute">⏱ 0:06</span>
     </div>
-    <p class="init-nownext" id="initNowNext"></p>
+    <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     <div class="init-controls">
-      <button type="button" class="btn" id="initNextBtn">Next turn</button>
-      <button type="button" class="btn" id="initPrevBtn">Prev turn</button>
-      <button type="button" class="btn" id="initRollAllBtn">Roll ALL</button>
-      <button type="button" class="btn" id="initResetBtn">Back to top</button>
-      <button type="button" class="btn" id="initCombatResetBtn">Reset combat</button>
-      <button type="button" class="btn" id="initClearBtn">Clear all</button>
-      <button type="button" class="btn" id="initUndoBtn" disabled>↩ Undo</button>
-      <button type="button" class="btn" id="initPartyAddBtn">Add party</button>
-      <button type="button" class="btn" id="initPartyBtn">Party roster</button>
-      <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime">🔔</button>
+      <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
+      <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
+      <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
+      <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — nothing else changes">Back to top</button>
+      <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
+      <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
+      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal, Clear all or Reset combat">↩ Undo</button>
+      <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole party roster onto the board — each member rolls their own initiative">Add party</button>
+      <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved party roster">Party roster</button>
+      <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
     <div class="init-tally" id="initTally" hidden></div>
     <div class="init-party" id="initParty" hidden>
-      <h4>Party roster</h4>
+      <h4 title="The saved party — the Add party button drops them all onto the board">Party roster</h4>
       <div id="initPartyRows"></div>
       <div class="init-party-add">
-        <input id="initPartyName" type="text" placeholder="New member name" aria-label="New party member name">
-        <button type="button" class="btn" id="initPartyNewBtn">Add member</button>
+        <input id="initPartyName" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
+        <button type="button" class="btn" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
       </div>
     </div>
     <div class="init-form">
-      <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name">
-      <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll">
-      <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling">
-      <input id="initAc" type="number" placeholder="AC" aria-label="Armour class">
-      <input id="initHp" type="number" placeholder="HP" aria-label="Hit points — starts full">
-      <input id="initQty" type="number" value="1" min="1" max="50" aria-label="Quantity to add">
-      <button type="button" class="btn" id="initAddBtn">Add</button>
+      <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
+      <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
+      <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
+      <input id="initAc" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
+      <input id="initHp" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
+      <input id="initQty" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
+      <button type="button" class="btn" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
     <div class="init-list" id="initList"></div>
     <div class="init-log" id="initLog"></div>
@@ -441,7 +441,7 @@ function renderInitSaved(){
   const wrap = $("initSaved"); if (!wrap) return;
   const saved = initState.saved || [];
   if (!saved.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map((s, si) => {
+  wrap.innerHTML = '<h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4>' + saved.map((s, si) => {
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     const who = (s.list || []).map(c => {
       let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
@@ -451,11 +451,11 @@ function renderInitSaved(){
       return t;
     }).join("<br>");
     const logFold = (Array.isArray(s.log) && s.log.length)
-      ? '<details class="init-saved-log"><summary>Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
+      ? '<details class="init-saved-log"><summary title="The combat log from that fight">Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
       : "";
     return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + logFold + '</span>' +
-      '<span class="init-saved-btns"><button type="button" class="init-saved-load" data-saved-load="' + si + '">Load</button>' +
-      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario">×</button></span></div>';
+      '<span class="init-saved-btns"><button type="button" class="init-saved-load" data-saved-load="' + si + '" title="Load this saved fight back onto the board — the current board is saved first">Load</button>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario" title="Delete this saved scenario">×</button></span></div>';
   }).join("");
   wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
     initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
@@ -580,13 +580,13 @@ function renderInitLog(){
   const wrap = $("initLog"); if (!wrap) return;
   const log = Array.isArray(initState.log) ? initState.log : [];
   if (!log.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4>Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
 }
 function renderInitTally(){
   const wrap = $("initTally"); if (!wrap) return;
   if (!initTallyText) { wrap.hidden = true; wrap.innerHTML = ""; return; }
   wrap.hidden = false;
-  wrap.innerHTML = '<span>' + esc(initTallyText) + '</span><button type="button" class="init-tally-x" aria-label="Dismiss the tally">×</button>';
+  wrap.innerHTML = '<span title="The fallen and their challenge ratings — for the DM\'s XP award">' + esc(initTallyText) + '</span><button type="button" class="init-tally-x" aria-label="Dismiss the tally" title="Dismiss this tally">×</button>';
   wrap.querySelector(".init-tally-x").addEventListener("click", () => { initTallyText = ""; renderInitTally(); });
 }
 function renderParty(){
@@ -594,14 +594,14 @@ function renderParty(){
   const num = v => (v === null || v === undefined ? "" : v);
   wrap.innerHTML = (initState.party || []).map(p =>
     '<div class="init-party-row">' +
-      '<input type="text" class="init-party-name" value="' + esc(p.name) + '" aria-label="Party member name" data-party-name="' + p.id + '">' +
-      '<label class="init-lab">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" data-party-mod="' + p.id + '"></label>' +
-      '<label class="init-lab">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" data-party-ac="' + p.id + '"></label>' +
-      '<label class="init-lab">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" data-party-hp="' + p.id + '"></label>' +
-      '<label class="init-lab">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" data-party-fort="' + p.id + '"></label>' +
-      '<label class="init-lab">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" data-party-ref="' + p.id + '"></label>' +
-      '<label class="init-lab">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" data-party-will="' + p.id + '"></label>' +
-      '<button type="button" class="init-del" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party">✕</button>' +
+      '<input type="text" class="init-party-name" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">' +
+      '<label class="init-lab">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>' +
+      '<label class="init-lab">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>' +
+      '<label class="init-lab">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>' +
+      '<label class="init-lab">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>' +
+      '<label class="init-lab">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>' +
+      '<label class="init-lab">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>' +
+      '<button type="button" class="init-del" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>' +
     '</div>').join("");
   const findP = id => (initState.party || []).find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
@@ -653,7 +653,7 @@ function renderInitiative(){
       const pct = Math.max(0, Math.min(100, c.hp / denom * 100));
       const col = pct > 50 ? "#57a85a" : (pct > 25 ? "#d9a441" : "#cf4b41");
       const tpct = Math.max(0, (c.tempHp || 0) / denom * 100);
-      bar = '<div class="init-bar"><span style="width:' + pct + '%;background:' + col + '"></span>' + (tpct > 0 ? '<span style="width:' + tpct + '%;background:#9fd8e8"></span>' : '') + '</div>';
+      bar = '<div class="init-bar" title="Hit points left — green is healthy, amber is hurt, red is dire; the pale blue part is temporary HP"><span style="width:' + pct + '%;background:' + col + '"></span>' + (tpct > 0 ? '<span style="width:' + tpct + '%;background:#9fd8e8"></span>' : '') + '</div>';
     }
     const chipsArr = [];
     (c.statuses || []).forEach((s, i) => {
@@ -661,50 +661,50 @@ function renderInitiative(){
       chipsArr.push('<span class="init-chip" title="' + esc(INIT_CONDITIONS[n] || "") + '">' + esc(n) + (d !== null ? ' · ' + d : '') +
         '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(n) + ' from ' + esc(c.name) + '">×</button></span>');
     });
-    if (c.readied) chipsArr.push('<span class="init-chip readied">Readied</span>');
-    if (c.delaying) chipsArr.push('<span class="init-chip delaying">⏸ Delaying</span>');
+    if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
+    if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
     const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
     return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
       '<div class="init-line1">' +
-        '<span class="init-drag" data-drag="' + c.id + '" title="Drag to reorder" aria-hidden="true">⠿</span>' +
+        '<span class="init-drag" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>' +
         '<span class="init-turn" aria-hidden="true">▶</span>' +
         '<span class="init-name' + (dead ? ' struck' : '') + '">' + esc(c.name) + '</span>' +
-        '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">' +
-        '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" data-init-val="' + c.id + '"></label>' +
+        '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" title="Notes for this combatant — saved with them" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">' +
+        '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" title="Initiative total — change it and the order re-sorts" data-init-val="' + c.id + '"></label>' +
         '<button type="button" class="init-roll" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">🎲</button>' +
-        '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" data-init-mod="' + c.id + '"></label>' +
-        '<label class="init-lab">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" data-init-ac="' + c.id + '"></label>' +
-        '<label class="init-lab">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" data-init-fort="' + c.id + '"></label>' +
-        '<label class="init-lab">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" data-init-ref="' + c.id + '"></label>' +
-        '<label class="init-lab">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" data-init-will="' + c.id + '"></label>' +
+        '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" title="Initiative modifier, used by the dice button and Roll ALL" data-init-mod="' + c.id + '"></label>' +
+        '<label class="init-lab">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" title="Armour class" data-init-ac="' + c.id + '"></label>' +
+        '<label class="init-lab">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" title="Fortitude save" data-init-fort="' + c.id + '"></label>' +
+        '<label class="init-lab">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" title="Reflex save" data-init-ref="' + c.id + '"></label>' +
+        '<label class="init-lab">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" title="Will save" data-init-will="' + c.id + '"></label>' +
         '<button type="button" class="init-dup" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">⧉</button>' +
         '<button type="button" class="init-toparty" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the party roster" aria-label="Add ' + esc(c.name) + ' to the party roster">👥</button>' +
-        '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '">✕</button>' +
+        '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">✕</button>' +
       '</div>' +
       '<div class="init-line2">' +
         (c.delaying
-          ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '">Jump in</button>'
-          : '<button type="button" class="init-delay" data-init-delay="' + c.id + '">Delay</button>') +
-        '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '">Ready</button>' +
+          ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
+          : '<button type="button" class="init-delay" data-init-delay="' + c.id + '" title="Delay: sit out the turn — Next will skip them until they jump back in">Delay</button>') +
+        '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>' +
         '<span class="init-hp-group">' +
-          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '">−</button>' +
-          '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" data-init-hp="' + c.id + '">' +
+          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">−</button>' +
+          '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" title="Current hit points" data-init-hp="' + c.id + '">' +
           '<span>/</span>' +
-          '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" data-init-hpmax="' + c.id + '">' +
-          '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '">+</button>' +
+          '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" title="Maximum hit points" data-init-hpmax="' + c.id + '">' +
+          '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '" title="One more hit point">+</button>' +
         '</span>' +
-        '<label class="init-lab">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" data-init-tmp="' + c.id + '"></label>' +
-        '<label class="init-lab">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" data-init-nl="' + c.id + '"></label>' +
-        '<label class="init-lab">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" data-init-cr="' + c.id + '"></label>' +
+        '<label class="init-lab">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" title="Temporary hit points — damage burns these before real HP" data-init-tmp="' + c.id + '"></label>' +
+        '<label class="init-lab">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken — equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>' +
+        '<label class="init-lab">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating — used by the XP tally when the fight is reset" data-init-cr="' + c.id + '"></label>' +
         '<span class="init-amt-group">' +
-          '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" data-init-amt="' + c.id + '">' +
-          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '">−Dmg</button>' +
-          '<button type="button" class="init-heal" data-init-heal="' + c.id + '">+Heal</button>' +
-          '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '">+NL</button>' +
+          '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons" data-init-amt="' + c.id + '">' +
+          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">−Dmg</button>' +
+          '<button type="button" class="init-heal" data-init-heal="' + c.id + '" title="Heal the Amt in hit points">+Heal</button>' +
+          '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '" title="Deal the Amt as nonlethal damage">+NL</button>' +
         '</span>' +
         (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
-        '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '">' + statusOptions + '</select>' +
-        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" data-init-dur="' + c.id + '">' +
+        '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
+        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts — leave blank for no countdown" data-init-dur="' + c.id + '">' +
       '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
