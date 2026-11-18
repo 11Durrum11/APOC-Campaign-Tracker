@@ -73,7 +73,7 @@
   /* Page furniture: a slim top bar tying the page to the hub —
      back to the Campaign Hub on the left, the campaign wordmark
      on the right, both in the hub's own type and colours. */
-  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:12px}
+  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:12px;flex-wrap:wrap}
   .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
@@ -110,9 +110,11 @@
   #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
   #initiativePanel .init-chip{background:#fff;color:#000;border-radius:999px;padding:.12rem .3rem .12rem .6rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.25rem}
   #initiativePanel .init-chip button{font:inherit;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
-  /* Per-character notes (Shaun, 2026-11-18): a quiet full-width
-     field on each combatant's own line, under the HP bar. */
-  #initiativePanel .init-notes{width:100%;margin-top:.45rem;font:inherit;font-size:.9rem;padding:.35rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  /* Per-character notes (Shaun, 2026-11-18): the notes field sits
+     on the name line, immediately after the character's name,
+     growing to fill the space before the Init field; on narrow
+     screens it wraps to its own sub-line right under the name. */
+  #initiativePanel .init-notes{flex:1 1 8rem;min-width:6rem;font:inherit;font-size:.9rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   /* Action buttons on TOP (Shaun, 2026-11-18): the controls sit
      right under the header / Now-Next line, above the form and the
      combatant list, and stick to the top of the view while a long
@@ -389,6 +391,7 @@ function renderInitiative(){
       '<div class="init-line1">' +
         '<span class="init-turn" aria-hidden="true">▶</span>' +
         '<span class="init-name' + (dead ? ' struck' : '') + '">' + esc(c.name) + '</span>' +
+        notes +
         '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" data-init-val="' + c.id + '"></label>' +
         '<button type="button" class="init-roll" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">🎲</button>' +
         '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" data-init-mod="' + c.id + '"></label>' +
@@ -410,7 +413,7 @@ function renderInitiative(){
         '</span>' +
         (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
         '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '">' + statusOptions + '</select>' +
-      '</div>' + bar + chips + notes + '</div>';
+      '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
