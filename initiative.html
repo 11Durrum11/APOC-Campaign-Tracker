@@ -140,6 +140,10 @@
      nonlethal fields, status durations, the party roster, the
      combat log, the XP tally, saved-scenario Load. */
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
+  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
+  #initiativePanel .init-clocks{display:inline-flex;gap:.55rem;align-items:center;font-variant-numeric:tabular-nums}
+  #initiativePanel .init-stint{font-weight:700}
+  #initiativePanel .init-total{opacity:.75;font-size:.88em}
   #initiativePanel .init-drag{cursor:grab;touch-action:none;padding:.2rem .3rem;opacity:.7;user-select:none;-webkit-user-select:none}
   #initiativePanel .init-row.dragging{opacity:.55;outline:2px dashed var(--mv-blue, #8fb4ff);position:relative;z-index:5}
   #initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
@@ -210,7 +214,8 @@
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
       <span class="init-round" id="initRound" title="The current round of the fight">Round 1</span>
-      <span class="init-clock" id="initClock" title="Fight time so far — every round is 6 seconds, so Round 10 is one minute">⏱ 0:06</span>
+      <span class="init-clock" id="initClock" title="Real time since this fight began — a true stopwatch, ticking once a second from the first turn taken">⏱ 0:00</span>
+      <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     <div class="init-lock-row" id="initLockRow">
@@ -376,7 +381,7 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, combatStart: null };
 let initUndoStack = [];
 let initTallyText = "";
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -405,6 +410,8 @@ function initNorm(c){
     notes: typeof c.notes === "string" ? c.notes : "",
     delaying: !!c.delaying,
     readied: !!c.readied,
+    turnMs: c.turnMs || 0,
+    lastStint: c.lastStint || 0,
     seq: c.seq || 0
   };
 }
@@ -424,6 +431,50 @@ function initLog(text){
   initState.log.push("R" + (initState.round || 1) + " · " + text);
   if (initState.log.length > 200) initState.log.splice(0, initState.log.length - 200);
 }
+/* Per-combatant clocks and the fight stopwatch (Shaun, 2026-11-18):
+   the current holder's stint runs from initState.turnStart, a
+   timestamp in the SHARED state, so every open screen ticks from
+   the same start and a screen that loads mid-turn picks the stint
+   up where it really began. A combatant's finished stints add into
+   turnMs; lastStint keeps the most recent one. The header stopwatch
+   runs from combatStart (the first turn taken). Elapsed time is
+   always derived from the timestamps — the one-second ticker only
+   repaints, it never writes state. Undo never touches the clocks. */
+function fmtClock(ms){
+  const s = Math.max(0, Math.floor((ms || 0) / 1000));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+function initStintMs(c){
+  return (initState.turnId === c.id && initState.turnStart) ? Math.max(0, Date.now() - initState.turnStart) : 0;
+}
+function initCloseStint(id, logIt){
+  if (!id || !initState.turnStart) return;
+  const c = initState.list.find(x => x.id === id); if (!c) return;
+  const stint = Math.max(0, Date.now() - initState.turnStart);
+  c.turnMs = (c.turnMs || 0) + stint;
+  c.lastStint = stint;
+  if (logIt && stint >= 1000) initLog("⏱ " + c.name + " held the turn for " + fmtClock(stint) + ".");
+}
+function initOpenStint(){
+  initState.turnStart = Date.now();
+  if (!initState.combatStart) initState.combatStart = initState.turnStart;
+}
+function initZeroClocks(){
+  initState.list.forEach(c => { c.turnMs = 0; c.lastStint = 0; });
+  initState.turnStart = null; initState.combatStart = null;
+}
+function initTickClocks(){
+  const ce = $("initClock");
+  if (ce) ce.textContent = "⏱ " + fmtClock(initState.combatStart ? Date.now() - initState.combatStart : 0);
+  document.querySelectorAll("[data-stint]").forEach(el => {
+    const c = initState.list.find(x => x.id === el.dataset.stint);
+    if (c && initState.turnId === c.id) el.textContent = "⏱ " + fmtClock(initStintMs(c));
+  });
+  document.querySelectorAll("[data-total]").forEach(el => {
+    const c = initState.list.find(x => x.id === el.dataset.total);
+    if (c) el.textContent = "Total " + fmtClock((c.turnMs || 0) + initStintMs(c));
+  });
+}
 function initSnapshot(){
   try {
     initUndoStack.push(JSON.stringify({ list: initState.list, turnId: initState.turnId, round: initState.round, started: initState.started, manual: initState.manual }));
@@ -433,11 +484,16 @@ function initSnapshot(){
 function initUndo(){
   const s = initUndoStack.pop();
   if (!s) return;
+  /* The clocks are never rewound: totals earned stay earned, and
+     the running stint keeps its start. */
+  const totals = {};
+  initState.list.forEach(c => { totals[c.id] = [c.turnMs || 0, c.lastStint || 0]; });
   try {
     const v = JSON.parse(s);
     initState.list = v.list; initState.turnId = v.turnId; initState.round = v.round;
     initState.started = v.started; initState.manual = v.manual;
   } catch (e) { return; }
+  initState.list.forEach(c => { if (totals[c.id]) { c.turnMs = totals[c.id][0]; c.lastStint = totals[c.id][1]; } });
   /* The combat log is a record of the fight, not board state: it
      is never rewound, even when the act it describes is undone. */
   initTallyText = "";
@@ -449,18 +505,24 @@ function archiveInitiative(){
     id: initUid(),
     endedAt: Date.now(),
     round: initState.round || 1,
-    list: initSorted().map(c => ({
-      name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
-      tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
-      fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
-      statuses: (c.statuses || []).map(s => ({ n: stName(s), d: stDur(s) })),
-      notes: c.notes || ""
-    })),
+    list: initSorted().map(c => {
+      /* The holder's in-progress stint folds into the saved totals,
+         so the record carries the whole fight's time. */
+      const live = (initState.turnId === c.id && initState.turnStart) ? Math.max(0, Date.now() - initState.turnStart) : 0;
+      return {
+        name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
+        tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
+        fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
+        turnMs: (c.turnMs || 0) + live, lastStint: live || c.lastStint || 0,
+        statuses: (c.statuses || []).map(s => ({ n: stName(s), d: stDur(s) })),
+        notes: c.notes || ""
+      };
+    }),
     log: Array.isArray(initState.log) ? initState.log.slice() : []
   };
   initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
-  initState.manual = false; initState.log = [];
+  initState.manual = false; initState.log = []; initState.turnStart = null; initState.combatStart = null;
   saveInitiative();
 }
 function renderInitSaved(){
@@ -473,6 +535,7 @@ function renderInitSaved(){
       let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
       if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
+      if (c.turnMs) t += " · ⏱ " + fmtClock(c.turnMs) + " on the turn";
       if (c.notes) t += " · 📝 " + esc(c.notes);
       return t;
     }).join("<br>");
@@ -497,10 +560,11 @@ function initLoadSaved(idx){
   if (initState.list.length) archiveInitiative();
   initState.list = (entry.list || []).map((c, i) => {
     const n = initNorm(Object.assign({}, c, { id: initUid(), seq: i + 1 }));
-    n.delaying = false; n.readied = false;
+    n.delaying = false; n.readied = false; n.turnMs = 0; n.lastStint = 0;
     return n;
   });
   initState.round = 1; initState.started = false; initState.manual = false;
+  initState.turnStart = null; initState.combatStart = null;
   initState.log = [];
   initLog("Loaded the saved scenario from " + new Date(entry.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " — a fresh fight.");
   initPinTop();
@@ -653,7 +717,9 @@ function renderInitiative(){
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
   const clockEl = $("initClock");
-  if (clockEl) { const secs = round * 6; clockEl.textContent = "⏱ " + Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
+  if (clockEl) clockEl.textContent = "⏱ " + fmtClock(initState.combatStart ? Date.now() - initState.combatStart : 0);
+  const worldEl = $("initWorldClock");
+  if (worldEl) { const secs = round * 6; worldEl.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
   const nn = $("initNowNext");
   if (!rows.length) {
     nn.textContent = "";
@@ -712,6 +778,8 @@ function renderInitiative(){
           ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
           : '<button type="button" class="init-delay" data-init-delay="' + c.id + '" title="Delay: sit out the turn — Next will skip them until they jump back in">Delay</button>') +
         '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>' +
+        '<span class="init-clocks"><span class="init-stint" data-stint="' + c.id + '" title="Time on this turn — the clock starts when their turn begins and stops when it passes to the next combatant">⏱ ' + fmtClock(active ? initStintMs(c) : (c.lastStint || 0)) + '</span>' +
+        '<span class="init-total" data-total="' + c.id + '" title="Total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>' +
         '<span class="init-hp-group">' +
           '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">−</button>' +
           '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" title="Current hit points" data-init-hp="' + c.id + '">' +
@@ -854,7 +922,7 @@ function renderInitiative(){
   wrap.querySelectorAll("[data-init-dup]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initDup); if (!c) return;
     const copy = initNorm(JSON.parse(JSON.stringify(c)));
-    copy.id = initUid();
+    copy.id = initUid(); copy.turnMs = 0; copy.lastStint = 0;
     copy.seq = initState.list.reduce((m, x) => Math.max(m, x.seq || 0), 0) + 1;
     initState.list.push(copy);
     saveInitiative(); renderInitiative();
@@ -869,8 +937,11 @@ function renderInitiative(){
   wrap.querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", () => {
     const gone = b.dataset.initDel;
     initSnapshot();
+    const wasRunning = initState.turnId === gone && !!initState.turnStart;
+    if (initState.turnId === gone) initCloseStint(gone, true);
     initState.list = initState.list.filter(x => x.id !== gone);
     if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
+    if (wasRunning) { if (initState.list.length) initOpenStint(); else initState.turnStart = null; }
     saveInitiative(); renderInitiative();
   }));
   /* Drag reorder by the handle: pointer-driven, so it works with
@@ -909,9 +980,15 @@ function renderInitiative(){
     h.addEventListener("pointerup", up);
     h.addEventListener("pointercancel", up);
   }));
+  initTickClocks();
 }
 function initAdvance(dir, silent){
   const rows = initSorted(); if (!rows.length) return;
+  /* The outgoing holder's stint ends here (logged); the incoming
+     holder's begins. On the very first advance no stint is open
+     yet, so the close is a no-op and the open starts the fight
+     clock — combat begins with the first turn taken. */
+  initCloseStint(initState.turnId, true);
   initState.started = true;
   let i = rows.findIndex(c => c.id === initState.turnId);
   if (i < 0) i = 0;
@@ -924,6 +1001,7 @@ function initAdvance(dir, silent){
   if (dir > 0 && ni <= i) { initState.round = (initState.round || 1) + 1; initLog("— Round " + initState.round + " begins —"); initTickStatuses(); }
   if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
   initState.turnId = rows[ni].id;
+  initOpenStint();
   if (!silent && initState.turnId !== before) initChime();
   saveInitiative(); renderInitiative();
 }
@@ -956,7 +1034,9 @@ async function loadInitiative(){
       saved: Array.isArray(v.saved) ? v.saved : [],
       party: Array.isArray(v.party) ? v.party.map(partyNorm) : [],
       log: Array.isArray(v.log) ? v.log : [],
-      manual: !!v.manual
+      manual: !!v.manual,
+      turnStart: v.turnStart ?? null,
+      combatStart: v.combatStart ?? null
     };
   } catch (e) {}
   initLoaded = true;
@@ -1038,6 +1118,7 @@ function initRollAll(){
   initState.list.forEach(c => { c.init = initRoll(c.mod); });
   initState.manual = false;
   initState.started = false;
+  initZeroClocks();
   initPinTop();
   saveInitiative(); renderInitiative();
 }
@@ -1054,19 +1135,21 @@ function initCombatReset(){
     if (typeof c.maxHp === "number") c.hp = c.maxHp;
   });
   initState.round = 1; initState.started = false; initState.manual = false;
+  initZeroClocks();
   initPinTop();
   saveInitiative(); renderInitiative();
 }
 function initReset(){
   const rows = initSorted(); if (!rows.length) return;
   initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  initZeroClocks();
   saveInitiative(); renderInitiative();
 }
 function initClear(){
   if (!initState.list.length) return;
   if (!confirm("Clear the whole initiative board?")) return;
   initSnapshot();
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, combatStart: null };
   saveInitiative(); renderInitiative();
 }
 $("initAddBtn").addEventListener("click", initAdd);
@@ -1092,6 +1175,9 @@ $("initPartyNewBtn").addEventListener("click", () => {
 });
 ["initName", "initTotal", "initMod", "initAc", "initHp", "initQty"].forEach(id => { const el = $(id); if (el) el.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }); });
 initChimeBtnLabel();
+/* The clocks repaint once a second — text only, never a save:
+   every value is derived from the shared timestamps. */
+setInterval(initTickClocks, 1000);
 setInterval(() => {
   const p = $("initiativePanel");
   if (p && initLoaded && !document.hidden && !initDirty && !p.contains(document.activeElement)) loadInitiative();
