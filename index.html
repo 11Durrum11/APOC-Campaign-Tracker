@@ -186,13 +186,13 @@
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.5rem;margin:.4rem 0 .8rem}
-  #initiativePanel .init-row{border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem}
+  #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
   #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
   #initiativePanel .init-line2{margin-top:.45rem}
   #initiativePanel .init-turn{width:1.1rem;text-align:center;visibility:hidden}
   #initiativePanel .init-row.active .init-turn{visibility:visible}
-  #initiativePanel .init-name{flex:1 1 6rem;min-width:0;overflow-wrap:anywhere;font-weight:600}
+  #initiativePanel .init-name{flex:1 1 6rem;min-width:0;overflow-wrap:anywhere;font-weight:600;cursor:default}
   #initiativePanel .init-name.struck{text-decoration:line-through}
   #initiativePanel .init-lab{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;opacity:.9}
   #initiativePanel .init-lab input{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
@@ -200,7 +200,7 @@
   #initiativePanel .init-hp-group,#initiativePanel .init-amt-group{display:inline-flex;align-items:center;gap:.3rem}
   #initiativePanel .init-hp,#initiativePanel .init-hpmax{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-amt{font:inherit;width:4rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
-  #initiativePanel .init-bar{height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
+  #initiativePanel .init-bar{width:100%;align-self:stretch;height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
   #initiativePanel .init-bar span{display:block;height:100%}
   #initiativePanel .init-hint{font-weight:700;font-style:italic}
   #initiativePanel .init-status-add{font:inherit;padding:.3rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
