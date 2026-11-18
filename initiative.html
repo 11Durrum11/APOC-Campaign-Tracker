@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John's House — Initiative Tracker · APOC Survival</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --background:hsl(222 22% 10%);
+    --foreground:hsl(42 38% 88%);
+    --card:hsla(222,20%,14%,0);
+    --card-foreground:hsl(42 38% 88%);
+    --card-border:hsl(220 16% 24%);
+    --popover:hsla(222,20%,13%,0);
+    --primary:hsl(38 92% 50%);
+    --primary-foreground:hsl(30 40% 10%);
+    --secondary:hsla(220,16%,20%,0);
+    --muted:hsla(220,16%,20%,0);
+    --muted-foreground:hsl(220 12% 62%);
+    --accent:hsla(222,18%,22%,0);
+    --accent-foreground:hsl(42 38% 90%);
+    --destructive:hsl(0 62% 46%);
+    --border:hsl(220 16% 24%);
+    --input:hsl(220 16% 26%);
+    --ring:hsl(38 92% 50%);
+    --radius:12px;
+    --scene-image:url("assets/scenes/bastion-streets.webp");
+  }
+  body{
+    margin:0;background:var(--background);color:var(--foreground);
+    font-family:Georgia,"Times New Roman",serif;line-height:1.5;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;
+  }
+  /* The backdrop: the hub's own pinned scene layer and scrim,
+     verbatim — the slideshow cycles --scene-image underneath. */
+  body::before{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-2;
+    background-image:var(--scene-image);background-size:cover;background-position:center;
+    opacity:var(--bg-opacity,.45);transition:opacity 1.5s ease;
+  }
+  body::after{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;
+    background:
+      linear-gradient(180deg,hsla(222,22%,10%,.62),hsla(222,22%,10%,.86) 46%,hsla(222,22%,10%,.96) 100%),
+      radial-gradient(ellipse at 50% 0%,transparent 0%,hsla(222,22%,10%,.40) 72%);
+  }
+  a{color:var(--primary)}
+  button,input,select,textarea{font:inherit}
+  button,select,input,textarea{color:var(--foreground)}
+  button{cursor:pointer}
+  :focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+  .page{width:min(1180px,100%);margin:0 auto;padding:0 16px 12px}
+  .panel{
+    background:hsla(222,20%,14%,0);border:1px solid var(--card-border);backdrop-filter:blur(3px);
+    border-radius:var(--radius);padding:10px;margin-top:8px;
+    box-shadow:0 14px 32px rgba(0,0,0,.18);
+  }
+  .panel h2{margin:0 0 6px;font-size:clamp(1.3rem,3.4vw,1.7rem);font-weight:500}
+  .panel h3{font-weight:500}
+  .muted{color:var(--muted-foreground)}
+  .small{font-size:.9rem}
+  .eyebrow{margin:0 0 2px;color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
+  .btn{
+    border:1px solid var(--card-border);background:var(--secondary);color:var(--foreground);
+    border-radius:9px;padding:6px 11px;min-height:34px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .btn:hover{background:var(--accent);color:var(--accent-foreground)}
+  .btn.primary{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
+  .btn.danger{background:transparent;border-color:var(--destructive);color:#f0b1b1}
+  .btn.danger:hover{background:transparent;color:#f0b1b1}
+  [hidden]{display:none !important}
+  /* Page furniture: a slim top bar tying the page to the hub —
+     back to the Campaign Hub on the left, the campaign wordmark
+     on the right, both in the hub's own type and colours. */
+  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:12px}
+  .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+  /* Campaign Initiative Tracker panel — John's House, full combat
+     build (2026-11-18: AC, HP with damage/healing by amount, 3.5
+     statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
+     Reset combat — the recovered AIDM Roster feature set). Every
+     rule is scoped under #initiativePanel so nothing else on the
+     page collides with it. */
+  #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  #initiativePanel .init-round{font-weight:700;letter-spacing:.04em}
+  #initiativePanel .init-nownext{margin:.35rem 0 0;font-weight:600;min-height:1.2em}
+  #initiativePanel .init-form{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}
+  #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-form input[type="number"]{width:5.5rem}
+  #initiativePanel .init-form input#initName{flex:1 1 10rem}
+  #initiativePanel .init-list{display:flex;flex-direction:column;gap:.5rem;margin:.4rem 0 .8rem}
+  #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem}
+  #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
+  #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+  #initiativePanel .init-line2{margin-top:.45rem}
+  #initiativePanel .init-turn{width:1.1rem;text-align:center;visibility:hidden}
+  #initiativePanel .init-row.active .init-turn{visibility:visible}
+  #initiativePanel .init-name{flex:1 1 6rem;min-width:0;overflow-wrap:anywhere;font-weight:600;cursor:default}
+  #initiativePanel .init-name.struck{text-decoration:line-through}
+  #initiativePanel .init-lab{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;opacity:.9}
+  #initiativePanel .init-lab input{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-hp-group,#initiativePanel .init-amt-group{display:inline-flex;align-items:center;gap:.3rem}
+  #initiativePanel .init-hp,#initiativePanel .init-hpmax{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-amt{font:inherit;width:4rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-bar{width:100%;align-self:stretch;height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
+  #initiativePanel .init-bar span{display:block;height:100%}
+  #initiativePanel .init-hint{font-weight:700;font-style:italic}
+  #initiativePanel .init-status-add{font:inherit;padding:.3rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
+  #initiativePanel .init-chip{background:#fff;color:#000;border-radius:999px;padding:.12rem .3rem .12rem .6rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.25rem}
+  #initiativePanel .init-chip button{font:inherit;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
+  /* Action buttons on TOP (Shaun, 2026-11-18): the controls sit
+     right under the header / Now-Next line, above the form and the
+     combatant list, and stick to the top of the view while a long
+     list scrolls under them. */
+  #initiativePanel .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.55rem 0;padding:.45rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  #initiativePanel .init-empty{opacity:.8;font-style:italic}
+  #initiativePanel .init-saved{margin-top:1rem}
+  #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-saved-row{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
+  #initiativePanel .init-saved-row .init-saved-body{flex:1 1 auto;min-width:0}
+  #initiativePanel .init-saved-row .when{font-weight:600}
+  #initiativePanel .init-saved-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .5rem;line-height:1.3}
+  @media (max-width:760px){
+    .panel{padding:16px}
+    #initiativePanel .init-form input{font-size:16px;min-height:44px}
+    #initiativePanel .init-form input#initName{flex:1 1 100%}
+    #initiativePanel .init-form input[type="number"]{flex:1 1 0;width:auto}
+    #initiativePanel .init-form .btn{min-height:44px;flex:1 1 0}
+    #initiativePanel .init-row{padding:.55rem .6rem}
+    #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
+    #initiativePanel .init-status-add{font-size:16px;min-height:40px}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{min-width:40px;min-height:40px}
+    #initiativePanel .init-saved-del{min-width:40px;min-height:40px}
+    #initiativePanel .init-controls .btn{min-height:44px}
+    #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
+  }
+</style>
+</head>
+<body data-scene="bastion-streets">
+<div class="page">
+  <div class="init-topbar">
+    <a class="btn" href="index.html">&#8592; Campaign Hub</a>
+    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
+  </div>
+  <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
+    <div class="init-head">
+      <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
+      <span class="init-round" id="initRound">Round 1</span>
+    </div>
+    <p class="init-nownext" id="initNowNext"></p>
+    <div class="init-controls">
+      <button type="button" class="btn" id="initNextBtn">Next turn</button>
+      <button type="button" class="btn" id="initPrevBtn">Prev turn</button>
+      <button type="button" class="btn" id="initRollAllBtn">Roll ALL</button>
+      <button type="button" class="btn" id="initResetBtn">Back to top</button>
+      <button type="button" class="btn" id="initCombatResetBtn">Reset combat</button>
+      <button type="button" class="btn" id="initClearBtn">Clear all</button>
+    </div>
+    <div class="init-form">
+      <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name">
+      <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll">
+      <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling">
+      <input id="initAc" type="number" placeholder="AC" aria-label="Armour class">
+      <input id="initHp" type="number" placeholder="HP" aria-label="Hit points — starts full">
+      <button type="button" class="btn" id="initAddBtn">Add</button>
+    </div>
+    <div class="init-list" id="initList"></div>
+    <div class="init-saved" id="initSaved"></div>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+/* ================= Shared backend config (same as the hub) ================= */
+const SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
+const SETTINGS_TABLE = "site_settings";
+let db = null;
+try {
+  if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) { db = null; }
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================= Scenes + background slideshow (the hub's own) ================= */
+const SCENES = {
+  "bastion-streets":      { label:"The Bastion — fogbound streets",    file:"assets/scenes/bastion-streets.webp" },
+  "market-guild-streets": { label:"The Bastion — market & guild streets", file:"assets/scenes/market-guild-streets.webp" },
+  "lower-quarter":        { label:"The Bastion — lower quarter",       file:"assets/scenes/lower-quarter.webp" },
+  "city-approach":        { label:"The Bastion — city approach road",  file:"assets/scenes/city-approach.webp" },
+  "winding-dock-road":    { label:"The Bastion — winding dock road",   file:"assets/scenes/winding-dock-road.webp" },
+  "watch-precinct":       { label:"The Bastion — watch precinct streets", file:"assets/scenes/watch-precinct.webp" },
+  "broad-avenue":         { label:"The Bastion — broad avenue",        file:"assets/scenes/broad-avenue.webp" }
+};
+const BG_FILES = [...new Set(Object.values(SCENES).map(x => x.file))];
+let bgIdx = 0;
+BG_FILES.forEach(f => { const im = new Image(); im.src = f; });
+function paintBackdrop(){
+  document.body.style.setProperty("--scene-image", `url("${BG_FILES[bgIdx]}")`);
+}
+function cycleBackdrop(){
+  document.body.style.setProperty("--bg-opacity", "0");
+  setTimeout(() => {
+    bgIdx = (bgIdx + 1) % BG_FILES.length;
+    paintBackdrop();
+    document.body.style.setProperty("--bg-opacity", ".45");
+  }, 1500);
+}
+function jumpBackdropTo(sceneKey){
+  const f = SCENES[sceneKey] && SCENES[sceneKey].file;
+  const i = f ? BG_FILES.indexOf(f) : -1;
+  if (i >= 0) { bgIdx = i; paintBackdrop(); }
+}
+if (BG_FILES.length > 1) {
+  setInterval(cycleBackdrop, 14000);
+}
+/* Start the show where the campaign currently is, like the hub does. */
+(async function startBackdropAtCampaignScene(){
+  if (!db) return;
+  try {
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", "campaign_status").maybeSingle();
+    const scene = data && data.value && data.value.scene;
+    if (scene && SCENES[scene]) jumpBackdropTo(scene);
+  } catch (e) {}
+})();
+</script>
+<script>
+"use strict";
+/* ================= Campaign Initiative Tracker =================
+   (Shaun, 2026-11-18: a 13th hub button under Cosmetology, on both
+   pages — "John's House", "Initiative Tracker" in small under it.
+   Full combat build the same day: the recovered AIDM Initiative
+   Roster feature set — AC, HP with damage/healing by amount, 3.5
+   death hints, the full status list as stackable chips with
+   hover-only crunch, Roll ALL, Prev, Now/Next, Reset combat.)
+   Shared board: one row in site_settings, key "campaign_initiative",
+   value {list:[{id,name,init,mod,ac,hp,maxHp,statuses,seq}],
+   turnId, round, started, saved}. The list renders sorted by
+   initiative, highest first; the turn marker follows turnId so
+   re-sorts never lose whose turn it is.
+   OPEN/CLOSE RULE (Shaun, 2026-11-18): every open starts a NEW
+   BLANK scenario; every close SAVES the board that was run into
+   the saved list (newest first, last 20 kept) shown in the panel.
+   A board left un-closed is saved at the next open instead, so
+   nothing run is ever lost. With no backend reachable the board
+   still works on-device. */
+const INIT_KEY = "campaign_initiative";
+/* The full 3.5 condition list, each with its real mechanical effect
+   as a HOVER-ONLY tooltip on the chip — never a standing bar. */
+const INIT_CONDITIONS = {
+  "Blinded": "−2 AC and loses Dex bonus to AC; −4 on Search and most Str/Dex-based checks; all opponents have total concealment (50% miss).",
+  "Confused": "Acts randomly each round (d%): attacks the caster, acts normally, babbles, flees, or attacks the nearest creature.",
+  "Cowering": "Frozen in fear: no actions, −2 AC, loses Dex bonus to AC.",
+  "Dazed": "Can take no actions (but defends normally, no AC penalty).",
+  "Dazzled": "−1 on attack rolls, Spot and Search checks from bright light.",
+  "Deafened": "−4 initiative, automatically fails Listen, 20% failure on spells with verbal components.",
+  "Disabled": "At 0 HP: only a move or standard action; taking a strenuous action deals 1 damage.",
+  "Dying": "Unconscious at −1 to −9 HP; loses 1 HP per round until stabilised (10% chance each round).",
+  "Energy Drained": "Per negative level: −1 on attacks, saves and checks, −5 HP, −1 effective level, spell slots lost.",
+  "Entangled": "−2 on attacks, −4 Dex, moves at half speed, cannot run or charge; casting needs Concentration (DC 15 + spell level).",
+  "Exhausted": "−6 Str and Dex, moves at half speed, cannot run or charge; 1 hour of rest reduces it to fatigued.",
+  "Fascinated": "Sits or stands quietly, −4 on reactive Spot/Listen; a potential threat allows a new save, an obvious threat breaks it.",
+  "Fatigued": "−2 Str and Dex, cannot run or charge; anything that would fatigue again makes it exhausted.",
+  "Flat-Footed": "Hasn't acted yet: loses Dex bonus to AC and cannot make attacks of opportunity.",
+  "Frightened": "−2 on attacks, saves and checks; flees if able, but can fight if cornered.",
+  "Grappling": "In a grapple: loses Dex bonus to AC against everyone except the grappler; only grapple actions (or light weapons).",
+  "Helpless": "Dexterity 0 (−5 modifier); melee attackers get +4 to hit; can be coup de graced.",
+  "Invisible": "+2 on attacks against sighted foes, who lose their Dex bonus to AC; total concealment (50% miss).",
+  "Knocked Down": "Knocked prone: −4 on melee attacks, −4 AC vs melee, +4 AC vs ranged; standing costs a move action.",
+  "Nauseated": "Can take only a single move action each round — no attacks, spells or concentration.",
+  "On Fire": "Takes 1d6 fire damage each round until extinguished (Reflex DC 15).",
+  "Panicked": "−2 on saves and checks, drops everything held and flees by a random route; cowers if cornered.",
+  "Paralyzed": "Strength and Dexterity 0; helpless; can take purely mental actions only.",
+  "Petrified": "Turned to stone and unconscious; unaware of surroundings; if the stone breaks, so does the creature.",
+  "Pinned": "Held immobile in a grapple: loses Dex bonus to AC and takes −4 AC against everyone but the grappler.",
+  "Poisoned": "Suffers the poison's effect: initial damage on the failed save, secondary damage 1 minute later (ability damage per the poison).",
+  "Prone": "−4 on melee attacks, cannot use most ranged weapons; +4 AC vs ranged, −4 AC vs melee; standing is a move action.",
+  "Shaken": "−2 on attack rolls, saving throws and skill/ability checks.",
+  "Sickened": "−2 on attack rolls, weapon damage rolls, saving throws and skill/ability checks.",
+  "Stable": "Dying but no longer losing HP each round; still unconscious.",
+  "Staggered": "When nonlethal damage equals current HP: only a single move or standard action each round.",
+  "Stunned": "Drops everything held, can take no actions, −2 AC, loses Dex bonus to AC.",
+  "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
+  "Unconscious": "Knocked out and helpless; cannot act or perceive."
+};
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [] };
+function initNorm(c){
+  return {
+    id: c.id, name: c.name,
+    init: (c.init === undefined ? null : c.init),
+    mod: c.mod || 0,
+    ac: (c.ac === undefined ? null : c.ac),
+    hp: (c.hp === undefined ? null : c.hp),
+    maxHp: (c.maxHp === undefined ? null : c.maxHp),
+    statuses: Array.isArray(c.statuses) ? c.statuses.slice() : [],
+    seq: c.seq || 0
+  };
+}
+function archiveInitiative(){
+  if (!initState.list.length) return;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    endedAt: Date.now(),
+    round: initState.round || 1,
+    list: initSorted().map(c => ({ name: c.name, init: c.init, hp: c.hp, maxHp: c.maxHp, statuses: (c.statuses || []).slice() }))
+  };
+  initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
+  initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
+  saveInitiative();
+}
+function renderInitSaved(){
+  const wrap = $("initSaved"); if (!wrap) return;
+  const saved = initState.saved || [];
+  if (!saved.length) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map((s, si) => {
+    const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    const who = s.list.map(c => {
+      let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
+      if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
+      if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(esc).join(", ");
+      return t;
+    }).join("<br>");
+    return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + '</span>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario">×</button></div>';
+  }).join("");
+  wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
+    initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
+    saveInitiative();
+    renderInitSaved();
+  }));
+}
+let initLoaded = false;
+function initVal(c){ return (c.init === null || c.init === undefined || c.init === "") ? -Infinity : c.init; }
+function initSorted(){ return initState.list.slice().sort((a, b) => (initVal(b) - initVal(a)) || ((a.seq || 0) - (b.seq || 0))); }
+/* Until the first turn is taken, the marker sits on top of the order,
+   so building the board always starts at the highest initiative. */
+function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
+function initRoll(mod){ return Math.floor(Math.random() * 20) + 1 + (mod || 0); }
+function initHpHint(c){
+  if (typeof c.hp !== "number") return "";
+  if (c.hp <= -10) return "Dead";
+  if (c.hp < 0) return "Dying";
+  if (c.hp === 0) return "Disabled";
+  return "";
+}
+function renderInitiative(){
+  const wrap = $("initList"); if (!wrap) return;
+  renderInitSaved();
+  const rows = initSorted();
+  $("initRound").textContent = "Round " + (initState.round || 1);
+  const nn = $("initNowNext");
+  if (!rows.length) {
+    nn.textContent = "";
+    wrap.innerHTML = '<p class="init-empty">No combatants yet — add the first above.</p>';
+    return;
+  }
+  let ti = rows.findIndex(c => c.id === initState.turnId);
+  if (ti < 0) ti = 0;
+  nn.textContent = rows.length === 1
+    ? "Now: " + rows[ti].name
+    : "Now: " + rows[ti].name + " · Next: " + rows[(ti + 1) % rows.length].name;
+  const statusOptions = '<option value="">+ Status</option>' + Object.keys(INIT_CONDITIONS).map(k => '<option value="' + esc(k) + '">' + esc(k) + '</option>').join("");
+  wrap.innerHTML = rows.map(c => {
+    const active = c.id === initState.turnId;
+    const hint = initHpHint(c);
+    const dead = hint === "Dead";
+    const num = v => (v === null || v === undefined ? "" : v);
+    let bar = "";
+    if (typeof c.hp === "number" && typeof c.maxHp === "number" && c.maxHp > 0) {
+      const pct = Math.max(0, Math.min(100, c.hp / c.maxHp * 100));
+      const col = pct > 50 ? "#57a85a" : (pct > 25 ? "#d9a441" : "#cf4b41");
+      bar = '<div class="init-bar"><span style="width:' + pct + '%;background:' + col + '"></span></div>';
+    }
+    const chips = (c.statuses && c.statuses.length)
+      ? '<div class="init-chips">' + c.statuses.map((s, i) =>
+          '<span class="init-chip" title="' + esc(INIT_CONDITIONS[s] || "") + '">' + esc(s) +
+          '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(s) + ' from ' + esc(c.name) + '">×</button></span>').join("") + '</div>'
+      : "";
+    return '<div class="init-row' + (active ? ' active' : '') + '">' +
+      '<div class="init-line1">' +
+        '<span class="init-turn" aria-hidden="true">▶</span>' +
+        '<span class="init-name' + (dead ? ' struck' : '') + '">' + esc(c.name) + '</span>' +
+        '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" data-init-val="' + c.id + '"></label>' +
+        '<button type="button" class="init-roll" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">🎲</button>' +
+        '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" data-init-mod="' + c.id + '"></label>' +
+        '<label class="init-lab">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" data-init-ac="' + c.id + '"></label>' +
+        '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '">✕</button>' +
+      '</div>' +
+      '<div class="init-line2">' +
+        '<span class="init-hp-group">' +
+          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '">−</button>' +
+          '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" data-init-hp="' + c.id + '">' +
+          '<span>/</span>' +
+          '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" data-init-hpmax="' + c.id + '">' +
+          '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '">+</button>' +
+        '</span>' +
+        '<span class="init-amt-group">' +
+          '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" data-init-amt="' + c.id + '">' +
+          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '">−Dmg</button>' +
+          '<button type="button" class="init-heal" data-init-heal="' + c.id + '">+Heal</button>' +
+        '</span>' +
+        (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
+        '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '">' + statusOptions + '</select>' +
+      '</div>' + bar + chips + '</div>';
+  }).join("");
+  const find = id => initState.list.find(x => x.id === id);
+  const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
+  wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initVal);
+    if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-mod]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initMod);
+    if (c) { c.mod = parseInt(inp.value, 10) || 0; saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-ac]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initAc);
+    if (c) { c.ac = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-hp]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initHp);
+    if (c) { c.hp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-hpmax]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initHpmax);
+    if (c) { c.maxHp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-roll]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initRoll);
+    if (c) { c.init = initRoll(c.mod); initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-step]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.for);
+    if (c) {
+      const d = parseInt(b.dataset.initStep, 10) || 0;
+      let hp = (typeof c.hp === "number" ? c.hp : 0) + d;
+      if (d > 0 && typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
+      c.hp = hp; saveInitiative(); renderInitiative();
+    }
+  }));
+  wrap.querySelectorAll("[data-init-dmg]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDmg); if (!c) return;
+    const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]');
+    const amt = Math.abs(parseInt(inp && inp.value, 10) || 0);
+    if (!amt) { if (inp) inp.focus(); return; }
+    c.hp = (typeof c.hp === "number" ? c.hp : 0) - amt;
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-heal]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initHeal); if (!c) return;
+    const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]');
+    const amt = Math.abs(parseInt(inp && inp.value, 10) || 0);
+    if (!amt) { if (inp) inp.focus(); return; }
+    let hp = (typeof c.hp === "number" ? c.hp : 0) + amt;
+    if (typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
+    c.hp = hp;
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-status]").forEach(sel => sel.addEventListener("change", () => {
+    const c = find(sel.dataset.initStatus);
+    if (c && sel.value) {
+      if (!c.statuses.includes(sel.value)) c.statuses.push(sel.value);
+      saveInitiative(); renderInitiative();
+    }
+  }));
+  wrap.querySelectorAll("[data-chip-del]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.chipDel);
+    if (c) { c.statuses.splice(parseInt(b.dataset.chipIdx, 10), 1); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", () => {
+    const gone = b.dataset.initDel;
+    initState.list = initState.list.filter(x => x.id !== gone);
+    if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
+    saveInitiative(); renderInitiative();
+  }));
+}
+async function loadInitiative(){
+  if (!db) { initLoaded = true; renderInitiative(); return; }
+  try {
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
+    const v = data && data.value;
+    if (v && Array.isArray(v.list)) initState = { list: v.list.map(initNorm), turnId: v.turnId ?? null, round: v.round || 1, started: !!v.started, saved: Array.isArray(v.saved) ? v.saved : [] };
+  } catch (e) {}
+  initLoaded = true;
+  renderInitiative();
+}
+async function saveInitiative(){
+  if (!db) return;
+  try {
+    await db.from(SETTINGS_TABLE).upsert(
+      { key: INIT_KEY, value: initState, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+  } catch (e) {}
+}
+function initAdd(){
+  const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp");
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  const mod = parseInt(modEl.value, 10) || 0;
+  let init;
+  if (totalEl.value !== "") init = parseInt(totalEl.value, 10) || 0;
+  else init = initRoll(mod);
+  const ac = acEl.value === "" ? null : (parseInt(acEl.value, 10) || 0);
+  const maxHp = hpEl.value === "" ? null : (parseInt(hpEl.value, 10) || 0);
+  const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
+  initState.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, init, mod, ac, hp: maxHp, maxHp, statuses: [], seq });
+  initPinTop();
+  if (!initState.turnId) initState.turnId = initSorted()[0].id;
+  nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
+  saveInitiative(); renderInitiative(); nameEl.focus();
+}
+function initNext(){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.started = true;
+  let i = rows.findIndex(c => c.id === initState.turnId);
+  i = (i + 1) % rows.length;
+  if (i === 0) initState.round = (initState.round || 1) + 1;
+  initState.turnId = rows[i].id;
+  saveInitiative(); renderInitiative();
+}
+function initPrev(){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.started = true;
+  let i = rows.findIndex(c => c.id === initState.turnId);
+  if (i < 0) i = 0;
+  i = (i - 1 + rows.length) % rows.length;
+  if (i === rows.length - 1) initState.round = Math.max(1, (initState.round || 1) - 1);
+  initState.turnId = rows[i].id;
+  saveInitiative(); renderInitiative();
+}
+function initRollAll(){
+  if (!initState.list.length) return;
+  initState.list.forEach(c => { c.init = initRoll(c.mod); });
+  initState.started = false;
+  initPinTop();
+  saveInitiative(); renderInitiative();
+}
+function initCombatReset(){
+  if (!initState.list.length) return;
+  initState.list.forEach(c => { c.init = null; c.statuses = []; if (typeof c.maxHp === "number") c.hp = c.maxHp; });
+  initState.round = 1; initState.started = false;
+  initPinTop();
+  saveInitiative(); renderInitiative();
+}
+function initReset(){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  saveInitiative(); renderInitiative();
+}
+function initClear(){
+  if (!initState.list.length) return;
+  if (!confirm("Clear the whole initiative board?")) return;
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [] };
+  saveInitiative(); renderInitiative();
+}
+$("initAddBtn").addEventListener("click", initAdd);
+$("initNextBtn").addEventListener("click", initNext);
+$("initPrevBtn").addEventListener("click", initPrev);
+$("initRollAllBtn").addEventListener("click", initRollAll);
+$("initResetBtn").addEventListener("click", initReset);
+$("initCombatResetBtn").addEventListener("click", initCombatReset);
+$("initClearBtn").addEventListener("click", initClear);
+["initName", "initTotal", "initMod", "initAc", "initHp"].forEach(id => $(id).addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }));
+setInterval(() => {
+  const p = $("initiativePanel");
+  if (p && initLoaded && !document.hidden && !p.contains(document.activeElement)) loadInitiative();
+}, 5000);
+/* On this page, arriving is opening and leaving is closing — the
+   open/close rule carried over from the panel unchanged: boot pulls
+   the store fresh, saves any board a previous visit left un-closed,
+   and starts blank; leaving the page saves the board that was run.
+   The leave save re-sends the archived state with keepalive so the
+   write survives the page going away. */
+(async function initBoot(){
+  await loadInitiative();
+  archiveInitiative();
+  renderInitiative();
+})();
+window.addEventListener("pagehide", () => {
+  if (!initState.list.length) return;
+  archiveInitiative();
+  try {
+    fetch(SUPABASE_URL + "/rest/v1/" + SETTINGS_TABLE, {
+      method: "POST", keepalive: true,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ key: INIT_KEY, value: initState, updated_at: new Date().toISOString() })
+    }).catch(() => {});
+  } catch (e) {}
+});
+
+</script>
+</body>
+</html>
