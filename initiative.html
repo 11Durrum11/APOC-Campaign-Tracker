@@ -936,14 +936,30 @@ async function loadInitiative(){
   initLoaded = true;
   renderInitiative(); renderParty();
 }
-async function saveInitiative(){
+/* Saves are SERIALIZED and the poll never rewinds (fix, 2026-11-18):
+   every save queues behind the previous one and carries a snapshot
+   of the state at its own call, so writes land in the order they
+   were issued; while any save is in flight the board is "dirty" and
+   the 5-second poll skips its reload, so a mid-flight read can
+   never replace fresh local work (damage, log lines) with a stale
+   stored state. */
+let initSaveChain = Promise.resolve();
+let initSaveGen = 0;
+let initDirty = false;
+function saveInitiative(){
   if (!db) return;
-  try {
-    await db.from(SETTINGS_TABLE).upsert(
-      { key: INIT_KEY, value: initState, updated_at: new Date().toISOString() },
-      { onConflict: "key" }
-    );
-  } catch (e) {}
+  initDirty = true;
+  const myGen = ++initSaveGen;
+  const snap = JSON.parse(JSON.stringify(initState));
+  initSaveChain = initSaveChain.then(async () => {
+    try {
+      await db.from(SETTINGS_TABLE).upsert(
+        { key: INIT_KEY, value: snap, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+    } catch (e) {}
+    if (myGen === initSaveGen) initDirty = false;
+  });
 }
 function initAdd(){
   const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp"), qtyEl = $("initQty");
@@ -1052,7 +1068,7 @@ $("initPartyNewBtn").addEventListener("click", () => {
 initChimeBtnLabel();
 setInterval(() => {
   const p = $("initiativePanel");
-  if (p && initLoaded && !document.hidden && !p.contains(document.activeElement)) loadInitiative();
+  if (p && initLoaded && !document.hidden && !initDirty && !p.contains(document.activeElement)) loadInitiative();
 }, 5000);
 /* On this page, arriving is opening and leaving is closing — the
    open/close rule carried over from the panel unchanged: boot pulls
