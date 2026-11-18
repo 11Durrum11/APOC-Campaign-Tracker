@@ -168,6 +168,27 @@
   .hub-share-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
   .hub-share-btn:hover,.hub-share-btn:focus-visible{opacity:1}
   .hub-share-note{font-size:11.5px;opacity:.85}
+  /* 13th hub button (Shaun, 2026-11-18): the Campaign Initiative
+     Tracker sits UNDER Cosmetology — row 5, column 2 of the hub grid
+     (the grid is 3-across at phone size too, so the placement holds). */
+  .hub-item-under-cosmo{grid-column:2}
+  /* Campaign Initiative Tracker panel */
+  .init-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  .init-round{font-weight:700;letter-spacing:.04em}
+  .init-form{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}
+  .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  .init-form input[type="number"]{width:5.5rem}
+  .init-form input#initName{flex:1 1 10rem}
+  .init-list{display:flex;flex-direction:column;gap:.35rem;margin:.4rem 0 .8rem}
+  .init-row{display:flex;align-items:center;gap:.6rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px}
+  .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
+  .init-turn{width:1.2rem;text-align:center;visibility:hidden}
+  .init-row.active .init-turn{visibility:visible}
+  .init-name{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+  .init-val{width:4.2rem;font:inherit;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  .init-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.2rem .5rem}
+  .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+  .init-empty{opacity:.8;font-style:italic}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -766,6 +787,9 @@
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="reconvenes" aria-expanded="false" id="reconButton"><span class="hub-name">The Table Reconvenes</span></button>
       </div>
+      <div class="hub-item hub-item-under-cosmo">
+        <button class="hub-btn" type="button" data-hub-action="initiative" aria-expanded="false" id="initiativeButton"><span class="hub-name">John's House</span><span class="hub-sub">Initiative Tracker</span></button>
+      </div>
     </div>
   </section>
 
@@ -960,6 +984,25 @@
       <div><b id="cdSecs">—</b><span>Seconds</span></div>
     </div>
     <p class="countdown-note muted" id="cdNote" style="margin:6px 0 0;font-size:.85rem">Until the table reconvenes</p>
+  </section>
+
+  <section class="panel hub-content-panel" id="initiativePanel" hidden aria-label="John's House Initiative Tracker">
+    <div class="init-head">
+      <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
+      <span class="init-round" id="initRound">Round 1</span>
+    </div>
+    <div class="init-form">
+      <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name">
+      <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll">
+      <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling">
+      <button type="button" class="btn" id="initAddBtn">Add</button>
+    </div>
+    <div class="init-list" id="initList"></div>
+    <div class="init-controls">
+      <button type="button" class="btn" id="initNextBtn">Next turn</button>
+      <button type="button" class="btn" id="initResetBtn">Back to top</button>
+      <button type="button" class="btn" id="initClearBtn">Clear all</button>
+    </div>
   </section>
 
   <section class="panel hub-content-panel" id="trackerPanel" hidden aria-label="Campaign Status Tracker">
@@ -1378,7 +1421,7 @@ function toggleHubPanel(panelId, btnId){
   if (!panel || !btn) return;
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
-  ["canonButton", "trackerButton", "lairButton", "cosmetologyButton", "skyButton", "reconButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
+  ["canonButton", "trackerButton", "lairButton", "cosmetologyButton", "skyButton", "reconButton", "initiativeButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
   panel.hidden = !opening;
   btn.setAttribute("aria-expanded", opening ? "true" : "false");
   if (opening) {
@@ -1399,6 +1442,9 @@ function activateHub(btn){
     toggleHubPanel("skyPanel", "skyButton");
   } else if (action === "reconvenes") {
     toggleHubPanel("reconPanel", "reconButton");
+  } else if (action === "initiative") {
+    toggleHubPanel("initiativePanel", "initiativeButton");
+    if (!$("initiativePanel").hidden) openInitiative();
   } else if (action === "gallery") {
     openGallery();
   }
@@ -1411,6 +1457,110 @@ document.querySelectorAll(".hub-btn").forEach(btn => {
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") { closeGallery(); }
 });
+
+/* ================= Campaign Initiative Tracker =================
+   (Shaun, 2026-11-18: a 13th hub button under Cosmetology, on both
+   pages.) Shared board: one row in site_settings, key
+   "campaign_initiative", value {list:[{id,name,init,seq}], turnId,
+   round}. The list renders sorted by initiative, highest first; the
+   turn marker follows turnId so re-sorts never lose whose turn it
+   is. With no backend reachable the board still works on-device. */
+const INIT_KEY = "campaign_initiative";
+let initState = { list: [], turnId: null, round: 1, started: false };
+let initLoaded = false;
+function initSorted(){ return initState.list.slice().sort((a, b) => (b.init - a.init) || ((a.seq || 0) - (b.seq || 0))); }
+/* Until the first turn is taken, the marker sits on top of the order,
+   so building the board always starts at the highest initiative. */
+function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
+function renderInitiative(){
+  const wrap = $("initList"); if (!wrap) return;
+  const rows = initSorted();
+  $("initRound").textContent = "Round " + (initState.round || 1);
+  if (!rows.length) { wrap.innerHTML = '<p class="init-empty">No combatants yet — add the first above.</p>'; return; }
+  wrap.innerHTML = rows.map(c => {
+    const active = c.id === initState.turnId;
+    return '<div class="init-row' + (active ? ' active' : '') + '">' +
+      '<span class="init-turn" aria-hidden="true">▶</span>' +
+      '<span class="init-name">' + esc(c.name) + '</span>' +
+      '<input class="init-val" type="number" value="' + c.init + '" aria-label="Initiative for ' + esc(c.name) + '" data-init-val="' + c.id + '">' +
+      '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '">✕</button></div>';
+  }).join("");
+  wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
+    const c = initState.list.find(x => x.id === inp.dataset.initVal);
+    if (c) { c.init = parseInt(inp.value, 10) || 0; initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", () => {
+    const gone = b.dataset.initDel;
+    initState.list = initState.list.filter(x => x.id !== gone);
+    if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
+    saveInitiative(); renderInitiative();
+  }));
+}
+async function loadInitiative(){
+  if (!db) { initLoaded = true; renderInitiative(); return; }
+  try {
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
+    const v = data && data.value;
+    if (v && Array.isArray(v.list)) initState = { list: v.list, turnId: v.turnId ?? null, round: v.round || 1, started: !!v.started };
+  } catch (e) {}
+  initLoaded = true;
+  renderInitiative();
+}
+async function saveInitiative(){
+  if (!db) return;
+  try {
+    await db.from(SETTINGS_TABLE).upsert(
+      { key: INIT_KEY, value: initState, updated_at: new Date().toISOString() },
+      { onConflict: "key" }
+    );
+  } catch (e) {}
+}
+function initAdd(){
+  const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod");
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  let init;
+  if (totalEl.value !== "") init = parseInt(totalEl.value, 10) || 0;
+  else { const mod = parseInt(modEl.value, 10) || 0; init = Math.floor(Math.random() * 20) + 1 + mod; }
+  const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
+  initState.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, init, seq });
+  initPinTop();
+  if (!initState.turnId) initState.turnId = initSorted()[0].id;
+  nameEl.value = ""; totalEl.value = "";
+  saveInitiative(); renderInitiative(); nameEl.focus();
+}
+function initNext(){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.started = true;
+  let i = rows.findIndex(c => c.id === initState.turnId);
+  i = (i + 1) % rows.length;
+  if (i === 0) initState.round = (initState.round || 1) + 1;
+  initState.turnId = rows[i].id;
+  saveInitiative(); renderInitiative();
+}
+function initReset(){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  saveInitiative(); renderInitiative();
+}
+function initClear(){
+  if (!initState.list.length) return;
+  if (!confirm("Clear the whole initiative board?")) return;
+  initState = { list: [], turnId: null, round: 1, started: false };
+  saveInitiative(); renderInitiative();
+}
+function openInitiative(){
+  if (!initLoaded) loadInitiative(); else renderInitiative();
+}
+$("initAddBtn").addEventListener("click", initAdd);
+$("initNextBtn").addEventListener("click", initNext);
+$("initResetBtn").addEventListener("click", initReset);
+$("initClearBtn").addEventListener("click", initClear);
+["initName", "initTotal", "initMod"].forEach(id => $(id).addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }));
+setInterval(() => {
+  const p = $("initiativePanel");
+  if (p && !p.hidden && initLoaded && !p.contains(document.activeElement)) loadInitiative();
+}, 5000);
 </script>
 
 <script>
