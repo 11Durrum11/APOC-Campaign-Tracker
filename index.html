@@ -211,8 +211,10 @@
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
   #initiativePanel .init-saved{margin-top:1rem}
   #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
-  #initiativePanel .init-saved-row{padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
+  #initiativePanel .init-saved-row{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
+  #initiativePanel .init-saved-row .init-saved-body{flex:1 1 auto;min-width:0}
   #initiativePanel .init-saved-row .when{font-weight:600}
+  #initiativePanel .init-saved-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .5rem;line-height:1.3}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -579,6 +581,7 @@
     #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
     #initiativePanel .init-status-add{font-size:16px;min-height:40px}
     #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{min-width:40px;min-height:40px}
+    #initiativePanel .init-saved-del{min-width:40px;min-height:40px}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
     .gallery-panel{padding:13px;max-height:94vh}
@@ -1593,7 +1596,7 @@ function renderInitSaved(){
   const wrap = $("initSaved"); if (!wrap) return;
   const saved = initState.saved || [];
   if (!saved.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map(s => {
+  wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map((s, si) => {
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     const who = s.list.map(c => {
       let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
@@ -1601,8 +1604,14 @@ function renderInitSaved(){
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(esc).join(", ");
       return t;
     }).join("<br>");
-    return '<div class="init-saved-row"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + "</div>";
+    return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + '</span>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario">×</button></div>';
   }).join("");
+  wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
+    initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
+    saveInitiative();
+    renderInitSaved();
+  }));
 }
 let initLoaded = false;
 function initVal(c){ return (c.init === null || c.init === undefined || c.init === "") ? -Infinity : c.init; }
