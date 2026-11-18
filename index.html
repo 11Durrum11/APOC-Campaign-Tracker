@@ -172,8 +172,9 @@
      hub buttons can be unlocked, dragged into a new order, and given
      bigger or smaller footprints (grid spans), with a lock to set
      them back to working as buttons. The lock row and the size
-     steppers exist only at phone width; the saved layout applies
-     only at phone width — the desktop hub never changes. */
+     steppers exist only on the phone side (phones and tablets);
+     the saved layout applies only there — the desktop hub never
+     changes. */
   .hub-lock-row{display:none}
   .hub-lock-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
   .hub-size{display:none}
@@ -519,7 +520,10 @@
   }
   .notice strong{color:var(--foreground)}
 
-  @media (max-width:760px){
+  /* Phone side (Shaun's definition, 2026-11-18): the phone way
+     applies on phones AND tablets — narrow screens, plus any
+     touch-first (coarse pointer) device up to 1400px wide. */
+  @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
     .page{padding:0 10px 22px}
     .hero{margin:0 -10px;min-height:0;padding:10px 16px 8px}
     .timer{justify-content:flex-start}
@@ -920,7 +924,8 @@
      steppers (footprint in grid cells: width 1–3, height 1–2).
      Locking puts the buttons back to working as buttons. The saved
      order and sizes live per device in localStorage and apply ONLY
-     at phone width; the desktop hub always keeps the shipped order.
+     on the phone side (phones and tablets — see the mq below); the
+     desktop hub always keeps the shipped order.
      Every load starts locked — arranging is a deliberate session,
      never a state the table stumbles into mid-game. */
   (function () {
@@ -929,7 +934,7 @@
     var resetBtn = document.getElementById("hubLayoutResetBtn");
     if (!row || !lockBtn || !resetBtn) return;
     var KEY = "apoc-hub-layout-v1";
-    var mq = window.matchMedia("(max-width: 760px)");
+    var mq = window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)");
     var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
     var shipped = items.map(function (it) { return it.getAttribute("data-hub-key"); });
     var arranging = false;

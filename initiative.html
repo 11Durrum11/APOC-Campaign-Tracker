@@ -164,7 +164,8 @@
   #initiativePanel .init-saved-log{margin-top:.3rem;font-size:.85rem}
   #initiativePanel .init-saved-log summary{cursor:pointer;opacity:.85}
   #initiativePanel .init-controls .btn[disabled]{opacity:.45;cursor:default}
-  @media (max-width:760px){
+  /* Phone side (Shaun's definition, 2026-11-18): phones AND tablets. */
+  @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
     .panel{padding:16px}
     #initiativePanel .init-form input{font-size:16px;min-height:44px}
     #initiativePanel .init-form input#initName{flex:1 1 100%}
