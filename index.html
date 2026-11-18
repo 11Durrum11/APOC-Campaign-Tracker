@@ -189,6 +189,10 @@
   .init-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.2rem .5rem}
   .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
   .init-empty{opacity:.8;font-style:italic}
+  .init-saved{margin-top:1rem}
+  .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  .init-saved-row{padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
+  .init-saved-row .when{font-weight:600}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
@@ -1015,6 +1019,7 @@
       <button type="button" class="btn" id="initResetBtn">Back to top</button>
       <button type="button" class="btn" id="initClearBtn">Clear all</button>
     </div>
+    <div class="init-saved" id="initSaved"></div>
   </section>
 
   <section class="panel hub-content-panel" id="trackerPanel" hidden aria-label="Campaign Status Tracker">
@@ -1431,6 +1436,11 @@ function tickCountdown(){
 function toggleHubPanel(panelId, btnId){
   const panel = $(panelId), btn = $(btnId);
   if (!panel || !btn) return;
+  /* John's House rule (Shaun, 2026-11-18): closing the initiative
+     tracker — by its own button or by opening any other panel —
+     saves the board that was run. */
+  const initP = $("initiativePanel");
+  if (initP && !initP.hidden) archiveInitiative();
   const opening = panel.hidden;
   document.querySelectorAll(".hub-content-panel").forEach(p => { p.hidden = true; });
   ["canonButton", "trackerButton", "lairButton", "cosmetologyButton", "skyButton", "reconButton", "initiativeButton"].forEach(id => { const b = $(id); if (b) b.setAttribute("aria-expanded", "false"); });
@@ -1472,13 +1482,41 @@ document.addEventListener("keydown", ev => {
 
 /* ================= Campaign Initiative Tracker =================
    (Shaun, 2026-11-18: a 13th hub button under Cosmetology, on both
-   pages.) Shared board: one row in site_settings, key
-   "campaign_initiative", value {list:[{id,name,init,seq}], turnId,
-   round}. The list renders sorted by initiative, highest first; the
-   turn marker follows turnId so re-sorts never lose whose turn it
-   is. With no backend reachable the board still works on-device. */
+   pages — "John's House", "Initiative Tracker" in small under it.)
+   Shared board: one row in site_settings, key "campaign_initiative",
+   value {list:[{id,name,init,seq}], turnId, round, started, saved}.
+   The list renders sorted by initiative, highest first; the turn
+   marker follows turnId so re-sorts never lose whose turn it is.
+   OPEN/CLOSE RULE (Shaun, 2026-11-18): every open starts a NEW
+   BLANK scenario; every close SAVES the board that was run into
+   the saved list (newest first, last 20 kept) shown in the panel.
+   A board left un-closed is saved at the next open instead, so
+   nothing run is ever lost. With no backend reachable the board
+   still works on-device. */
 const INIT_KEY = "campaign_initiative";
-let initState = { list: [], turnId: null, round: 1, started: false };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [] };
+function archiveInitiative(){
+  if (!initState.list.length) return;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    endedAt: Date.now(),
+    round: initState.round || 1,
+    list: initSorted().map(c => ({ name: c.name, init: c.init }))
+  };
+  initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
+  initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
+  saveInitiative();
+}
+function renderInitSaved(){
+  const wrap = $("initSaved"); if (!wrap) return;
+  const saved = initState.saved || [];
+  if (!saved.length) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map(s => {
+    const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    const who = s.list.map(c => esc(c.name) + " " + c.init).join(" · ");
+    return '<div class="init-saved-row"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + "</div>";
+  }).join("");
+}
 let initLoaded = false;
 function initSorted(){ return initState.list.slice().sort((a, b) => (b.init - a.init) || ((a.seq || 0) - (b.seq || 0))); }
 /* Until the first turn is taken, the marker sits on top of the order,
@@ -1486,6 +1524,7 @@ function initSorted(){ return initState.list.slice().sort((a, b) => (b.init - a.
 function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
 function renderInitiative(){
   const wrap = $("initList"); if (!wrap) return;
+  renderInitSaved();
   const rows = initSorted();
   $("initRound").textContent = "Round " + (initState.round || 1);
   if (!rows.length) { wrap.innerHTML = '<p class="init-empty">No combatants yet — add the first above.</p>'; return; }
@@ -1513,7 +1552,7 @@ async function loadInitiative(){
   try {
     const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
     const v = data && data.value;
-    if (v && Array.isArray(v.list)) initState = { list: v.list, turnId: v.turnId ?? null, round: v.round || 1, started: !!v.started };
+    if (v && Array.isArray(v.list)) initState = { list: v.list, turnId: v.turnId ?? null, round: v.round || 1, started: !!v.started, saved: Array.isArray(v.saved) ? v.saved : [] };
   } catch (e) {}
   initLoaded = true;
   renderInitiative();
@@ -1558,11 +1597,15 @@ function initReset(){
 function initClear(){
   if (!initState.list.length) return;
   if (!confirm("Clear the whole initiative board?")) return;
-  initState = { list: [], turnId: null, round: 1, started: false };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [] };
   saveInitiative(); renderInitiative();
 }
-function openInitiative(){
-  if (!initLoaded) loadInitiative(); else renderInitiative();
+async function openInitiative(){
+  /* Every open is a new blank scenario: pull the store fresh, save
+     any board left un-closed into the saved list, start blank. */
+  await loadInitiative();
+  archiveInitiative();
+  renderInitiative();
 }
 $("initAddBtn").addEventListener("click", initAdd);
 $("initNextBtn").addEventListener("click", initNext);
