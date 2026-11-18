@@ -121,6 +121,13 @@
      combatant list, and stick to the top of the view while a long
      list scrolls under them. */
   #initiativePanel .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.55rem 0;padding:.45rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
+     row and size row exist only on the phone side (phones and
+     tablets); the desktop page never shows them. */
+  #initiativePanel .init-lock-row{display:none}
+  #initiativePanel .init-size-row{display:none}
+  #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
   #initiativePanel .init-saved{margin-top:1rem}
   #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
@@ -183,6 +190,13 @@
     #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:40px;min-height:40px}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
+    #initiativePanel .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0}
+    #initiativePanel .init-lock-btn{min-height:36px;padding:.35rem .75rem}
+    body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
+    body.init-arranging #initiativePanel .init-controls .btn{touch-action:none;cursor:grab}
+    body.init-arranging #initiativePanel .init-controls .btn.bar-selected{border-color:var(--primary);border-style:solid;box-shadow:0 0 0 2px var(--primary)}
+    body.init-arranging #initiativePanel .init-controls .btn.dragging{opacity:.55}
+    body.init-arranging #initiativePanel .init-controls .btn.drop-target{border-color:var(--primary);border-style:dashed}
   }
 </style>
 </head>
@@ -199,6 +213,16 @@
       <span class="init-clock" id="initClock" title="Fight time so far — every round is 6 seconds, so Round 10 is one minute">⏱ 0:06</span>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
+    <div class="init-lock-row" id="initLockRow">
+      <button type="button" class="init-lock-btn" id="initBarResetBtn" hidden>Reset layout</button>
+      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to drag the action buttons into your own order and change their footprints; lock to use them as buttons again">&#128275; Move buttons</button>
+    </div>
+    <div class="init-size-row" id="initSizeRow" hidden>
+      <span>Footprint: <strong id="initSizeName">Next turn</strong></span>
+      <button type="button" class="init-lock-btn" id="initSizeDown" title="Diminish the selected button's footprint">−</button>
+      <span class="init-size-read" id="initSizeRead">M</span>
+      <button type="button" class="init-lock-btn" id="initSizeUp" title="Extend the selected button's footprint">+</button>
+    </div>
     <div class="init-controls">
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
@@ -1095,6 +1119,156 @@ window.addEventListener("pagehide", () => {
   } catch (e) {}
 });
 
+</script>
+<script>
+/* Phone-side action-bar arranging (Shaun, 2026-11-18 — the movable
+   buttons of his order are THIS page's own buttons): on the phone
+   side only (phones and tablets), the lock button above the action
+   bar unlocks arranging: drag any action button onto another to
+   swap them, tap one to select it, and step its footprint down or
+   up (S / M / L / XL) with the − / + in the footprint row. While
+   unlocked, taps fire nothing. Locking restores normal use. Order
+   and footprints save per device and apply only on the phone side;
+   every load starts locked. */
+(function () {
+  var bar = document.querySelector("#initiativePanel .init-controls");
+  var lockBtn = document.getElementById("initLockBtn");
+  var resetBtn = document.getElementById("initBarResetBtn");
+  var sizeRow = document.getElementById("initSizeRow");
+  var sizeName = document.getElementById("initSizeName");
+  var sizeRead = document.getElementById("initSizeRead");
+  var sizeDown = document.getElementById("initSizeDown");
+  var sizeUp = document.getElementById("initSizeUp");
+  if (!bar || !lockBtn || !resetBtn) return;
+  var KEY = "apoc-init-bar-v1";
+  var mq = window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)");
+  var btns = Array.prototype.slice.call(bar.querySelectorAll(".btn"));
+  var shipped = btns.map(function (b) { return b.id; });
+  var LEVELS = ["S", "M", "L", "XL"];
+  var arranging = false;
+  var selectedId = shipped[0];
+
+  function load() {
+    try { var raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+  }
+  function save(layout) {
+    try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch (e) {}
+  }
+  function applySize(btn, level) {
+    if (level === 0) { btn.style.flex = "0 1 auto"; btn.style.padding = ".32rem .55rem"; btn.style.fontSize = ".85rem"; }
+    else if (level === 2) { btn.style.flex = "1 1 34%"; btn.style.padding = ""; btn.style.fontSize = ""; }
+    else if (level === 3) { btn.style.flex = "1 1 100%"; btn.style.padding = ""; btn.style.fontSize = ""; }
+    else { btn.style.flex = ""; btn.style.padding = ""; btn.style.fontSize = ""; }
+    btn.setAttribute("data-size", String(level));
+  }
+  function currentLayout() {
+    var sizes = {};
+    btns.forEach(function (b) {
+      var lv = parseInt(b.getAttribute("data-size") || "1", 10);
+      if (lv !== 1) sizes[b.id] = lv;
+    });
+    return { order: Array.prototype.slice.call(bar.querySelectorAll(".btn")).map(function (b) { return b.id; }), sizes: sizes };
+  }
+  function applyLayout() {
+    var layout = load();
+    if (!mq.matches || !layout || !layout.order) {
+      shipped.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
+      btns.forEach(function (b) { applySize(b, 1); b.removeAttribute("data-size"); });
+      return;
+    }
+    layout.order.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
+    btns.forEach(function (b) { applySize(b, (layout.sizes || {})[b.id] != null ? (layout.sizes || {})[b.id] : 1); });
+  }
+  function select(id) {
+    selectedId = id;
+    btns.forEach(function (b) { b.classList.toggle("bar-selected", arranging && b.id === id); });
+    var b = document.getElementById(id);
+    if (b && sizeName) sizeName.textContent = (b.textContent || id).trim();
+    if (b && sizeRead) sizeRead.textContent = LEVELS[parseInt(b.getAttribute("data-size") || "1", 10)];
+  }
+  function setArranging(on) {
+    arranging = on;
+    document.body.classList.toggle("init-arranging", on);
+    lockBtn.textContent = on ? "\uD83D\uDD12 Lock buttons" : "\uD83D\uDD13 Move buttons";
+    lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    resetBtn.hidden = !on;
+    if (sizeRow) sizeRow.hidden = !on;
+    select(selectedId);
+  }
+  lockBtn.addEventListener("click", function () { setArranging(!arranging); });
+  resetBtn.addEventListener("click", function () {
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    applyLayout(); select(shipped[0]);
+  });
+  function stepSize(dir) {
+    var b = document.getElementById(selectedId);
+    if (!b) return;
+    var lv = parseInt(b.getAttribute("data-size") || "1", 10);
+    lv = Math.max(0, Math.min(3, lv + dir));
+    applySize(b, lv);
+    if (sizeRead) sizeRead.textContent = LEVELS[lv];
+    save(currentLayout());
+  }
+  if (sizeDown) sizeDown.addEventListener("click", function () { stepSize(-1); });
+  if (sizeUp) sizeUp.addEventListener("click", function () { stepSize(1); });
+
+  /* While arranging, a tap on an action button selects it — the
+     button's own action never fires. */
+  bar.addEventListener("click", function (ev) {
+    if (arranging) {
+      ev.preventDefault(); ev.stopPropagation();
+      var b = ev.target.closest && ev.target.closest(".btn");
+      if (b && bar.contains(b)) select(b.id);
+    }
+  }, true);
+
+  var dragBtn = null, dragTarget = null, startX = 0, startY = 0, dragging = false;
+  bar.addEventListener("pointerdown", function (ev) {
+    if (!arranging) return;
+    var b = ev.target.closest && ev.target.closest(".btn");
+    if (!b || !bar.contains(b)) return;
+    select(b.id);
+    dragBtn = b; dragTarget = null; dragging = false;
+    startX = ev.clientX; startY = ev.clientY;
+    try { b.setPointerCapture(ev.pointerId); } catch (e) {}
+  });
+  bar.addEventListener("pointermove", function (ev) {
+    if (!arranging || !dragBtn) return;
+    if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 9) {
+      dragging = true; dragBtn.classList.add("dragging");
+    }
+    if (!dragging) return;
+    var el = document.elementFromPoint(ev.clientX, ev.clientY);
+    var t = el && el.closest ? el.closest(".btn") : null;
+    if (t && t !== dragBtn && bar.contains(t)) {
+      if (dragTarget) dragTarget.classList.remove("drop-target");
+      dragTarget = t; t.classList.add("drop-target");
+    }
+  });
+  function endDrag() {
+    if (!dragBtn) return;
+    if (dragging && dragTarget && dragTarget !== dragBtn) {
+      var kids = Array.prototype.slice.call(bar.querySelectorAll(".btn"));
+      var i = kids.indexOf(dragBtn), j = kids.indexOf(dragTarget);
+      kids[i] = dragTarget; kids[j] = dragBtn;
+      kids.forEach(function (k) { bar.appendChild(k); });
+      save(currentLayout());
+    }
+    if (dragTarget) dragTarget.classList.remove("drop-target");
+    dragBtn.classList.remove("dragging");
+    dragBtn = null; dragTarget = null; dragging = false;
+  }
+  bar.addEventListener("pointerup", endDrag);
+  bar.addEventListener("pointercancel", endDrag);
+
+  if (mq.addEventListener) mq.addEventListener("change", function () {
+    if (!mq.matches) setArranging(false);
+    applyLayout();
+  });
+
+  applyLayout();
+})();
 </script>
 </body>
 </html>
