@@ -168,6 +168,16 @@
   .hub-share-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
   .hub-share-btn:hover,.hub-share-btn:focus-visible{opacity:1}
   .hub-share-note{font-size:11.5px;opacity:.85}
+  /* Share menu (Shaun, 2026-11-18 — "shareable to every available
+     aspect", both halves): every shareable piece of the campaign
+     gets a row; where the device has a share sheet the row shares
+     through it, where it doesn't the row opens the concrete routes
+     (Text / Email / WhatsApp / Copy link). */
+  .hub-share-menu{margin:2px 0 6px auto;max-width:340px;border:1px solid var(--card-border);border-radius:10px;padding:.45rem;background:hsla(222,20%,14%,.55)}
+  .hub-share-item{padding:.15rem 0}
+  .hub-share-piece{font:inherit;font-size:.92rem;font-weight:600;width:100%;text-align:left;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground);cursor:pointer}
+  .hub-share-routes{display:flex;gap:.4rem;flex-wrap:wrap;padding:.4rem .2rem .2rem}
+  .hub-share-route{font:inherit;font-size:.82rem;padding:.32rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;text-decoration:none;display:inline-block}
   /* 13th hub button (Shaun, 2026-11-18): the Campaign Initiative
      Tracker sits UNDER Cosmetology — row 5, column 2 of the hub grid
      (the grid is 3-across at phone size too, so the placement holds). */
@@ -573,6 +583,9 @@
     /* John's House phone fit (Shaun, 2026-11-18): 16px inputs so
        phones don't auto-zoom on tap, thumb-sized targets, the name
        field takes its own full line, and Next turn spans wide. */
+    .hub-share-menu{max-width:none;width:100%}
+    .hub-share-piece{min-height:44px}
+    .hub-share-route{padding:.5rem .7rem}
     #initiativePanel .init-form input{font-size:16px;min-height:44px}
     #initiativePanel .init-form input#initName{flex:1 1 100%}
     #initiativePanel .init-form input[type="number"]{flex:1 1 0;width:auto}
@@ -760,26 +773,126 @@
 
   <!-- 3 / APOC System Hub -->
   <section class="panel hub-panel" id="system" aria-labelledby="hubHeading">
-    <div class="hub-share-row"><span class="hub-share-note" id="hubShareNote" role="status" aria-live="polite"></span><button class="hub-share-btn" type="button" id="hubShareBtn" aria-label="Share this page">&#8599; Share</button></div>
+    <div class="hub-share-row"><span class="hub-share-note" id="hubShareNote" role="status" aria-live="polite"></span><button class="hub-share-btn" type="button" id="hubShareBtn" aria-label="Share the campaign" aria-expanded="false" aria-controls="hubShareMenu">&#8599; Share</button></div>
+    <div class="hub-share-menu" id="hubShareMenu" hidden>
+      <div class="hub-share-item" data-title="APOC Survival — Campaign Hub" data-url="https://11durrum11.github.io/APOC-Campaign-Tracker/">
+        <button type="button" class="hub-share-piece">Campaign Hub</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — The Timeline" data-url="https://11durrum11.github.io/APOC-Campaign-Tracker/timeline.html">
+        <button type="button" class="hub-share-piece">The Timeline</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — The World at Large" data-url="https://11durrum11.github.io/APOC-Campaign-Tracker/my-world.html">
+        <button type="button" class="hub-share-piece">The World at Large</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — The Crystal Sphere" data-url="https://11durrum11.github.io/APOC-Campaign-Tracker/sphere.html">
+        <button type="button" class="hub-share-piece">The Crystal Sphere</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — APOC VTT" data-url="https://11durrum11.github.io/APOC-VTT/">
+        <button type="button" class="hub-share-piece">APOC VTT</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — Encounter Generator" data-url="https://11durrum11.github.io/APOC-Encounter-Generator/">
+        <button type="button" class="hub-share-piece">Encounter Generator</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+      <div class="hub-share-item" data-title="APOC Survival — CritGen APOC" data-url="https://11durrum11.github.io/APOC-CritGen/">
+        <button type="button" class="hub-share-piece">CritGen APOC</button>
+        <span class="hub-share-routes" hidden>
+          <a class="hub-share-route" data-route="sms" href="#">Text</a>
+          <a class="hub-share-route" data-route="email" href="#">Email</a>
+          <a class="hub-share-route" data-route="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button type="button" class="hub-share-route" data-route="copy">Copy link</button>
+        </span>
+      </div>
+    </div>
     <script>
       (function () {
         var btn = document.getElementById("hubShareBtn");
         var note = document.getElementById("hubShareNote");
-        if (!btn) return;
-        var url = "https://11durrum11.github.io/APOC-Campaign-Tracker/";
+        var menu = document.getElementById("hubShareMenu");
+        if (!btn || !menu) return;
         function say(msg) {
           if (!note) return;
           note.textContent = msg;
           setTimeout(function () { note.textContent = ""; }, 2600);
         }
-        btn.addEventListener("click", function () {
-          if (navigator.share) {
-            navigator.share({ title: "APOC Survival — Campaign Tracker", url: url }).catch(function () {});
-          } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        function closeMenu() {
+          menu.hidden = true;
+          btn.setAttribute("aria-expanded", "false");
+          menu.querySelectorAll(".hub-share-routes").forEach(function (r) { r.hidden = true; });
+        }
+        function copyLink(url) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(function () { say("Link copied"); }, function () { say(url); });
           } else {
             say(url);
           }
+        }
+        /* Precompute the concrete routes for every piece. */
+        menu.querySelectorAll(".hub-share-item").forEach(function (item) {
+          var title = item.getAttribute("data-title");
+          var url = item.getAttribute("data-url");
+          var body = encodeURIComponent(title + " " + url);
+          item.querySelector('[data-route="sms"]').setAttribute("href", "sms:?&body=" + body);
+          item.querySelector('[data-route="email"]').setAttribute("href", "mailto:?subject=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(title + "\n" + url));
+          item.querySelector('[data-route="whatsapp"]').setAttribute("href", "https://wa.me/?text=" + body);
+          item.querySelector('[data-route="copy"]').addEventListener("click", function () { copyLink(url); closeMenu(); });
+          item.querySelector(".hub-share-piece").addEventListener("click", function () {
+            if (navigator.share) {
+              navigator.share({ title: title, text: title, url: url }).catch(function () {});
+              closeMenu();
+            } else {
+              var routes = item.querySelector(".hub-share-routes");
+              var willShow = routes.hidden;
+              menu.querySelectorAll(".hub-share-routes").forEach(function (r) { r.hidden = true; });
+              routes.hidden = !willShow;
+            }
+          });
+        });
+        btn.addEventListener("click", function () {
+          if (menu.hidden) { menu.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+          else closeMenu();
+        });
+        document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && !menu.hidden) closeMenu(); });
+        /* This script runs before the hub grid exists in the document,
+           so listen at document level: tapping any hub button closes
+           the share menu. */
+        document.addEventListener("click", function (ev) {
+          if (!menu.hidden && ev.target && ev.target.closest && ev.target.closest(".hub-btn")) closeMenu();
         });
       })();
     </script>
