@@ -110,6 +110,9 @@
   #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
   #initiativePanel .init-chip{background:#fff;color:#000;border-radius:999px;padding:.12rem .3rem .12rem .6rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.25rem}
   #initiativePanel .init-chip button{font:inherit;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
+  /* Per-character notes (Shaun, 2026-11-18): a quiet full-width
+     field on each combatant's own line, under the HP bar. */
+  #initiativePanel .init-notes{width:100%;margin-top:.45rem;font:inherit;font-size:.9rem;padding:.35rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   /* Action buttons on TOP (Shaun, 2026-11-18): the controls sit
      right under the header / Now-Next line, above the form and the
      combatant list, and stick to the top of the view while a long
@@ -131,6 +134,7 @@
     #initiativePanel .init-row{padding:.55rem .6rem}
     #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
     #initiativePanel .init-status-add{font-size:16px;min-height:40px}
+    #initiativePanel .init-notes{font-size:16px;min-height:40px}
     #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{min-width:40px;min-height:40px}
     #initiativePanel .init-saved-del{min-width:40px;min-height:40px}
     #initiativePanel .init-controls .btn{min-height:44px}
@@ -295,6 +299,7 @@ function initNorm(c){
     hp: (c.hp === undefined ? null : c.hp),
     maxHp: (c.maxHp === undefined ? null : c.maxHp),
     statuses: Array.isArray(c.statuses) ? c.statuses.slice() : [],
+    notes: typeof c.notes === "string" ? c.notes : "",
     seq: c.seq || 0
   };
 }
@@ -304,7 +309,7 @@ function archiveInitiative(){
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     endedAt: Date.now(),
     round: initState.round || 1,
-    list: initSorted().map(c => ({ name: c.name, init: c.init, hp: c.hp, maxHp: c.maxHp, statuses: (c.statuses || []).slice() }))
+    list: initSorted().map(c => ({ name: c.name, init: c.init, hp: c.hp, maxHp: c.maxHp, statuses: (c.statuses || []).slice(), notes: c.notes || "" }))
   };
   initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
@@ -320,6 +325,7 @@ function renderInitSaved(){
       let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
       if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(esc).join(", ");
+      if (c.notes) t += " · 📝 " + esc(c.notes);
       return t;
     }).join("<br>");
     return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + '</span>' +
@@ -378,6 +384,7 @@ function renderInitiative(){
           '<span class="init-chip" title="' + esc(INIT_CONDITIONS[s] || "") + '">' + esc(s) +
           '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(s) + ' from ' + esc(c.name) + '">×</button></span>').join("") + '</div>'
       : "";
+    const notes = '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">';
     return '<div class="init-row' + (active ? ' active' : '') + '">' +
       '<div class="init-line1">' +
         '<span class="init-turn" aria-hidden="true">▶</span>' +
@@ -403,7 +410,7 @@ function renderInitiative(){
         '</span>' +
         (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
         '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '">' + statusOptions + '</select>' +
-      '</div>' + bar + chips + '</div>';
+      '</div>' + bar + chips + notes + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
@@ -415,6 +422,13 @@ function renderInitiative(){
     const c = find(inp.dataset.initMod);
     if (c) { c.mod = parseInt(inp.value, 10) || 0; saveInitiative(); }
   }));
+  wrap.querySelectorAll("[data-init-notes]").forEach(inp => {
+    /* Typing updates state on every keystroke WITHOUT a re-render,
+       so the field never loses focus mid-note; the save lands on
+       change, and the leave-save carries the state regardless. */
+    inp.addEventListener("input", () => { const c = find(inp.dataset.initNotes); if (c) c.notes = inp.value; });
+    inp.addEventListener("change", () => saveInitiative());
+  });
   wrap.querySelectorAll("[data-init-ac]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initAc);
     if (c) { c.ac = numOrNull(inp.value); saveInitiative(); }
@@ -506,7 +520,7 @@ function initAdd(){
   const ac = acEl.value === "" ? null : (parseInt(acEl.value, 10) || 0);
   const maxHp = hpEl.value === "" ? null : (parseInt(hpEl.value, 10) || 0);
   const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
-  initState.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, init, mod, ac, hp: maxHp, maxHp, statuses: [], seq });
+  initState.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, init, mod, ac, hp: maxHp, maxHp, statuses: [], notes: "", seq });
   initPinTop();
   if (!initState.turnId) initState.turnId = initSorted()[0].id;
   nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
