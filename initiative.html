@@ -103,8 +103,8 @@
   #initiativePanel .init-hp-group,#initiativePanel .init-amt-group{display:inline-flex;align-items:center;gap:.3rem}
   #initiativePanel .init-hp,#initiativePanel .init-hpmax{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-amt{font:inherit;width:4rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
-  #initiativePanel .init-bar{width:100%;align-self:stretch;height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
-  #initiativePanel .init-bar span{display:block;height:100%}
+  #initiativePanel .init-bar{display:flex;width:100%;align-self:stretch;height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
+  #initiativePanel .init-bar span{height:100%}
   #initiativePanel .init-hint{font-weight:700;font-style:italic}
   #initiativePanel .init-status-add{font:inherit;padding:.3rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
@@ -127,6 +127,42 @@
   #initiativePanel .init-saved-row .init-saved-body{flex:1 1 auto;min-width:0}
   #initiativePanel .init-saved-row .when{font-weight:600}
   #initiativePanel .init-saved-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .5rem;line-height:1.3}
+  /* Accessories (Shaun, 2026-11-18 — "put ALL of it in"): combat
+     clock, drag handle, saves on the line, Delay/Ready, temp HP and
+     nonlethal fields, status durations, the party roster, the
+     combat log, the XP tally, saved-scenario Load. */
+  #initiativePanel .init-clock{font-weight:600;opacity:.85}
+  #initiativePanel .init-drag{cursor:grab;touch-action:none;padding:.2rem .3rem;opacity:.7;user-select:none;-webkit-user-select:none}
+  #initiativePanel .init-row.dragging{opacity:.55;outline:2px dashed var(--mv-blue, #8fb4ff);position:relative;z-index:5}
+  #initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-ready.on{background:#f3c969;color:#000;border-color:#f3c969;font-weight:700}
+  #initiativePanel .init-delay.jumpin{background:var(--mv-blue, #8fb4ff);color:#000;border-color:var(--mv-blue, #8fb4ff);font-weight:700}
+  #initiativePanel .init-save{width:2.7rem !important}
+  #initiativePanel .init-tmp,#initiativePanel .init-nl{font:inherit;width:3.2rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-cr{font:inherit;width:3.2rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-dur{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-chip.readied{background:#f3c969;color:#000;padding:.12rem .6rem}
+  #initiativePanel .init-chip.delaying{background:#3d4b6b;color:#fff;padding:.12rem .6rem}
+  #initiativePanel .init-tally{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;padding:.5rem .7rem;border:1px solid var(--card-border);border-left:4px solid #f3c969;border-radius:8px;background:hsla(222,20%,14%,.5);font-weight:600}
+  #initiativePanel .init-tally[hidden]{display:none}
+  #initiativePanel .init-tally-x{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.05rem .5rem;margin-left:auto}
+  #initiativePanel .init-party{margin:.55rem 0;padding:.55rem .7rem;border:1px solid var(--card-border);border-radius:8px}
+  #initiativePanel .init-party[hidden]{display:none}
+  #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
+  #initiativePanel .init-party-name{font:inherit;flex:1 1 8rem;min-width:5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
+  #initiativePanel .init-party-add input{font:inherit;flex:1 1 10rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-log{margin-top:1rem}
+  #initiativePanel .init-log h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-logbox{max-height:180px;overflow-y:auto;border:1px solid var(--card-border);border-radius:8px;padding:.45rem .6rem;font-size:.85rem}
+  #initiativePanel .init-logbox div{padding:.1rem 0;border-bottom:1px dashed rgba(127,127,127,.25)}
+  #initiativePanel .init-logbox div:last-child{border-bottom:none}
+  #initiativePanel .init-saved-btns{display:inline-flex;gap:.35rem;flex:none}
+  #initiativePanel .init-saved-load{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .55rem;line-height:1.3}
+  #initiativePanel .init-saved-log{margin-top:.3rem;font-size:.85rem}
+  #initiativePanel .init-saved-log summary{cursor:pointer;opacity:.85}
+  #initiativePanel .init-controls .btn[disabled]{opacity:.45;cursor:default}
   @media (max-width:760px){
     .panel{padding:16px}
     #initiativePanel .init-form input{font-size:16px;min-height:44px}
@@ -137,8 +173,12 @@
     #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
     #initiativePanel .init-status-add{font-size:16px;min-height:40px}
     #initiativePanel .init-notes{font-size:16px;min-height:40px}
-    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{min-width:40px;min-height:40px}
-    #initiativePanel .init-saved-del{min-width:40px;min-height:40px}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{min-width:40px;min-height:40px}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-dur,#initiativePanel .init-cr{font-size:16px;min-height:40px}
+    #initiativePanel .init-drag{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:16px;min-height:40px}
+    #initiativePanel .init-party-add .btn{min-height:44px}
+    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:40px;min-height:40px}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
   }
@@ -154,6 +194,7 @@
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
       <span class="init-round" id="initRound">Round 1</span>
+      <span class="init-clock" id="initClock">⏱ 0:06</span>
     </div>
     <p class="init-nownext" id="initNowNext"></p>
     <div class="init-controls">
@@ -163,6 +204,19 @@
       <button type="button" class="btn" id="initResetBtn">Back to top</button>
       <button type="button" class="btn" id="initCombatResetBtn">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn">Clear all</button>
+      <button type="button" class="btn" id="initUndoBtn" disabled>↩ Undo</button>
+      <button type="button" class="btn" id="initPartyAddBtn">Add party</button>
+      <button type="button" class="btn" id="initPartyBtn">Party roster</button>
+      <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime">🔔</button>
+    </div>
+    <div class="init-tally" id="initTally" hidden></div>
+    <div class="init-party" id="initParty" hidden>
+      <h4>Party roster</h4>
+      <div id="initPartyRows"></div>
+      <div class="init-party-add">
+        <input id="initPartyName" type="text" placeholder="New member name" aria-label="New party member name">
+        <button type="button" class="btn" id="initPartyNewBtn">Add member</button>
+      </div>
     </div>
     <div class="init-form">
       <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name">
@@ -170,9 +224,11 @@
       <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling">
       <input id="initAc" type="number" placeholder="AC" aria-label="Armour class">
       <input id="initHp" type="number" placeholder="HP" aria-label="Hit points — starts full">
+      <input id="initQty" type="number" value="1" min="1" max="50" aria-label="Quantity to add">
       <button type="button" class="btn" id="initAddBtn">Add</button>
     </div>
     <div class="init-list" id="initList"></div>
+    <div class="init-log" id="initLog"></div>
     <div class="init-saved" id="initSaved"></div>
   </section>
 </div>
@@ -235,26 +291,29 @@ if (BG_FILES.length > 1) {
 <script>
 "use strict";
 /* ================= Campaign Initiative Tracker =================
-   (Shaun, 2026-11-18: a 13th hub button under Cosmetology, on both
-   pages — "John's House", "Initiative Tracker" in small under it.
-   Full combat build the same day: the recovered AIDM Initiative
-   Roster feature set — AC, HP with damage/healing by amount, 3.5
-   death hints, the full status list as stackable chips with
-   hover-only crunch, Roll ALL, Prev, Now/Next, Reset combat.)
-   Shared board: one row in site_settings, key "campaign_initiative",
-   value {list:[{id,name,init,mod,ac,hp,maxHp,statuses,seq}],
-   turnId, round, started, saved}. The list renders sorted by
-   initiative, highest first; the turn marker follows turnId so
-   re-sorts never lose whose turn it is.
+   John's House — a shared combat board for the campaign, on its
+   own page since v51.44. Shared board: one row in site_settings,
+   key "campaign_initiative", read and written by every visitor;
+   the board re-reads every few seconds while the page is open so
+   the table stays in step. Rows sort by initiative, highest first
+   (or by hand once a drag or a Jump-in sets the manual order); the
+   turn marker follows turnId so re-sorting never loses whose turn
+   it is.
    OPEN/CLOSE RULE (Shaun, 2026-11-18): every open starts a NEW
    BLANK scenario; every close SAVES the board that was run into
    the saved list (newest first, last 20 kept) shown in the panel.
    A board left un-closed is saved at the next open instead, so
-   nothing run is ever lost. With no backend reachable the board
-   still works on-device. */
+   nothing run is ever lost.
+   ACCESSORIES (Shaun, 2026-11-18 — "put ALL of it in"): Delay and
+   Ready with Jump-in, loading a saved scenario back, a persistent
+   Party roster with one-tap Add party, quantity adds, per-row
+   duplicate, drag reorder by handle, one-tap Undo of destructive
+   acts, status durations that tick down by round, temporary HP,
+   nonlethal damage with the 3.5 knockout hints, Fort/Ref/Will on
+   the line, an auto-written combat log carried into saved
+   scenarios, a combat clock at 6 seconds a round, a turn chime
+   with a mute toggle, and an XP tally of the fallen at reset. */
 const INIT_KEY = "campaign_initiative";
-/* The full 3.5 condition list, each with its real mechanical effect
-   as a HOVER-ONLY tooltip on the chip — never a standing bar. */
 const INIT_CONDITIONS = {
   "Blinded": "−2 AC and loses Dex bonus to AC; −4 on Search and most Str/Dex-based checks; all opponents have total concealment (50% miss).",
   "Confused": "Acts randomly each round (d%): attacks the caster, acts normally, babbles, flees, or attacks the nearest creature.",
@@ -291,30 +350,88 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [] };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false };
+let initUndoStack = [];
+let initTallyText = "";
+function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function stName(s){ return typeof s === "string" ? s : (s && (s.n || s.name)) || ""; }
+function stDur(s){ return (s && typeof s === "object" && typeof s.d === "number") ? s.d : null; }
+function stNorm(s){
+  if (typeof s === "string") return { n: s, d: null };
+  if (s && typeof s === "object") return { n: s.n || s.name || "", d: (typeof s.d === "number" ? s.d : null) };
+  return { n: "", d: null };
+}
 function initNorm(c){
   return {
-    id: c.id, name: c.name,
+    id: c.id || initUid(), name: c.name,
     init: (c.init === undefined ? null : c.init),
     mod: c.mod || 0,
     ac: (c.ac === undefined ? null : c.ac),
     hp: (c.hp === undefined ? null : c.hp),
     maxHp: (c.maxHp === undefined ? null : c.maxHp),
-    statuses: Array.isArray(c.statuses) ? c.statuses.slice() : [],
+    tempHp: c.tempHp || 0,
+    nonlethal: c.nonlethal || 0,
+    fort: (c.fort === undefined ? null : c.fort),
+    ref: (c.ref === undefined ? null : c.ref),
+    will: (c.will === undefined ? null : c.will),
+    cr: (c.cr === undefined || c.cr === null) ? "" : String(c.cr),
+    statuses: Array.isArray(c.statuses) ? c.statuses.map(stNorm).filter(s => s.n) : [],
     notes: typeof c.notes === "string" ? c.notes : "",
+    delaying: !!c.delaying,
+    readied: !!c.readied,
     seq: c.seq || 0
   };
+}
+function partyNorm(p){
+  return {
+    id: p.id || initUid(), name: p.name || "",
+    mod: p.mod || 0,
+    ac: (p.ac === undefined ? null : p.ac),
+    maxHp: (p.maxHp === undefined ? null : p.maxHp),
+    fort: (p.fort === undefined ? null : p.fort),
+    ref: (p.ref === undefined ? null : p.ref),
+    will: (p.will === undefined ? null : p.will)
+  };
+}
+function initLog(text){
+  if (!Array.isArray(initState.log)) initState.log = [];
+  initState.log.push("R" + (initState.round || 1) + " · " + text);
+  if (initState.log.length > 200) initState.log.splice(0, initState.log.length - 200);
+}
+function initSnapshot(){
+  try {
+    initUndoStack.push(JSON.stringify({ list: initState.list, turnId: initState.turnId, round: initState.round, started: initState.started, manual: initState.manual, log: initState.log }));
+    if (initUndoStack.length > 10) initUndoStack.shift();
+  } catch (e) {}
+}
+function initUndo(){
+  const s = initUndoStack.pop();
+  if (!s) return;
+  try {
+    const v = JSON.parse(s);
+    initState.list = v.list; initState.turnId = v.turnId; initState.round = v.round;
+    initState.started = v.started; initState.manual = v.manual; initState.log = v.log;
+  } catch (e) { return; }
+  saveInitiative(); renderInitiative();
 }
 function archiveInitiative(){
   if (!initState.list.length) return;
   const entry = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    id: initUid(),
     endedAt: Date.now(),
     round: initState.round || 1,
-    list: initSorted().map(c => ({ name: c.name, init: c.init, hp: c.hp, maxHp: c.maxHp, statuses: (c.statuses || []).slice(), notes: c.notes || "" }))
+    list: initSorted().map(c => ({
+      name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
+      tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
+      fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
+      statuses: (c.statuses || []).map(s => ({ n: stName(s), d: stDur(s) })),
+      notes: c.notes || ""
+    })),
+    log: Array.isArray(initState.log) ? initState.log.slice() : []
   };
   initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
+  initState.manual = false; initState.log = [];
   saveInitiative();
 }
 function renderInitSaved(){
@@ -323,25 +440,51 @@ function renderInitSaved(){
   if (!saved.length) { wrap.innerHTML = ""; return; }
   wrap.innerHTML = '<h4>Saved scenarios</h4>' + saved.map((s, si) => {
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-    const who = s.list.map(c => {
+    const who = (s.list || []).map(c => {
       let t = esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
       if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
-      if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(esc).join(", ");
+      if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
       if (c.notes) t += " · 📝 " + esc(c.notes);
       return t;
     }).join("<br>");
-    return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + '</span>' +
-      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario">×</button></div>';
+    const logFold = (Array.isArray(s.log) && s.log.length)
+      ? '<details class="init-saved-log"><summary>Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
+      : "";
+    return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + "<br>" + who + logFold + '</span>' +
+      '<span class="init-saved-btns"><button type="button" class="init-saved-load" data-saved-load="' + si + '">Load</button>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario">×</button></span></div>';
   }).join("");
   wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
     initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
     saveInitiative();
     renderInitSaved();
   }));
+  wrap.querySelectorAll("[data-saved-load]").forEach(b => b.addEventListener("click", () => {
+    initLoadSaved(parseInt(b.dataset.savedLoad, 10));
+  }));
+}
+function initLoadSaved(idx){
+  const entry = (initState.saved || [])[idx]; if (!entry) return;
+  if (initState.list.length) archiveInitiative();
+  initState.list = (entry.list || []).map((c, i) => {
+    const n = initNorm(Object.assign({}, c, { id: initUid(), seq: i + 1 }));
+    n.delaying = false; n.readied = false;
+    return n;
+  });
+  initState.round = 1; initState.started = false; initState.manual = false;
+  initState.log = [];
+  initLog("Loaded the saved scenario from " + new Date(entry.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " — a fresh fight.");
+  initPinTop();
+  saveInitiative(); renderInitiative();
 }
 let initLoaded = false;
 function initVal(c){ return (c.init === null || c.init === undefined || c.init === "") ? -Infinity : c.init; }
-function initSorted(){ return initState.list.slice().sort((a, b) => (initVal(b) - initVal(a)) || ((a.seq || 0) - (b.seq || 0))); }
+function initSorted(){
+  const arr = initState.list.slice();
+  if (initState.manual) arr.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+  else arr.sort((a, b) => (initVal(b) - initVal(a)) || ((a.seq || 0) - (b.seq || 0)));
+  return arr;
+}
 /* Until the first turn is taken, the marker sits on top of the order,
    so building the board always starts at the highest initiative. */
 function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
@@ -351,13 +494,137 @@ function initHpHint(c){
   if (c.hp <= -10) return "Dead";
   if (c.hp < 0) return "Dying";
   if (c.hp === 0) return "Disabled";
+  const nl = c.nonlethal || 0;
+  if (nl > c.hp) return "Unconscious";
+  if (nl > 0 && nl === c.hp) return "Staggered";
   return "";
+}
+function initDownLog(c, beforeHint){
+  const after = initHpHint(c);
+  if (after && after !== beforeHint) {
+    if (after === "Dead") initLog(c.name + " is dead.");
+    else if (after === "Dying") initLog(c.name + " is dying.");
+    else if (after === "Disabled") initLog(c.name + " is disabled.");
+    else if (after === "Unconscious") initLog(c.name + " is knocked out.");
+    else if (after === "Staggered") initLog(c.name + " is staggered by nonlethal damage.");
+  }
+}
+function initApplyDamage(c, amt){
+  if (!amt) return;
+  const beforeHint = initHpHint(c);
+  let left = amt, absorbed = 0;
+  if ((c.tempHp || 0) > 0) { absorbed = Math.min(c.tempHp, left); c.tempHp -= absorbed; left -= absorbed; }
+  c.hp = (typeof c.hp === "number" ? c.hp : 0) - left;
+  initLog(c.name + " took " + amt + " damage" + (absorbed ? " (" + absorbed + " soaked by temporary HP)" : "") + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
+  initDownLog(c, beforeHint);
+}
+function initApplyHeal(c, amt){
+  if (!amt) return;
+  let hp = (typeof c.hp === "number" ? c.hp : 0) + amt;
+  if (typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
+  c.hp = hp;
+  initLog(c.name + " healed " + amt + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
+}
+function initApplyNonlethal(c, amt){
+  if (!amt) return;
+  const beforeHint = initHpHint(c);
+  c.nonlethal = (c.nonlethal || 0) + amt;
+  initLog(c.name + " took " + amt + " nonlethal damage (total " + c.nonlethal + ").");
+  initDownLog(c, beforeHint);
+}
+function initTickStatuses(){
+  initState.list.forEach(c => {
+    if (!Array.isArray(c.statuses)) return;
+    const kept = [];
+    c.statuses.forEach(s => {
+      const d = stDur(s);
+      if (d === null) { kept.push(s); return; }
+      const nd = d - 1;
+      if (nd <= 0) initLog(c.name + "'s " + stName(s) + " expired.");
+      else kept.push({ n: stName(s), d: nd });
+    });
+    c.statuses = kept;
+  });
+}
+function initNextIdx(rows, from, dir){
+  const n = rows.length;
+  let i = from, steps = 0;
+  do { i = (i + dir + n) % n; steps++; } while (rows[i].delaying && steps < n);
+  return i;
+}
+let initAudio = null;
+function initChimeOn(){ try { return localStorage.getItem("apoc-init-chime") !== "0"; } catch (e) { return true; } }
+function initChime(){
+  if (!initChimeOn()) return;
+  try {
+    initAudio = initAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (initAudio.state === "suspended") initAudio.resume();
+    const t = initAudio.currentTime;
+    [880, 1174.66].forEach((f, i) => {
+      const o = initAudio.createOscillator(), g = initAudio.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      const at = t + i * 0.09;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.07, at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
+      o.connect(g); g.connect(initAudio.destination);
+      o.start(at); o.stop(at + 0.25);
+    });
+  } catch (e) {}
+}
+function initChimeBtnLabel(){ const b = $("initChimeBtn"); if (b) b.textContent = initChimeOn() ? "🔔" : "🔇"; }
+function renderInitLog(){
+  const wrap = $("initLog"); if (!wrap) return;
+  const log = Array.isArray(initState.log) ? initState.log : [];
+  if (!log.length) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = '<h4>Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+}
+function renderInitTally(){
+  const wrap = $("initTally"); if (!wrap) return;
+  if (!initTallyText) { wrap.hidden = true; wrap.innerHTML = ""; return; }
+  wrap.hidden = false;
+  wrap.innerHTML = '<span>' + esc(initTallyText) + '</span><button type="button" class="init-tally-x" aria-label="Dismiss the tally">×</button>';
+  wrap.querySelector(".init-tally-x").addEventListener("click", () => { initTallyText = ""; renderInitTally(); });
+}
+function renderParty(){
+  const wrap = $("initPartyRows"); if (!wrap) return;
+  const num = v => (v === null || v === undefined ? "" : v);
+  wrap.innerHTML = (initState.party || []).map(p =>
+    '<div class="init-party-row">' +
+      '<input type="text" class="init-party-name" value="' + esc(p.name) + '" aria-label="Party member name" data-party-name="' + p.id + '">' +
+      '<label class="init-lab">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" data-party-mod="' + p.id + '"></label>' +
+      '<label class="init-lab">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" data-party-ac="' + p.id + '"></label>' +
+      '<label class="init-lab">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" data-party-hp="' + p.id + '"></label>' +
+      '<label class="init-lab">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" data-party-fort="' + p.id + '"></label>' +
+      '<label class="init-lab">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" data-party-ref="' + p.id + '"></label>' +
+      '<label class="init-lab">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" data-party-will="' + p.id + '"></label>' +
+      '<button type="button" class="init-del" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party">✕</button>' +
+    '</div>').join("");
+  const findP = id => (initState.party || []).find(x => x.id === id);
+  const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
+  wrap.querySelectorAll("[data-party-name]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyName); if (p) { p.name = inp.value; saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-mod]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyMod); if (p) { p.mod = parseInt(inp.value, 10) || 0; saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-ac]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyAc); if (p) { p.ac = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-hp]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyHp); if (p) { p.maxHp = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-fort]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyFort); if (p) { p.fort = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-ref]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyRef); if (p) { p.ref = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-will]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyWill); if (p) { p.will = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-del]").forEach(b => b.addEventListener("click", () => {
+    initState.party = (initState.party || []).filter(x => x.id !== b.dataset.partyDel);
+    saveInitiative(); renderParty();
+  }));
 }
 function renderInitiative(){
   const wrap = $("initList"); if (!wrap) return;
   renderInitSaved();
+  renderInitLog();
+  renderInitTally();
+  const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   const rows = initSorted();
-  $("initRound").textContent = "Round " + (initState.round || 1);
+  const round = initState.round || 1;
+  $("initRound").textContent = "Round " + round;
+  const clockEl = $("initClock");
+  if (clockEl) { const secs = round * 6; clockEl.textContent = "⏱ " + Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
   const nn = $("initNowNext");
   if (!rows.length) {
     nn.textContent = "";
@@ -366,9 +633,11 @@ function renderInitiative(){
   }
   let ti = rows.findIndex(c => c.id === initState.turnId);
   if (ti < 0) ti = 0;
-  nn.textContent = rows.length === 1
-    ? "Now: " + rows[ti].name
-    : "Now: " + rows[ti].name + " · Next: " + rows[(ti + 1) % rows.length].name;
+  if (rows.length === 1) nn.textContent = "Now: " + rows[ti].name;
+  else {
+    const ni = initNextIdx(rows, ti, 1);
+    nn.textContent = "Now: " + rows[ti].name + " · Next: " + rows[ni].name;
+  }
   const statusOptions = '<option value="">+ Status</option>' + Object.keys(INIT_CONDITIONS).map(k => '<option value="' + esc(k) + '">' + esc(k) + '</option>').join("");
   wrap.innerHTML = rows.map(c => {
     const active = c.id === initState.turnId;
@@ -377,28 +646,43 @@ function renderInitiative(){
     const num = v => (v === null || v === undefined ? "" : v);
     let bar = "";
     if (typeof c.hp === "number" && typeof c.maxHp === "number" && c.maxHp > 0) {
-      const pct = Math.max(0, Math.min(100, c.hp / c.maxHp * 100));
+      const denom = Math.max(c.maxHp, c.hp + (c.tempHp || 0));
+      const pct = Math.max(0, Math.min(100, c.hp / denom * 100));
       const col = pct > 50 ? "#57a85a" : (pct > 25 ? "#d9a441" : "#cf4b41");
-      bar = '<div class="init-bar"><span style="width:' + pct + '%;background:' + col + '"></span></div>';
+      const tpct = Math.max(0, (c.tempHp || 0) / denom * 100);
+      bar = '<div class="init-bar"><span style="width:' + pct + '%;background:' + col + '"></span>' + (tpct > 0 ? '<span style="width:' + tpct + '%;background:#9fd8e8"></span>' : '') + '</div>';
     }
-    const chips = (c.statuses && c.statuses.length)
-      ? '<div class="init-chips">' + c.statuses.map((s, i) =>
-          '<span class="init-chip" title="' + esc(INIT_CONDITIONS[s] || "") + '">' + esc(s) +
-          '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(s) + ' from ' + esc(c.name) + '">×</button></span>').join("") + '</div>'
-      : "";
-    const notes = '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">';
-    return '<div class="init-row' + (active ? ' active' : '') + '">' +
+    const chipsArr = [];
+    (c.statuses || []).forEach((s, i) => {
+      const n = stName(s), d = stDur(s);
+      chipsArr.push('<span class="init-chip" title="' + esc(INIT_CONDITIONS[n] || "") + '">' + esc(n) + (d !== null ? ' · ' + d : '') +
+        '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(n) + ' from ' + esc(c.name) + '">×</button></span>');
+    });
+    if (c.readied) chipsArr.push('<span class="init-chip readied">Readied</span>');
+    if (c.delaying) chipsArr.push('<span class="init-chip delaying">⏸ Delaying</span>');
+    const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
+    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
       '<div class="init-line1">' +
+        '<span class="init-drag" data-drag="' + c.id + '" title="Drag to reorder" aria-hidden="true">⠿</span>' +
         '<span class="init-turn" aria-hidden="true">▶</span>' +
         '<span class="init-name' + (dead ? ' struck' : '') + '">' + esc(c.name) + '</span>' +
-        notes +
+        '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">' +
         '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" data-init-val="' + c.id + '"></label>' +
         '<button type="button" class="init-roll" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">🎲</button>' +
         '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" data-init-mod="' + c.id + '"></label>' +
         '<label class="init-lab">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" data-init-ac="' + c.id + '"></label>' +
+        '<label class="init-lab">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" data-init-fort="' + c.id + '"></label>' +
+        '<label class="init-lab">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" data-init-ref="' + c.id + '"></label>' +
+        '<label class="init-lab">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" data-init-will="' + c.id + '"></label>' +
+        '<button type="button" class="init-dup" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">⧉</button>' +
+        '<button type="button" class="init-toparty" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the party roster" aria-label="Add ' + esc(c.name) + ' to the party roster">👥</button>' +
         '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '">✕</button>' +
       '</div>' +
       '<div class="init-line2">' +
+        (c.delaying
+          ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '">Jump in</button>'
+          : '<button type="button" class="init-delay" data-init-delay="' + c.id + '">Delay</button>') +
+        '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '">Ready</button>' +
         '<span class="init-hp-group">' +
           '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '">−</button>' +
           '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" data-init-hp="' + c.id + '">' +
@@ -406,13 +690,18 @@ function renderInitiative(){
           '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" data-init-hpmax="' + c.id + '">' +
           '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '">+</button>' +
         '</span>' +
+        '<label class="init-lab">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" data-init-tmp="' + c.id + '"></label>' +
+        '<label class="init-lab">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" data-init-nl="' + c.id + '"></label>' +
+        '<label class="init-lab">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" data-init-cr="' + c.id + '"></label>' +
         '<span class="init-amt-group">' +
           '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" data-init-amt="' + c.id + '">' +
           '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '">−Dmg</button>' +
           '<button type="button" class="init-heal" data-init-heal="' + c.id + '">+Heal</button>' +
+          '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '">+NL</button>' +
         '</span>' +
         (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
         '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '">' + statusOptions + '</select>' +
+        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" data-init-dur="' + c.id + '">' +
       '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
@@ -421,28 +710,49 @@ function renderInitiative(){
     const c = find(inp.dataset.initVal);
     if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
   }));
+  wrap.querySelectorAll("[data-init-notes]").forEach(inp => {
+    inp.addEventListener("input", () => { const c = find(inp.dataset.initNotes); if (c) c.notes = inp.value; });
+    inp.addEventListener("change", () => saveInitiative());
+  });
   wrap.querySelectorAll("[data-init-mod]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initMod);
     if (c) { c.mod = parseInt(inp.value, 10) || 0; saveInitiative(); }
   }));
-  wrap.querySelectorAll("[data-init-notes]").forEach(inp => {
-    /* Typing updates state on every keystroke WITHOUT a re-render,
-       so the field never loses focus mid-note; the save lands on
-       change, and the leave-save carries the state regardless. */
-    inp.addEventListener("input", () => { const c = find(inp.dataset.initNotes); if (c) c.notes = inp.value; });
-    inp.addEventListener("change", () => saveInitiative());
-  });
   wrap.querySelectorAll("[data-init-ac]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initAc);
     if (c) { c.ac = numOrNull(inp.value); saveInitiative(); }
   }));
+  wrap.querySelectorAll("[data-init-fort]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initFort);
+    if (c) { c.fort = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-ref]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initRef);
+    if (c) { c.ref = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-will]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initWill);
+    if (c) { c.will = numOrNull(inp.value); saveInitiative(); }
+  }));
   wrap.querySelectorAll("[data-init-hp]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initHp);
-    if (c) { c.hp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+    if (c) { initSnapshot(); c.hp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
   }));
   wrap.querySelectorAll("[data-init-hpmax]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initHpmax);
     if (c) { c.maxHp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-cr]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initCr);
+    if (c) { c.cr = inp.value.trim(); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-tmp]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initTmp);
+    if (c) { c.tempHp = Math.max(0, parseInt(inp.value, 10) || 0); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-nl]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initNl);
+    if (c) { c.nonlethal = Math.max(0, parseInt(inp.value, 10) || 0); saveInitiative(); renderInitiative(); }
   }));
   wrap.querySelectorAll("[data-init-roll]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initRoll);
@@ -452,33 +762,42 @@ function renderInitiative(){
     const c = find(b.dataset.for);
     if (c) {
       const d = parseInt(b.dataset.initStep, 10) || 0;
-      let hp = (typeof c.hp === "number" ? c.hp : 0) + d;
-      if (d > 0 && typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
-      c.hp = hp; saveInitiative(); renderInitiative();
+      initSnapshot();
+      if (d < 0) initApplyDamage(c, 1);
+      else initApplyHeal(c, 1);
+      saveInitiative(); renderInitiative();
     }
   }));
+  const amtFor = id => { const inp = wrap.querySelector('[data-init-amt="' + id + '"]'); return Math.abs(parseInt(inp && inp.value, 10) || 0); };
   wrap.querySelectorAll("[data-init-dmg]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initDmg); if (!c) return;
-    const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]');
-    const amt = Math.abs(parseInt(inp && inp.value, 10) || 0);
-    if (!amt) { if (inp) inp.focus(); return; }
-    c.hp = (typeof c.hp === "number" ? c.hp : 0) - amt;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyDamage(c, amt);
     saveInitiative(); renderInitiative();
   }));
   wrap.querySelectorAll("[data-init-heal]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initHeal); if (!c) return;
-    const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]');
-    const amt = Math.abs(parseInt(inp && inp.value, 10) || 0);
-    if (!amt) { if (inp) inp.focus(); return; }
-    let hp = (typeof c.hp === "number" ? c.hp : 0) + amt;
-    if (typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
-    c.hp = hp;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyHeal(c, amt);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-nlbtn]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initNlbtn); if (!c) return;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyNonlethal(c, amt);
     saveInitiative(); renderInitiative();
   }));
   wrap.querySelectorAll("[data-init-status]").forEach(sel => sel.addEventListener("change", () => {
     const c = find(sel.dataset.initStatus);
     if (c && sel.value) {
-      if (!c.statuses.includes(sel.value)) c.statuses.push(sel.value);
+      const durInp = wrap.querySelector('[data-init-dur="' + c.id + '"]');
+      const d = durInp ? (parseInt(durInp.value, 10) || 0) : 0;
+      c.statuses = (c.statuses || []).filter(s => stName(s) !== sel.value);
+      c.statuses.push({ n: sel.value, d: d > 0 ? d : null });
+      initLog(c.name + " is now " + sel.value + (d > 0 ? " (" + d + " rounds)" : "") + ".");
       saveInitiative(); renderInitiative();
     }
   }));
@@ -486,22 +805,133 @@ function renderInitiative(){
     const c = find(b.dataset.chipDel);
     if (c) { c.statuses.splice(parseInt(b.dataset.chipIdx, 10), 1); saveInitiative(); renderInitiative(); }
   }));
+  wrap.querySelectorAll("[data-init-delay]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDelay); if (!c) return;
+    c.delaying = true;
+    initLog(c.name + " delays.");
+    if (initState.turnId === c.id) initAdvance(1, true);
+    else { saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-jumpin]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initJumpin); if (!c) return;
+    initJumpIn(c);
+  }));
+  wrap.querySelectorAll("[data-init-ready]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initReady); if (!c) return;
+    c.readied = !c.readied;
+    initLog(c.name + (c.readied ? " readies an action." : " is no longer readied."));
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-dup]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDup); if (!c) return;
+    const copy = initNorm(JSON.parse(JSON.stringify(c)));
+    copy.id = initUid();
+    copy.seq = initState.list.reduce((m, x) => Math.max(m, x.seq || 0), 0) + 1;
+    initState.list.push(copy);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-toparty]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initToparty); if (!c) return;
+    if (!(initState.party || []).some(p => p.name === c.name)) {
+      initState.party = (initState.party || []).concat([partyNorm({ name: c.name, mod: c.mod, ac: c.ac, maxHp: c.maxHp, fort: c.fort, ref: c.ref, will: c.will })]);
+      saveInitiative(); renderParty();
+    }
+  }));
   wrap.querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", () => {
     const gone = b.dataset.initDel;
+    initSnapshot();
     initState.list = initState.list.filter(x => x.id !== gone);
     if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
     saveInitiative(); renderInitiative();
   }));
+  /* Drag reorder by the handle: pointer-driven, so it works with
+     touch; the rest of the row never starts a drag, so the page
+     still scrolls normally everywhere else. */
+  wrap.querySelectorAll("[data-drag]").forEach(h => h.addEventListener("pointerdown", ev => {
+    ev.preventDefault();
+    const rowEl = h.closest(".init-row"); if (!rowEl) return;
+    const id = h.dataset.drag;
+    const startY = ev.clientY;
+    rowEl.classList.add("dragging");
+    try { h.setPointerCapture(ev.pointerId); } catch (e) {}
+    const move = mv => { rowEl.style.transform = "translateY(" + (mv.clientY - startY) + "px)"; };
+    const up = upEv => {
+      h.removeEventListener("pointermove", move);
+      h.removeEventListener("pointerup", up);
+      h.removeEventListener("pointercancel", up);
+      rowEl.classList.remove("dragging");
+      rowEl.style.transform = "";
+      const rowsEls = Array.from(wrap.querySelectorAll(".init-row"));
+      let target = rowsEls.length - 1;
+      for (let k = 0; k < rowsEls.length; k++) {
+        const r = rowsEls[k].getBoundingClientRect();
+        if (upEv.clientY < r.top + r.height / 2) { target = k; break; }
+      }
+      const order = initSorted();
+      const from = order.findIndex(x => x.id === id);
+      if (from < 0) return;
+      const item = order.splice(from, 1)[0];
+      order.splice(target, 0, item);
+      order.forEach((x, idx) => { x.seq = idx + 1; });
+      initState.manual = true;
+      saveInitiative(); renderInitiative();
+    };
+    h.addEventListener("pointermove", move);
+    h.addEventListener("pointerup", up);
+    h.addEventListener("pointercancel", up);
+  }));
+}
+function initAdvance(dir, silent){
+  const rows = initSorted(); if (!rows.length) return;
+  initState.started = true;
+  let i = rows.findIndex(c => c.id === initState.turnId);
+  if (i < 0) i = 0;
+  const before = initState.turnId;
+  const ni = initNextIdx(rows, i, dir);
+  /* Stepping forward past the end of the order (ni lands at or
+     behind where we started) means a new round: tick durations.
+     Stepping backward past the top likewise steps the round back,
+     but durations never rewind. */
+  if (dir > 0 && ni <= i) { initState.round = (initState.round || 1) + 1; initLog("— Round " + initState.round + " begins —"); initTickStatuses(); }
+  if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
+  initState.turnId = rows[ni].id;
+  if (!silent && initState.turnId !== before) initChime();
+  saveInitiative(); renderInitiative();
+}
+function initNext(){ initAdvance(1); }
+function initPrev(){ initAdvance(-1); }
+function initJumpIn(c){
+  const rows = initSorted();
+  const hi = rows.findIndex(x => x.id === initState.turnId);
+  if (hi < 0) return;
+  const holder = rows[hi];
+  const order = rows.filter(x => x.id !== c.id);
+  const at = order.findIndex(x => x.id === holder.id);
+  order.splice(at + 1, 0, c);
+  order.forEach((x, idx) => { x.seq = idx + 1; });
+  initState.manual = true;
+  c.delaying = false;
+  initLog(c.name + " jumps in after " + holder.name + ".");
+  saveInitiative(); renderInitiative();
 }
 async function loadInitiative(){
-  if (!db) { initLoaded = true; renderInitiative(); return; }
+  if (!db) { initLoaded = true; renderInitiative(); renderParty(); return; }
   try {
     const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
     const v = data && data.value;
-    if (v && Array.isArray(v.list)) initState = { list: v.list.map(initNorm), turnId: v.turnId ?? null, round: v.round || 1, started: !!v.started, saved: Array.isArray(v.saved) ? v.saved : [] };
+    if (v && Array.isArray(v.list)) initState = {
+      list: v.list.map(initNorm),
+      turnId: v.turnId ?? null,
+      round: v.round || 1,
+      started: !!v.started,
+      saved: Array.isArray(v.saved) ? v.saved : [],
+      party: Array.isArray(v.party) ? v.party.map(partyNorm) : [],
+      log: Array.isArray(v.log) ? v.log : [],
+      manual: !!v.manual
+    };
   } catch (e) {}
   initLoaded = true;
-  renderInitiative();
+  renderInitiative(); renderParty();
 }
 async function saveInitiative(){
   if (!db) return;
@@ -513,52 +943,72 @@ async function saveInitiative(){
   } catch (e) {}
 }
 function initAdd(){
-  const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp");
+  const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp"), qtyEl = $("initQty");
   const name = nameEl.value.trim();
   if (!name) { nameEl.focus(); return; }
   const mod = parseInt(modEl.value, 10) || 0;
-  let init;
-  if (totalEl.value !== "") init = parseInt(totalEl.value, 10) || 0;
-  else init = initRoll(mod);
+  const typed = totalEl.value !== "" ? (parseInt(totalEl.value, 10) || 0) : null;
   const ac = acEl.value === "" ? null : (parseInt(acEl.value, 10) || 0);
   const maxHp = hpEl.value === "" ? null : (parseInt(hpEl.value, 10) || 0);
-  const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
-  initState.list.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, init, mod, ac, hp: maxHp, maxHp, statuses: [], notes: "", seq });
+  let qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
+  qty = Math.max(1, Math.min(50, qty));
+  let seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0);
+  for (let k = 1; k <= qty; k++) {
+    seq += 1;
+    initState.list.push(initNorm({
+      id: initUid(),
+      name: qty > 1 ? name + " " + k : name,
+      init: typed !== null ? typed : initRoll(mod),
+      mod, ac, hp: maxHp, maxHp,
+      statuses: [], notes: "", seq
+    }));
+  }
   initPinTop();
   if (!initState.turnId) initState.turnId = initSorted()[0].id;
   nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
+  if (qtyEl) qtyEl.value = "1";
   saveInitiative(); renderInitiative(); nameEl.focus();
 }
-function initNext(){
-  const rows = initSorted(); if (!rows.length) return;
-  initState.started = true;
-  let i = rows.findIndex(c => c.id === initState.turnId);
-  i = (i + 1) % rows.length;
-  if (i === 0) initState.round = (initState.round || 1) + 1;
-  initState.turnId = rows[i].id;
-  saveInitiative(); renderInitiative();
-}
-function initPrev(){
-  const rows = initSorted(); if (!rows.length) return;
-  initState.started = true;
-  let i = rows.findIndex(c => c.id === initState.turnId);
-  if (i < 0) i = 0;
-  i = (i - 1 + rows.length) % rows.length;
-  if (i === rows.length - 1) initState.round = Math.max(1, (initState.round || 1) - 1);
-  initState.turnId = rows[i].id;
+function initAddParty(){
+  const roster = initState.party || [];
+  if (!roster.length) return;
+  let seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0);
+  let added = 0;
+  roster.forEach(p => {
+    if (initState.list.some(c => c.name === p.name)) return;
+    seq += 1; added += 1;
+    initState.list.push(initNorm({
+      id: initUid(), name: p.name, init: initRoll(p.mod), mod: p.mod, ac: p.ac,
+      hp: p.maxHp, maxHp: p.maxHp, fort: p.fort, ref: p.ref, will: p.will,
+      statuses: [], notes: "", seq
+    }));
+  });
+  if (added) initLog("The party joins the fight (" + added + " added).");
+  initPinTop();
+  if (!initState.turnId && initState.list.length) initState.turnId = initSorted()[0].id;
   saveInitiative(); renderInitiative();
 }
 function initRollAll(){
   if (!initState.list.length) return;
   initState.list.forEach(c => { c.init = initRoll(c.mod); });
+  initState.manual = false;
   initState.started = false;
   initPinTop();
   saveInitiative(); renderInitiative();
 }
 function initCombatReset(){
   if (!initState.list.length) return;
-  initState.list.forEach(c => { c.init = null; c.statuses = []; if (typeof c.maxHp === "number") c.hp = c.maxHp; });
-  initState.round = 1; initState.started = false;
+  initSnapshot();
+  const fallen = initSorted().filter(c => typeof c.hp === "number" && c.hp <= 0);
+  initTallyText = fallen.length
+    ? "Fallen: " + fallen.length + " — " + fallen.map(c => c.name + " (CR " + (c.cr ? c.cr : "—") + ")").join(", ")
+    : "";
+  if (initTallyText) initLog("XP tally — " + initTallyText + ".");
+  initState.list.forEach(c => {
+    c.init = null; c.statuses = []; c.tempHp = 0; c.nonlethal = 0; c.delaying = false; c.readied = false;
+    if (typeof c.maxHp === "number") c.hp = c.maxHp;
+  });
+  initState.round = 1; initState.started = false; initState.manual = false;
   initPinTop();
   saveInitiative(); renderInitiative();
 }
@@ -570,7 +1020,8 @@ function initReset(){
 function initClear(){
   if (!initState.list.length) return;
   if (!confirm("Clear the whole initiative board?")) return;
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [] };
+  initSnapshot();
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false };
   saveInitiative(); renderInitiative();
 }
 $("initAddBtn").addEventListener("click", initAdd);
@@ -580,7 +1031,22 @@ $("initRollAllBtn").addEventListener("click", initRollAll);
 $("initResetBtn").addEventListener("click", initReset);
 $("initCombatResetBtn").addEventListener("click", initCombatReset);
 $("initClearBtn").addEventListener("click", initClear);
-["initName", "initTotal", "initMod", "initAc", "initHp"].forEach(id => $(id).addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }));
+$("initUndoBtn").addEventListener("click", initUndo);
+$("initPartyAddBtn").addEventListener("click", initAddParty);
+$("initPartyBtn").addEventListener("click", () => { const p = $("initParty"); if (p) { p.hidden = !p.hidden; if (!p.hidden) renderParty(); } });
+$("initChimeBtn").addEventListener("click", () => {
+  try { localStorage.setItem("apoc-init-chime", initChimeOn() ? "0" : "1"); } catch (e) {}
+  initChimeBtnLabel();
+});
+$("initPartyNewBtn").addEventListener("click", () => {
+  const inp = $("initPartyName");
+  const name = inp.value.trim(); if (!name) { inp.focus(); return; }
+  initState.party = (initState.party || []).concat([partyNorm({ name })]);
+  inp.value = "";
+  saveInitiative(); renderParty();
+});
+["initName", "initTotal", "initMod", "initAc", "initHp", "initQty"].forEach(id => { const el = $(id); if (el) el.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }); });
+initChimeBtnLabel();
 setInterval(() => {
   const p = $("initiativePanel");
   if (p && initLoaded && !document.hidden && !p.contains(document.activeElement)) loadInitiative();
