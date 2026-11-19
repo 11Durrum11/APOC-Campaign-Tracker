@@ -74,7 +74,7 @@
   /* Page furniture: a slim top bar tying the page to the hub —
      back to the Campaign Hub on the left, the campaign wordmark
      on the right, both in the hub's own type and colours. */
-  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:12px;flex-wrap:wrap}
+  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:6px;flex-wrap:wrap}
   .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
@@ -124,15 +124,23 @@
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
-  #initiativePanel .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0}
-  body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
-  #initiativePanel .init-size-row{display:none}
-  #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+  body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
+  .init-topbar .init-size-row{display:none}
+  #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  .block-grip{display:none}
+  body.init-arranging .block-grip{display:flex;flex:1 1 100%;align-items:center;gap:.4rem;font-size:.78rem;font-weight:700;letter-spacing:.03em;opacity:.9;padding:.28rem .5rem;border:1px dashed rgba(242,234,216,.4);border-radius:8px;cursor:grab;margin-bottom:.35rem;touch-action:none}
+  body.init-arranging .init-block{outline:1px dashed rgba(242,234,216,.30);outline-offset:5px;border-radius:10px}
+  body.init-arranging [data-mk]{cursor:grab;touch-action:none}
+  [data-mk].mk-selected{outline:2px solid var(--primary);outline-offset:1px}
+  [data-mk].dragging{opacity:.55}
+  [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
+  .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
   #initiativePanel .init-help-line{font-size:.8rem;opacity:.75;margin:.15rem 0 .35rem}
   #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
   .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
-  #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
+  .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
   #initiativePanel .init-saved{margin-top:1rem}
   #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
@@ -213,9 +221,9 @@
     #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
-    #initiativePanel .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0}
-    #initiativePanel .init-lock-btn{min-height:36px;padding:.35rem .75rem}
-    body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
+    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:36px;padding:.35rem .75rem}
+    body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
     body.init-arranging #initiativePanel .init-controls .btn{touch-action:none;cursor:grab}
     body.init-arranging #initiativePanel .init-controls .btn.bar-selected{border-color:var(--primary);border-style:solid;box-shadow:0 0 0 2px var(--primary)}
     body.init-arranging #initiativePanel .init-controls .btn.dragging{opacity:.55}
@@ -227,22 +235,9 @@
 <div class="page">
   <div class="init-topbar">
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
-    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
-  </div>
-  <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
-    <div class="init-head">
-      <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
-      <span class="init-round" id="initRound" title="The current round — click to advance to the next round">Round 1</span>
-      <button type="button" class="init-clock" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
-      <button type="button" class="init-sessout" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
-      <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
-      <span class="init-help-q" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button type="button" class="init-lock-btn" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
-    </div>
-    <p class="init-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
-    <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" hidden>Reset layout</button>
-      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to drag the action buttons into your own order and change their footprints; lock to use them as buttons again">&#128275; Move buttons</button>
+      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to move everything on this page — drag buttons, controls, and whole blocks into your own order and change their footprints; lock to use them again">&#128275; Move buttons</button>
     </div>
     <div class="init-size-row" id="initSizeRow" hidden>
       <span>Footprint: <strong id="initSizeName">Next turn</strong></span>
@@ -250,7 +245,22 @@
       <span class="init-size-read" id="initSizeRead">M</span>
       <button type="button" class="init-lock-btn" id="initSizeUp" title="Extend the selected button's footprint">+</button>
     </div>
-    <div class="init-controls">
+    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
+  </div>
+  <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
+    <div class="init-block" data-block="header">
+    <div class="init-head">
+      <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
+      <span class="init-round" data-mk="round" data-mkgrp="head" id="initRound" title="The current round — click to advance to the next round">Round 1</span>
+      <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
+      <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
+      <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
+      <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+    </div>
+    <p class="init-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
+    <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
+    </div>
+    <div class="init-controls init-block" data-block="bar">
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
@@ -264,26 +274,26 @@
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
     <div class="init-tally" id="initTally" hidden></div>
-    <div class="init-party" id="initParty" hidden>
+    <div class="init-party init-block" data-block="party" id="initParty" hidden>
       <h4 title="The saved party — the Add party button drops them all onto the board">Party roster</h4>
       <div id="initPartyRows"></div>
       <div class="init-party-add">
-        <input id="initPartyName" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
-        <button type="button" class="btn" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
+        <input id="initPartyName" data-mk="pname" data-mkgrp="partyadd" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
+        <button type="button" class="btn" data-mk="padd" data-mkgrp="partyadd" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
       </div>
     </div>
-    <div class="init-form">
-      <input id="initName" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
-      <input id="initTotal" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
-      <input id="initMod" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
-      <input id="initAc" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
-      <input id="initHp" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
-      <input id="initQty" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
-      <button type="button" class="btn" id="initAddBtn" title="Add the combatant to the board">Add</button>
+    <div class="init-form init-block" data-block="form">
+      <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
+      <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
+      <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
+      <input id="initAc" data-mk="ac" data-mkgrp="form" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
+      <input id="initHp" data-mk="hp" data-mkgrp="form" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
+      <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
+      <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
-    <div class="init-list" id="initList"></div>
-    <div class="init-log" id="initLog"></div>
-    <div class="init-saved" id="initSaved"></div>
+    <div class="init-block" data-block="list"><div class="init-list" id="initList"></div></div>
+    <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -658,9 +668,13 @@ function renderInitSaved(){
     const logFold = (Array.isArray(s.log) && s.log.length)
       ? '<details class="init-saved-log"><summary title="The combat log from that fight">Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
       : "";
-    return '<div class="init-saved-row"><span class="init-saved-body"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + (s.combatMs ? " · ⏱ " + fmtClock(s.combatMs) + " in combat" : "") + "<br>" + who + logFold + '</span>' +
-      '<span class="init-saved-btns"><button type="button" class="init-saved-load" data-saved-load="' + si + '" title="Load this saved fight back onto the board — the current board is saved first">Load</button>' +
-      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario" title="Delete this saved scenario">×</button></span></div>';
+    const segS = {
+      body: '<span class="init-saved-body" data-mk="body" data-mkgrp="saved"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + (s.combatMs ? " · ⏱ " + fmtClock(s.combatMs) + " in combat" : "") + "<br>" + who + logFold + '</span>',
+      btns: '<span class="init-saved-btns" data-mk="btns" data-mkgrp="saved"><button type="button" class="init-saved-load" data-saved-load="' + si + '" title="Load this saved fight back onto the board — the current board is saved first">Load</button>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario" title="Delete this saved scenario">×</button></span>'
+    };
+    const ordS = (window.__mkOrder ? window.__mkOrder("saved", SAVED_KEYS) : SAVED_KEYS);
+    return '<div class="init-saved-row">' + ordS.map(k => segS[k] || "").join("") + '</div>';
   }).join("");
   wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
     initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
@@ -798,17 +812,20 @@ function renderInitTally(){
 function renderParty(){
   const wrap = $("initPartyRows"); if (!wrap) return;
   const num = v => (v === null || v === undefined ? "" : v);
-  wrap.innerHTML = (initState.party || []).map(p =>
-    '<div class="init-party-row">' +
-      '<input type="text" class="init-party-name" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">' +
-      '<label class="init-lab">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>' +
-      '<label class="init-lab">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>' +
-      '<label class="init-lab">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>' +
-      '<label class="init-lab">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>' +
-      '<label class="init-lab">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>' +
-      '<label class="init-lab">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>' +
-      '<button type="button" class="init-del" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>' +
-    '</div>').join("");
+  wrap.innerHTML = (initState.party || []).map(p => {
+    const seg = {
+      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">',
+      mod: '<label class="init-lab" data-mk="mod" data-mkgrp="partyrow">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>',
+      ac: '<label class="init-lab" data-mk="ac" data-mkgrp="partyrow">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>',
+      hp: '<label class="init-lab" data-mk="hp" data-mkgrp="partyrow">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>',
+      fort: '<label class="init-lab" data-mk="fort" data-mkgrp="partyrow">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>',
+      ref: '<label class="init-lab" data-mk="ref" data-mkgrp="partyrow">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>',
+      will: '<label class="init-lab" data-mk="will" data-mkgrp="partyrow">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>',
+      del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="partyrow" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>'
+    };
+    const ord = (window.__mkOrder ? window.__mkOrder("partyrow", PARTYROW_KEYS) : PARTYROW_KEYS);
+    return '<div class="init-party-row">' + ord.map(k => seg[k] || "").join("") + '</div>';
+  }).join("");
   const findP = id => (initState.party || []).find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
   wrap.querySelectorAll("[data-party-name]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyName); if (p) { p.name = inp.value; saveInitiative(); } }));
@@ -823,6 +840,10 @@ function renderParty(){
     saveInitiative(); renderParty();
   }));
 }
+const ROW1_KEYS = ["drag","turn","name","notes","init","roll","mod","ac","fort","ref","will","dup","toparty","del"];
+const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status"];
+const PARTYROW_KEYS = ["name","mod","ac","hp","fort","ref","will","del"];
+const SAVED_KEYS = ["body","btns"];
 function renderInitiative(){
   const wrap = $("initList"); if (!wrap) return;
   renderInitSaved();
@@ -873,51 +894,55 @@ function renderInitiative(){
     if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
     if (c.surprised) chipsArr.push('<span class="init-chip surprised" title="Surprised — sits out Round 1; the mark clears when Round 2 begins">😲 Surprised</span>');
     const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
-    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
-      '<div class="init-line1">' +
-        '<span class="init-drag" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>' +
-        '<span class="init-turn" aria-hidden="true">▶</span>' +
-        '<span class="init-name' + (dead ? ' struck' : '') + '">' + esc(c.name) + '</span>' +
-        '<input type="text" class="init-notes" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" title="Notes for this combatant — saved with them" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">' +
-        '<label class="init-lab">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" title="Initiative total — change it and the order re-sorts" data-init-val="' + c.id + '"></label>' +
-        '<button type="button" class="init-roll" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">🎲</button>' +
-        '<label class="init-lab">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" title="Initiative modifier, used by the dice button and Roll ALL" data-init-mod="' + c.id + '"></label>' +
-        '<label class="init-lab">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" title="Armour class" data-init-ac="' + c.id + '"></label>' +
-        '<label class="init-lab">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" title="Fortitude save" data-init-fort="' + c.id + '"></label>' +
-        '<label class="init-lab">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" title="Reflex save" data-init-ref="' + c.id + '"></label>' +
-        '<label class="init-lab">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" title="Will save" data-init-will="' + c.id + '"></label>' +
-        '<button type="button" class="init-dup" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">⧉</button>' +
-        '<button type="button" class="init-toparty" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the party roster" aria-label="Add ' + esc(c.name) + ' to the party roster">👥</button>' +
-        '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">✕</button>' +
-      '</div>' +
-      '<div class="init-line2">' +
-        (c.delaying
-          ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
-          : '<button type="button" class="init-delay" data-init-delay="' + c.id + '" title="Delay: sit out the turn — Next will skip them until they jump back in">Delay</button>') +
-        '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>' +
-        '<button type="button" class="init-surprised' + (c.surprised ? ' on' : '') + '" data-init-surprised="' + c.id + '" title="Surprised: mark that this combatant is caught off guard — they sit out Round 1, and the mark clears when Round 2 begins">Surprised</button>' +
-        '<span class="init-clocks"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer — starts when their turn begins, stops when it passes on. Tap to pause or resume the clocks">' + initStintText(c) + '</span>' +
-        '<span class="init-total" data-total="' + c.id + '" title="Their total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>' +
-        '<span class="init-hp-group">' +
-          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">−</button>' +
+    const seg1 = {
+      drag: '<span class="init-drag" data-mk="drag" data-mkgrp="row1" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>',
+      turn: '<span class="init-turn" data-mk="turn" data-mkgrp="row1" aria-hidden="true">\u25B6</span>',
+      name: '<span class="init-name' + (dead ? ' struck' : '') + '" data-mk="name" data-mkgrp="row1">' + esc(c.name) + '</span>',
+      notes: '<input type="text" class="init-notes" data-mk="notes" data-mkgrp="row1" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" title="Notes for this combatant \u2014 saved with them" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">',
+      init: '<label class="init-lab" data-mk="init" data-mkgrp="row1">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" title="Initiative total \u2014 change it and the order re-sorts" data-init-val="' + c.id + '"></label>',
+      roll: '<button type="button" class="init-roll" data-mk="roll" data-mkgrp="row1" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">\uD83C\uDFB2</button>',
+      mod: '<label class="init-lab" data-mk="mod" data-mkgrp="row1">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" title="Initiative modifier, used by the dice button and Roll ALL" data-init-mod="' + c.id + '"></label>',
+      ac: '<label class="init-lab" data-mk="ac" data-mkgrp="row1">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" title="Armour class" data-init-ac="' + c.id + '"></label>',
+      fort: '<label class="init-lab" data-mk="fort" data-mkgrp="row1">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" title="Fortitude save" data-init-fort="' + c.id + '"></label>',
+      ref: '<label class="init-lab" data-mk="ref" data-mkgrp="row1">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" title="Reflex save" data-init-ref="' + c.id + '"></label>',
+      will: '<label class="init-lab" data-mk="will" data-mkgrp="row1">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" title="Will save" data-init-will="' + c.id + '"></label>',
+      dup: '<button type="button" class="init-dup" data-mk="dup" data-mkgrp="row1" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">\u29C9</button>',
+      toparty: '<button type="button" class="init-toparty" data-mk="toparty" data-mkgrp="row1" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the party roster" aria-label="Add ' + esc(c.name) + ' to the party roster">\uD83D\uDC65</button>',
+      del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="row1" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">\u2715</button>'
+    };
+    const seg2 = {
+      delay: (c.delaying
+        ? '<button type="button" class="init-delay jumpin" data-mk="delay" data-mkgrp="row2" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
+        : '<button type="button" class="init-delay" data-mk="delay" data-mkgrp="row2" data-init-delay="' + c.id + '" title="Delay: sit out the turn \u2014 Next will skip them until they jump back in">Delay</button>'),
+      ready: '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-mk="ready" data-mkgrp="row2" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>',
+      surprised: '<button type="button" class="init-surprised' + (c.surprised ? ' on' : '') + '" data-mk="surprised" data-mkgrp="row2" data-init-surprised="' + c.id + '" title="Surprised: mark that this combatant is caught off guard \u2014 they sit out Round 1, and the mark clears when Round 2 begins">Surprised</button>',
+      clocks: '<span class="init-clocks" data-mk="clocks" data-mkgrp="row2"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer \u2014 starts when their turn begins, stops when it passes on. Tap to pause or resume the clocks">' + initStintText(c) + '</span>' +
+        '<span class="init-total" data-total="' + c.id + '" title="Their total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>',
+      hp: '<span class="init-hp-group" data-mk="hp" data-mkgrp="row2">' +
+          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">\u2212</button>' +
           '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" title="Current hit points" data-init-hp="' + c.id + '">' +
           '<span>/</span>' +
           '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" title="Maximum hit points" data-init-hpmax="' + c.id + '">' +
           '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '" title="One more hit point">+</button>' +
-        '</span>' +
-        '<label class="init-lab">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" title="Temporary hit points — damage burns these before real HP" data-init-tmp="' + c.id + '"></label>' +
-        '<label class="init-lab">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken — equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>' +
-        '<label class="init-lab">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating — used by the XP tally when the fight is reset" data-init-cr="' + c.id + '"></label>' +
-        '<span class="init-amt-group">' +
+        '</span>',
+      tmp: '<label class="init-lab" data-mk="tmp" data-mkgrp="row2">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" title="Temporary hit points \u2014 damage burns these before real HP" data-init-tmp="' + c.id + '"></label>',
+      nl: '<label class="init-lab" data-mk="nl" data-mkgrp="row2">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken \u2014 equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>',
+      cr: '<label class="init-lab" data-mk="cr" data-mkgrp="row2">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating \u2014 used by the XP tally when the fight is reset" data-init-cr="' + c.id + '"></label>',
+      amt: '<span class="init-amt-group" data-mk="amt" data-mkgrp="row2">' +
           '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons" data-init-amt="' + c.id + '">' +
-          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">−Dmg</button>' +
+          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">\u2212Dmg</button>' +
           '<button type="button" class="init-heal" data-init-heal="' + c.id + '" title="Heal the Amt in hit points">+Heal</button>' +
           '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '" title="Deal the Amt as nonlethal damage">+NL</button>' +
-        '</span>' +
-        (hint ? '<span class="init-hint">' + hint + '</span>' : '') +
-        '<select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
-        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts — leave blank for no countdown" data-init-dur="' + c.id + '">' +
-      '</div>' + bar + chips + '</div>';
+        '</span>',
+      hint: '<span class="init-hint" data-mk="hint" data-mkgrp="row2">' + (hint || '') + '</span>',
+      status: '<span style="display:inline-flex;gap:.45rem;align-items:center" data-mk="status" data-mkgrp="row2"><select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
+        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts \u2014 leave blank for no countdown" data-init-dur="' + c.id + '"></span>'
+    };
+    const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
+    const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
+    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
+      '<div class="init-line1">' + ord1.map(k => seg1[k] || "").join("") + '</div>' +
+      '<div class="init-line2">' + ord2.map(k => seg2[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
@@ -1089,6 +1114,7 @@ function renderInitiative(){
      touch; the rest of the row never starts a drag, so the page
      still scrolls normally everywhere else. */
   wrap.querySelectorAll("[data-drag]").forEach(h => h.addEventListener("pointerdown", ev => {
+    if (document.body.classList.contains("init-arranging")) return;
     ev.preventDefault();
     const rowEl = h.closest(".init-row"); if (!rowEl) return;
     const id = h.dataset.drag;
@@ -1430,18 +1456,24 @@ window.addEventListener("pagehide", () => {
 
 </script>
 <script>
-/* Phone-side action-bar arranging (Shaun, 2026-11-18 — the movable
-   buttons of his order are THIS page's own buttons): on the phone
-   side only (phones and tablets), the lock button above the action
-   bar unlocks arranging: drag any action button onto another to
-   swap them, tap one to select it, and step its footprint down or
-   up (S / M / L / XL) with the − / + in the footprint row. While
-   unlocked, taps fire nothing. Locking restores normal use. Order
-   and footprints save per device. Built phone-side first (v51.55);
-   Shaun extended it to the laptop side the same day — it now runs
-   at every width; every load starts locked. */
+/* Arrange: EVERYTHING on this page moves (Shaun, 2026-11-18 —
+   "when I say give all the buttons in John's House the ability
+   to move, I mean ALL of them"). One unlock (Move buttons) makes
+   the whole surface arrangeable: the page's blocks (header,
+   action bar, party roster, add form, combatants, combat log,
+   saved scenarios) shift against each other by their grip
+   strips; control groups reorder inside themselves (the header
+   clocks, the action bar — the original v51.55 system — the
+   add form, the roster's add row); and the rows are templates:
+   moving a control in any combatant row, party row, or saved
+   row sets the layout every row of that kind follows. Drag onto
+   another item to swap, tap to select, and the footprint row
+   steps the selected item S / M / L / XL. While unlocked, taps
+   fire nothing. Every load starts locked; layouts persist per
+   device, on the phone side and the laptop side alike. */
 (function () {
-  var bar = document.querySelector("#initiativePanel .init-controls");
+  var panel = document.getElementById("initiativePanel");
+  var bar = panel ? panel.querySelector(".init-controls") : null;
   var lockBtn = document.getElementById("initLockBtn");
   var resetBtn = document.getElementById("initBarResetBtn");
   var sizeRow = document.getElementById("initSizeRow");
@@ -1449,129 +1481,247 @@ window.addEventListener("pagehide", () => {
   var sizeRead = document.getElementById("initSizeRead");
   var sizeDown = document.getElementById("initSizeDown");
   var sizeUp = document.getElementById("initSizeUp");
-  if (!bar || !lockBtn || !resetBtn) return;
-  var KEY = "apoc-init-bar-v1";
-  var btns = Array.prototype.slice.call(bar.querySelectorAll(".btn"));
-  var shipped = btns.map(function (b) { return b.id; });
+  if (!panel || !bar || !lockBtn || !resetBtn) return;
+  var BARKEY = "apoc-init-bar-v1", LAYKEY = "apoc-init-layout-v2";
   var LEVELS = ["S", "M", "L", "XL"];
+  var slice = function (nl) { return Array.prototype.slice.call(nl); };
+  var barBtns = slice(bar.querySelectorAll(".btn"));
+  barBtns.forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
+  var barShipped = barBtns.map(function (b) { return b.id; });
+  var DEFAULTS = {
+    blocks: ["header", "bar", "party", "form", "list", "log", "saved"],
+    head: ["round", "sessin", "sessout", "world", "helpq", "reset"],
+    form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
+    partyadd: ["pname", "padd"],
+    row1: ["drag", "turn", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"],
+    row2: ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"],
+    partyrow: ["name", "mod", "ac", "hp", "fort", "ref", "will", "del"],
+    saved: ["body", "btns"]
+  };
+  var TEMPLATE = { row1: 1, row2: 1, partyrow: 1, saved: 1 };
   var arranging = false;
-  var selectedId = shipped[0];
+  var sel = { grp: "bar", key: barShipped[0] };
 
-  function load() {
-    try { var raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
-    catch (e) { return null; }
+  function load(key) { try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function store(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  function layRec() { return load(LAYKEY) || {}; }
+  function validOrder(grp, stored, keys) {
+    var known = keys || DEFAULTS[grp] || [];
+    var out = (stored || []).filter(function (k) { return known.indexOf(k) >= 0; });
+    known.forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); });
+    return out;
   }
-  function save(layout) {
-    try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch (e) {}
-  }
-  function applySize(btn, level) {
+  window.__mkOrder = function (grp, keys) { return validOrder(grp, layRec()[grp], keys); };
+
+  /* ---- the action bar (its original record and size scheme) ---- */
+  function applyBarSize(btn, level) {
     if (level === 0) { btn.style.flex = "0 1 auto"; btn.style.padding = ".32rem .55rem"; btn.style.fontSize = ".85rem"; }
     else if (level === 2) { btn.style.flex = "1 1 34%"; btn.style.padding = ""; btn.style.fontSize = ""; }
     else if (level === 3) { btn.style.flex = "1 1 100%"; btn.style.padding = ""; btn.style.fontSize = ""; }
     else { btn.style.flex = ""; btn.style.padding = ""; btn.style.fontSize = ""; }
     btn.setAttribute("data-size", String(level));
   }
-  function currentLayout() {
+  function barLayout() {
     var sizes = {};
-    btns.forEach(function (b) {
-      var lv = parseInt(b.getAttribute("data-size") || "1", 10);
-      if (lv !== 1) sizes[b.id] = lv;
-    });
-    return { order: Array.prototype.slice.call(bar.querySelectorAll(".btn")).map(function (b) { return b.id; }), sizes: sizes };
+    barBtns.forEach(function (b) { var lv = parseInt(b.getAttribute("data-size") || "1", 10); if (lv !== 1) sizes[b.id] = lv; });
+    return { order: slice(bar.querySelectorAll(".btn")).map(function (b) { return b.id; }), sizes: sizes };
   }
-  function applyLayout() {
-    var layout = load();
+  function applyBar() {
+    var layout = load(BARKEY);
     if (!layout || !layout.order) {
-      shipped.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
-      btns.forEach(function (b) { applySize(b, 1); b.removeAttribute("data-size"); });
+      barShipped.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
+      barBtns.forEach(function (b) { applyBarSize(b, 1); b.removeAttribute("data-size"); });
       return;
     }
     layout.order.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
-    btns.forEach(function (b) { applySize(b, (layout.sizes || {})[b.id] != null ? (layout.sizes || {})[b.id] : 1); });
+    barBtns.forEach(function (b) { applyBarSize(b, (layout.sizes || {})[b.id] != null ? (layout.sizes || {})[b.id] : 1); });
   }
-  function select(id) {
-    selectedId = id;
-    btns.forEach(function (b) { b.classList.toggle("bar-selected", arranging && b.id === id); });
-    var b = document.getElementById(id);
-    if (b && sizeName) sizeName.textContent = (b.textContent || id).trim();
-    if (b && sizeRead) sizeRead.textContent = LEVELS[parseInt(b.getAttribute("data-size") || "1", 10)];
+
+  /* ---- everything else: sizes, static orders, selection ---- */
+  function applyMkSize(el, level) {
+    if (level === 0) { el.style.fontSize = ".8rem"; el.style.padding = ".14rem .35rem"; }
+    else if (level === 2) { el.style.fontSize = ".98rem"; el.style.padding = ".38rem .62rem"; }
+    else if (level === 3) { el.style.fontSize = "1.08rem"; el.style.padding = ".52rem .8rem"; }
+    else { el.style.fontSize = ""; el.style.padding = ""; }
   }
-  function setArranging(on) {
-    arranging = on;
-    document.body.classList.toggle("init-arranging", on);
-    lockBtn.textContent = on ? "\uD83D\uDD12 Lock buttons" : "\uD83D\uDD13 Move buttons";
-    lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    resetBtn.hidden = !on;
-    if (sizeRow) sizeRow.hidden = !on;
-    select(selectedId);
+  function applySizes() {
+    var sizes = layRec().sizes || {};
+    slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
+      var grp = el.getAttribute("data-mkgrp"); if (grp === "bar") return;
+      var lv = sizes[grp + ":" + el.getAttribute("data-mk")];
+      applyMkSize(el, lv == null ? 1 : lv);
+      el.classList.toggle("mk-selected", arranging && sel.grp === grp && sel.key === el.getAttribute("data-mk"));
+    });
+    barBtns.forEach(function (b) { b.classList.toggle("bar-selected", arranging && sel.grp === "bar" && sel.key === b.id); });
   }
-  lockBtn.addEventListener("click", function () { setArranging(!arranging); });
-  resetBtn.addEventListener("click", function () {
-    try { localStorage.removeItem(KEY); } catch (e) {}
-    applyLayout(); select(shipped[0]);
-  });
+  window.__mkApply = applySizes;
+  function containerOf(grp) {
+    if (grp === "blocks") return panel;
+    if (grp === "head") return panel.querySelector(".init-head");
+    if (grp === "form") return panel.querySelector(".init-form");
+    if (grp === "partyadd") return panel.querySelector(".init-party-add");
+    return null;
+  }
+  function applyStatic() {
+    var rec = layRec();
+    validOrder("blocks", rec.blocks).forEach(function (k) { var b = panel.querySelector('[data-block="' + k + '"]'); if (b) panel.appendChild(b); });
+    ["head", "form", "partyadd"].forEach(function (grp) {
+      var cont = containerOf(grp); if (!cont) return;
+      validOrder(grp, rec[grp]).forEach(function (k) { var el = cont.querySelector('[data-mk="' + k + '"]'); if (el) cont.appendChild(el); });
+    });
+  }
+  function nameOf(grp, key) {
+    var el = panel.querySelector('[data-mkgrp="' + grp + '"][data-mk="' + key + '"]');
+    if (!el) return key;
+    return ((el.getAttribute("aria-label") || el.textContent || el.getAttribute("title") || key) + "").trim().replace(/\s+/g, " ").slice(0, 30) || key;
+  }
+  function levelOf(grp, key) {
+    if (grp === "bar") { var b = document.getElementById(key); return b ? parseInt(b.getAttribute("data-size") || "1", 10) : 1; }
+    var lv = (layRec().sizes || {})[grp + ":" + key];
+    return lv == null ? 1 : lv;
+  }
+  function select(grp, key) {
+    sel = { grp: grp, key: key };
+    if (sizeName) sizeName.textContent = nameOf(grp, key);
+    if (sizeRead) sizeRead.textContent = LEVELS[levelOf(grp, key)];
+    applySizes();
+  }
   function stepSize(dir) {
-    var b = document.getElementById(selectedId);
-    if (!b) return;
-    var lv = parseInt(b.getAttribute("data-size") || "1", 10);
-    lv = Math.max(0, Math.min(3, lv + dir));
-    applySize(b, lv);
+    var lv = Math.max(0, Math.min(3, levelOf(sel.grp, sel.key) + dir));
+    if (sel.grp === "bar") {
+      var b = document.getElementById(sel.key); if (!b) return;
+      applyBarSize(b, lv); store(BARKEY, barLayout());
+    } else {
+      var rec = layRec(); rec.sizes = rec.sizes || {};
+      if (lv === 1) delete rec.sizes[sel.grp + ":" + sel.key]; else rec.sizes[sel.grp + ":" + sel.key] = lv;
+      store(LAYKEY, rec); applySizes();
+    }
     if (sizeRead) sizeRead.textContent = LEVELS[lv];
-    save(currentLayout());
   }
   if (sizeDown) sizeDown.addEventListener("click", function () { stepSize(-1); });
   if (sizeUp) sizeUp.addEventListener("click", function () { stepSize(1); });
 
-  /* While arranging, a tap on an action button selects it — the
-     button's own action never fires. */
-  bar.addEventListener("click", function (ev) {
-    if (arranging) {
-      ev.preventDefault(); ev.stopPropagation();
-      var b = ev.target.closest && ev.target.closest(".btn");
-      if (b && bar.contains(b)) select(b.id);
-    }
+  function setArranging(on) {
+    arranging = on;
+    document.body.classList.toggle("init-arranging", on);
+    lockBtn.textContent = on ? "🔒 Lock buttons" : "🔓 Move buttons";
+    lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    resetBtn.hidden = !on;
+    if (sizeRow) sizeRow.hidden = !on;
+    select(sel.grp, sel.key);
+  }
+  lockBtn.addEventListener("click", function () { setArranging(!arranging); });
+  resetBtn.addEventListener("click", function () {
+    try { localStorage.removeItem(BARKEY); localStorage.removeItem(LAYKEY); } catch (e) {}
+    applyBar(); applyStatic();
+    if (typeof renderInitiative === "function") renderInitiative();
+    if (typeof renderParty === "function") renderParty();
+    if (typeof renderInitSaved === "function") renderInitSaved();
+    applySizes(); select("bar", barShipped[0]);
+  });
+
+  /* Block grips: one strip per block, visible only while arranging. */
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "Party roster", form: "Add a combatant", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  Object.keys(BLOCK_NAMES).forEach(function (k) {
+    var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
+    var g = document.createElement("div");
+    g.className = "block-grip";
+    g.setAttribute("data-grip", k); g.setAttribute("data-mk", k); g.setAttribute("data-mkgrp", "blocks");
+    g.textContent = "⠿ " + BLOCK_NAMES[k] + " — drag to move this block";
+    b.insertBefore(g, b.firstChild);
+  });
+
+  /* While arranging, taps inside the blocks select and never fire. */
+  panel.addEventListener("click", function (ev) {
+    if (!arranging) return;
+    var inBlock = ev.target.closest && ev.target.closest("[data-block]");
+    if (!inBlock) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var mk = ev.target.closest("[data-mk]");
+    if (mk && panel.contains(mk)) select(mk.getAttribute("data-mkgrp"), mk.getAttribute("data-mk"));
   }, true);
 
-  var dragBtn = null, dragTarget = null, startX = 0, startY = 0, dragging = false;
-  bar.addEventListener("pointerdown", function (ev) {
+  /* One dragger for every group. */
+  var drag = null;
+  panel.addEventListener("pointerdown", function (ev) {
     if (!arranging) return;
-    var b = ev.target.closest && ev.target.closest(".btn");
-    if (!b || !bar.contains(b)) return;
-    select(b.id);
-    dragBtn = b; dragTarget = null; dragging = false;
-    startX = ev.clientX; startY = ev.clientY;
-    try { b.setPointerCapture(ev.pointerId); } catch (e) {}
+    var mk = ev.target.closest && ev.target.closest("[data-mk]");
+    if (!mk || !panel.contains(mk)) return;
+    var grp = mk.getAttribute("data-mkgrp"), key = mk.getAttribute("data-mk");
+    select(grp, key);
+    drag = { grp: grp, key: key, el: grp === "blocks" ? mk.closest("[data-block]") : mk, targetEl: null, targetKey: null, on: false, x: ev.clientX, y: ev.clientY };
+    try { mk.setPointerCapture(ev.pointerId); } catch (e) {}
+    ev.preventDefault();
   });
-  bar.addEventListener("pointermove", function (ev) {
-    if (!arranging || !dragBtn) return;
-    if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 9) {
-      dragging = true; dragBtn.classList.add("dragging");
-    }
-    if (!dragging) return;
+  panel.addEventListener("pointermove", function (ev) {
+    if (!arranging || !drag) return;
+    if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) > 9) { drag.on = true; drag.el.classList.add("dragging"); }
+    if (!drag.on) return;
     var el = document.elementFromPoint(ev.clientX, ev.clientY);
-    var t = el && el.closest ? el.closest(".btn") : null;
-    if (t && t !== dragBtn && bar.contains(t)) {
-      if (dragTarget) dragTarget.classList.remove("drop-target");
-      dragTarget = t; t.classList.add("drop-target");
+    var t = el && el.closest ? el.closest("[data-mk]") : null;
+    if (t && t.getAttribute("data-mkgrp") === drag.grp && t.getAttribute("data-mk") !== drag.key) {
+      if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
+      drag.targetEl = drag.grp === "blocks" ? t.closest("[data-block]") : t;
+      if (drag.targetEl) drag.targetEl.classList.add("drop-target");
+      drag.targetKey = t.getAttribute("data-mk");
     }
   });
-  function endDrag() {
-    if (!dragBtn) return;
-    if (dragging && dragTarget && dragTarget !== dragBtn) {
-      var kids = Array.prototype.slice.call(bar.querySelectorAll(".btn"));
-      var i = kids.indexOf(dragBtn), j = kids.indexOf(dragTarget);
-      kids[i] = dragTarget; kids[j] = dragBtn;
-      kids.forEach(function (k) { bar.appendChild(k); });
-      save(currentLayout());
-    }
-    if (dragTarget) dragTarget.classList.remove("drop-target");
-    dragBtn.classList.remove("dragging");
-    dragBtn = null; dragTarget = null; dragging = false;
+  function rerender(grp) {
+    if (grp === "row1" || grp === "row2") { if (typeof renderInitiative === "function") renderInitiative(); }
+    else if (grp === "partyrow") { if (typeof renderParty === "function") renderParty(); }
+    else if (grp === "saved") { if (typeof renderInitSaved === "function") renderInitSaved(); }
   }
-  bar.addEventListener("pointerup", endDrag);
-  bar.addEventListener("pointercancel", endDrag);
+  function commitSwap(grp, a, b) {
+    if (grp === "bar") {
+      var kids = slice(bar.querySelectorAll(".btn"));
+      var i = kids.findIndex(function (k) { return k.id === a; }), j = kids.findIndex(function (k) { return k.id === b; });
+      if (i < 0 || j < 0) return;
+      kids[i] = document.getElementById(b); kids[j] = document.getElementById(a);
+      kids.forEach(function (k) { bar.appendChild(k); });
+      store(BARKEY, barLayout());
+      return;
+    }
+    if (TEMPLATE[grp]) {
+      var rec = layRec(); var ord = validOrder(grp, rec[grp]);
+      var i2 = ord.indexOf(a), j2 = ord.indexOf(b);
+      if (i2 < 0 || j2 < 0) return;
+      ord[i2] = b; ord[j2] = a; rec[grp] = ord; store(LAYKEY, rec);
+      rerender(grp); applySizes();
+      return;
+    }
+    var cont = containerOf(grp); if (!cont) return;
+    var selq = grp === "blocks" ? "[data-block]" : '[data-mkgrp="' + grp + '"]';
+    var items = slice(cont.querySelectorAll(selq));
+    var ea = grp === "blocks" ? cont.querySelector('[data-block="' + a + '"]') : cont.querySelector('[data-mk="' + a + '"]');
+    var eb = grp === "blocks" ? cont.querySelector('[data-block="' + b + '"]') : cont.querySelector('[data-mk="' + b + '"]');
+    if (!ea || !eb) return;
+    var i3 = items.indexOf(ea), j3 = items.indexOf(eb);
+    items[i3] = eb; items[j3] = ea;
+    items.forEach(function (k) { cont.appendChild(k); });
+    var rec2 = layRec();
+    rec2[grp] = items.map(function (k) { return grp === "blocks" ? k.getAttribute("data-block") : k.getAttribute("data-mk"); });
+    store(LAYKEY, rec2);
+  }
+  function endDrag() {
+    if (!drag) return;
+    if (drag.on && drag.targetKey && drag.targetKey !== drag.key) commitSwap(drag.grp, drag.key, drag.targetKey);
+    if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
+    if (drag.el) drag.el.classList.remove("dragging");
+    drag = null;
+  }
+  panel.addEventListener("pointerup", endDrag);
+  panel.addEventListener("pointercancel", endDrag);
 
-  applyLayout();
+  /* Fresh row instances pick up sizes and selection automatically. */
+  var raf = 0;
+  new MutationObserver(function () {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; applySizes(); });
+  }).observe(panel, { childList: true, subtree: true });
+
+  applyBar();
+  applyStatic();
+  applySizes();
 })();
 </script>
 
