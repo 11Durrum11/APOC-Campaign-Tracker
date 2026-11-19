@@ -154,6 +154,10 @@
   #initiativePanel .init-row.dragging{opacity:.55;outline:2px dashed var(--mv-blue, #8fb4ff);position:relative;z-index:5}
   #initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
   #initiativePanel .init-ready.on{background:#f3c969;color:#000;border-color:#f3c969;font-weight:700}
+  #initiativePanel .init-surprised{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-surprised.on{background:#ffe1a8;color:#000;border-color:#ffe1a8;font-weight:700}
+  #initiativePanel .init-chip.surprised{background:#ffe1a8;color:#111}
+  #initiativePanel .init-controls .btn.on{background:#f3c969;color:#111;border-color:#f3c969;font-weight:700}
   #initiativePanel .init-delay.jumpin{background:var(--mv-blue, #8fb4ff);color:#000;border-color:var(--mv-blue, #8fb4ff);font-weight:700}
   #initiativePanel .init-save{width:2.7rem !important}
   #initiativePanel .init-tmp,#initiativePanel .init-nl{font:inherit;width:3.2rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
@@ -193,7 +197,7 @@
     #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
     #initiativePanel .init-status-add{font-size:16px;min-height:40px}
     #initiativePanel .init-notes{font-size:16px;min-height:40px}
-    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{min-width:40px;min-height:40px}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:40px;min-height:40px}
     #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-dur,#initiativePanel .init-cr{font-size:16px;min-height:40px}
     #initiativePanel .init-drag{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
     #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:16px;min-height:40px}
@@ -244,6 +248,7 @@
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
+      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — nothing else changes">Back to top</button>
       <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
@@ -395,7 +400,7 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
 let initUndoStack = [];
 let initTallyText = "";
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -424,6 +429,8 @@ function initNorm(c){
     notes: typeof c.notes === "string" ? c.notes : "",
     delaying: !!c.delaying,
     readied: !!c.readied,
+    surprised: !!c.surprised,
+    wasSurprised: !!c.wasSurprised,
     turnMs: c.turnMs || 0,
     lastStint: c.lastStint || 0,
     seq: c.seq || 0
@@ -608,6 +615,7 @@ function archiveInitiative(){
         tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
         fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
         turnMs: (c.turnMs || 0) + live, lastStint: live || c.lastStint || 0,
+        surprised: !!c.wasSurprised,
         statuses: (c.statuses || []).map(s => ({ n: stName(s), d: stDur(s) })),
         notes: c.notes || ""
       };
@@ -630,6 +638,7 @@ function renderInitSaved(){
       if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
       if (c.turnMs) t += " · ⏱ " + fmtClock(c.turnMs) + " on the turn";
+      if (c.surprised) t += " · Surprised in Round 1";
       if (c.notes) t += " · 📝 " + esc(c.notes);
       return t;
     }).join("<br>");
@@ -654,7 +663,7 @@ function initLoadSaved(idx){
   if (initState.list.length) archiveInitiative();
   initState.list = (entry.list || []).map((c, i) => {
     const n = initNorm(Object.assign({}, c, { id: initUid(), seq: i + 1 }));
-    n.delaying = false; n.readied = false; n.turnMs = 0; n.lastStint = 0;
+    n.delaying = false; n.readied = false; n.turnMs = 0; n.lastStint = 0; n.wasSurprised = !!n.surprised;
     return n;
   });
   initState.round = 1; initState.started = false; initState.manual = false;
@@ -736,7 +745,7 @@ function initTickStatuses(){
 function initNextIdx(rows, from, dir){
   const n = rows.length;
   let i = from, steps = 0;
-  do { i = (i + dir + n) % n; steps++; } while (rows[i].delaying && steps < n);
+  do { i = (i + dir + n) % n; steps++; } while ((rows[i].delaying || (initState.round === 1 && rows[i].surprised)) && steps < n);
   return i;
 }
 let initAudio = null;
@@ -807,6 +816,7 @@ function renderInitiative(){
   renderInitLog();
   renderInitTally();
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
+  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.classList.toggle("on", !!initState.rolling); rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
   const rows = initSorted();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
@@ -848,6 +858,7 @@ function renderInitiative(){
     });
     if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
     if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
+    if (c.surprised) chipsArr.push('<span class="init-chip surprised" title="Surprised — sits out Round 1; the mark clears when Round 2 begins">😲 Surprised</span>');
     const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
     return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
       '<div class="init-line1">' +
@@ -871,6 +882,7 @@ function renderInitiative(){
           ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
           : '<button type="button" class="init-delay" data-init-delay="' + c.id + '" title="Delay: sit out the turn — Next will skip them until they jump back in">Delay</button>') +
         '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>' +
+        '<button type="button" class="init-surprised' + (c.surprised ? ' on' : '') + '" data-init-surprised="' + c.id + '" title="Surprised: mark that this combatant is caught off guard — they sit out Round 1, and the mark clears when Round 2 begins">Surprised</button>' +
         '<span class="init-clocks"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer — starts when their turn begins, stops when it passes on. Tap to pause or resume the clocks">' + initStintText(c) + '</span>' +
         '<span class="init-total" data-total="' + c.id + '" title="Their total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>' +
         '<span class="init-hp-group">' +
@@ -1015,6 +1027,16 @@ function renderInitiative(){
     const c = find(b.dataset.initJumpin); if (!c) return;
     initJumpIn(c);
   }));
+  wrap.querySelectorAll("[data-init-surprised]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initSurprised); if (!c) return;
+    c.surprised = !c.surprised;
+    if (c.surprised) {
+      c.wasSurprised = true;
+      initLog(c.name + " is surprised — sits out Round 1.");
+      if (initState.started && initState.round === 1 && initState.turnId === c.id) { initAdvance(1, true); return; }
+    }
+    saveInitiative(); renderInitiative();
+  }));
   wrap.querySelectorAll("[data-init-ready]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initReady); if (!c) return;
     c.readied = !c.readied;
@@ -1024,7 +1046,7 @@ function renderInitiative(){
   wrap.querySelectorAll("[data-init-dup]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initDup); if (!c) return;
     const copy = initNorm(JSON.parse(JSON.stringify(c)));
-    copy.id = initUid(); copy.turnMs = 0; copy.lastStint = 0;
+    copy.id = initUid(); copy.turnMs = 0; copy.lastStint = 0; copy.surprised = false; copy.wasSurprised = false;
     copy.seq = initState.list.reduce((m, x) => Math.max(m, x.seq || 0), 0) + 1;
     initState.list.push(copy);
     saveInitiative(); renderInitiative();
@@ -1088,6 +1110,11 @@ function renderInitiative(){
   }));
   initTickClocks();
 }
+function initClearSurprise(logIt){
+  let any = false;
+  initState.list.forEach(c => { if (c.surprised) { c.surprised = false; any = true; } });
+  if (any && logIt) initLog("The surprise round ends.");
+}
 function initAdvance(dir, silent){
   const rows = initSorted(); if (!rows.length) return;
   sessionSettle();
@@ -1105,9 +1132,25 @@ function initAdvance(dir, silent){
      behind where we started) means a new round: tick durations.
      Stepping backward past the top likewise steps the round back,
      but durations never rewind. */
-  if (dir > 0 && ni <= i) { initState.round = (initState.round || 1) + 1; initLog("— Round " + initState.round + " begins —"); initTickStatuses(); }
+  let rollingTop = null;
+  if (dir > 0 && ni <= i) {
+    initState.round = (initState.round || 1) + 1;
+    initLog("— Round " + initState.round + " begins —");
+    initTickStatuses();
+    if (initState.round === 2) initClearSurprise(true);
+    /* Rolling initiative (Shaun, 2026-11-18): while the board
+       toggle is on, a new round re-rolls everyone and re-sorts;
+       the turn goes to the top of the new order. */
+    if (initState.rolling && initState.list.length) {
+      initState.list.forEach(c => { c.init = initRoll(c.mod); });
+      initState.manual = false;
+      const nr = initSorted();
+      if (nr.length) rollingTop = nr[0].id;
+      initLog("Rolling initiative — new order rolled for Round " + initState.round + ".");
+    }
+  }
   if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
-  initState.turnId = rows[ni].id;
+  initState.turnId = rollingTop || rows[ni].id;
   initOpenStint();
   if (!silent && initState.turnId !== before) initChime();
   saveInitiative(); renderInitiative();
@@ -1143,7 +1186,8 @@ async function loadInitiative(){
       log: Array.isArray(v.log) ? v.log : [],
       manual: !!v.manual,
       turnStart: v.turnStart ?? null,
-      turnPaused: v.turnPaused ?? null
+      turnPaused: v.turnPaused ?? null,
+      rolling: !!v.rolling
     };
   } catch (e) {}
   initLoaded = true;
@@ -1241,7 +1285,7 @@ function initCombatReset(){
   if (initTallyText) initLog("XP tally — " + initTallyText + ".");
   if (initState.started && sessionTally.combatMs >= 1000) initLog("Combat ended — " + fmtClock(sessionTally.combatMs) + " in combat.");
   initState.list.forEach(c => {
-    c.init = null; c.statuses = []; c.tempHp = 0; c.nonlethal = 0; c.delaying = false; c.readied = false;
+    c.init = null; c.statuses = []; c.tempHp = 0; c.nonlethal = 0; c.delaying = false; c.readied = false; c.surprised = false; c.wasSurprised = false;
     if (typeof c.maxHp === "number") c.hp = c.maxHp;
   });
   initState.round = 1; initState.started = false; initState.manual = false;
@@ -1253,6 +1297,7 @@ function initReset(){
   const rows = initSorted(); if (!rows.length) return;
   sessionSettle();
   initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  initState.list.forEach(c => { c.surprised = false; c.wasSurprised = false; });
   initZeroClocks();
   saveInitiative(); renderInitiative();
 }
@@ -1277,7 +1322,7 @@ function initClear(){
   sessionSettle();
   const endedMs = initState.started ? sessionTally.combatMs : 0;
   initSnapshot();
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling };
   /* The fresh board's log opens with the ended fight's record. */
   if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
   saveInitiative(); renderInitiative();
@@ -1297,7 +1342,7 @@ function initEditRound(){
     if (done) return; done = true;
     if (save) {
       const v = parseInt(inp.value, 10);
-      if (!isNaN(v) && v >= 1 && v !== initState.round) { initState.round = Math.min(999, v); saveInitiative(); }
+      if (!isNaN(v) && v >= 1 && v !== initState.round) { initState.round = Math.min(999, v); if (initState.round === 2) initClearSurprise(false); saveInitiative(); }
     }
     renderInitiative();
   };
@@ -1309,6 +1354,11 @@ function initEditRound(){
 $("initRound").addEventListener("click", initEditRound);
 $("initSessIn").addEventListener("click", initToggleClockPause);
 $("initSessOut").addEventListener("click", initToggleClockPause);
+$("initRollingBtn").addEventListener("click", () => {
+  initState.rolling = !initState.rolling;
+  initLog("Rolling initiative " + (initState.rolling ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
+  saveInitiative(); renderInitiative();
+});
 $("initAddBtn").addEventListener("click", initAdd);
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
