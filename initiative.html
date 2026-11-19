@@ -477,9 +477,10 @@ function initLog(text){
    in combat and out of combat, not per-combatant turn timers).
    The tallies are per-device session state, like the chime setting
    and Undo — never shared-store state, so two open screens never
-   double-count into one record. Which side is accumulating keys
-   off the shared board's combat state (initState.started), which
-   every screen can see. Time is settled by timestamps, not by
+   double-count into one record. Which side is accumulating is
+   Shaun's manual choice alone (his ruling, 2026-11-18): neither
+   tally runs on page open, and the board's combat state starts
+   nothing. Time is settled by timestamps, not by
    counting ticks: sessionSettle credits the elapsed span to the
    side that was running, then re-reads the mode. It runs on the
    one-second ticker, on every render, and at the top of the
@@ -492,8 +493,8 @@ function fmtClock(ms){
 const sessionTally = (() => {
   let t = null;
   try { t = JSON.parse(sessionStorage.getItem("apoc-init-session") || "null"); } catch (e) {}
-  if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "out" };
-  if (["auto", "in", "out", "off"].indexOf(t.tallyMode) < 0) t.tallyMode = "auto";
+  if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "off" };
+  if (["in", "out", "off"].indexOf(t.tallyMode) < 0) t.tallyMode = "off";
   t.boardWas = t.boardWas === "in" ? "in" : "out";
   t.last = Date.now();
   return t;
@@ -501,14 +502,17 @@ const sessionTally = (() => {
 function sessionPersist(){
   try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
 }
-/* Which tally is accumulating. Default ("auto") follows the
-   board: in combat while a fight runs, out of combat the rest
-   of the time. Shaun's manual control (2026-11-18): clicking a
-   tally takes over — his choice holds until he clicks again,
-   and a board flip never restarts a tally he turned off. */
+/* Which tally is accumulating. MANUAL-ONLY (Shaun's ruling,
+   2026-11-18, superseding the automatic default): neither
+   tally runs until he clicks one — on page open both sit
+   stopped at their totals, and a board flip starts nothing.
+   Clicking a tally runs it; clicking the running one stops
+   both; his choice holds until he clicks again. Combat-end
+   lines and saved durations read whatever the in-combat
+   tally actually accumulated — zero if he never started it. */
 function sessionEffMode(){
   if (sessionTally.tallyMode === "in" || sessionTally.tallyMode === "out" || sessionTally.tallyMode === "off") return sessionTally.tallyMode;
-  return (initState.started && initState.list.length) ? "in" : "out";
+  return "off";
 }
 function sessionSettle(){
   const now = Date.now();
