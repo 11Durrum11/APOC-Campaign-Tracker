@@ -143,10 +143,10 @@
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
   #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
-  #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-round{cursor:pointer}
-  #initiativePanel .init-clock.paused,#initiativePanel .init-sessout.paused{color:#f3c969;opacity:1}
+  #initiativePanel .init-round{cursor:pointer}
+  #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
+  #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
   #initiativePanel .init-stint{cursor:pointer}
-  #initiativePanel .init-round-input{width:3.4em;font:inherit;font-weight:700;background:#fff;color:#111;border:1px solid #111;border-radius:.3rem;padding:.05rem .25rem}
   #initiativePanel .init-clocks{display:inline-flex;gap:.55rem;align-items:center;font-variant-numeric:tabular-nums}
   #initiativePanel .init-stint{font-weight:700}
   #initiativePanel .init-total{opacity:.75;font-size:.88em}
@@ -228,10 +228,11 @@
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
-      <span class="init-round" id="initRound" title="The current round of the fight — tap to set the number">Round 1</span>
-      <span class="init-clock" id="initSessIn" title="Time in combat this session, on this device — counts while a fight is running; a true stopwatch, ticking once a second. Tap to pause or resume the clocks">In combat 0:00</span>
-      <span class="init-sessout" id="initSessOut" title="Time out of combat this session, on this device — counts whenever this page is open and no fight is running. Tap to pause or resume the clocks">Out of combat 0:00</span>
+      <span class="init-round" id="initRound" title="The current round — click to advance to the next round">Round 1</span>
+      <button type="button" class="init-clock" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
+      <button type="button" class="init-sessout" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
+      <button type="button" class="init-lock-btn" id="initClockResetBtn" title="Reset both session timers to zero — the board is untouched">Reset timers</button>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     <div class="init-lock-row" id="initLockRow">
@@ -473,56 +474,62 @@ const sessionTally = (() => {
   let t = null;
   try { t = JSON.parse(sessionStorage.getItem("apoc-init-session") || "null"); } catch (e) {}
   if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "out" };
-  t.paused = !!t.paused;
+  if (["auto", "in", "out", "off"].indexOf(t.tallyMode) < 0) t.tallyMode = "auto";
+  t.boardWas = t.boardWas === "in" ? "in" : "out";
   t.last = Date.now();
   return t;
 })();
+function sessionPersist(){
+  try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
+}
+/* Which tally is accumulating. Default ("auto") follows the
+   board: in combat while a fight runs, out of combat the rest
+   of the time. Shaun's manual control (2026-11-18): clicking a
+   tally takes over — his choice holds until he clicks again,
+   and a board flip never restarts a tally he turned off. */
+function sessionEffMode(){
+  if (sessionTally.tallyMode === "in" || sessionTally.tallyMode === "out" || sessionTally.tallyMode === "off") return sessionTally.tallyMode;
+  return (initState.started && initState.list.length) ? "in" : "out";
+}
 function sessionSettle(){
   const now = Date.now();
   const dt = Math.max(0, now - (sessionTally.last || now));
-  /* Paused (Shaun, 2026-11-18): the span counts for neither side —
-     pressing a clock stops it; the paused stretch never lands in
-     either tally. Mode flips are still tracked so a combat that
-     begins while paused starts its clock fresh on resume. */
-  if (!sessionTally.paused) {
-    if (sessionTally.mode === "in") { sessionTally.inMs += dt; sessionTally.combatMs += dt; }
-    else sessionTally.outMs += dt;
-  }
-  const mode = (initState.started && initState.list.length) ? "in" : "out";
-  if (mode !== sessionTally.mode) {
-    if (mode === "in") sessionTally.combatMs = 0; /* a new combat begins */
-    sessionTally.mode = mode;
-  }
+  if (sessionTally.mode === "in") { sessionTally.inMs += dt; sessionTally.combatMs += dt; }
+  else if (sessionTally.mode === "out") sessionTally.outMs += dt;
+  const boardMode = (initState.started && initState.list.length) ? "in" : "out";
+  if (boardMode === "in" && sessionTally.boardWas !== "in") sessionTally.combatMs = 0; /* a new combat begins */
+  sessionTally.boardWas = boardMode;
+  sessionTally.mode = sessionEffMode();
   sessionTally.last = now;
-  try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
+  sessionPersist();
+}
+function initTallyClick(side){
+  sessionSettle();
+  sessionTally.tallyMode = (sessionEffMode() === side) ? "off" : side;
+  sessionTally.mode = sessionEffMode();
+  sessionPersist();
+  paintSessionClocks();
 }
 function paintSessionClocks(){
-  const p = sessionTally.paused ? "⏸ " : "";
-  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = p + "In combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("paused", !!sessionTally.paused); }
-  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = p + "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("paused", !!sessionTally.paused); }
+  const eff = sessionEffMode();
+  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = "In combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("running", eff === "in"); }
+  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("running", eff === "out"); }
 }
-/* Press a clock to stop it, press again to start it (Shaun,
-   2026-11-18 — on the phone side and the desktop side alike).
-   One press pauses BOTH clock systems: this device's session
-   tallies freeze, and the shared turn clock freezes for every
-   screen via turnPaused — on resume the turn start shifts forward
-   by the paused span, so the break never counts anywhere. */
+/* Press a combatant's turn timer to stop it, press again to
+   start it (Shaun, 2026-11-18 — both sides). The shared turn
+   clock freezes for every screen via turnPaused; on resume the
+   turn start shifts forward by the paused span, so the break
+   never counts. (The header tallies have their own click
+   control — see initTallyClick.) */
 function initToggleClockPause(){
-  sessionSettle();
   const now = Date.now();
-  if (sessionTally.paused) {
-    sessionTally.paused = false;
-    if (initState.turnPaused) {
-      if (initState.turnStart) initState.turnStart += (now - initState.turnPaused);
-      initState.turnPaused = null;
-      saveInitiative();
-    }
-  } else {
-    sessionTally.paused = true;
-    if (initState.turnStart && !initState.turnPaused) { initState.turnPaused = now; saveInitiative(); }
-  }
-  try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
-  paintSessionClocks();
+  if (initState.turnPaused) {
+    if (initState.turnStart) initState.turnStart += (now - initState.turnPaused);
+    initState.turnPaused = null;
+  } else if (initState.turnStart) {
+    initState.turnPaused = now;
+  } else return;
+  saveInitiative();
   renderInitiative();
 }
 function initStintText(c){
@@ -603,6 +610,7 @@ function archiveInitiative(){
   const combatMs = initState.started ? sessionTally.combatMs : 0;
   const entryLog = Array.isArray(initState.log) ? initState.log.slice() : [];
   if (initState.started && combatMs >= 1000) entryLog.push("R" + (initState.round || 1) + " · Combat ended — " + fmtClock(combatMs) + " in combat.");
+  if (initState.started) { sessionTally.combatMs = 0; sessionPersist(); }
   const entry = {
     id: initUid(),
     endedAt: Date.now(),
@@ -1110,6 +1118,25 @@ function renderInitiative(){
   }));
   initTickClocks();
 }
+/* Everything a new round brings, shared by the Next-turn wrap
+   and the round counter's click-to-advance: the log line,
+   duration ticks, the surprise round ending, and — while the
+   rolling toggle is on — a full re-roll and re-sort. Returns
+   the new order's top id when rolling re-sorted, else null. */
+function initNewRound(){
+  initState.round = (initState.round || 1) + 1;
+  initLog("— Round " + initState.round + " begins —");
+  initTickStatuses();
+  if (initState.round === 2) initClearSurprise(true);
+  if (initState.rolling && initState.list.length) {
+    initState.list.forEach(c => { c.init = initRoll(c.mod); });
+    initState.manual = false;
+    initLog("Rolling initiative — new order rolled for Round " + initState.round + ".");
+    const nr = initSorted();
+    return nr.length ? nr[0].id : null;
+  }
+  return null;
+}
 function initClearSurprise(logIt){
   let any = false;
   initState.list.forEach(c => { if (c.surprised) { c.surprised = false; any = true; } });
@@ -1133,22 +1160,7 @@ function initAdvance(dir, silent){
      Stepping backward past the top likewise steps the round back,
      but durations never rewind. */
   let rollingTop = null;
-  if (dir > 0 && ni <= i) {
-    initState.round = (initState.round || 1) + 1;
-    initLog("— Round " + initState.round + " begins —");
-    initTickStatuses();
-    if (initState.round === 2) initClearSurprise(true);
-    /* Rolling initiative (Shaun, 2026-11-18): while the board
-       toggle is on, a new round re-rolls everyone and re-sorts;
-       the turn goes to the top of the new order. */
-    if (initState.rolling && initState.list.length) {
-      initState.list.forEach(c => { c.init = initRoll(c.mod); });
-      initState.manual = false;
-      const nr = initSorted();
-      if (nr.length) rollingTop = nr[0].id;
-      initLog("Rolling initiative — new order rolled for Round " + initState.round + ".");
-    }
-  }
+  if (dir > 0 && ni <= i) rollingTop = initNewRound();
   if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
   initState.turnId = rollingTop || rows[ni].id;
   initOpenStint();
@@ -1284,6 +1296,7 @@ function initCombatReset(){
     : "";
   if (initTallyText) initLog("XP tally — " + initTallyText + ".");
   if (initState.started && sessionTally.combatMs >= 1000) initLog("Combat ended — " + fmtClock(sessionTally.combatMs) + " in combat.");
+  if (initState.started) { sessionTally.combatMs = 0; sessionPersist(); }
   initState.list.forEach(c => {
     c.init = null; c.statuses = []; c.tempHp = 0; c.nonlethal = 0; c.delaying = false; c.readied = false; c.surprised = false; c.wasSurprised = false;
     if (typeof c.maxHp === "number") c.hp = c.maxHp;
@@ -1325,35 +1338,33 @@ function initClear(){
   initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling };
   /* The fresh board's log opens with the ended fight's record. */
   if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
+  if (endedMs) { sessionTally.combatMs = 0; sessionPersist(); }
   saveInitiative(); renderInitiative();
 }
-/* Set the round by hand (Shaun, 2026-11-18): tap the round
-   readout and it becomes a number field; commit on Enter, change
-   or blur, Escape cancels. Setting the number only sets the
-   number — status durations still tick on turn-driven round
-   increments, exactly as before. */
-function initEditRound(){
-  const el = $("initRound"); if (!el || el.querySelector("input")) return;
-  el.innerHTML = 'Round <input type="number" class="init-round-input" min="1" max="999" value="' + initState.round + '" title="Type the round number, then press Enter or tap away">';
-  const inp = el.querySelector("input");
-  inp.focus(); inp.select();
-  let done = false;
-  const commit = save => {
-    if (done) return; done = true;
-    if (save) {
-      const v = parseInt(inp.value, 10);
-      if (!isNaN(v) && v >= 1 && v !== initState.round) { initState.round = Math.min(999, v); if (initState.round === 2) initClearSurprise(false); saveInitiative(); }
-    }
-    renderInitiative();
-  };
-  inp.addEventListener("change", () => commit(true));
-  inp.addEventListener("blur", () => commit(true));
-  inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); commit(true); } else if (e.key === "Escape") commit(false); });
-  inp.addEventListener("click", e => e.stopPropagation());
+/* Click the round counter to advance the round (Shaun,
+   2026-11-18): every effect of a Next-turn wrap — durations
+   tick, rolling initiative re-rolls if on, the in-world clock
+   moves with the round — and the turn returns to the top of
+   the order with a fresh stint. (This replaced the type-a-
+   number editor on the same readout from earlier that day.) */
+function initRoundAdvance(){
+  const rows = initSorted(); if (!rows.length) return;
+  sessionSettle();
+  initCloseStint(initState.turnId, true);
+  initState.started = true;
+  const top = initNewRound();
+  initState.turnId = top || rows[0].id;
+  initOpenStint();
+  saveInitiative(); renderInitiative();
 }
-$("initRound").addEventListener("click", initEditRound);
-$("initSessIn").addEventListener("click", initToggleClockPause);
-$("initSessOut").addEventListener("click", initToggleClockPause);
+$("initRound").addEventListener("click", initRoundAdvance);
+$("initSessIn").addEventListener("click", () => initTallyClick("in"));
+$("initSessOut").addEventListener("click", () => initTallyClick("out"));
+$("initClockResetBtn").addEventListener("click", () => {
+  sessionSettle();
+  sessionTally.inMs = 0; sessionTally.outMs = 0; sessionTally.combatMs = 0;
+  sessionPersist(); paintSessionClocks();
+});
 $("initRollingBtn").addEventListener("click", () => {
   initState.rolling = !initState.rolling;
   initLog("Rolling initiative " + (initState.rolling ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
