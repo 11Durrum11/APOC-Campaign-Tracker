@@ -124,7 +124,8 @@
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
-  #initiativePanel .init-lock-row{display:none}
+  #initiativePanel .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0}
+  body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
   #initiativePanel .init-size-row{display:none}
   #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
   #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
@@ -1368,8 +1369,9 @@ window.addEventListener("pagehide", () => {
    swap them, tap one to select it, and step its footprint down or
    up (S / M / L / XL) with the − / + in the footprint row. While
    unlocked, taps fire nothing. Locking restores normal use. Order
-   and footprints save per device and apply only on the phone side;
-   every load starts locked. */
+   and footprints save per device. Built phone-side first (v51.55);
+   Shaun extended it to the laptop side the same day — it now runs
+   at every width; every load starts locked. */
 (function () {
   var bar = document.querySelector("#initiativePanel .init-controls");
   var lockBtn = document.getElementById("initLockBtn");
@@ -1381,7 +1383,6 @@ window.addEventListener("pagehide", () => {
   var sizeUp = document.getElementById("initSizeUp");
   if (!bar || !lockBtn || !resetBtn) return;
   var KEY = "apoc-init-bar-v1";
-  var mq = window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)");
   var btns = Array.prototype.slice.call(bar.querySelectorAll(".btn"));
   var shipped = btns.map(function (b) { return b.id; });
   var LEVELS = ["S", "M", "L", "XL"];
@@ -1412,7 +1413,7 @@ window.addEventListener("pagehide", () => {
   }
   function applyLayout() {
     var layout = load();
-    if (!mq.matches || !layout || !layout.order) {
+    if (!layout || !layout.order) {
       shipped.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
       btns.forEach(function (b) { applySize(b, 1); b.removeAttribute("data-size"); });
       return;
@@ -1501,11 +1502,6 @@ window.addEventListener("pagehide", () => {
   }
   bar.addEventListener("pointerup", endDrag);
   bar.addEventListener("pointercancel", endDrag);
-
-  if (mq.addEventListener) mq.addEventListener("change", function () {
-    if (!mq.matches) setArranging(false);
-    applyLayout();
-  });
 
   applyLayout();
 })();
