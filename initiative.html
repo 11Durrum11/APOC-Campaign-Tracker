@@ -148,6 +148,11 @@
   #initiativePanel .init-form.folded{display:none}
   body.init-arranging #initiativePanel .init-form.folded{display:flex}
   #initiativePanel .init-fold-toggle{flex:0 0 auto}
+  /* Phone one-screen folds (Shaun, 2026-11-19): these two
+     toggles exist only on the phone side — the base page never
+     shows them; the phone media block turns them on. */
+  #initiativePanel .init-rowfold{display:none}
+  #initiativePanel .init-more-btn{display:none}
   body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
   .init-topbar .init-size-row{display:none}
   #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
@@ -252,6 +257,83 @@
     body.init-arranging #initiativePanel .init-controls .btn.dragging{opacity:.55}
     body.init-arranging #initiativePanel .init-controls .btn.drop-target{border-color:var(--primary);border-style:dashed}
   }
+  /* One phone screen (Shaun, 2026-11-19): the whole tracker —
+     header, action bar, the fight itself, log and saved — fits
+     the phone's screen height with no up-and-down scrolling.
+     Everything is tightened, and the secondary pieces fold:
+     each row's extra controls behind its ▸, the action bar's
+     tail behind More, the combat log and the saved list behind
+     their headings. Nothing is removed; every fold opens in one
+     tap, remembers itself per device, and lets go entirely
+     while arranging. */
+  @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
+    .panel{padding:6px 8px}
+    .page{padding:0 6px 4px}
+    .panel{margin-top:4px}
+    .init-topbar{padding-top:2px;gap:.4rem}
+    .init-topbar .btn{font-size:.8rem;padding:.2rem .5rem;min-height:0}
+    .init-brand{font-size:.58rem;letter-spacing:.08em}
+    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:28px;padding:.16rem .45rem;font-size:.74rem}
+    #initiativePanel .init-head{gap:.2rem .35rem}
+    #initiativePanel .init-head .init-lock-btn{min-height:24px}
+    #initiativePanel .init-head .eyebrow{display:none}
+    #initiativePanel .init-round{font-size:.92rem}
+    #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.08rem .45rem;font-size:.76rem}
+    #initiativePanel .init-worldclock{font-size:.76rem}
+    #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
+    #initiativePanel .init-help-line{display:none}
+    #initiativePanel .init-nownext{margin:.08rem 0 0;font-size:.88rem;min-height:1.1em;line-height:1.2}
+    #initiativePanel .init-controls{gap:.28rem;margin:.28rem 0;padding:.28rem .32rem}
+    #initiativePanel .init-controls .btn{min-height:25px;padding:.1rem .42rem;font-size:.78rem}
+    #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
+    #initiativePanel .init-list{gap:.2rem;margin:.22rem 0 .3rem}
+    #initiativePanel .init-row{padding:.14rem .38rem;border-radius:7px}
+    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.13rem}
+    #initiativePanel .init-line2{margin-top:.1rem}
+    #initiativePanel .init-name{font-size:.9rem;flex:1 1 2.6rem;min-width:min-content;white-space:nowrap}
+    #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
+    #initiativePanel .init-drag{min-width:22px;min-height:24px;padding:.04rem .06rem}
+    #initiativePanel .init-turn{display:none}
+    #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
+    #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:24px;padding:.06rem .14rem}
+    #initiativePanel .init-save{width:2rem !important}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:22px;min-height:24px;padding:.06rem .2rem;font-size:.76rem}
+    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:2.05rem;font-size:13px;min-height:24px;padding:.06rem .16rem}
+    #initiativePanel .init-amt{width:2.3rem;font-size:13px;min-height:24px;padding:.06rem .16rem}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2.2rem;font-size:13px;min-height:24px;padding:.06rem .18rem}
+    #initiativePanel .init-notes{font-size:13px;min-height:24px;padding:.08rem .3rem;flex:1 1 2.8rem;min-width:2.4rem}
+    #initiativePanel .init-status-add{font-size:13px;min-height:24px;padding:.08rem .22rem}
+    #initiativePanel .init-dur{width:2.9rem;font-size:13px;min-height:24px;padding:.08rem .22rem}
+    #initiativePanel .init-bar{height:4px;margin-top:.08rem}
+    #initiativePanel .init-chips{gap:.22rem;margin-top:.08rem}
+    #initiativePanel .init-chip{font-size:.74rem;padding:.04rem .22rem .04rem .42rem}
+    #initiativePanel .init-clocks{gap:.28rem;font-size:.72rem;line-height:1.15}
+    #initiativePanel .init-hint{font-size:.78rem}
+    #initiativePanel .init-log{margin-top:.45rem}
+    #initiativePanel .init-log h4{margin-bottom:.15rem;cursor:pointer;line-height:1.2}
+    #initiativePanel .init-logbox{max-height:96px;font-size:.78rem;padding:.28rem .42rem}
+    #initiativePanel .init-saved-head{margin-top:.45rem;margin-bottom:.15rem}
+    #initiativePanel .init-saved-head .init-lock-btn{min-height:24px;padding-top:.1rem;padding-bottom:.1rem}
+    #initiativePanel .init-saved-head h4{cursor:pointer}
+    #initiativePanel .init-saved-row{padding:.22rem .42rem;font-size:.79rem;margin-bottom:.22rem}
+    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:24px}
+    #initiativePanel .init-party{padding:.4rem .5rem}
+    #initiativePanel .init-party-row{padding:.12rem 0}
+    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:26px}
+    #initiativePanel .init-party-add .btn{min-height:28px}
+    /* The folds themselves. */
+    #initiativePanel .init-rowfold{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:24px;padding:.04rem .15rem;font:inherit;font-size:.78rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer;flex:0 0 auto}
+    #initiativePanel .init-more-btn{display:inline-flex;align-items:center;min-height:25px;padding:.12rem .5rem;font:inherit;font-size:.78rem;font-weight:600;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer}
+    body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="notes"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="fort"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="ref"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="will"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="dup"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="toparty"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="delay"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="ready"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="surprised"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="tmp"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="nl"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="cr"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="status"]{display:none !important}
+    body:not(.init-arranging) #initiativePanel .init-row.pfold .init-total{display:none !important}
+    body:not(.init-arranging) #initiativePanel .init-controls:not(.bar-open)>.btn:not(#initNextBtn):not(#initPrevBtn):not(#initRollAllBtn):not(#initResetBtn):not(#initUndoBtn){display:none !important}
+    body:not(.init-arranging) #initiativePanel [data-block="log"]:not(.log-open) .init-logbox{display:none !important}
+    body:not(.init-arranging) #initiativePanel [data-block="saved"]:not(.saved-open) #initSaved{display:none !important}
+    #initiativePanel .init-log h4::after{content:" ▸";opacity:.65}
+    #initiativePanel [data-block="log"].log-open .init-log h4::after{content:" ▾"}
+    #initiativePanel .init-saved-head h4::after{content:" ▸";opacity:.65}
+    #initiativePanel [data-block="saved"].saved-open .init-saved-head h4::after{content:" ▾"}
+  }
 </style>
 </head>
 <body data-scene="bastion-streets">
@@ -299,6 +381,7 @@
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
+      <button type="button" class="init-more-btn" id="initMoreBtn" title="Show the rest of the action bar — Reset combat, Clear all, Add foe, Add party, the roster and the chime; tap again to fold them away">More ▸</button>
     </div>
     <div class="init-tally" id="initTally" hidden></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
@@ -329,7 +412,7 @@
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
     <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back. On a phone, tap the heading to show or hide the list">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -829,6 +912,12 @@ function initNextIdx(rows, from, dir){
 }
 let initAudio = null;
 function initChimeOn(){ try { return localStorage.getItem("apoc-init-chime") !== "0"; } catch (e) { return true; } }
+/* Phone one-screen folds: the set of combatant rows whose extra
+   controls are OPEN on this device. Every other row carries the
+   pfold class; the phone CSS folds its secondary segments away
+   so the fight fits one screen. Desktop never folds. */
+let initRowOpen = new Set();
+try { (JSON.parse(localStorage.getItem("apoc-init-rowopen") || "[]") || []).forEach(x => initRowOpen.add(x)); } catch (e) {}
 function initChime(){
   if (!initChimeOn()) return;
   try {
@@ -852,7 +941,7 @@ function renderInitLog(){
   const wrap = $("initLog"); if (!wrap) return;
   const log = Array.isArray(initState.log) ? initState.log : [];
   if (!log.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens. On a phone, tap the heading to show or hide it">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
 }
 function renderInitTally(){
   const wrap = $("initTally"); if (!wrap) return;
@@ -933,6 +1022,7 @@ function renderInitiative(){
     const active = c.id === initState.turnId;
     const hint = initHpHint(c);
     const dead = hint === "Dead";
+    const rowOpen = initRowOpen.has(c.id);
     const num = v => (v === null || v === undefined ? "" : v);
     let bar = "";
     if (typeof c.hp === "number" && typeof c.maxHp === "number" && c.maxHp > 0) {
@@ -999,12 +1089,26 @@ function renderInitiative(){
     };
     const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
     const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
-    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
-      '<div class="init-line1">' + ord1.map(k => seg1[k] || "").join("") + '</div>' +
+    return '<div class="init-row' + (active ? ' active' : '') + (rowOpen ? '' : ' pfold') + '" data-row-id="' + c.id + '">' +
+      '<div class="init-line1">' + ord1.map(k => seg1[k] || "").join("") + '<button type="button" class="init-rowfold" data-init-rowfold="' + c.id + '" aria-expanded="' + (rowOpen ? "true" : "false") + '" aria-label="More controls for ' + esc(c.name) + '" title="More controls for this combatant — notes, saves, duplicate, delay, ready, surprised, status and the rest; tap again to fold them away">' + (rowOpen ? "▴" : "▸") + '</button></div>' +
       '<div class="init-line2">' + ord2.map(k => seg2[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
+  wrap.querySelectorAll("[data-init-rowfold]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.initRowfold;
+    const row = b.closest(".init-row");
+    if (initRowOpen.has(id)) {
+      initRowOpen.delete(id);
+      if (row) row.classList.add("pfold");
+      b.textContent = "▸"; b.setAttribute("aria-expanded", "false");
+    } else {
+      initRowOpen.add(id);
+      if (row) row.classList.remove("pfold");
+      b.textContent = "▴"; b.setAttribute("aria-expanded", "true");
+    }
+    try { localStorage.setItem("apoc-init-rowopen", JSON.stringify([...initRowOpen])); } catch (e) {}
+  }));
   wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initVal);
     if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
@@ -1548,6 +1652,39 @@ function initClearLog(){
   saveInitiative(); renderInitiative();
 }
 $("initClearLogBtn").addEventListener("click", initClearLog);
+/* Phone one-screen folds (Shaun, 2026-11-19): on the phone side
+   the combat log, the saved-scenarios list and the action bar's
+   tail fold away so the whole tracker fits one screen; the
+   headings and the More button bring them back in one tap. The
+   folds are per-device and remember themselves; the CSS hides
+   things only at phone widths, and never while arranging. */
+(function(){
+  try {
+    if (localStorage.getItem("apoc-init-logopen") === "1") { const b = document.querySelector('[data-block="log"]'); if (b) b.classList.add("log-open"); }
+    if (localStorage.getItem("apoc-init-savedopen") === "1") { const b = document.querySelector('[data-block="saved"]'); if (b) b.classList.add("saved-open"); }
+    if (localStorage.getItem("apoc-init-baropen") === "1") { const c = document.querySelector(".init-controls"); if (c) c.classList.add("bar-open"); const m = $("initMoreBtn"); if (m) m.textContent = "Less ▴"; }
+  } catch (e) {}
+  const logWrap = $("initLog");
+  if (logWrap) logWrap.addEventListener("click", e => {
+    if (!e.target.closest("h4")) return;
+    const blk = e.target.closest("[data-block]"); if (!blk) return;
+    const open = blk.classList.toggle("log-open");
+    try { localStorage.setItem("apoc-init-logopen", open ? "1" : "0"); } catch (err) {}
+  });
+  const svH = document.querySelector(".init-saved-head h4");
+  if (svH) svH.addEventListener("click", () => {
+    const blk = svH.closest("[data-block]"); if (!blk) return;
+    const open = blk.classList.toggle("saved-open");
+    try { localStorage.setItem("apoc-init-savedopen", open ? "1" : "0"); } catch (err) {}
+  });
+  const mBtn = $("initMoreBtn");
+  if (mBtn) mBtn.addEventListener("click", () => {
+    const c = document.querySelector(".init-controls"); if (!c) return;
+    const open = c.classList.toggle("bar-open");
+    mBtn.textContent = open ? "Less ▴" : "More ▸";
+    try { localStorage.setItem("apoc-init-baropen", open ? "1" : "0"); } catch (err) {}
+  });
+})();
 /* Picture slots (Shaun, 2026-11-19): every combatant and every
    roster member carries a small picture — a URL in the shared
    state, never a blob. Upload is the primary route (the file
