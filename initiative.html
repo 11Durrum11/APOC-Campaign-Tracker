@@ -128,6 +128,8 @@
   body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
   #initiativePanel .init-size-row{display:none}
   #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  [title]{-webkit-touch-callout:none}
   #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
   #initiativePanel .init-saved{margin-top:1rem}
@@ -1567,6 +1569,54 @@ window.addEventListener("pagehide", () => {
   bar.addEventListener("pointercancel", endDrag);
 
   applyLayout();
+})();
+</script>
+
+<script>
+/* Press-and-hold help (Shaun, 2026-11-18): the hover
+   explanations work on BOTH sides — hover with a mouse, and on
+   touch screens press and hold any control to read what it
+   does, without the control firing. Same words both sides. */
+(() => {
+  let timer = null, target = null, sx = 0, sy = 0, fired = false;
+  const tip = document.createElement("div");
+  tip.className = "press-tip";
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  function show(el){
+    const text = el.getAttribute("title");
+    if (!text) return;
+    tip.textContent = text;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    let y = r.top - th - 10;
+    if (y < 8) y = Math.min(r.bottom + 10, window.innerHeight - th - 8);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function hide(){ tip.hidden = true; }
+  function cancel(){ if (timer) { clearTimeout(timer); timer = null; } }
+  document.addEventListener("pointerdown", e => {
+    if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+    const el = e.target.closest ? e.target.closest("[title]") : null;
+    cancel(); hide(); fired = false;
+    if (!el) { target = null; return; }
+    target = el; sx = e.clientX; sy = e.clientY;
+    timer = setTimeout(() => { fired = true; show(el); }, 550);
+  }, true);
+  document.addEventListener("pointermove", e => {
+    if (target && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) { cancel(); hide(); }
+  }, true);
+  ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { cancel(); setTimeout(hide, 60); }, true));
+  document.addEventListener("scroll", () => { cancel(); hide(); }, true);
+  document.addEventListener("click", e => {
+    if (fired) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); fired = false; }
+  }, true);
+  document.addEventListener("contextmenu", e => {
+    if (fired || (e.target.closest && e.target.closest("[title]"))) e.preventDefault();
+  }, true);
 })();
 </script>
 </body>
