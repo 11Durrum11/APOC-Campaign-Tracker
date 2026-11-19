@@ -140,7 +140,7 @@
   #initiativePanel .init-pic-note:empty{display:none}
   #initiativePanel .init-form.folded > *:not(.block-grip){display:none !important}
   #initiativePanel .init-party-add.folded > *:not(#initPartyAddToggle){display:none !important}
-  /* The Add a combatant button lives in the action bar now
+  /* The Add foe button lives in the action bar now
      (Shaun, 2026-11-19), so a folded form has nothing of its
      own left to show: the whole block leaves the page until
      the form is opened. While arranging it stays on the page
@@ -296,7 +296,7 @@
       <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal, Clear all or Reset combat">↩ Undo</button>
-      <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add a combatant — open the form to add someone to the fight; tap again to fold it away">▸ Add a combatant</button>
+      <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add foe — open the form to add someone to the fight; tap again to fold it away">▸ Add foe</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
@@ -1615,7 +1615,7 @@ $("initPicFile").addEventListener("change", async (e) => {
   } catch (err) { if (note) note.textContent = "The upload didn't go through — paste a link instead."; }
 });
 /* Nested add forms (Shaun, 2026-11-19): the whole add-combatant
-   form nests inside its Add a combatant button — which sits in
+   form nests inside its Add foe button — which sits in
    the action bar, so a closed form leaves no box on the page at
    all — and the roster's add form inside its Add PC button,
    which stays in the roster box. The open/closed choice is kept
@@ -1626,7 +1626,7 @@ function initFoldApply(){
   const f = document.querySelector(".init-form");
   const fo = initFoldGet("apoc-init-addopen");
   if (f) f.classList.toggle("folded", !fo);
-  const tb = $("initAddToggle"); if (tb) tb.textContent = (fo ? "▾" : "▸") + " Add a combatant";
+  const tb = $("initAddToggle"); if (tb) tb.textContent = (fo ? "▾" : "▸") + " Add foe";
   const pa = document.querySelector(".init-party-add");
   const po = initFoldGet("apoc-init-partyaddopen");
   if (pa) pa.classList.toggle("folded", !po);
@@ -1987,7 +1987,7 @@ window.addEventListener("pagehide", () => {
   });
 
   /* Block grips: one strip per block, visible only while arranging. */
-  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add a combatant", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
   Object.keys(BLOCK_NAMES).forEach(function (k) {
     var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
     var g = document.createElement("div");
