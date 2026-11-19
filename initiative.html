@@ -142,6 +142,10 @@
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
   #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
+  #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-round{cursor:pointer}
+  #initiativePanel .init-clock.paused,#initiativePanel .init-sessout.paused{color:#f3c969;opacity:1}
+  #initiativePanel .init-stint{cursor:pointer}
+  #initiativePanel .init-round-input{width:3.4em;font:inherit;font-weight:700;background:#fff;color:#111;border:1px solid #111;border-radius:.3rem;padding:.05rem .25rem}
   #initiativePanel .init-clocks{display:inline-flex;gap:.55rem;align-items:center;font-variant-numeric:tabular-nums}
   #initiativePanel .init-stint{font-weight:700}
   #initiativePanel .init-total{opacity:.75;font-size:.88em}
@@ -195,6 +199,8 @@
     #initiativePanel .init-party-add .btn{min-height:44px}
     #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:40px;min-height:40px}
     #initiativePanel .init-head{gap:.35rem .5rem}
+    #initiativePanel .init-stint{padding:.3rem .25rem}
+    #initiativePanel .init-clock,#initiativePanel .init-sessout{padding:.3rem .15rem}
     #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
@@ -217,9 +223,9 @@
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
-      <span class="init-round" id="initRound" title="The current round of the fight">Round 1</span>
-      <span class="init-clock" id="initSessIn" title="Time in combat this session, on this device — counts while a fight is running; a true stopwatch, ticking once a second">In combat 0:00</span>
-      <span class="init-sessout" id="initSessOut" title="Time out of combat this session, on this device — counts whenever this page is open and no fight is running">Out of combat 0:00</span>
+      <span class="init-round" id="initRound" title="The current round of the fight — tap to set the number">Round 1</span>
+      <span class="init-clock" id="initSessIn" title="Time in combat this session, on this device — counts while a fight is running; a true stopwatch, ticking once a second. Tap to pause or resume the clocks">In combat 0:00</span>
+      <span class="init-sessout" id="initSessOut" title="Time out of combat this session, on this device — counts whenever this page is open and no fight is running. Tap to pause or resume the clocks">Out of combat 0:00</span>
       <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
@@ -386,7 +392,7 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null };
 let initUndoStack = [];
 let initTallyText = "";
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -457,14 +463,21 @@ const sessionTally = (() => {
   let t = null;
   try { t = JSON.parse(sessionStorage.getItem("apoc-init-session") || "null"); } catch (e) {}
   if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "out" };
+  t.paused = !!t.paused;
   t.last = Date.now();
   return t;
 })();
 function sessionSettle(){
   const now = Date.now();
   const dt = Math.max(0, now - (sessionTally.last || now));
-  if (sessionTally.mode === "in") { sessionTally.inMs += dt; sessionTally.combatMs += dt; }
-  else sessionTally.outMs += dt;
+  /* Paused (Shaun, 2026-11-18): the span counts for neither side —
+     pressing a clock stops it; the paused stretch never lands in
+     either tally. Mode flips are still tracked so a combat that
+     begins while paused starts its clock fresh on resume. */
+  if (!sessionTally.paused) {
+    if (sessionTally.mode === "in") { sessionTally.inMs += dt; sessionTally.combatMs += dt; }
+    else sessionTally.outMs += dt;
+  }
   const mode = (initState.started && initState.list.length) ? "in" : "out";
   if (mode !== sessionTally.mode) {
     if (mode === "in") sessionTally.combatMs = 0; /* a new combat begins */
@@ -474,15 +487,45 @@ function sessionSettle(){
   try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
 }
 function paintSessionClocks(){
-  const iEl = $("initSessIn"); if (iEl) iEl.textContent = "In combat " + fmtClock(sessionTally.inMs);
-  const oEl = $("initSessOut"); if (oEl) oEl.textContent = "Out of combat " + fmtClock(sessionTally.outMs);
+  const p = sessionTally.paused ? "⏸ " : "";
+  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = p + "In combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("paused", !!sessionTally.paused); }
+  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = p + "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("paused", !!sessionTally.paused); }
+}
+/* Press a clock to stop it, press again to start it (Shaun,
+   2026-11-18 — on the phone side and the desktop side alike).
+   One press pauses BOTH clock systems: this device's session
+   tallies freeze, and the shared turn clock freezes for every
+   screen via turnPaused — on resume the turn start shifts forward
+   by the paused span, so the break never counts anywhere. */
+function initToggleClockPause(){
+  sessionSettle();
+  const now = Date.now();
+  if (sessionTally.paused) {
+    sessionTally.paused = false;
+    if (initState.turnPaused) {
+      if (initState.turnStart) initState.turnStart += (now - initState.turnPaused);
+      initState.turnPaused = null;
+      saveInitiative();
+    }
+  } else {
+    sessionTally.paused = true;
+    if (initState.turnStart && !initState.turnPaused) { initState.turnPaused = now; saveInitiative(); }
+  }
+  try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
+  paintSessionClocks();
+  renderInitiative();
+}
+function initStintText(c){
+  const active = initState.turnId === c.id;
+  const glyph = (active && initState.turnStart && initState.turnPaused) ? "⏸" : "⏱";
+  return glyph + " " + fmtClock(active ? initStintMs(c) : (c.lastStint || 0));
 }
 function initTickClocks(){
   sessionSettle();
   paintSessionClocks();
   document.querySelectorAll("[data-stint]").forEach(el => {
     const c = initState.list.find(x => x.id === el.dataset.stint);
-    if (c && initState.turnId === c.id) el.textContent = "⏱ " + fmtClock(initStintMs(c));
+    if (c) el.textContent = initStintText(c);
   });
   document.querySelectorAll("[data-total]").forEach(el => {
     const c = initState.list.find(x => x.id === el.dataset.total);
@@ -499,12 +542,12 @@ function initTickClocks(){
    Elapsed is always derived from the timestamp — the ticker only
    repaints. Undo never touches these clocks. */
 function initStintMs(c){
-  return (initState.turnId === c.id && initState.turnStart) ? Math.max(0, Date.now() - initState.turnStart) : 0;
+  return (initState.turnId === c.id && initState.turnStart) ? Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart) : 0;
 }
 function initCloseStint(id, logIt){
   if (!id || !initState.turnStart) return;
   const c = initState.list.find(x => x.id === id); if (!c) return;
-  const stint = Math.max(0, Date.now() - initState.turnStart);
+  const stint = Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart);
   c.turnMs = (c.turnMs || 0) + stint;
   c.lastStint = stint;
   if (logIt && stint >= 1000) initLog("⏱ " + c.name + " held the turn for " + fmtClock(stint) + ".");
@@ -515,6 +558,7 @@ function initOpenStint(){
 function initZeroClocks(){
   initState.list.forEach(c => { c.turnMs = 0; c.lastStint = 0; });
   initState.turnStart = null;
+  initState.turnPaused = null;
 }
 function initSnapshot(){
   try {
@@ -555,7 +599,7 @@ function archiveInitiative(){
     round: initState.round || 1,
     combatMs: combatMs,
     list: initSorted().map(c => {
-      const live = (initState.turnId === c.id && initState.turnStart) ? Math.max(0, Date.now() - initState.turnStart) : 0;
+      const live = (initState.turnId === c.id && initState.turnStart) ? Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart) : 0;
       return {
         name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
         tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
@@ -569,7 +613,7 @@ function archiveInitiative(){
   };
   initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
-  initState.manual = false; initState.log = []; initState.turnStart = null;
+  initState.manual = false; initState.log = []; initState.turnStart = null; initState.turnPaused = null;
   saveInitiative();
 }
 function renderInitSaved(){
@@ -611,7 +655,7 @@ function initLoadSaved(idx){
     return n;
   });
   initState.round = 1; initState.started = false; initState.manual = false;
-  initState.turnStart = null;
+  initState.turnStart = null; initState.turnPaused = null;
   initState.log = [];
   initLog("Loaded the saved scenario from " + new Date(entry.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " — a fresh fight.");
   initPinTop();
@@ -824,7 +868,7 @@ function renderInitiative(){
           ? '<button type="button" class="init-delay jumpin" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
           : '<button type="button" class="init-delay" data-init-delay="' + c.id + '" title="Delay: sit out the turn — Next will skip them until they jump back in">Delay</button>') +
         '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>' +
-        '<span class="init-clocks"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer — starts when their turn begins, stops when it passes on">⏱ ' + fmtClock(active ? initStintMs(c) : (c.lastStint || 0)) + '</span>' +
+        '<span class="init-clocks"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer — starts when their turn begins, stops when it passes on. Tap to pause or resume the clocks">' + initStintText(c) + '</span>' +
         '<span class="init-total" data-total="' + c.id + '" title="Their total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>' +
         '<span class="init-hp-group">' +
           '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">−</button>' +
@@ -952,6 +996,7 @@ function renderInitiative(){
     c.statuses[c.statuses.length - 1] = { n: stName(last), d: d > 0 ? d : null };
     saveInitiative(); renderInitiative();
   }));
+  wrap.querySelectorAll("[data-stint]").forEach(el => el.addEventListener("click", initToggleClockPause));
   wrap.querySelectorAll("[data-chip-del]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.chipDel);
     if (c) { c.statuses.splice(parseInt(b.dataset.chipIdx, 10), 1); saveInitiative(); renderInitiative(); }
@@ -1094,7 +1139,8 @@ async function loadInitiative(){
       party: Array.isArray(v.party) ? v.party.map(partyNorm) : [],
       log: Array.isArray(v.log) ? v.log : [],
       manual: !!v.manual,
-      turnStart: v.turnStart ?? null
+      turnStart: v.turnStart ?? null,
+      turnPaused: v.turnPaused ?? null
     };
   } catch (e) {}
   initLoaded = true;
@@ -1228,11 +1274,38 @@ function initClear(){
   sessionSettle();
   const endedMs = initState.started ? sessionTally.combatMs : 0;
   initSnapshot();
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null };
   /* The fresh board's log opens with the ended fight's record. */
   if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
   saveInitiative(); renderInitiative();
 }
+/* Set the round by hand (Shaun, 2026-11-18): tap the round
+   readout and it becomes a number field; commit on Enter, change
+   or blur, Escape cancels. Setting the number only sets the
+   number — status durations still tick on turn-driven round
+   increments, exactly as before. */
+function initEditRound(){
+  const el = $("initRound"); if (!el || el.querySelector("input")) return;
+  el.innerHTML = 'Round <input type="number" class="init-round-input" min="1" max="999" value="' + initState.round + '" title="Type the round number, then press Enter or tap away">';
+  const inp = el.querySelector("input");
+  inp.focus(); inp.select();
+  let done = false;
+  const commit = save => {
+    if (done) return; done = true;
+    if (save) {
+      const v = parseInt(inp.value, 10);
+      if (!isNaN(v) && v >= 1 && v !== initState.round) { initState.round = Math.min(999, v); saveInitiative(); }
+    }
+    renderInitiative();
+  };
+  inp.addEventListener("change", () => commit(true));
+  inp.addEventListener("blur", () => commit(true));
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); commit(true); } else if (e.key === "Escape") commit(false); });
+  inp.addEventListener("click", e => e.stopPropagation());
+}
+$("initRound").addEventListener("click", initEditRound);
+$("initSessIn").addEventListener("click", initToggleClockPause);
+$("initSessOut").addEventListener("click", initToggleClockPause);
 $("initAddBtn").addEventListener("click", initAdd);
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
