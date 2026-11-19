@@ -79,7 +79,7 @@
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
-     Reset combat — the recovered AIDM Roster feature set). Every
+     — the recovered AIDM Roster feature set). Every
      rule is scoped under #initiativePanel so nothing else on the
      page collides with it. */
   #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
@@ -178,7 +178,7 @@
   /* Accessories (Shaun, 2026-11-18 — "put ALL of it in"): combat
      clock, drag handle, saves on the line, Delay/Ready, temp HP and
      nonlethal fields, status durations, the party roster, the
-     combat log, the XP tally, saved-scenario Load. */
+     combat log, saved-scenario Load. */
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
   #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
@@ -205,9 +205,6 @@
   #initiativePanel .init-dur{font:inherit;font-weight:600;width:3.9rem;padding:.3rem .45rem;border:1px solid #111;border-radius:6px;background:#fff;color:#111}
   #initiativePanel .init-chip.readied{background:#f3c969;color:#000;border-color:#7a5a08;padding:.16rem .65rem}
   #initiativePanel .init-chip.delaying{background:#e8e8e8;color:#111;border-style:dashed;padding:.16rem .65rem}
-  #initiativePanel .init-tally{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;padding:.5rem .7rem;border:1px solid var(--card-border);border-left:4px solid #f3c969;border-radius:8px;background:hsla(222,20%,14%,.5);font-weight:600}
-  #initiativePanel .init-tally[hidden]{display:none}
-  #initiativePanel .init-tally-x{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.05rem .5rem;margin-left:auto}
   #initiativePanel .init-party{margin:.55rem 0;padding:.55rem .7rem;border:1px solid var(--card-border);border-radius:8px}
   #initiativePanel .init-party[hidden]{display:none}
   #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
@@ -375,16 +372,14 @@
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
-      <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
-      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal, Clear all or Reset combat">↩ Undo</button>
+      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
       <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add foe — open the form to add someone to the fight; tap again to fold it away">▸ Add foe</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
-      <button type="button" class="init-more-btn" id="initMoreBtn" title="Show the rest of the action bar — Reset combat, Clear all, Add foe, Add party, the roster and the chime; tap again to fold them away">More ▸</button>
+      <button type="button" class="init-more-btn" id="initMoreBtn" title="Show the rest of the action bar — Clear all, Add foe, Add party, the roster and the chime; tap again to fold them away">More ▸</button>
     </div>
-    <div class="init-tally" id="initTally" hidden></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
       <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
       <div id="initPartyRows"></div>
@@ -496,7 +491,7 @@ if (BG_FILES.length > 1) {
    nonlethal damage with the 3.5 knockout hints, Fort/Ref/Will on
    the line, an auto-written combat log carried into saved
    scenarios, a combat clock at 6 seconds a round, a turn chime
-   with a mute toggle, and an XP tally of the fallen at reset. */
+   with a mute toggle. */
 const INIT_KEY = "campaign_initiative";
 const INIT_CONDITIONS = {
   "Blinded": "−2 AC and loses Dex bonus to AC; −4 on Search and most Str/Dex-based checks; all opponents have total concealment (50% miss).",
@@ -538,7 +533,6 @@ const INIT_CONDITIONS = {
 };
 let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
 let initUndoStack = [];
-let initTallyText = "";
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function stName(s){ return typeof s === "string" ? s : (s && (s.n || s.name)) || ""; }
 function stDur(s){ return (s && typeof s === "object" && typeof s.d === "number") ? s.d : null; }
@@ -740,7 +734,6 @@ function initUndo(){
   initState.list.forEach(c => { if (totals[c.id]) { c.turnMs = totals[c.id][0]; c.lastStint = totals[c.id][1]; } });
   /* The combat log is a record of the fight, not board state: it
      is never rewound, even when the act it describes is undone. */
-  initTallyText = "";
   saveInitiative(); renderInitiative();
 }
 function archiveInitiative(){
@@ -944,13 +937,6 @@ function renderInitLog(){
   if (!log.length) { wrap.innerHTML = ""; return; }
   wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens. On a phone, tap the heading to show or hide it">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
 }
-function renderInitTally(){
-  const wrap = $("initTally"); if (!wrap) return;
-  if (!initTallyText) { wrap.hidden = true; wrap.innerHTML = ""; return; }
-  wrap.hidden = false;
-  wrap.innerHTML = '<span title="The fallen and their challenge ratings — for the DM\'s XP award">' + esc(initTallyText) + '</span><button type="button" class="init-tally-x" aria-label="Dismiss the tally" title="Dismiss this tally">×</button>';
-  wrap.querySelector(".init-tally-x").addEventListener("click", () => { initTallyText = ""; renderInitTally(); });
-}
 function renderParty(){
   const wrap = $("initPartyRows"); if (!wrap) return;
   if (initPicTarget && initPicTarget.kind === "party" && !initPicObj()) initPicClose();
@@ -995,7 +981,6 @@ function renderInitiative(){
   if (initPicTarget && !initPicObj()) initPicClose();
   renderInitSaved();
   renderInitLog();
-  renderInitTally();
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
   const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.classList.toggle("on", !!initState.rolling); rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
@@ -1077,7 +1062,7 @@ function renderInitiative(){
         '</span>',
       tmp: '<label class="init-lab" data-mk="tmp" data-mkgrp="row2">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" title="Temporary hit points \u2014 damage burns these before real HP" data-init-tmp="' + c.id + '"></label>',
       nl: '<label class="init-lab" data-mk="nl" data-mkgrp="row2">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken \u2014 equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>',
-      cr: '<label class="init-lab" data-mk="cr" data-mkgrp="row2">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating \u2014 used by the XP tally when the fight is reset" data-init-cr="' + c.id + '"></label>',
+      cr: '<label class="init-lab" data-mk="cr" data-mkgrp="row2">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating \u2014 recorded with the combatant and kept in saved scenarios" data-init-cr="' + c.id + '"></label>',
       amt: '<span class="init-amt-group" data-mk="amt" data-mkgrp="row2">' +
           '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons" data-init-amt="' + c.id + '">' +
           '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">\u2212Dmg</button>' +
@@ -1583,26 +1568,6 @@ function initRollAll(){
   if (initState.list.length) initOpenStint();
   saveInitiative(); renderInitiative();
 }
-function initCombatReset(){
-  if (!initState.list.length) return;
-  sessionSettle();
-  initSnapshot();
-  const fallen = initSorted().filter(c => typeof c.hp === "number" && c.hp <= 0);
-  initTallyText = fallen.length
-    ? "Fallen: " + fallen.length + " — " + fallen.map(c => c.name + " (CR " + (c.cr ? c.cr : "—") + ")").join(", ")
-    : "";
-  if (initTallyText) initLog("XP tally — " + initTallyText + ".");
-  if (initState.started && sessionTally.combatMs >= 1000) initLog("Combat ended — " + fmtClock(sessionTally.combatMs) + " in combat.");
-  if (initState.started) { sessionTally.combatMs = 0; sessionPersist(); }
-  initState.list.forEach(c => {
-    c.init = null; c.statuses = []; c.tempHp = 0; c.nonlethal = 0; c.delaying = false; c.readied = false; c.surprised = false; c.wasSurprised = false;
-    if (typeof c.maxHp === "number") c.hp = c.maxHp;
-  });
-  initState.round = 1; initState.started = false; initState.manual = false;
-  initZeroClocks();
-  initPinTop();
-  saveInitiative(); renderInitiative();
-}
 function initReset(){
   const rows = initSorted(); if (!rows.length) return;
   sessionSettle();
@@ -1891,7 +1856,6 @@ $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
 $("initRollAllBtn").addEventListener("click", initRollAll);
 $("initResetBtn").addEventListener("click", initReset);
-$("initCombatResetBtn").addEventListener("click", initCombatReset);
 $("initClearBtn").addEventListener("click", initClear);
 $("initUndoBtn").addEventListener("click", initUndo);
 $("initPartyAddBtn").addEventListener("click", initAddParty);
