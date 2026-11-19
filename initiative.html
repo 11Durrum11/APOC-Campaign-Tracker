@@ -253,7 +253,7 @@
   <div class="init-topbar">
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <div class="init-lock-row" id="initLockRow">
-      <button type="button" class="init-lock-btn" id="initBarResetBtn" hidden>Reset layout</button>
+      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the arranged layout — put every button, control and block back in its shipped order and size" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to move everything on this page — drag buttons, controls, and whole blocks into your own order and change their footprints; lock to use them again">&#128275; Move buttons</button>
     </div>
     <div class="init-size-row" id="initSizeRow" hidden>
@@ -285,7 +285,7 @@
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
-      <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — nothing else changes">Back to top</button>
+      <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal, Clear all or Reset combat">↩ Undo</button>
@@ -683,7 +683,11 @@ function archiveInitiative(){
     }),
     log: entryLog
   };
-  initState.saved = [entry].concat(initState.saved || []).slice(0, 20);
+  const mergedSaved = [entry].concat(initState.saved || []);
+  /* Entries the 20-cap drops here were removed on purpose —
+     the save merge must not resurrect them from the store. */
+  mergedSaved.slice(20).forEach(s => { if (s && s.id) initSavedGone.add(s.id); });
+  initState.saved = mergedSaved.slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
   initState.manual = false; initState.log = []; initState.turnStart = null; initState.turnPaused = null;
   saveInitiative();
@@ -700,6 +704,8 @@ function renderInitSaved(){
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
       if (c.turnMs) t += " · ⏱ " + fmtClock(c.turnMs) + " on the turn";
       if (c.surprised) t += " · Surprised in Round 1";
+      if (c.readied) t += " · Readied";
+      if (c.delaying) t += " · Delaying";
       if (c.notes) t += " · 📝 " + esc(c.notes);
       return t;
     }).join("<br>");
@@ -715,6 +721,8 @@ function renderInitSaved(){
     return '<div class="init-saved-row">' + ordS.map(k => segS[k] || "").join("") + '</div>';
   }).join("");
   wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
+    const goneSaved = initState.saved[parseInt(b.dataset.savedDel, 10)];
+    if (goneSaved && goneSaved.id) initSavedGone.add(goneSaved.id);
     initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
     saveInitiative();
     renderInitSaved();
@@ -876,6 +884,7 @@ function renderParty(){
   wrap.querySelectorAll("[data-party-ref]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyRef); if (p) { p.ref = numOrNull(inp.value); saveInitiative(); } }));
   wrap.querySelectorAll("[data-party-will]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyWill); if (p) { p.will = numOrNull(inp.value); saveInitiative(); } }));
   wrap.querySelectorAll("[data-party-del]").forEach(b => b.addEventListener("click", () => {
+    initPartyGone.add(b.dataset.partyDel);
     initState.party = (initState.party || []).filter(x => x.id !== b.dataset.partyDel);
     saveInitiative(); renderParty();
   }));
@@ -931,7 +940,7 @@ function renderInitiative(){
     (c.statuses || []).forEach((s, i) => {
       const n = stName(s), d = stDur(s);
       chipsArr.push('<span class="init-chip" title="' + esc(INIT_CONDITIONS[n] || "") + '">' + esc(n) + (d !== null ? ' · ' + d : '') +
-        '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(n) + ' from ' + esc(c.name) + '">×</button></span>');
+        '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(n) + ' from ' + esc(c.name) + '" title="Remove ' + esc(n) + ' from ' + esc(c.name) + '">×</button></span>');
     });
     if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
     if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
@@ -1283,7 +1292,17 @@ async function loadInitiative(){
     const panelEl = $("initiativePanel");
     if (panelEl && panelEl.contains(document.activeElement)) { initLoaded = true; return; }
     const v = data && data.value;
-    if (v && Array.isArray(v.list)) initState = {
+    /* Freshness token (fix, 2026-11-19): every write carries a
+       rising rev, and this page tracks the newest rev it has
+       written or applied. A read whose rev is older than that
+       is a stale snapshot — the server executed the select
+       against state from before a save landed — so it is
+       discarded whole, board, saved list and all; the next
+       poll brings the current state. This closes the window
+       the generation guard cannot see, where the save predates
+       the read and only the data is old. */
+    if (v && (v.rev || 0) < initRev) { initLoaded = true; return; }
+    if (v && Array.isArray(v.list)) { initState = {
       list: v.list.map(initNorm),
       turnId: v.turnId ?? null,
       round: v.round || 1,
@@ -1296,6 +1315,12 @@ async function loadInitiative(){
       turnPaused: v.turnPaused ?? null,
       rolling: !!v.rolling
     };
+    initRev = Math.max(initRev, v.rev || 0);
+    initLastKnown = v;
+    /* What arrived from the store is mirrored, not worked —
+       this page archives on pagehide only after its own hand
+       has been on the board (see the pagehide gate below). */
+    initBoardTouched = false; }
   } catch (e) {}
   initLoaded = true;
   renderInitiative(); renderParty();
@@ -1310,17 +1335,78 @@ async function loadInitiative(){
 let initSaveChain = Promise.resolve();
 let initSaveGen = 0;
 let initDirty = false;
+/* Persistence hardening (fix, 2026-11-19) — the hunt's
+   save-loss fault had three real doors, and each gets a lock:
+   (1) REV — every write carries a rising revision number and
+   a page never applies a read older than the newest revision
+   it has written or seen (the guard lives in loadInitiative),
+   so a stale snapshot can no longer rewind the board, the
+   saved list, or the turn totals.
+   (2) MERGE — a save never drops what it never saw: inside
+   the serialized chain, each write first re-reads the store
+   and unions the saved scenarios and the party roster by id,
+   holding back only the entries this page deliberately
+   removed (initSavedGone / initPartyGone). One tab's stale
+   state can no longer erase another tab's saves.
+   (3) TOUCHED — pagehide archives only when the board was
+   actually worked from this page since the last applied
+   read; a tab that merely mirrored the board closes
+   silently (the gate lives at the pagehide handler). */
+let initRev = 0;
+let initWriter = Math.random().toString(36).slice(2, 8);
+let initLastKnown = null;
+let initBoardTouched = false;
+const initSavedGone = new Set();
+const initPartyGone = new Set();
+function initMergeSavedParty(snap, cur){
+  if (!cur) return snap;
+  if (Array.isArray(cur.saved)) {
+    const have = new Set((snap.saved || []).map(s => s && s.id));
+    const extra = cur.saved.filter(s => s && s.id && !have.has(s.id) && !initSavedGone.has(s.id));
+    if (extra.length) {
+      snap.saved = (snap.saved || []).concat(extra)
+        .sort((a, b) => (b.endedAt || 0) - (a.endedAt || 0)).slice(0, 20);
+    }
+  }
+  if (Array.isArray(cur.party)) {
+    const have = new Set((snap.party || []).map(p => p && p.id));
+    const extra = cur.party.filter(p => p && p.id && !have.has(p.id) && !initPartyGone.has(p.id));
+    if (extra.length) snap.party = (snap.party || []).concat(extra);
+  }
+  return snap;
+}
 function saveInitiative(){
+  /* Touched is set before the db check (fix, 2026-11-19): a
+     board worked in a tab whose store client never came up
+     is still a worked board, and its pagehide archive rides
+     the plain keepalive fetch, which needs no client. */
+  initBoardTouched = true;
   if (!db) return;
   initDirty = true;
   const myGen = ++initSaveGen;
   const snap = JSON.parse(JSON.stringify(initState));
   initSaveChain = initSaveChain.then(async () => {
     try {
+      let cur = null;
+      try {
+        const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
+        cur = data && data.value;
+      } catch (e) {}
+      if (cur && typeof cur.rev === "number" && cur.rev > initRev) initRev = cur.rev;
+      if (cur) initLastKnown = cur;
+      initMergeSavedParty(snap, cur);
+      snap.rev = ++initRev;
+      snap.by = initWriter;
       await db.from(SETTINGS_TABLE).upsert(
         { key: INIT_KEY, value: snap, updated_at: new Date().toISOString() },
         { onConflict: "key" }
       );
+      initLastKnown = snap;
+      if (myGen === initSaveGen) {
+        /* Show this page the entries the merge preserved. */
+        if (JSON.stringify(initState.saved) !== JSON.stringify(snap.saved)) { initState.saved = snap.saved; renderInitSaved(); }
+        if (JSON.stringify(initState.party) !== JSON.stringify(snap.party)) { initState.party = snap.party; renderParty(); }
+      }
     } catch (e) {}
     if (myGen === initSaveGen) initDirty = false;
   });
@@ -1446,7 +1532,7 @@ function initClearLog(){
      table should not wipe the fight's record. Saved scenarios
      keep their own logs; only the live log clears. */
   if (Date.now() >= initClearLogArmUntil) {
-    initClearLogArmUntil = Date.now() + 4000;
+    initClearLogArmUntil = Date.now() + 10000;
     initPaintArms();
     setTimeout(initPaintArms, 4100);
     return;
@@ -1548,7 +1634,7 @@ function initClear(){
      which left this button looking dead; the arm pattern works
      everywhere a tap does. */
   if (Date.now() >= initClearArmUntil) {
-    initClearArmUntil = Date.now() + 4000;
+    initClearArmUntil = Date.now() + 10000;
     initPaintArms();
     setTimeout(initPaintArms, 4100);
     return;
@@ -1690,7 +1776,9 @@ setInterval(() => {
    the store fresh, saves any board a previous visit left un-closed,
    and starts blank; leaving the page saves the board that was run.
    The leave save re-sends the archived state with keepalive so the
-   write survives the page going away. */
+   write survives the page going away — merged against the freshest
+   store state this page has seen, and gated so a tab that only
+   watched the board writes nothing at all (fix, 2026-11-19). */
 (async function initBoot(){
   await loadInitiative();
   archiveInitiative();
@@ -1698,12 +1786,26 @@ setInterval(() => {
 })();
 window.addEventListener("pagehide", () => {
   if (!initState.list.length) return;
+  /* A tab that only mirrored this board — opened, watched,
+     never worked — closes silently (fix, 2026-11-19): its
+     leave write carried its whole stale state and could wipe
+     saves made elsewhere since it loaded, roster and all.
+     Only a page the fight was actually worked from archives
+     on the way out. */
+  if (!initBoardTouched) return;
   archiveInitiative();
+  /* The keepalive payload is merged with the freshest store
+     state this page has seen, so even this last write cannot
+     drop a save or a roster member it never knew about. */
+  const payload = JSON.parse(JSON.stringify(initState));
+  initMergeSavedParty(payload, initLastKnown);
+  payload.rev = ++initRev;
+  payload.by = initWriter;
   try {
     fetch(SUPABASE_URL + "/rest/v1/" + SETTINGS_TABLE, {
       method: "POST", keepalive: true,
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
-      body: JSON.stringify({ key: INIT_KEY, value: initState, updated_at: new Date().toISOString() })
+      body: JSON.stringify({ key: INIT_KEY, value: payload, updated_at: new Date().toISOString() })
     }).catch(() => {});
   } catch (e) {}
 });
