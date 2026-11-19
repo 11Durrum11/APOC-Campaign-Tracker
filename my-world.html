@@ -48,6 +48,14 @@
       .head-meta { display: flex; flex-wrap: wrap; gap: .4rem 1.3rem; margin-top: .6rem; font-size: .86rem; color: var(--ink-faint); }
       .head-meta b { color: var(--ink-dim); font-weight: normal; }
       .head-toggle { display: none; }
+      .help-row { display: flex; align-items: center; gap: .45rem; margin-top: .55rem; }
+      .help-marker {
+        display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+        width: 1.35rem; height: 1.35rem; border-radius: 50%;
+        background: var(--amber); color: hsl(222 24% 7%);
+        font-size: .9rem; font-weight: bold; line-height: 1; cursor: help;
+      }
+      .help-line { margin: 0; font-size: .82rem; color: var(--ink-faint); }
 
       /* ---------- layout ---------- */
       .map-grid { display: grid; grid-template-columns: minmax(0,1fr) 350px; gap: 1.1rem; align-items: start; }
@@ -248,6 +256,18 @@
         background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
       }
 
+      /* ---------- press-and-hold help (touch / pen) ---------- */
+      [title] { -webkit-touch-callout: none; }
+      .touch-tip {
+        position: fixed; z-index: 90; max-width: min(78vw, 320px);
+        background: var(--panel-2); color: var(--ink);
+        border: 1px solid var(--amber); border-radius: 6px;
+        padding: .45rem .7rem; font-size: .9rem; line-height: 1.4;
+        box-shadow: 0 6px 22px hsla(222 26% 4% / .55);
+        pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .12s ease;
+      }
+      .touch-tip.show { opacity: 1; visibility: visible; }
+
       footer.colophon { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: .8rem; font-size: .85rem; color: var(--ink-faint); max-width: 78ch; }
 
       @media (max-width: 640px) {
@@ -270,6 +290,7 @@
       }
       @media (prefers-reduced-motion: reduce) {
         .marrakesh-ghost { transition: none !important; }
+        .touch-tip { transition: none; }
       }
     </style>
   </head>
@@ -284,22 +305,26 @@
           <span><b>Survey</b> — traced from the old atlas; detail deepens the closer you go</span>
           <span><b>The fourth city</b> — Marrakesh walks, and is never pinned</span>
         </div>
-        <button class="head-toggle" id="headToggle" type="button" aria-expanded="false">About this map ▾</button>
+        <div class="help-row">
+          <span class="help-marker" title="Hover any control to see what it does. On a phone or tablet, press and hold instead." aria-label="Help">?</span>
+          <p class="help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
+        </div>
+        <button class="head-toggle" id="headToggle" type="button" aria-expanded="false" title="Collapse or expand the map header.">About this map ▾</button>
       </header>
 
       <div class="map-tools" role="group" aria-label="Map tools">
         <span class="zoom-group">
-          <button class="tool-btn" id="zoomOut" type="button" aria-label="Zoom out">−</button>
-          <button class="tool-btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
-          <button class="tool-btn" id="zoomReset" type="button">Whole world</button>
+          <button class="tool-btn" id="zoomOut" type="button" aria-label="Zoom out" title="Zoom the map out.">−</button>
+          <button class="tool-btn" id="zoomIn" type="button" aria-label="Zoom in" title="Zoom the map in.">+</button>
+          <button class="tool-btn" id="zoomReset" type="button" title="Reset the zoom to the whole world.">Whole world</button>
         </span>
         <span class="layer-label" id="layerLabel">Layers</span>
-        <button class="tool-btn layer-btn" type="button" data-layer="places" aria-pressed="true">Places</button>
-        <button class="tool-btn layer-btn" type="button" data-layer="regions" aria-pressed="true">Regions</button>
-        <button class="tool-btn layer-btn" type="button" data-layer="roads" aria-pressed="true">Roads</button>
-        <button class="tool-btn layer-btn" type="button" data-layer="fog" aria-pressed="true">Fog reach</button>
-        <button class="tool-btn layer-btn" type="button" data-layer="hexes" aria-pressed="false">Hexes</button>
-        <span class="search-wrap"><input id="placeSearch" type="search" placeholder="Find a place…" aria-label="Find a place" /></span>
+        <button class="tool-btn layer-btn" type="button" data-layer="places" aria-pressed="true" title="Show or hide the placed locations.">Places</button>
+        <button class="tool-btn layer-btn" type="button" data-layer="regions" aria-pressed="true" title="Show or hide the Badlands regions.">Regions</button>
+        <button class="tool-btn layer-btn" type="button" data-layer="roads" aria-pressed="true" title="Show or hide the roads.">Roads</button>
+        <button class="tool-btn layer-btn" type="button" data-layer="fog" aria-pressed="true" title="Show or hide the Fog of Life veil.">Fog reach</button>
+        <button class="tool-btn layer-btn" type="button" data-layer="hexes" aria-pressed="false" title="Show or hide the hex grid — one hex is fifteen miles.">Hexes</button>
+        <span class="search-wrap"><input id="placeSearch" type="search" placeholder="Find a place…" aria-label="Find a place" title="Search for a place by name; press Enter to fly to it and open its record." /></span>
       </div>
 
       <div class="map-grid">
@@ -1194,7 +1219,7 @@
     </main>
 
     <div class="lightbox" id="lightbox" role="dialog" aria-label="Picture, enlarged">
-      <button type="button" id="lightboxClose" aria-label="Close enlarged picture">✕</button>
+      <button type="button" id="lightboxClose" aria-label="Close enlarged picture" title="Close the picture viewer.">✕</button>
       <img id="lightboxImg" alt="" />
     </div>
 
@@ -1441,7 +1466,7 @@
           if (item.imgs.length > 1) {
             html += '<div class="thumbs" role="group" aria-label="More pictures of this place">';
             item.imgs.forEach(function (src, i) {
-              html += '<button type="button" data-thumb="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="Picture ' + (i + 1) + ' of ' + esc(item.name) + '"><img src="' + esc(src) + '" alt="" /></button>';
+              html += '<button type="button" data-thumb="' + i + '" title="View this picture full-size." aria-pressed="' + (i === 0) + '" aria-label="Picture ' + (i + 1) + ' of ' + esc(item.name) + '"><img src="' + esc(src) + '" alt="" /></button>';
             });
             html += "</div>";
           }
@@ -1470,7 +1495,7 @@
         }
         function showPlace(p, fly) {
           selectPin(p.id);
-          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record">✕</button>';
+          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record" title="Close this record.">✕</button>';
           html += "<h2>" + esc(p.name) + "</h2>";
           html += '<p class="kind-line">' + esc(p.zone) + " · the Badlands and the held world</p>";
           html += figuresHTML(p);
@@ -1486,7 +1511,7 @@
         }
         function showRegion(r) {
           selectPin(null);
-          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record">✕</button>';
+          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record" title="Close this record.">✕</button>';
           html += "<h2>" + esc(r.name) + "</h2>";
           html += '<p class="kind-line">Region of the Badlands</p>';
           html += "<h3>Since the APOC</h3><p>" + esc(r.record) + "</p>";
@@ -1498,7 +1523,7 @@
         }
         function showCity(c) {
           selectPin(null);
-          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record">✕</button>';
+          var html = '<button class="record-close" type="button" id="recordClose" aria-label="Close record" title="Close this record.">✕</button>';
           html += "<h2>" + esc(c.name) + "</h2>";
           html += '<p class="kind-line">' + esc(c.kind) + "</p>";
           if (c.imgs && c.imgs.length) html += figuresHTML(c);
@@ -1552,18 +1577,18 @@
         /* ---------- index lists ---------- */
         var heldList = document.getElementById("heldList");
         heldList.innerHTML = '<div class="place-list">' + CITIES.map(function (c, i) {
-          return c.held ? '<button type="button" class="place-chip" data-city-chip="' + i + '">' + esc(c.name) + "</button>" : "";
+          return c.held ? '<button type="button" class="place-chip" data-city-chip="' + i + '" title="Fly to this city and open its record.">' + esc(c.name) + "</button>" : "";
         }).join("") + "</div>" +
         "<p style='margin-top:.8rem'>Marrakesh is listed with the held cities because she held — but she has no pin and no fixed place on the map. Her record opens from the list here, or from her wandering ghost in the southern grey.</p>" +
         '<div class="place-list" style="margin-top:.6rem">' + CITIES.map(function (c, i) {
-          return c.held ? "" : '<button type="button" class="place-chip" data-city-chip="' + i + '">' + esc(c.name) + " — at the map&rsquo;s edge, above the Bastion</button>";
+          return c.held ? "" : '<button type="button" class="place-chip" data-city-chip="' + i + '" title="Fly to this city and open its record.">' + esc(c.name) + " — at the map&rsquo;s edge, above the Bastion</button>";
         }).join("") + "</div>";
         heldList.querySelectorAll("[data-city-chip]").forEach(function (btn) {
           btn.addEventListener("click", function () { showCity(CITIES[Number(btn.getAttribute("data-city-chip"))]); });
         });
         var regionList = document.getElementById("regionList");
         regionList.innerHTML = REGIONS.map(function (r, i) {
-          return '<button type="button" class="place-chip" data-region-chip="' + i + '">' + esc(r.name) + "</button>";
+          return '<button type="button" class="place-chip" data-region-chip="' + i + '" title="Fly to this region and open its record.">' + esc(r.name) + "</button>";
         }).join("");
         regionList.querySelectorAll("[data-region-chip]").forEach(function (btn) {
           btn.addEventListener("click", function () { showRegion(REGIONS[Number(btn.getAttribute("data-region-chip"))]); });
@@ -1579,7 +1604,7 @@
             det.className = "fold";
             det.innerHTML = "<summary>" + esc(z) + ' <span class="count">— ' + list.length + " places</span></summary>" +
               '<div class="fold-body"><div class="place-list">' +
-              list.map(function (p) { return '<button type="button" class="place-chip" data-place-chip="' + esc(p.id) + '">' + esc(p.name) + "</button>"; }).join("") +
+              list.map(function (p) { return '<button type="button" class="place-chip" data-place-chip="' + esc(p.id) + '" title="Fly to this place and open its record.">' + esc(p.name) + "</button>"; }).join("") +
               "</div></div>";
             zoneFolds.appendChild(det);
           });
@@ -1801,6 +1826,126 @@
 
         showDefault();
         fit();
+      })();
+    </script>
+    <script>
+      "use strict";
+      /* ---------- press-and-hold help (touch / pen) ----------
+         Touch and pen have no hover, so a titled control's help is
+         reached by holding it: after ~550ms with the finger still
+         down and unmoved, the title text shows in a bubble near the
+         control, and that press is spent — the click it would have
+         produced is swallowed exactly once, so the control does not
+         fire. A quick tap, a moved finger, and the mouse (native
+         hover tooltips) are all untouched. Everything is delegated
+         from the document, so controls generated later — suggestion
+         chips, lightbox thumbnails, record close buttons — are
+         covered with no extra wiring. */
+      (function () {
+        var HOLD_MS = 550, MOVE_TOL = 10;
+        var tip = document.createElement("div");
+        tip.className = "touch-tip";
+        tip.setAttribute("role", "tooltip");
+        tip.setAttribute("aria-hidden", "true");
+        document.body.appendChild(tip);
+
+        var timer = null, target = null, titleText = "";
+        var startX = 0, startY = 0;
+        var active = false, shown = false;
+        var swallow = false, swallowTimer = null;
+
+        function clearTimer() {
+          if (timer) { clearTimeout(timer); timer = null; }
+        }
+        function hideTip() { tip.classList.remove("show"); }
+        function disarmSwallow() {
+          swallow = false;
+          if (swallowTimer) { clearTimeout(swallowTimer); swallowTimer = null; }
+        }
+        function armSwallow() {
+          swallow = true;
+          if (swallowTimer) clearTimeout(swallowTimer);
+          /* The click belonging to a spent press follows its
+             pointerup at once; if none arrives, stand down so a
+             later, unrelated tap is never eaten. */
+          swallowTimer = setTimeout(disarmSwallow, 1500);
+        }
+        function cancelHold() {
+          clearTimer();
+          active = false; shown = false; target = null;
+          hideTip();
+        }
+        function showTip() {
+          timer = null;
+          if (!active || !target) return;
+          shown = true;
+          tip.textContent = titleText;
+          tip.classList.add("show");
+          var rect = target.getBoundingClientRect();
+          var bw = tip.offsetWidth, bh = tip.offsetHeight;
+          var x = rect.left + rect.width / 2 - bw / 2;
+          var y = rect.top - bh - 10;
+          if (y < 8) y = rect.bottom + 10;
+          x = Math.max(8, Math.min(x, window.innerWidth - bw - 8));
+          y = Math.max(8, Math.min(y, window.innerHeight - bh - 8));
+          tip.style.left = x + "px";
+          tip.style.top = y + "px";
+          armSwallow();
+        }
+
+        document.addEventListener("pointerdown", function (e) {
+          if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+          /* A fresh press supersedes whatever the last one left. */
+          cancelHold();
+          disarmSwallow();
+          var t = e.target;
+          var el = (t && typeof t.closest === "function") ? t.closest("[title]") : null;
+          if (!el) return;
+          var text = el.getAttribute("title");
+          if (!text) return;
+          target = el; titleText = text;
+          startX = e.clientX; startY = e.clientY;
+          active = true; shown = false;
+          timer = setTimeout(showTip, HOLD_MS);
+        }, true);
+
+        document.addEventListener("pointermove", function (e) {
+          if (!active) return;
+          if (Math.hypot(e.clientX - startX, e.clientY - startY) <= MOVE_TOL) return;
+          if (shown) {
+            /* The bubble goes, but the press stays spent: its
+               click is still swallowed when the finger lifts. */
+            clearTimer();
+            active = false; shown = false; target = null;
+            hideTip();
+          } else {
+            cancelHold();
+          }
+        }, true);
+
+        function endHold() {
+          if (!active) return;
+          var wasShown = shown;
+          clearTimer();
+          active = false; shown = false; target = null;
+          hideTip();
+          if (wasShown) armSwallow();
+        }
+        document.addEventListener("pointerup", endHold, true);
+        document.addEventListener("pointercancel", endHold, true);
+
+        document.addEventListener("click", function (e) {
+          if (!swallow) return;
+          disarmSwallow();
+          e.preventDefault();
+          e.stopPropagation();
+        }, true);
+
+        document.addEventListener("contextmenu", function (e) {
+          if (!active) return;
+          var t = e.target;
+          if (t && typeof t.closest === "function" && t.closest("[title]")) e.preventDefault();
+        }, true);
       })();
     </script>
   </body>

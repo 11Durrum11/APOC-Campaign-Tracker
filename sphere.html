@@ -41,6 +41,14 @@
       header.page-head p { margin: 0; color: var(--ink-dim); max-width: 62ch; }
       .head-meta { display: flex; flex-wrap: wrap; gap: .45rem 1.4rem; margin-top: .7rem; font-size: .86rem; color: var(--ink-faint); }
       .head-meta b { color: var(--ink-dim); font-weight: normal; }
+      .help-row { display: flex; align-items: center; gap: .5rem; margin-top: .7rem; }
+      .help-mark {
+        flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+        width: 1.3rem; height: 1.3rem; border-radius: 50%;
+        background: var(--amber); color: var(--bg-deep);
+        font-size: .85rem; font-weight: bold; line-height: 1; cursor: help;
+      }
+      .help-line { font-size: .85rem; color: var(--ink-faint); }
 
       h2 { font-size: 1.3rem; font-weight: normal; margin: 0 0 .6rem; color: var(--ink); }
       h2 .accent { color: var(--amber-soft); }
@@ -66,6 +74,18 @@
       .tool-btn:hover { border-color: var(--amber); color: var(--amber-soft); }
       .tool-btn[aria-pressed="true"] { border-color: var(--amber); color: var(--amber-soft); }
       .map-note { font-size: .85rem; color: var(--ink-faint); margin: 0; }
+
+      /* ---------- Press-and-hold help (touch / pen) ---------- */
+      [title] { -webkit-touch-callout: none; }
+      .hold-tip {
+        position: fixed; z-index: 9999; pointer-events: none;
+        display: none; max-width: min(320px, calc(100vw - 16px));
+        background: var(--panel-2); color: var(--ink);
+        border: 1px solid var(--amber); border-radius: 6px;
+        padding: .45rem .65rem; font-size: .88rem; line-height: 1.4;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, .5);
+      }
+      .hold-tip.show { display: block; }
 
       /* ---------- Orrery SVG ---------- */
       .orbit-ring { fill: none; stroke: var(--line-soft); stroke-width: 1; }
@@ -278,10 +298,14 @@
           <span><b>Sphere radius:</b> 3,200 million miles</span>
           <span><b>Worlds:</b> Eight planets, Sun at center</span>
         </div>
+        <div class="help-row">
+          <span class="help-mark" title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span>
+          <span class="help-line">Hold any button — or hover on a computer — and it will explain what it does.</span>
+        </div>
       </header>
 
       <div class="map-tools">
-        <button class="tool-btn" id="turnToggle" type="button" aria-pressed="false">Pause the turning</button>
+        <button class="tool-btn" id="turnToggle" type="button" aria-pressed="false" title="Pause or resume the slow turning of the worlds around the sun.">Pause the turning</button>
         <p class="map-note">Orbit rings are compressed to fit the page — every distance is given true in the labels, the record panel, and the table. The turning is illustrative, not to scale.</p>
       </div>
 
@@ -351,12 +375,12 @@
           <div class="cut-item">
             <h3>The gods are outside</h3>
             <p>The gods are beyond the wall. They can see in, but they cannot touch, interact with, or influence anything inside the sphere.</p>
-            <button class="tool-btn" type="button" data-select="gods">Show the Gods on the map</button>
+            <button class="tool-btn" type="button" data-select="gods" title="Open the record of the gods, who watch the sphere from outside its wall.">Show the Gods on the map</button>
           </div>
           <div class="cut-item">
             <h3>The Fog of Life</h3>
             <p>From Toril's surface, neither sun nor stars are seen. The Fog of Life fills the sky — grey light and grey dark. The Sun still burns at the center; it is simply never seen.</p>
-            <button class="tool-btn" type="button" data-select="toril">Show Toril on the map</button>
+            <button class="tool-btn" type="button" data-select="toril" title="Open Toril's record — the world the Bastion stands on.">Show Toril on the map</button>
           </div>
           <div class="cut-item">
             <h3>Power is drawn, not granted</h3>
@@ -365,12 +389,12 @@
           <div class="cut-item">
             <h3>The other worlds</h3>
             <p>In and of themselves, the other planets have not directly been touched by portals — no rifts opened on them. But incursions have been made by the demons, with Toril as the demons' home base for those incursions.</p>
-            <button class="tool-btn" type="button" data-select="glyth">Show an outer world on the map</button>
+            <button class="tool-btn" type="button" data-select="glyth" title="Open Glyth's record — the ringed world and its three moons.">Show an outer world on the map</button>
           </div>
           <div class="cut-item">
             <h3>Stations of the sphere</h3>
             <p>The Rock of Bral — spelled B-R-A-L, pronounced “brawl” — still floats anchored above the Bastion, out in deep space off Toril's surface — a trading point between the cities. A couple of other stations exist besides it; their names and placements are not in the record.</p>
-            <button class="tool-btn" type="button" data-select="rockofbral">Show the Rock of Bral</button>
+            <button class="tool-btn" type="button" data-select="rockofbral" title="Open the Rock of Bral's record — the station anchored above the Bastion.">Show the Rock of Bral</button>
           </div>
         </div>
       </section>
@@ -486,7 +510,7 @@
 
         <div class="sj-filter">
           <label for="fleetFilter">Find a ship in the fleets below:</label>
-          <input id="fleetFilter" type="search" placeholder="Try “Mammoth”, “Wasp”, “Vodoni”…" autocomplete="off" />
+          <input id="fleetFilter" type="search" placeholder="Try “Mammoth”, “Wasp”, “Vodoni”…" autocomplete="off" title="Type to filter the spelljammer fleet list by name." />
           <p class="filter-note" id="filterNote" aria-live="polite"></p>
         </div>
 
@@ -1212,11 +1236,15 @@
           panel.insertBefore(headWrap, dl);
           makeCollapsible(panel, headWrap, [dl]);
         })();
-        /* Page head: intro + meta nest inside the title header */
+        /* Page head: intro + meta nest inside the title header. The help
+           marker + line stand outside the fold, always visible. */
         (function () {
           var head = document.querySelector("header.page-head"); if (!head) return;
           var h1 = head.querySelector("h1"); if (!h1) return;
-          makeCollapsible(head, h1, childrenExcept(head, h1));
+          var help = head.querySelector(".help-row");
+          var nodes = childrenExcept(head, h1).filter(function (n) { return n !== help; });
+          makeCollapsible(head, h1, nodes);
+          if (help) head.appendChild(help);
         })();
         /* Each top-level section: its h2 is the header, everything else nests inside */
         document.querySelectorAll("main > section").forEach(function (sec) {
@@ -1361,6 +1389,148 @@
             btn.addEventListener("click", function () { openDetail(false); });
           });
         })();
+      })();
+    </script>
+    <script>
+      /* PRESS-AND-HOLD HELP (touch / pen only): there is no hover on a touch
+         screen, so a titled control's help is reached by holding it. A quick
+         tap behaves completely normally; a hold of ~550ms without moving
+         shows the title in a bubble, and that press must not fire the
+         control — the click it would produce is swallowed exactly once.
+         The mouse is ignored entirely: native hover tooltips rule there.
+         Delegated on the document in the capture phase, so every titled
+         control on the page, present and future, is covered. */
+      (function () {
+        var HOLD_MS = 550;
+        var MOVE_TOLERANCE = 10; /* px of finger drift allowed before the hold counts as moved */
+        var bubble = null;
+        var timer = null;
+        var holdTarget = null;   /* the titled element being held */
+        var holdTitle = "";
+        var activePointerId = null;
+        var startX = 0, startY = 0;
+        var holdInProgress = false; /* from a titled pointerdown until the press ends or is cancelled */
+        var bubbleShown = false;
+        var swallowArmed = false;   /* the shown hold owes us one swallowed click */
+
+        function titledFrom(target) {
+          if (!target || typeof target.closest !== "function") return null;
+          var el = target.closest("[title]");
+          if (!el) return null;
+          var t = el.getAttribute("title");
+          if (!t || !t.replace(/\s+/g, "")) return null;
+          return el;
+        }
+
+        function ensureBubble() {
+          if (bubble) return bubble;
+          bubble = document.createElement("div");
+          bubble.className = "hold-tip";
+          bubble.setAttribute("role", "tooltip");
+          bubble.setAttribute("aria-hidden", "true");
+          document.body.appendChild(bubble);
+          return bubble;
+        }
+
+        function showBubble() {
+          var el = holdTarget;
+          if (!el) return;
+          var b = ensureBubble();
+          b.textContent = holdTitle;
+          b.style.visibility = "hidden";
+          b.classList.add("show");
+          var rect = el.getBoundingClientRect();
+          var w = b.offsetWidth, h = b.offsetHeight;
+          var left = rect.left + rect.width / 2 - w / 2;
+          left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+          var top = rect.top - h - 10;
+          if (top < 8) top = rect.bottom + 10;
+          top = Math.max(8, Math.min(top, window.innerHeight - h - 8));
+          b.style.left = left + "px";
+          b.style.top = top + "px";
+          b.style.visibility = "";
+          bubbleShown = true;
+          swallowArmed = true;
+          /* A held form field must not keep the focus the press gave it. */
+          if (document.activeElement === el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.blur();
+        }
+
+        function hideBubble() {
+          if (bubble) bubble.classList.remove("show");
+          bubbleShown = false;
+        }
+
+        function clearTimer() {
+          if (timer !== null) { clearTimeout(timer); timer = null; }
+        }
+
+        function endPress() {
+          clearTimer();
+          hideBubble();
+          holdInProgress = false;
+          holdTarget = null;
+          activePointerId = null;
+        }
+
+        document.addEventListener("pointerdown", function (ev) {
+          if (ev.pointerType !== "touch" && ev.pointerType !== "pen") return; /* mouse: native hover */
+          /* A fresh press supersedes any click-swallow a previous hold left armed
+             (its click, if any, has already been and gone by now). */
+          swallowArmed = false;
+          endPress();
+          var el = titledFrom(ev.target);
+          if (!el) return;
+          holdTarget = el;
+          holdTitle = el.getAttribute("title");
+          activePointerId = ev.pointerId;
+          startX = ev.clientX; startY = ev.clientY;
+          holdInProgress = true;
+          timer = setTimeout(function () {
+            timer = null;
+            if (!holdInProgress || !holdTarget) return; /* released or moved first */
+            showBubble();
+          }, HOLD_MS);
+        }, true);
+
+        document.addEventListener("pointermove", function (ev) {
+          if (!holdInProgress || ev.pointerId !== activePointerId) return;
+          var dx = ev.clientX - startX, dy = ev.clientY - startY;
+          if (dx * dx + dy * dy > MOVE_TOLERANCE * MOVE_TOLERANCE) {
+            /* Movement cancels the pending hold and dismisses a shown bubble.
+               If the bubble had shown, the click-swallow stays armed: this same
+               press still must not fire the control when it is released. */
+            clearTimer();
+            hideBubble();
+            holdInProgress = false;
+            holdTarget = null;
+            activePointerId = null;
+          }
+        }, true);
+
+        function onUp(ev) {
+          if (activePointerId !== null && ev.pointerId !== activePointerId) return;
+          if (!holdInProgress && !bubbleShown) return;
+          /* The bubble goes away with the press; a click-swallow armed by a
+             shown bubble survives until the click it belongs to arrives. */
+          endPress();
+        }
+        document.addEventListener("pointerup", onUp, true);
+        document.addEventListener("pointercancel", onUp, true);
+
+        /* Swallow the click a shown hold would otherwise fire — exactly once. */
+        document.addEventListener("click", function (ev) {
+          if (!swallowArmed) return;
+          swallowArmed = false;
+          ev.preventDefault();
+          ev.stopPropagation();
+          ev.stopImmediatePropagation();
+        }, true);
+
+        /* No native long-press menu on a titled control mid-hold. */
+        document.addEventListener("contextmenu", function (ev) {
+          if (!holdInProgress && !bubbleShown) return;
+          if (titledFrom(ev.target)) ev.preventDefault();
+        }, true);
       })();
     </script>
   </body>
