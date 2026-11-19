@@ -125,6 +125,8 @@
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
   .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+  #initiativePanel .init-log-tools{display:flex;justify-content:flex-end;margin:.15rem 0}
+  #initiativePanel .init-log-tools .init-lock-btn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
   .init-topbar .init-size-row{display:none}
   #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
@@ -296,7 +298,7 @@
       <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
     <div class="init-block" data-block="list"><div class="init-list" id="initList"></div></div>
-    <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
+    <div class="init-block" data-block="log"><div class="init-log-tools"><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-log" id="initLog"></div></div>
     <div class="init-block" data-block="saved"><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
@@ -1353,6 +1355,27 @@ function initReset(){
   initZeroClocks();
   saveInitiative(); renderInitiative();
 }
+let initClearLogArm = null;
+function initClearLog(){
+  if (!initState.log || !initState.log.length) return;
+  /* Same two-tap arm as Clear all — one stray tap at a live
+     table should not wipe the fight's record. Saved scenarios
+     keep their own logs; only the live log clears. */
+  const btn = $("initClearLogBtn");
+  if (!initClearLogArm) {
+    initClearLogArm = setTimeout(() => {
+      initClearLogArm = null;
+      if (btn) { btn.textContent = "Clear log"; btn.classList.remove("armed"); }
+    }, 4000);
+    if (btn) { btn.textContent = "Tap again to clear"; btn.classList.add("armed"); }
+    return;
+  }
+  clearTimeout(initClearLogArm); initClearLogArm = null;
+  if (btn) { btn.textContent = "Clear log"; btn.classList.remove("armed"); }
+  initState.log = [];
+  saveInitiative(); renderInitiative();
+}
+$("initClearLogBtn").addEventListener("click", initClearLog);
 let initClearArm = null;
 function initClear(){
   if (!initState.list.length) return;
@@ -1554,6 +1577,7 @@ window.addEventListener("pagehide", () => {
     head: ["round", "roundup", "rounddown", "roundset", "sessin", "sessout", "world", "helpq", "reset"],
     form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
     partyadd: ["pname", "padd"],
+    logbar: ["clearlog"],
     row1: ["drag", "turn", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"],
     row2: ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"],
     partyrow: ["name", "mod", "ac", "hp", "fort", "ref", "will", "del"],
@@ -1621,12 +1645,13 @@ window.addEventListener("pagehide", () => {
     if (grp === "head") return panel.querySelector(".init-head");
     if (grp === "form") return panel.querySelector(".init-form");
     if (grp === "partyadd") return panel.querySelector(".init-party-add");
+    if (grp === "logbar") return panel.querySelector(".init-log-tools");
     return null;
   }
   function applyStatic() {
     var rec = layRec();
     validOrder("blocks", rec.blocks).forEach(function (k) { var b = panel.querySelector('[data-block="' + k + '"]'); if (b) panel.appendChild(b); });
-    ["head", "form", "partyadd"].forEach(function (grp) {
+    ["head", "form", "partyadd", "logbar"].forEach(function (grp) {
       var cont = containerOf(grp); if (!cont) return;
       validOrder(grp, rec[grp]).forEach(function (k) { var el = cont.querySelector('[data-mk="' + k + '"]'); if (el) cont.appendChild(el); });
     });
