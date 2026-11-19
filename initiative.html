@@ -290,10 +290,11 @@
     #initiativePanel .init-row{padding:.14rem .38rem;border-radius:7px}
     #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.13rem}
     #initiativePanel .init-line2{margin-top:.1rem}
-    #initiativePanel .init-name{font-size:.9rem;flex:1 1 2.6rem;min-width:min-content;white-space:nowrap}
+    #initiativePanel .init-name{font-size:.9rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
     #initiativePanel .init-drag{min-width:22px;min-height:24px;padding:.04rem .06rem}
     #initiativePanel .init-turn{display:none}
+  #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
     #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
     #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:24px;padding:.06rem .14rem}
     #initiativePanel .init-save{width:2rem !important}
@@ -2015,8 +2016,9 @@ window.addEventListener("pagehide", () => {
   window.__mkOrder = function (grp, keys) { return validOrder(grp, layRec()[grp], keys); };
 
   /* ---- the action bar (its original record and size scheme) ---- */
+  function mkPhone() { return window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)").matches; }
   function applyBarSize(btn, level) {
-    if (level === 0) { btn.style.flex = "0 1 auto"; btn.style.padding = ".32rem .55rem"; btn.style.fontSize = ".85rem"; }
+    if (level === 0) { btn.style.flex = "0 1 auto"; if (mkPhone()) { btn.style.padding = ".06rem .3rem"; btn.style.fontSize = ".72rem"; } else { btn.style.padding = ".32rem .55rem"; btn.style.fontSize = ".85rem"; } }
     else if (level === 2) { btn.style.flex = "1 1 34%"; btn.style.padding = ""; btn.style.fontSize = ""; }
     else if (level === 3) { btn.style.flex = "1 1 100%"; btn.style.padding = ""; btn.style.fontSize = ""; }
     else { btn.style.flex = ""; btn.style.padding = ""; btn.style.fontSize = ""; }
@@ -2040,6 +2042,13 @@ window.addEventListener("pagehide", () => {
 
   /* ---- everything else: sizes, static orders, selection ---- */
   function applyMkSize(el, level) {
+    if (mkPhone()) {
+      if (level === 0) { el.style.fontSize = ".68rem"; el.style.padding = ".08rem .25rem"; }
+      else if (level === 2) { el.style.fontSize = ".86rem"; el.style.padding = ".24rem .45rem"; }
+      else if (level === 3) { el.style.fontSize = ".95rem"; el.style.padding = ".34rem .6rem"; }
+      else { el.style.fontSize = ""; el.style.padding = ""; }
+      return;
+    }
     if (level === 0) { el.style.fontSize = ".8rem"; el.style.padding = ".14rem .35rem"; }
     else if (level === 2) { el.style.fontSize = ".98rem"; el.style.padding = ".38rem .62rem"; }
     else if (level === 3) { el.style.fontSize = "1.08rem"; el.style.padding = ".52rem .8rem"; }
