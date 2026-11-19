@@ -129,6 +129,7 @@
   #initiativePanel .init-size-row{display:none}
   #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
   #initiativePanel .init-help-line{font-size:.8rem;opacity:.75;margin:.15rem 0 .35rem}
+  #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
   .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
@@ -235,7 +236,7 @@
       <button type="button" class="init-clock" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
-      <button type="button" class="init-lock-btn" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+      <span class="init-help-q" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button type="button" class="init-lock-btn" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
     <p class="init-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
