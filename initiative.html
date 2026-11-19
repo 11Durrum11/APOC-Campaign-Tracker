@@ -128,6 +128,7 @@
   body.init-arranging #initiativePanel .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:.35rem 0 0;font-size:.85rem}
   #initiativePanel .init-size-row{display:none}
   #initiativePanel .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  #initiativePanel .init-help-line{font-size:.8rem;opacity:.75;margin:.15rem 0 .35rem}
   .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   #initiativePanel .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
@@ -236,6 +237,7 @@
       <span class="init-worldclock" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
       <button type="button" class="init-lock-btn" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
+    <p class="init-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" hidden>Reset layout</button>
