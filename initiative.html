@@ -156,7 +156,6 @@
   #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
   #initiativePanel .init-round{cursor:pointer}
-  #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
   #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
   #initiativePanel .init-stint{cursor:pointer}
@@ -253,7 +252,8 @@
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
       <span class="init-round" data-mk="round" data-mkgrp="head" id="initRound" title="The current round — click to advance to the next round">Round 1</span>
-      <button type="button" class="init-lock-btn" data-mk="roundset" data-mkgrp="head" id="initRoundSetBtn" title="Type the round number instead of clicking through — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998; Set round</button>
+      <button type="button" class="init-lock-btn" data-mk="roundup" data-mkgrp="head" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button>
+      <button type="button" class="init-lock-btn" data-mk="rounddown" data-mkgrp="head" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
@@ -1391,45 +1391,21 @@ function initRoundAdvance(){
   saveInitiative(); renderInitiative();
 }
 $("initRound").addEventListener("click", initRoundAdvance);
-/* Set the round by typing it (Shaun, 2026-11-18 — restored
-   as its own control beside the readout; the readout keeps
-   click-to-advance): the editor changes ONLY the number.
-   Durations tick on real advances; the in-world clock
-   follows the number because it is read from the round. */
-let initRoundEditing = false;
-function initRoundSetOpen(){
-  if (initRoundEditing) return;
-  const span = $("initRound"); if (!span) return;
-  initRoundEditing = true;
-  const inp = document.createElement("input");
-  inp.type = "number"; inp.min = "1"; inp.step = "1";
-  inp.value = String(initState.round || 1);
-  inp.className = "init-round-input";
-  inp.title = "Type the round number, then press Enter — Escape cancels";
-  inp.setAttribute("aria-label", "Round number");
-  span.style.display = "none";
-  span.parentNode.insertBefore(inp, span.nextSibling);
-  inp.focus(); inp.select();
-  let done = false;
-  const close = (commit) => {
-    if (done) return; done = true;
-    initRoundEditing = false;
-    const v = parseInt(inp.value, 10);
-    inp.remove(); span.style.display = "";
-    if (commit && Number.isFinite(v) && v >= 1 && v !== initState.round) {
-      initState.round = v;
-      saveInitiative();
-    }
-    renderInitiative();
-  };
-  inp.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); close(true); }
-    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
-  });
-  inp.addEventListener("change", () => close(true));
-  inp.addEventListener("blur", () => close(true));
+/* Step the round by hand (Shaun, 2026-11-18 — two little
+   arrows at the readout, replacing the typed editor from
+   earlier the same evening): an arrow step is a manual set
+   and changes ONLY the number — no wrap effects, no
+   duration ticks; the in-world clock follows the number
+   because it is read from the round. Floor at Round 1.
+   Clicking the readout keeps its full advance. */
+function initRoundStep(delta){
+  const v = Math.max(1, (initState.round || 1) + delta);
+  if (v === initState.round) return;
+  initState.round = v;
+  saveInitiative(); renderInitiative();
 }
-$("initRoundSetBtn").addEventListener("click", initRoundSetOpen);
+$("initRoundUpBtn").addEventListener("click", () => initRoundStep(1));
+$("initRoundDownBtn").addEventListener("click", () => initRoundStep(-1));
 $("initSessIn").addEventListener("click", () => initTallyClick("in"));
 $("initSessOut").addEventListener("click", () => initTallyClick("out"));
 $("initClockResetBtn").addEventListener("click", () => {
@@ -1531,7 +1507,7 @@ window.addEventListener("pagehide", () => {
   var barShipped = barBtns.map(function (b) { return b.id; });
   var DEFAULTS = {
     blocks: ["header", "bar", "party", "form", "list", "log", "saved"],
-    head: ["round", "roundset", "sessin", "sessout", "world", "helpq", "reset"],
+    head: ["round", "roundup", "rounddown", "sessin", "sessout", "world", "helpq", "reset"],
     form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
     partyadd: ["pname", "padd"],
     row1: ["drag", "turn", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"],
