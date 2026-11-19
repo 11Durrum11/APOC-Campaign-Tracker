@@ -183,6 +183,10 @@
   #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
   #initiativePanel .init-round{cursor:pointer}
+  #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:hsla(222,20%,14%,.35)}
+  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;padding:.18rem .5rem}
+  #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
+  #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
   #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
@@ -291,6 +295,8 @@
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
     #initiativePanel .init-drag{min-width:22px;min-height:24px;padding:.04rem .06rem}
     #initiativePanel .init-turn{display:none}
+  #initiativePanel .init-roundbox .init-round{padding:.1rem .4rem}
+  #initiativePanel .init-round-btn{min-height:24px;padding:.1rem .34rem}
   #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
     #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
     #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:24px;padding:.06rem .14rem}
@@ -354,10 +360,7 @@
     <div class="init-block" data-block="header">
     <div class="init-head">
       <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
-      <span class="init-round" data-mk="round" data-mkgrp="head" id="initRound" title="The current round — click to advance to the next round">Round 1</span>
-      <button type="button" class="init-lock-btn" data-mk="roundup" data-mkgrp="head" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button>
-      <button type="button" class="init-lock-btn" data-mk="rounddown" data-mkgrp="head" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button>
-      <button type="button" class="init-lock-btn" data-mk="roundset" data-mkgrp="head" id="initRoundSetBtn" title="Type the round number instead of clicking through — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998; Set round</button>
+      <span class="init-roundbox" data-mk="round" data-mkgrp="head"><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
@@ -1955,7 +1958,7 @@ window.addEventListener("pagehide", () => {
   var barShipped = barBtns.map(function (b) { return b.id; });
   var DEFAULTS = {
     blocks: ["header", "bar", "party", "form", "list", "log", "saved"],
-    head: ["round", "roundup", "rounddown", "roundset", "sessin", "sessout", "world", "helpq", "reset"],
+    head: ["round", "sessin", "sessout", "world", "helpq", "reset"],
     form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
     partyadd: ["paddtoggle", "pname", "padd"],
     logbar: ["clearlog"],
