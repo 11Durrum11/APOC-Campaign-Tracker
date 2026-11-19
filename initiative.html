@@ -176,6 +176,7 @@
   #initiativePanel .init-saved-log{margin-top:.3rem;font-size:.85rem}
   #initiativePanel .init-saved-log summary{cursor:pointer;opacity:.85}
   #initiativePanel .init-controls .btn[disabled]{opacity:.45;cursor:default}
+  #initiativePanel .init-controls .btn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   /* Phone side (Shaun's definition, 2026-11-18): phones AND tablets. */
   @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
     .panel{padding:16px}
@@ -574,7 +575,7 @@ function archiveInitiative(){
 function renderInitSaved(){
   const wrap = $("initSaved"); if (!wrap) return;
   const saved = initState.saved || [];
-  if (!saved.length) { wrap.innerHTML = ""; return; }
+  if (!saved.length) { wrap.innerHTML = '<h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><p class="init-empty">No saved scenarios yet — run a fight, and when the board closes it will be kept here.</p>'; return; }
   wrap.innerHTML = '<h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4>' + saved.map((s, si) => {
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     const who = (s.list || []).map(c => {
@@ -943,6 +944,14 @@ function renderInitiative(){
       saveInitiative(); renderInitiative();
     }
   }));
+  wrap.querySelectorAll("[data-init-dur]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initDur);
+    if (!c || !(c.statuses || []).length) return;
+    const d = parseInt(inp.value, 10) || 0;
+    const last = c.statuses[c.statuses.length - 1];
+    c.statuses[c.statuses.length - 1] = { n: stName(last), d: d > 0 ? d : null };
+    saveInitiative(); renderInitiative();
+  }));
   wrap.querySelectorAll("[data-chip-del]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.chipDel);
     if (c) { c.statuses.splice(parseInt(b.dataset.chipIdx, 10), 1); saveInitiative(); renderInitiative(); }
@@ -987,6 +996,10 @@ function renderInitiative(){
     initState.list = initState.list.filter(x => x.id !== gone);
     if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
     if (wasRunning) { if (initState.list.length) initOpenStint(); else initState.turnStart = null; }
+    /* A blank scenario starts with a blank log: when the board
+       becomes empty, the log clears with it instead of greeting
+       the next visit above an empty board. */
+    if (!initState.list.length) initState.log = [];
     saveInitiative(); renderInitiative();
   }));
   /* Drag reorder by the handle: pointer-driven, so it works with
@@ -1194,9 +1207,24 @@ function initReset(){
   initZeroClocks();
   saveInitiative(); renderInitiative();
 }
+let initClearArm = null;
 function initClear(){
   if (!initState.list.length) return;
-  if (!confirm("Clear the whole initiative board?")) return;
+  /* In-page confirm (two taps) — the native confirm() dialog is
+     the one control test browsers and some webviews cannot answer,
+     which left this button looking dead; the arm pattern works
+     everywhere a tap does. */
+  const btn = $("initClearBtn");
+  if (!initClearArm) {
+    initClearArm = setTimeout(() => {
+      initClearArm = null;
+      if (btn) { btn.textContent = "Clear all"; btn.classList.remove("armed"); }
+    }, 4000);
+    if (btn) { btn.textContent = "Tap again to clear"; btn.classList.add("armed"); }
+    return;
+  }
+  clearTimeout(initClearArm); initClearArm = null;
+  if (btn) { btn.textContent = "Clear all"; btn.classList.remove("armed"); }
   sessionSettle();
   const endedMs = initState.started ? sessionTally.combatMs : 0;
   initSnapshot();
