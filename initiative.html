@@ -138,8 +138,15 @@
   #initiativePanel .init-pic-x{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem .35rem}
   #initiativePanel .init-pic-note{flex:1 1 100%;color:var(--muted);font-size:.9em}
   #initiativePanel .init-pic-note:empty{display:none}
-  #initiativePanel .init-form.folded > *:not(#initAddToggle):not(.block-grip){display:none !important}
+  #initiativePanel .init-form.folded > *:not(.block-grip){display:none !important}
   #initiativePanel .init-party-add.folded > *:not(#initPartyAddToggle){display:none !important}
+  /* The Add a combatant button lives in the action bar now
+     (Shaun, 2026-11-19), so a folded form has nothing of its
+     own left to show: the whole block leaves the page until
+     the form is opened. While arranging it stays on the page
+     as a strip, so its grip can still be dragged. */
+  #initiativePanel .init-form.folded{display:none}
+  body.init-arranging #initiativePanel .init-form.folded{display:flex}
   #initiativePanel .init-fold-toggle{flex:0 0 auto}
   body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
   .init-topbar .init-size-row{display:none}
@@ -289,22 +296,22 @@
       <button type="button" class="btn" id="initCombatResetBtn" title="End the fight: HP back to full, statuses and rolls cleared — the XP tally of the fallen is shown first">Reset combat</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal, Clear all or Reset combat">↩ Undo</button>
-      <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole party roster onto the board — each member rolls their own initiative">Add party</button>
-      <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved party roster">Party roster</button>
+      <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add a combatant — open the form to add someone to the fight; tap again to fold it away">▸ Add a combatant</button>
+      <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
+      <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
     <div class="init-tally" id="initTally" hidden></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
-      <h4 title="The saved party — the Add party button drops them all onto the board">Party roster</h4>
+      <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
       <div id="initPartyRows"></div>
       <div class="init-party-add">
-        <button type="button" class="btn init-fold-toggle" data-mk="paddtoggle" data-mkgrp="partyadd" id="initPartyAddToggle" title="Add party — open the form to add someone to the party roster; tap again to fold it away">▸ Add party</button>
+        <button type="button" class="btn init-fold-toggle" data-mk="paddtoggle" data-mkgrp="partyadd" id="initPartyAddToggle" title="Add PC — open the form to add someone to the PC roster; tap again to fold it away">▸ Add PC</button>
         <input id="initPartyName" data-mk="pname" data-mkgrp="partyadd" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
         <button type="button" class="btn" data-mk="padd" data-mkgrp="partyadd" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
       </div>
     </div>
     <div class="init-form init-block" data-block="form">
-      <button type="button" class="btn init-fold-toggle" data-mk="addtoggle" data-mkgrp="form" id="initAddToggle" title="Add a combatant — open the form to add someone to the fight; tap again to fold it away">▸ Add a combatant</button>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
@@ -960,7 +967,7 @@ function renderInitiative(){
       ref: '<label class="init-lab" data-mk="ref" data-mkgrp="row1">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" title="Reflex save" data-init-ref="' + c.id + '"></label>',
       will: '<label class="init-lab" data-mk="will" data-mkgrp="row1">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" title="Will save" data-init-will="' + c.id + '"></label>',
       dup: '<button type="button" class="init-dup" data-mk="dup" data-mkgrp="row1" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">\u29C9</button>',
-      toparty: '<button type="button" class="init-toparty" data-mk="toparty" data-mkgrp="row1" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the party roster" aria-label="Add ' + esc(c.name) + ' to the party roster">\uD83D\uDC65</button>',
+      toparty: '<button type="button" class="init-toparty" data-mk="toparty" data-mkgrp="row1" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the PC roster" aria-label="Add ' + esc(c.name) + ' to the PC roster">\uD83D\uDC65</button>',
       del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="row1" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">\u2715</button>'
     };
     const seg2 = {
@@ -1608,10 +1615,11 @@ $("initPicFile").addEventListener("change", async (e) => {
   } catch (err) { if (note) note.textContent = "The upload didn't go through — paste a link instead."; }
 });
 /* Nested add forms (Shaun, 2026-11-19): the whole add-combatant
-   form nests inside its Add a combatant button, and the roster's
-   add form inside its Add party button — closed shows the button
-   alone, nothing of the form. The open/closed choice is kept per
-   device; closed is the shipped default. */
+   form nests inside its Add a combatant button — which sits in
+   the action bar, so a closed form leaves no box on the page at
+   all — and the roster's add form inside its Add PC button,
+   which stays in the roster box. The open/closed choice is kept
+   per device; closed is the shipped default. */
 function initFoldGet(k){ try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } }
 function initFoldSet(k, v){ try { localStorage.setItem(k, v ? "1" : "0"); } catch (e) {} }
 function initFoldApply(){
@@ -1622,7 +1630,7 @@ function initFoldApply(){
   const pa = document.querySelector(".init-party-add");
   const po = initFoldGet("apoc-init-partyaddopen");
   if (pa) pa.classList.toggle("folded", !po);
-  const pb = $("initPartyAddToggle"); if (pb) pb.textContent = (po ? "▾" : "▸") + " Add party";
+  const pb = $("initPartyAddToggle"); if (pb) pb.textContent = (po ? "▾" : "▸") + " Add PC";
 }
 $("initAddToggle").addEventListener("click", () => { initFoldSet("apoc-init-addopen", !initFoldGet("apoc-init-addopen")); initFoldApply(); });
 $("initPartyAddToggle").addEventListener("click", () => { initFoldSet("apoc-init-partyaddopen", !initFoldGet("apoc-init-partyaddopen")); initFoldApply(); });
@@ -1847,7 +1855,7 @@ window.addEventListener("pagehide", () => {
   var DEFAULTS = {
     blocks: ["header", "bar", "party", "form", "list", "log", "saved"],
     head: ["round", "roundup", "rounddown", "roundset", "sessin", "sessout", "world", "helpq", "reset"],
-    form: ["addtoggle", "name", "total", "mod", "ac", "hp", "qty", "add"],
+    form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
     partyadd: ["paddtoggle", "pname", "padd"],
     logbar: ["clearlog"],
     row1: ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"],
@@ -1979,7 +1987,7 @@ window.addEventListener("pagehide", () => {
   });
 
   /* Block grips: one strip per block, visible only while arranging. */
-  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "Party roster", form: "Add a combatant", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add a combatant", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
   Object.keys(BLOCK_NAMES).forEach(function (k) {
     var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
     var g = document.createElement("div");
