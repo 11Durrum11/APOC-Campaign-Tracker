@@ -125,8 +125,8 @@
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
   .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
-  #initiativePanel .init-log-tools{display:flex;justify-content:flex-end;margin:.15rem 0}
-  #initiativePanel .init-log-tools .init-lock-btn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
+  #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:1rem;margin-bottom:.4rem}
+  #initiativePanel #initClearLogBtn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   #initiativePanel .init-pic{flex:0 0 auto;width:2.1em;height:2.1em;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px dashed var(--card-border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;overflow:hidden}
   #initiativePanel .init-pic.has{border-style:solid}
   #initiativePanel .init-pic img{width:100%;height:100%;object-fit:cover;display:block}
@@ -165,8 +165,7 @@
   [title]{-webkit-touch-callout:none}
   .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
-  #initiativePanel .init-saved{margin-top:1rem}
-  #initiativePanel .init-saved h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-saved-head h4{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
   #initiativePanel .init-saved-row{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
   #initiativePanel .init-saved-row .init-saved-body{flex:1 1 auto;min-width:0}
   #initiativePanel .init-saved-row .when{font-weight:600}
@@ -329,8 +328,8 @@
       <button type="button" class="init-pic-x" id="initPicCloseBtn" aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
-    <div class="init-block" data-block="log"><div class="init-log-tools"><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-log" id="initLog"></div></div>
-    <div class="init-block" data-block="saved"><div class="init-saved" id="initSaved"></div></div>
+    <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -702,8 +701,8 @@ function archiveInitiative(){
 function renderInitSaved(){
   const wrap = $("initSaved"); if (!wrap) return;
   const saved = initState.saved || [];
-  if (!saved.length) { wrap.innerHTML = '<h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><p class="init-empty">No saved scenarios yet — run a fight, and when the board closes it will be kept here.</p>'; return; }
-  wrap.innerHTML = '<h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4>' + saved.map((s, si) => {
+  if (!saved.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = saved.map((s, si) => {
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     const who = (s.list || []).map(c => {
       let t = (c.pic ? '<img class="init-saved-pic" src="' + esc(c.pic) + '" alt=""> ' : '') + esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
@@ -919,7 +918,7 @@ function renderInitiative(){
   const nn = $("initNowNext");
   if (!rows.length) {
     nn.textContent = "";
-    wrap.innerHTML = '<p class="init-empty">No combatants yet — add the first above.</p>';
+    wrap.innerHTML = '';
     return;
   }
   let ti = rows.findIndex(c => c.id === initState.turnId);
@@ -1925,7 +1924,7 @@ window.addEventListener("pagehide", () => {
     if (grp === "head") return panel.querySelector(".init-head");
     if (grp === "form") return panel.querySelector(".init-form");
     if (grp === "partyadd") return panel.querySelector(".init-party-add");
-    if (grp === "logbar") return panel.querySelector(".init-log-tools");
+    if (grp === "logbar") return panel.querySelector(".init-saved-head");
     return null;
   }
   function applyStatic() {
