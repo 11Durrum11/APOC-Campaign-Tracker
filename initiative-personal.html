@@ -133,8 +133,10 @@
   /* Roll ALL and Rolling are ONE button with two halves (Shaun, 2026-11-20):
      joined at a single seam — the left half rolls everyone, the right half
      turns rolling initiative on or off. */
-  #initiativePanel #initRollAllBtn{border-right:none;border-top-right-radius:0;border-bottom-right-radius:0}
-  #initiativePanel #initRollingBtn{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-.4rem}
+  #initiativePanel #initRollAllBtn{border-top-right-radius:5px;border-bottom-right-radius:5px}
+  #initiativePanel #initRollingBtn{border-top-left-radius:5px;border-bottom-left-radius:5px;margin-left:-.25rem;padding-left:0;padding-right:0}
+  #initiativePanel #initRollingBtn [data-onoff]{display:inline-block;padding:.3rem .55rem}
+  #initiativePanel #initRollingBtn [data-onoff="off"]{border-left:1px solid var(--card-border)}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
@@ -285,7 +287,8 @@
     #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
     #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
     #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
-    #initiativePanel #initRollingBtn{margin-left:-.2rem}
+    #initiativePanel #initRollingBtn{margin-left:-.1rem}
+    #initiativePanel #initRollingBtn [data-onoff]{padding:.05rem .38rem}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
     #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
@@ -369,7 +372,7 @@
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
-      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
+      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
@@ -974,7 +977,7 @@ function renderInitiative(){
   renderInitLog();
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
-  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
+  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
   const rows = initSorted();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
@@ -1823,9 +1826,13 @@ $("initClockResetBtn").addEventListener("click", () => {
   sessionTally.inMs = 0; sessionTally.outMs = 0; sessionTally.combatMs = 0;
   sessionPersist(); paintSessionClocks();
 });
-$("initRollingBtn").addEventListener("click", () => {
-  initState.rolling = !initState.rolling;
-  initLog("Rolling initiative " + (initState.rolling ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
+$("initRollingBtn").addEventListener("click", (ev) => {
+  const seg = ev.target && ev.target.closest ? ev.target.closest("[data-onoff]") : null;
+  if (!seg) return;
+  const want = seg.getAttribute("data-onoff") === "on";
+  if (initState.rolling === want) return;
+  initState.rolling = want;
+  initLog("Rolling initiative " + (want ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
   saveInitiative(); renderInitiative();
 });
 $("initAddBtn").addEventListener("click", initAdd);
