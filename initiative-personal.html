@@ -92,6 +92,7 @@
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
   #initiativePanel .init-form.folded > *:not(#initAddFoeBtn){display:none !important}
+  #initiativePanel .init-form.folded input, #initiativePanel .init-form.folded #initAddBtn{display:none !important}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
   #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
@@ -156,7 +157,7 @@
   [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
   .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
   #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
-  .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  .press-tip{position:fixed;z-index:9999;max-width:min(84vw,400px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.65rem .85rem;font-size:1.05rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
@@ -375,7 +376,7 @@
       </div>
     </div>
     <div class="init-form init-block folded" data-block="form">
-      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" aria-expanded="false" title="Add a foe — tap to open the combatant line nested under this button; tap again to fold it away">Add foe</button>
+      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" data-nohold aria-expanded="false" title="Add a foe — tap to open the combatant line nested under this button; tap again to fold it away">Add foe</button>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
@@ -394,7 +395,7 @@
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
     <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -963,7 +964,7 @@ function renderInitiative(){
   renderInitLog();
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
-  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.classList.toggle("on", !!initState.rolling); rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
+  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
   const rows = initSorted();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
@@ -1819,9 +1820,11 @@ $("initRollingBtn").addEventListener("click", () => {
 });
 $("initAddBtn").addEventListener("click", initAdd);
 $("initAddFoeBtn").addEventListener("click", () => {
-  const b = $("initAddFoeBtn"), form = b.closest(".init-form"), open = form.classList.contains("folded");
-  form.classList.toggle("folded", !open); b.setAttribute("aria-expanded", String(open));
-  if (open) $("initName").focus();
+  const b = $("initAddFoeBtn"), form = document.querySelector("#initiativePanel .init-form");
+  if (!form) return;
+  const open = form.classList.contains("folded");
+  form.classList.toggle("folded", !open); if (b) b.setAttribute("aria-expanded", String(open));
+  if (open) { const n = $("initName"); if (n) n.focus(); }
 });
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
@@ -2276,6 +2279,7 @@ window.addEventListener("pagehide", () => {
     const el = e.target.closest ? e.target.closest("[title]") : null;
     cancel(); hide(); fired = false;
     if (!el) { target = null; return; }
+    if (el.closest && el.closest("[data-nohold]")) { target = null; return; }
     target = el; sx = e.clientX; sy = e.clientY;
     timer = setTimeout(() => { fired = true; show(el); }, 550);
   }, true);
