@@ -76,6 +76,12 @@
   .init-topbar{display:flex;align-items:center;justify-content:flex-start;gap:.75rem;padding-top:6px;flex-wrap:wrap}
   .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
   .init-topbar-title{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+  /* The orange words sit centred in the middle of the page (Shaun, 2026-11-20):
+     their own full row under the Hub / Edit page row, centred left-to-right. */
+  .init-midwords{display:flex;align-items:center;justify-content:center;gap:.75rem;flex:1 1 100%;order:3;text-align:center}
+  .init-topbar>a.btn{order:1}
+  .init-topbar .init-lock-row{order:2}
+  .init-topbar .init-size-row{order:4}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
@@ -327,8 +333,7 @@
 <div class="page">
   <div class="init-topbar">
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
-    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
-    <span class="init-topbar-title">John's House — Initiative Tracker</span>
+    <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span></span>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back in its shipped place and size, from any arrangement" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
