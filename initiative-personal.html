@@ -137,6 +137,7 @@
   #initiativePanel #initRollingBtn{border-top-left-radius:5px;border-bottom-left-radius:5px;margin-left:-.25rem;padding-left:0;padding-right:0}
   #initiativePanel #initRollingBtn [data-onoff]{display:inline-block;padding:.3rem .55rem}
   #initiativePanel #initRollingBtn [data-onoff="off"]{border-left:1px solid var(--card-border)}
+  #initiativePanel #initRollingBtn[aria-pressed="true"] [data-onoff="on"],#initiativePanel #initRollingBtn[aria-pressed="false"] [data-onoff="off"]{font-size:1.3em;font-weight:700;padding:.3rem .7rem}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
@@ -291,6 +292,7 @@
     #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
     #initiativePanel #initRollingBtn{margin-left:-.1rem}
     #initiativePanel #initRollingBtn [data-onoff]{padding:.05rem .38rem}
+    #initiativePanel #initRollingBtn[aria-pressed="true"] [data-onoff="on"],#initiativePanel #initRollingBtn[aria-pressed="false"] [data-onoff="off"]{padding:.05rem .5rem}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
     #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
