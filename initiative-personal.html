@@ -218,7 +218,9 @@
   #initiativePanel .init-party[hidden]{display:none}
   #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
   #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
-  #initiativePanel .init-party-name{font:inherit;flex:1 1 8rem;min-width:5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-name{font:inherit;flex:0 1 4rem;min-width:2.5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-state{flex:1 1 auto;min-width:0;font-size:.88em;opacity:.9}
+  #initiativePanel .init-party-state:empty{display:none}
   #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
   #initiativePanel .init-party-add input{font:inherit;flex:1 1 10rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-log{margin-top:.65rem}
@@ -404,8 +406,8 @@
       <button type="button" class="btn" id="initPicUploadBtn" title="Upload a picture from this device — it is stored with the campaign pictures, and the link is what stays on the row">Upload a picture</button>
       <input type="url" id="initPicUrl" placeholder="…or paste a picture link" aria-label="Picture link" title="Paste a link to a picture instead of uploading one">
       <button type="button" class="btn" id="initPicUrlBtn" title="Use the pasted link as the picture">Set link</button>
+      <button type="button" class="btn" id="initPicCloseBtn" data-nohold aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <button type="button" class="btn" id="initPicRemoveBtn" title="Take the picture off — the slot goes back to empty">Remove</button>
-      <button type="button" class="init-pic-x" id="initPicCloseBtn" aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
     <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
@@ -931,6 +933,21 @@ function renderInitLog(){
   if (!log.length) { wrap.innerHTML = ""; return; }
   wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
 }
+function partyStateText(p){
+  const c = (initState.list || []).find(x => x.name === p.name);
+  if (!c) return "";
+  const parts = [];
+  if (typeof c.hp === "number") parts.push("HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : ""));
+  const hint = initHpHint(c); if (hint) parts.push(hint);
+  (c.statuses || []).forEach(s => { const n = stName(s); if (!n) return; const d = stDur(s); parts.push(n + (d !== null ? " (" + d + " rds)" : "")); });
+  return parts.join(" · ");
+}
+function paintPartyStates(){
+  document.querySelectorAll("[data-party-state]").forEach(sp => {
+    const p = (initState.party || []).find(x => x.id === sp.getAttribute("data-party-state"));
+    if (p) sp.textContent = partyStateText(p);
+  });
+}
 function renderParty(){
   const wrap = $("initPartyRows"); if (!wrap) return;
   if (initPicTarget && initPicTarget.kind === "party" && !initPicObj()) initPicClose();
@@ -938,7 +955,7 @@ function renderParty(){
   wrap.innerHTML = (initState.party || []).map(p => {
     const seg = {
       pic: '<button type="button" class="init-pic' + (p.pic ? ' has' : '') + '" data-mk="pic" data-mkgrp="partyrow" data-party-pic="' + p.id + '" aria-label="Picture for ' + esc(p.name) + '" title="' + (p.pic ? 'Picture for ' + esc(p.name) + ' — tap to change or remove it; it comes along when they join the fight' : 'Add a picture for ' + esc(p.name) + ' — tap to upload one or paste a link; it comes along when they join the fight') + '">' + (p.pic ? '<img src="' + esc(p.pic) + '" alt="">' : '<span aria-hidden="true">🖼</span>') + '</button>',
-      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">',
+      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '"><span class="init-party-state" data-party-state="' + p.id + '" title="This character\'s current state in the fight — hit points and statuses, kept live as the fight changes">' + esc(partyStateText(p)) + '</span>',
       mod: '<label class="init-lab" data-mk="mod" data-mkgrp="partyrow">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>',
       ac: '<label class="init-lab" data-mk="ac" data-mkgrp="partyrow">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>',
       hp: '<label class="init-lab" data-mk="hp" data-mkgrp="partyrow">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>',
@@ -988,6 +1005,7 @@ function renderInitiative(){
   if (!rows.length) {
     nn.textContent = "";
     wrap.innerHTML = '';
+    paintPartyStates();
     return;
   }
   let ti = rows.findIndex(c => c.id === initState.turnId);
@@ -1278,6 +1296,7 @@ function renderInitiative(){
     h.addEventListener("pointercancel", up);
   }));
   initTickClocks();
+  paintPartyStates();
 }
 /* Everything a new round brings, shared by the Next-turn wrap
    and the round counter's click-to-advance: the log line,
