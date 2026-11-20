@@ -367,6 +367,7 @@
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
       <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
       <div id="initPartyRows"></div>
@@ -385,7 +386,6 @@
       <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
       <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
       <span class="init-pic-for" id="initPicFor"></span>
       <button type="button" class="btn" id="initPicUploadBtn" title="Upload a picture from this device — it is stored with the campaign pictures, and the link is what stays on the row">Upload a picture</button>
@@ -2004,6 +2004,12 @@ window.addEventListener("pagehide", () => {
       var w = rec.bwidth[k];
       b.style.width = (w && w < 100) ? w + "%" : "";
     });
+    /* Saved scenarios is locked in place (Shaun, 2026-11-20): directly
+       below the buttons, above every result — it is not in BLOCKS, so
+       no saved layout, drag or reset can move it; this pins it back
+       under the action bar after every reorder. */
+    var sv = panel.querySelector('[data-block="saved"]'), bb = panel.querySelector('[data-block="bar"]');
+    if (sv && bb) bb.after(sv);
   }
 
   /* ---- looks: continuous scale, nudge, selection, clamp ---- */
