@@ -51,17 +51,16 @@
   button,select,input,textarea{color:var(--foreground)}
   button{cursor:pointer}
   :focus-visible{outline:3px solid var(--ring);outline-offset:2px}
-  .page{width:min(1180px,100%);margin:0 auto;padding:0 16px 12px}
+  .page{width:min(1180px,100%);margin:0 auto;padding:0 16px 8px}
   .panel{
     background:hsla(222,20%,14%,0);border:1px solid var(--card-border);backdrop-filter:blur(3px);
-    border-radius:var(--radius);padding:10px;margin-top:8px;
+    border-radius:var(--radius);padding:8px 10px;margin-top:6px;
     box-shadow:0 14px 32px rgba(0,0,0,.18);
   }
   .panel h2{margin:0 0 6px;font-size:clamp(1.3rem,3.4vw,1.7rem);font-weight:500}
   .panel h3{font-weight:500}
   .muted{color:var(--muted-foreground)}
   .small{font-size:.9rem}
-  .eyebrow{margin:0 0 2px;color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
   .btn{
     border:1px solid var(--card-border);background:var(--secondary);color:var(--foreground);
     border-radius:9px;padding:6px 11px;min-height:34px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
@@ -74,26 +73,27 @@
   /* Page furniture: a slim top bar tying the page to the hub —
      back to the Campaign Hub on the left, the campaign wordmark
      on the right, both in the hub's own type and colours. */
-  .init-topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-top:6px;flex-wrap:wrap}
+  .init-topbar{display:flex;align-items:center;justify-content:flex-start;gap:.75rem;padding-top:6px;flex-wrap:wrap}
   .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+  .init-topbar-title{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
      — the recovered AIDM Roster feature set). Every
      rule is scoped under #initiativePanel so nothing else on the
      page collides with it. */
-  #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.55rem;flex-wrap:wrap}
   #initiativePanel .init-round{font-weight:700;letter-spacing:.04em}
-  #initiativePanel .init-nownext{margin:.35rem 0 0;font-weight:600;min-height:1.2em}
+  #initiativePanel .init-nownext{margin:.22rem 0 0;font-weight:600;min-height:1.2em}
   #initiativePanel .init-form{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}
   #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
-  #initiativePanel .init-list{display:flex;flex-direction:column;gap:.5rem;margin:.4rem 0 .8rem}
-  #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem}
+  #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
+  #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
-  #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
-  #initiativePanel .init-line2{margin-top:.45rem}
+  #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.32rem;flex-wrap:wrap}
+  #initiativePanel .init-line2{margin-top:.32rem}
   #initiativePanel .init-turn{width:1.1rem;text-align:center;visibility:hidden}
   #initiativePanel .init-row.active .init-turn{visibility:visible}
   #initiativePanel .init-name{flex:1 1 6rem;min-width:0;overflow-wrap:anywhere;font-weight:600;cursor:default}
@@ -120,12 +120,12 @@
      right under the header / Now-Next line, above the form and the
      combatant list, and stick to the top of the view while a long
      list scrolls under them. */
-  #initiativePanel .init-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.55rem 0;padding:.45rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  #initiativePanel .init-controls{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.4rem 0;padding:.35rem .45rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
   .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
-  #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:1rem;margin-bottom:.4rem}
+  #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.65rem;margin-bottom:.28rem}
   #initiativePanel #initClearLogBtn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   #initiativePanel .init-pic{flex:0 0 auto;width:2.1em;height:2.1em;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px dashed var(--card-border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;overflow:hidden}
   #initiativePanel .init-pic.has{border-style:solid}
@@ -164,7 +164,6 @@
   [data-mk].dragging{opacity:.55}
   [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
   .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
-  #initiativePanel .init-help-line{font-size:.8rem;opacity:.75;margin:.15rem 0 .35rem}
   #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
   .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
@@ -180,7 +179,8 @@
      nonlethal fields, status durations, the party roster, the
      combat log, saved-scenario Load. */
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
-  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600}
+  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600;cursor:pointer}
+  #initiativePanel .init-worldclock:hover{opacity:.95}
   #initiativePanel .init-sessout{font-weight:600;opacity:.65}
   #initiativePanel .init-round{cursor:pointer}
   #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:hsla(222,20%,14%,.35)}
@@ -188,6 +188,7 @@
   #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
   #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
+  #initiativePanel .init-time-input{width:4.6rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
   #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
   #initiativePanel .init-stint{cursor:pointer}
@@ -216,7 +217,7 @@
   #initiativePanel .init-party-name{font:inherit;flex:1 1 8rem;min-width:5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
   #initiativePanel .init-party-add input{font:inherit;flex:1 1 10rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
-  #initiativePanel .init-log{margin-top:1rem}
+  #initiativePanel .init-log{margin-top:.65rem}
   #initiativePanel .init-log h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
   #initiativePanel .init-logbox{max-height:180px;overflow-y:auto;border:1px solid var(--card-border);border-radius:8px;padding:.45rem .6rem;font-size:.85rem}
   #initiativePanel .init-logbox div{padding:.1rem 0;border-bottom:1px dashed rgba(127,127,127,.25)}
@@ -268,66 +269,65 @@
      tap, remembers itself per device, and lets go entirely
      while arranging. */
   @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
-    .panel{padding:6px 8px}
-    .page{padding:0 6px 4px}
-    .panel{margin-top:4px}
-    .init-topbar{padding-top:2px;gap:.4rem}
-    .init-topbar .btn{font-size:.8rem;padding:.2rem .5rem;min-height:0}
-    .init-brand{font-size:.58rem;letter-spacing:.08em}
-    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:28px;padding:.16rem .45rem;font-size:.74rem}
-    #initiativePanel .init-head{gap:.2rem .35rem}
-    #initiativePanel .init-head .init-lock-btn{min-height:24px}
-    #initiativePanel .init-head .eyebrow{display:none}
+    .panel{padding:5px 7px}
+    .page{padding:0 5px 3px}
+    .panel{margin-top:3px}
+    .init-topbar{padding-top:2px;gap:.3rem}
+    .init-topbar .btn{font-size:.76rem;padding:.12rem .45rem;min-height:0}
+    .init-brand{font-size:.55rem;letter-spacing:.08em}
+    .init-topbar-title{font-size:.6rem;letter-spacing:.1em}
+    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:22px;padding:.1rem .4rem;font-size:.74rem}
+    #initiativePanel .init-head{gap:.15rem .28rem}
+    #initiativePanel .init-head .init-lock-btn{min-height:20px}
     #initiativePanel .init-round{font-size:.92rem}
-    #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.08rem .45rem;font-size:.76rem}
+    #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
     #initiativePanel .init-worldclock{font-size:.76rem}
     #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
-    #initiativePanel .init-help-line{display:none}
-    #initiativePanel .init-nownext{margin:.08rem 0 0;font-size:.88rem;min-height:1.1em;line-height:1.2}
-    #initiativePanel .init-controls{gap:.28rem;margin:.28rem 0;padding:.28rem .32rem}
-    #initiativePanel .init-controls .btn{min-height:25px;padding:.1rem .42rem;font-size:.78rem}
+    #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.86rem;min-height:1em;line-height:1.15}
+    #initiativePanel .init-controls{gap:.24rem;margin:.2rem 0;padding:.18rem .24rem}
+    #initiativePanel .init-controls .btn{min-height:22px;padding:.07rem .4rem;font-size:.78rem}
     #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
-    #initiativePanel .init-list{gap:.2rem;margin:.22rem 0 .3rem}
-    #initiativePanel .init-row{padding:.14rem .38rem;border-radius:7px}
-    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.13rem}
-    #initiativePanel .init-line2{margin-top:.1rem}
+    #initiativePanel .init-list{gap:.15rem;margin:.18rem 0 .24rem}
+    #initiativePanel .init-row{padding:.08rem .34rem;border-radius:7px}
+    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.11rem}
+    #initiativePanel .init-line2{margin-top:.08rem}
     #initiativePanel .init-name{font-size:.9rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
-    #initiativePanel .init-drag{min-width:22px;min-height:24px;padding:.04rem .06rem}
+    #initiativePanel .init-drag{min-width:22px;min-height:22px;padding:.04rem .06rem}
     #initiativePanel .init-turn{display:none}
-  #initiativePanel .init-roundbox .init-round{padding:.1rem .4rem}
-  #initiativePanel .init-round-btn{min-height:24px;padding:.1rem .34rem}
+  #initiativePanel .init-roundbox .init-round{padding:.06rem .35rem}
+  #initiativePanel .init-round-btn{min-height:22px;padding:.08rem .32rem}
   #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
     #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
-    #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:24px;padding:.06rem .14rem}
+    #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:22px;padding:.05rem .14rem}
     #initiativePanel .init-save{width:2rem !important}
-    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:22px;min-height:24px;padding:.06rem .2rem;font-size:.76rem}
-    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:2.05rem;font-size:13px;min-height:24px;padding:.06rem .16rem}
-    #initiativePanel .init-amt{width:2.3rem;font-size:13px;min-height:24px;padding:.06rem .16rem}
-    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2.2rem;font-size:13px;min-height:24px;padding:.06rem .18rem}
-    #initiativePanel .init-notes{font-size:13px;min-height:24px;padding:.08rem .3rem;flex:1 1 2.8rem;min-width:2.4rem}
-    #initiativePanel .init-status-add{font-size:13px;min-height:24px;padding:.08rem .22rem}
-    #initiativePanel .init-dur{width:2.9rem;font-size:13px;min-height:24px;padding:.08rem .22rem}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:22px;min-height:22px;padding:.05rem .2rem;font-size:.76rem}
+    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:2.05rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
+    #initiativePanel .init-amt{width:2.3rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2.2rem;font-size:13px;min-height:22px;padding:.05rem .18rem}
+    #initiativePanel .init-notes{font-size:13px;min-height:22px;padding:.06rem .3rem;flex:1 1 2.8rem;min-width:2.4rem}
+    #initiativePanel .init-status-add{font-size:13px;min-height:22px;padding:.06rem .22rem}
+    #initiativePanel .init-dur{width:2.9rem;font-size:13px;min-height:22px;padding:.06rem .22rem}
     #initiativePanel .init-bar{height:4px;margin-top:.08rem}
-    #initiativePanel .init-chips{gap:.22rem;margin-top:.08rem}
-    #initiativePanel .init-chip{font-size:.74rem;padding:.04rem .22rem .04rem .42rem}
+    #initiativePanel .init-chips{gap:.18rem;margin-top:.06rem}
+    #initiativePanel .init-chip{font-size:.74rem;padding:.02rem .2rem .02rem .38rem}
     #initiativePanel .init-clocks{gap:.28rem;font-size:.72rem;line-height:1.15}
     #initiativePanel .init-hint{font-size:.78rem}
-    #initiativePanel .init-log{margin-top:.45rem}
+    #initiativePanel .init-log{margin-top:.35rem}
     #initiativePanel .init-log h4{margin-bottom:.15rem;cursor:pointer;line-height:1.2}
     #initiativePanel .init-logbox{max-height:96px;font-size:.78rem;padding:.28rem .42rem}
-    #initiativePanel .init-saved-head{margin-top:.45rem;margin-bottom:.15rem}
-    #initiativePanel .init-saved-head .init-lock-btn{min-height:24px;padding-top:.1rem;padding-bottom:.1rem}
+    #initiativePanel .init-saved-head{margin-top:.35rem;margin-bottom:.12rem}
+    #initiativePanel .init-saved-head .init-lock-btn{min-height:20px;padding-top:.06rem;padding-bottom:.06rem}
     #initiativePanel .init-saved-head h4{cursor:pointer}
     #initiativePanel .init-saved-row{padding:.22rem .42rem;font-size:.79rem;margin-bottom:.22rem}
-    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:24px}
+    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:22px}
     #initiativePanel .init-party{padding:.4rem .5rem}
     #initiativePanel .init-party-row{padding:.12rem 0}
-    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:26px}
-    #initiativePanel .init-party-add .btn{min-height:28px}
+    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:24px}
+    #initiativePanel .init-party-add .btn{min-height:25px}
     /* The folds themselves. */
-    #initiativePanel .init-rowfold{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:24px;padding:.04rem .15rem;font:inherit;font-size:.78rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer;flex:0 0 auto}
-    #initiativePanel .init-more-btn{display:inline-flex;align-items:center;min-height:25px;padding:.12rem .5rem;font:inherit;font-size:.78rem;font-weight:600;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer}
+    #initiativePanel .init-rowfold{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:22px;padding:.04rem .15rem;font:inherit;font-size:.78rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer;flex:0 0 auto}
+    #initiativePanel .init-more-btn{display:inline-flex;align-items:center;min-height:23px;padding:.12rem .5rem;font:inherit;font-size:.78rem;font-weight:600;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer}
     body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="notes"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="fort"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="ref"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="will"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="dup"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="toparty"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="delay"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="ready"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="surprised"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="tmp"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="nl"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="cr"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="status"]{display:none !important}
     body:not(.init-arranging) #initiativePanel .init-row.pfold .init-total{display:none !important}
     body:not(.init-arranging) #initiativePanel .init-controls:not(.bar-open)>.btn:not(#initNextBtn):not(#initPrevBtn):not(#initRollAllBtn):not(#initResetBtn):not(#initUndoBtn){display:none !important}
@@ -344,6 +344,7 @@
 <div class="page">
   <div class="init-topbar">
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
+    <span class="init-topbar-title">John's House — Initiative Tracker</span>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the arranged layout — put every button, control and block back in its shipped order and size" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to move everything on this page — drag buttons, controls, and whole blocks into your own order and change their footprints; lock to use them again">&#128275; Move buttons</button>
@@ -359,14 +360,12 @@
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-block" data-block="header">
     <div class="init-head">
-      <p class="eyebrow" style="margin:0">John's House — Initiative Tracker</p>
       <span class="init-roundbox" data-mk="round" data-mkgrp="head"><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
-      <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute">0:06</span>
-      <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+      <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</span>
+      <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
-    <p class="init-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     </div>
     <div class="init-controls init-block" data-block="bar">
@@ -1769,9 +1768,9 @@ function initClear(){
    the order with a fresh stint. (This replaced the type-a-
    number editor on the same readout from earlier that day.) */
 function initRoundAdvance(){
-  /* While the Set round editor is open, no click advances the
+  /* While either round editor is open, no click advances the
      round (fix, 2026-11-18) — the readout's own click included. */
-  if (initRoundEditing) return;
+  if (initRoundEditing || initTimeEditing) return;
   const rows = initSorted(); if (!rows.length) return;
   sessionSettle();
   initCloseStint(initState.turnId, true);
@@ -1803,7 +1802,7 @@ $("initRoundDownBtn").addEventListener("click", () => initRoundStep(-1));
    with the same manual-set semantics as the arrows. */
 let initRoundEditing = false;
 function initRoundSetOpen(){
-  if (initRoundEditing) return;
+  if (initRoundEditing || initTimeEditing) return;
   const span = $("initRound"); if (!span) return;
   initRoundEditing = true;
   const inp = document.createElement("input");
@@ -1842,6 +1841,54 @@ function initRoundSetOpen(){
   inp.addEventListener("blur", () => close(true));
 }
 $("initRoundSetBtn").addEventListener("click", initRoundSetOpen);
+/* Set the round from the in-world clock (Shaun, 2026-11-19):
+   the clock readout is the round in its other form — six
+   seconds to a round — so clicking it opens a typed time
+   editor and committing sets the round to match. A manual
+   set, like the steppers: only the number changes. A time
+   that is not a whole number of rounds snaps to the
+   nearest round; a bare number is read as seconds. */
+let initTimeEditing = false;
+function initParseTime(text){
+  const t = String(text || "").trim(); if (!t) return null;
+  let secs = null;
+  const m = t.match(/^(\d+):([0-5]?\d)$/);
+  if (m) secs = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  else if (/^\d+$/.test(t)) secs = parseInt(t, 10);
+  if (secs == null || !Number.isFinite(secs)) return null;
+  return Math.max(1, Math.round(secs / 6));
+}
+function initTimeSetOpen(){
+  if (initTimeEditing || initRoundEditing) return;
+  const span = $("initWorldClock"); if (!span) return;
+  initTimeEditing = true;
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.inputMode = "numeric";
+  const secs = (initState.round || 1) * 6;
+  inp.value = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
+  inp.className = "init-round-input init-time-input";
+  inp.title = "Type the in-world time as minutes:seconds, then press Enter — Escape cancels";
+  inp.setAttribute("aria-label", "In-world time, minutes and seconds");
+  span.style.display = "none";
+  span.parentNode.insertBefore(inp, span.nextSibling);
+  inp.focus(); inp.select();
+  let done = false;
+  const close = (commit) => {
+    if (done) return; done = true;
+    initTimeEditing = false;
+    const v = commit ? initParseTime(inp.value) : null;
+    inp.remove(); span.style.display = "";
+    if (v != null && v !== initState.round) { initState.round = v; saveInitiative(); }
+    renderInitiative();
+  };
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); close(true); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
+  });
+  inp.addEventListener("change", () => close(true));
+  inp.addEventListener("blur", () => close(true));
+}
+$("initWorldClock").addEventListener("click", initTimeSetOpen);
 $("initSessIn").addEventListener("click", () => initTallyClick("in"));
 $("initSessOut").addEventListener("click", () => initTallyClick("out"));
 $("initClockResetBtn").addEventListener("click", () => {
