@@ -76,12 +76,19 @@
   .init-topbar{display:flex;align-items:center;justify-content:flex-start;gap:.75rem;padding-top:6px;flex-wrap:wrap}
   .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
   .init-topbar-title{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+  /* The orange words sit centred in the middle of the page, on the SAME line
+     as Campaign Hub and Edit page (Shaun, 2026-11-20): a centred column
+     between the two buttons, both words whole. */
+  .init-midwords{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05rem;flex:1 1 0;text-align:center;min-width:0}
+  .init-midwords .init-topbar-title{white-space:normal;overflow:visible;text-overflow:clip}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
      — the recovered AIDM Roster feature set). Every
      rule is scoped under #initiativePanel so nothing else on the
      page collides with it. */
+  #initiativePanel{display:flex;flex-wrap:wrap;align-content:flex-start}
+  #initiativePanel .init-block{flex:0 0 auto;width:100%}
   #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.55rem;flex-wrap:wrap}
   #initiativePanel .init-round{font-weight:700;letter-spacing:.04em}
   #initiativePanel .init-nownext{margin:.22rem 0 0;font-weight:600;min-height:1.2em}
@@ -89,6 +96,8 @@
   #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
+  #initiativePanel .init-form.folded > *:not(#initAddFoeBtn){display:none !important}
+  #initiativePanel .init-form.folded input, #initiativePanel .init-form.folded #initAddBtn{display:none !important}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
   #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
@@ -121,10 +130,18 @@
      combatant list, and stick to the top of the view while a long
      list scrolls under them. */
   #initiativePanel .init-controls{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.4rem 0;padding:.35rem .45rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  /* Roll ALL and Rolling are ONE button with two halves (Shaun, 2026-11-20):
+     joined at a single seam — the left half rolls everyone, the right half
+     turns rolling initiative on or off. */
+  #initiativePanel #initRollAllBtn{border-top-right-radius:5px;border-bottom-right-radius:5px}
+  #initiativePanel #initRollingBtn{border-top-left-radius:5px;border-bottom-left-radius:5px;margin-left:-.25rem;padding-left:0;padding-right:0}
+  #initiativePanel #initRollingBtn [data-onoff]{display:inline-block;padding:.3rem .55rem}
+  #initiativePanel #initRollingBtn [data-onoff="off"]{border-left:1px solid var(--card-border)}
+  #initiativePanel #initRollingBtn[aria-pressed="true"] [data-onoff="on"],#initiativePanel #initRollingBtn[aria-pressed="false"] [data-onoff="off"]{font-size:1.3em;font-weight:700;padding:.3rem .7rem}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
-  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0 0 0 auto}
   #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.65rem;margin-bottom:.28rem}
   #initiativePanel #initClearLogBtn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   #initiativePanel .init-pic{flex:0 0 auto;width:2.1em;height:2.1em;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px dashed var(--card-border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;overflow:hidden}
@@ -138,20 +155,9 @@
   #initiativePanel .init-pic-x{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem .35rem}
   #initiativePanel .init-pic-note{flex:1 1 100%;color:var(--muted);font-size:.9em}
   #initiativePanel .init-pic-note:empty{display:none}
-  #initiativePanel .init-form.folded > *:not(.block-grip){display:none !important}
-  #initiativePanel .init-party-add.folded > *:not(#initPartyAddToggle){display:none !important}
-  /* The Add foe button lives in the action bar now
-     (Shaun, 2026-11-19), so a folded form has nothing of its
-     own left to show: the whole block leaves the page until
-     the form is opened. While arranging it stays on the page
-     as a strip, so its grip can still be dragged. */
-  #initiativePanel .init-form.folded{display:none}
-  body.init-arranging #initiativePanel .init-form.folded{display:flex}
-  #initiativePanel .init-fold-toggle{flex:0 0 auto}
-  /* Phone one-screen folds (Shaun, 2026-11-19): these two
-     toggles exist only on the phone side — the base page never
-     shows them; the phone media block turns them on. */
-  #initiativePanel .init-rowfold{display:none}
+  /* One surface (Shaun, 2026-11-20): on this personal page
+     nothing folds — the add form and the roster's add form
+     stand open on the page at every width. */
   body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
   .init-topbar .init-size-row{display:none}
   #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
@@ -164,7 +170,7 @@
   [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
   .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
   #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
-  .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  .press-tip{position:fixed;z-index:9999;max-width:min(84vw,400px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.65rem .85rem;font-size:1.05rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
@@ -178,9 +184,9 @@
      nonlethal fields, status durations, the party roster, the
      combat log, saved-scenario Load. */
   #initiativePanel .init-clock{font-weight:600;opacity:.85}
-  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600;cursor:pointer}
+  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.85;font-weight:600;cursor:pointer}
   #initiativePanel .init-worldclock:hover{opacity:.95}
-  #initiativePanel .init-sessout{font-weight:600;opacity:.65}
+  #initiativePanel .init-sessout{font-weight:600;opacity:.85}
   #initiativePanel .init-round{cursor:pointer}
   #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:hsla(222,20%,14%,.35)}
   #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;padding:.18rem .5rem}
@@ -189,7 +195,7 @@
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
   #initiativePanel .init-time-input{width:4.6rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
-  #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
+  #initiativePanel #initUndoBtn:disabled{background:var(--secondary);color:var(--foreground);border-color:var(--card-border);opacity:1}
   #initiativePanel .init-stint{cursor:pointer}
   #initiativePanel .init-clocks{display:inline-flex;gap:.55rem;align-items:center;font-variant-numeric:tabular-nums}
   #initiativePanel .init-stint{font-weight:700}
@@ -213,7 +219,9 @@
   #initiativePanel .init-party[hidden]{display:none}
   #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
   #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
-  #initiativePanel .init-party-name{font:inherit;flex:1 1 8rem;min-width:5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-name{font:inherit;flex:0 0 auto;width:13.5em;box-sizing:content-box;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-state{flex:1 1 auto;min-width:0;font-size:.88em;opacity:.9}
+  #initiativePanel .init-party-state:empty{display:none}
   #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
   #initiativePanel .init-party-add input{font:inherit;flex:1 1 10rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-log{margin-top:.65rem}
@@ -250,7 +258,7 @@
     #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
-    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0 0 0 auto}
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:36px;padding:.35rem .75rem}
     body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
     body.init-arranging #initiativePanel .init-controls .btn{touch-action:none;cursor:grab}
@@ -258,15 +266,13 @@
     body.init-arranging #initiativePanel .init-controls .btn.dragging{opacity:.55}
     body.init-arranging #initiativePanel .init-controls .btn.drop-target{border-color:var(--primary);border-style:dashed}
   }
-  /* One phone screen (Shaun, 2026-11-19): the whole tracker —
-     header, action bar, the fight itself, log and saved — fits
-     the phone's screen height with no up-and-down scrolling.
-     Everything is tightened, and the secondary pieces fold:
-     each row's extra controls behind its ▸, the action bar's
-     tail behind More, the combat log and the saved list behind
-     their headings. Nothing is removed; every fold opens in one
-     tap, remembers itself per device, and lets go entirely
-     while arranging. */
+  /* One phone screen, one surface (Shaun, 2026-11-19/20): the
+     whole tracker — header, action bar, the fight itself, log
+     and saved — fits the phone's screen height with no
+     up-and-down scrolling, and everything stands open on the
+     one surface: every row control, the add form, the combat
+     log and the saved list. Nothing folds and nothing is
+     removed; the fit comes from tightening alone. */
   @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
     .panel{padding:5px 7px}
     .page{padding:0 5px 3px}
@@ -282,58 +288,56 @@
     #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
     #initiativePanel .init-worldclock{font-size:.76rem}
     #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
-    #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.86rem;min-height:1em;line-height:1.15}
-    #initiativePanel .init-controls{gap:.24rem;margin:.2rem 0;padding:.18rem .24rem}
-    #initiativePanel .init-controls .btn{min-height:22px;padding:.07rem .4rem;font-size:.78rem}
+    #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
+    #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
+    #initiativePanel #initRollingBtn{margin-left:-.1rem}
+    #initiativePanel #initRollingBtn [data-onoff]{padding:.05rem .38rem}
+    #initiativePanel #initRollingBtn[aria-pressed="true"] [data-onoff="on"],#initiativePanel #initRollingBtn[aria-pressed="false"] [data-onoff="off"]{padding:.05rem .5rem}
+    #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
-    #initiativePanel .init-list{gap:.15rem;margin:.18rem 0 .24rem}
-    #initiativePanel .init-row{padding:.08rem .34rem;border-radius:7px}
-    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.11rem}
-    #initiativePanel .init-line2{margin-top:.08rem}
-    #initiativePanel .init-name{font-size:.9rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
+    #initiativePanel .init-row{padding:.05rem .28rem;border-radius:7px}
+    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.08rem}
+    #initiativePanel .init-line2{margin-top:.05rem}
+    #initiativePanel .init-name{font-size:.86rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
-    #initiativePanel .init-drag{min-width:22px;min-height:22px;padding:.04rem .06rem}
+    #initiativePanel .init-drag{min-width:20px;min-height:20px;padding:.03rem .05rem}
     #initiativePanel .init-turn{display:none}
   #initiativePanel .init-roundbox .init-round{padding:.06rem .35rem}
   #initiativePanel .init-round-btn{min-height:22px;padding:.08rem .32rem}
   #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
     #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
-    #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:22px;padding:.05rem .14rem}
-    #initiativePanel .init-save{width:2rem !important}
-    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:22px;min-height:22px;padding:.05rem .2rem;font-size:.76rem}
-    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:2.05rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
-    #initiativePanel .init-amt{width:2.3rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
-    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2.2rem;font-size:13px;min-height:22px;padding:.05rem .18rem}
-    #initiativePanel .init-notes{font-size:13px;min-height:22px;padding:.06rem .3rem;flex:1 1 2.8rem;min-width:2.4rem}
-    #initiativePanel .init-status-add{font-size:13px;min-height:22px;padding:.06rem .22rem}
-    #initiativePanel .init-dur{width:2.9rem;font-size:13px;min-height:22px;padding:.06rem .22rem}
-    #initiativePanel .init-bar{height:4px;margin-top:.08rem}
-    #initiativePanel .init-chips{gap:.18rem;margin-top:.06rem}
-    #initiativePanel .init-chip{font-size:.74rem;padding:.02rem .2rem .02rem .38rem}
-    #initiativePanel .init-clocks{gap:.28rem;font-size:.72rem;line-height:1.15}
+    #initiativePanel .init-lab input{width:1.85rem;font-size:13px;min-height:20px;padding:.03rem .12rem}
+    #initiativePanel .init-save{width:1.85rem !important}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:20px;min-height:20px;padding:.03rem .17rem;font-size:.74rem}
+    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:1.95rem;font-size:13px;min-height:20px;padding:.03rem .13rem}
+    #initiativePanel .init-amt{width:2.1rem;font-size:13px;min-height:20px;padding:.03rem .13rem}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2rem;font-size:13px;min-height:20px;padding:.03rem .15rem}
+    #initiativePanel .init-notes{font-size:13px;min-height:20px;padding:.04rem .25rem;flex:1 1 2.3rem;min-width:2rem}
+    #initiativePanel .init-status-add{font-size:13px;min-height:20px;padding:.04rem .18rem}
+    #initiativePanel .init-dur{width:2.5rem;font-size:13px;min-height:20px;padding:.04rem .18rem}
+    #initiativePanel .init-bar{height:3px;margin-top:.05rem}
+    #initiativePanel .init-chips{gap:.14rem;margin-top:.04rem}
+    #initiativePanel .init-chip{font-size:.7rem;padding:.01rem .16rem .01rem .3rem}
+    #initiativePanel .init-clocks{gap:.22rem;font-size:.7rem;line-height:1.1}
     #initiativePanel .init-hint{font-size:.78rem}
-    #initiativePanel .init-log{margin-top:.35rem}
-    #initiativePanel .init-log h4{margin-bottom:.15rem;cursor:pointer;line-height:1.2}
-    #initiativePanel .init-logbox{max-height:96px;font-size:.78rem;padding:.28rem .42rem}
-    #initiativePanel .init-saved-head{margin-top:.35rem;margin-bottom:.12rem}
+    #initiativePanel .init-log{margin-top:.25rem}
+    #initiativePanel .init-log h4{margin-bottom:.15rem;line-height:1.2}
+    #initiativePanel .init-logbox{max-height:62px;font-size:.76rem;padding:.22rem .36rem}
+    #initiativePanel .init-saved-head{margin-top:.25rem;margin-bottom:.08rem}
     #initiativePanel .init-saved-head .init-lock-btn{min-height:20px;padding-top:.06rem;padding-bottom:.06rem}
-    #initiativePanel .init-saved-head h4{cursor:pointer}
-    #initiativePanel .init-saved-row{padding:.22rem .42rem;font-size:.79rem;margin-bottom:.22rem}
+    #initiativePanel .init-saved-row{padding:.16rem .36rem;font-size:.77rem;margin-bottom:.16rem}
     #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:22px}
     #initiativePanel .init-party{padding:.4rem .5rem}
     #initiativePanel .init-party-row{padding:.12rem 0}
     #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:24px}
     #initiativePanel .init-party-add .btn{min-height:25px}
-    /* The folds themselves. */
-    #initiativePanel .init-rowfold{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:22px;padding:.04rem .15rem;font:inherit;font-size:.78rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer;flex:0 0 auto}
-    body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="notes"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="fort"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="ref"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="will"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="dup"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="toparty"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="delay"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="ready"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="surprised"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="tmp"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="nl"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="cr"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="status"]{display:none !important}
-    body:not(.init-arranging) #initiativePanel .init-row.pfold .init-total{display:none !important}
-    body:not(.init-arranging) #initiativePanel [data-block="log"]:not(.log-open) .init-logbox{display:none !important}
-    body:not(.init-arranging) #initiativePanel [data-block="saved"]:not(.saved-open) #initSaved{display:none !important}
-    #initiativePanel .init-log h4::after{content:" ▸";opacity:.65}
-    #initiativePanel [data-block="log"].log-open .init-log h4::after{content:" ▾"}
-    #initiativePanel .init-saved-head h4::after{content:" ▸";opacity:.65}
-    #initiativePanel [data-block="saved"].saved-open .init-saved-head h4::after{content:" ▾"}
+    /* The add form, tightened to stand open on the surface. */
+    #initiativePanel .init-form{gap:.3rem;margin:.25rem 0}
+    #initiativePanel .init-form input{font-size:13px;min-height:26px;padding:.14rem .4rem}
+    #initiativePanel .init-form input#initName{flex:1 1 6rem}
+    #initiativePanel .init-form input[type="number"]{flex:0 0 auto;width:3.6rem}
+    #initiativePanel .init-form .btn{min-height:26px;flex:0 0 auto;padding:.14rem .6rem;font-size:.8rem}
   }
 </style>
 </head>
@@ -341,18 +345,21 @@
 <div class="page">
   <div class="init-topbar">
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
-    <span class="init-topbar-title">John's House — Initiative Tracker</span>
+    <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span></span>
     <div class="init-lock-row" id="initLockRow">
-      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the arranged layout — put every button, control and block back in its shipped order and size" hidden>Reset layout</button>
-      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to move everything on this page — drag buttons, controls, and whole blocks into your own order and change their footprints; lock to use them again">&#128275; Move buttons</button>
+      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back in its shipped place and size, from any arrangement" hidden>Reset layout</button>
+      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
     </div>
     <div class="init-size-row" id="initSizeRow" hidden>
-      <span>Footprint: <strong id="initSizeName">Next turn</strong></span>
-      <button type="button" class="init-lock-btn" id="initSizeDown" title="Diminish the selected button's footprint">−</button>
-      <span class="init-size-read" id="initSizeRead">M</span>
-      <button type="button" class="init-lock-btn" id="initSizeUp" title="Extend the selected button's footprint">+</button>
+      <span>Selected: <strong id="initSizeName">Next turn</strong></span>
+      <button type="button" class="init-lock-btn" id="initSizeDown" title="Shrink the selected control a step — for a block, narrow it a step">−</button>
+      <span class="init-size-read" id="initSizeRead">100%</span>
+      <button type="button" class="init-lock-btn" id="initSizeUp" title="Grow the selected control a step — for a block, widen it a step">+</button>
+      <button type="button" class="init-lock-btn" id="initNudgeL" title="Nudge the selected control left a couple of pixels (arrow keys work too, Shift for bigger steps)">&#9664;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeU" title="Nudge the selected control up a couple of pixels">&#9650;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeD" title="Nudge the selected control down a couple of pixels">&#9660;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeR" title="Nudge the selected control right a couple of pixels">&#9654;</button>
     </div>
-    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
   </div>
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-block" data-block="header">
@@ -369,25 +376,25 @@
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
-      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
+      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
-      <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add foe — open the form to add someone to the fight; tap again to fold it away">▸ Add foe</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
       <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
       <div id="initPartyRows"></div>
       <div class="init-party-add">
-        <button type="button" class="btn init-fold-toggle" data-mk="paddtoggle" data-mkgrp="partyadd" id="initPartyAddToggle" title="Add PC — open the form to add someone to the PC roster; tap again to fold it away">▸ Add PC</button>
         <input id="initPartyName" data-mk="pname" data-mkgrp="partyadd" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
         <button type="button" class="btn" data-mk="padd" data-mkgrp="partyadd" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
       </div>
     </div>
-    <div class="init-form init-block" data-block="form">
+    <div class="init-form init-block folded" data-block="form">
+      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" data-nohold aria-expanded="false" title="Add a foe — tap to open the combatant line nested under this button; tap again to fold it away">Add foe</button>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
@@ -401,12 +408,11 @@
       <button type="button" class="btn" id="initPicUploadBtn" title="Upload a picture from this device — it is stored with the campaign pictures, and the link is what stays on the row">Upload a picture</button>
       <input type="url" id="initPicUrl" placeholder="…or paste a picture link" aria-label="Picture link" title="Paste a link to a picture instead of uploading one">
       <button type="button" class="btn" id="initPicUrlBtn" title="Use the pasted link as the picture">Set link</button>
+      <button type="button" class="btn" id="initPicCloseBtn" data-nohold aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <button type="button" class="btn" id="initPicRemoveBtn" title="Take the picture off — the slot goes back to empty">Remove</button>
-      <button type="button" class="init-pic-x" id="initPicCloseBtn" aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
     <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back. On a phone, tap the heading to show or hide the list">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -602,7 +608,7 @@ function fmtClock(ms){
 }
 const sessionTally = (() => {
   let t = null;
-  try { t = JSON.parse(sessionStorage.getItem("apoc-init-session") || "null"); } catch (e) {}
+  try { t = JSON.parse(sessionStorage.getItem("apoc-personal-session") || "null"); } catch (e) {}
   if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "off" };
   if (["in", "out", "off"].indexOf(t.tallyMode) < 0) t.tallyMode = "off";
   t.boardWas = t.boardWas === "in" ? "in" : "out";
@@ -610,7 +616,7 @@ const sessionTally = (() => {
   return t;
 })();
 function sessionPersist(){
-  try { sessionStorage.setItem("apoc-init-session", JSON.stringify(sessionTally)); } catch (e) {}
+  try { sessionStorage.setItem("apoc-personal-session", JSON.stringify(sessionTally)); } catch (e) {}
 }
 /* Which tally is accumulating. MANUAL-ONLY (Shaun's ruling,
    2026-11-18, superseding the automatic default): neither
@@ -903,13 +909,7 @@ function initNextIdx(rows, from, dir){
   return i;
 }
 let initAudio = null;
-function initChimeOn(){ try { return localStorage.getItem("apoc-init-chime") !== "0"; } catch (e) { return true; } }
-/* Phone one-screen folds: the set of combatant rows whose extra
-   controls are OPEN on this device. Every other row carries the
-   pfold class; the phone CSS folds its secondary segments away
-   so the fight fits one screen. Desktop never folds. */
-let initRowOpen = new Set();
-try { (JSON.parse(localStorage.getItem("apoc-init-rowopen") || "[]") || []).forEach(x => initRowOpen.add(x)); } catch (e) {}
+function initChimeOn(){ try { return localStorage.getItem("apoc-personal-chime") !== "0"; } catch (e) { return true; } }
 function initChime(){
   if (!initChimeOn()) return;
   try {
@@ -933,7 +933,22 @@ function renderInitLog(){
   const wrap = $("initLog"); if (!wrap) return;
   const log = Array.isArray(initState.log) ? initState.log : [];
   if (!log.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens. On a phone, tap the heading to show or hide it">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+}
+function partyStateText(p){
+  const c = (initState.list || []).find(x => x.name === p.name);
+  if (!c) return "";
+  const parts = [];
+  if (typeof c.hp === "number") parts.push("HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : ""));
+  const hint = initHpHint(c); if (hint) parts.push(hint);
+  (c.statuses || []).forEach(s => { const n = stName(s); if (!n) return; const d = stDur(s); parts.push(n + (d !== null ? " (" + d + " rds)" : "")); });
+  return parts.join(" · ");
+}
+function paintPartyStates(){
+  document.querySelectorAll("[data-party-state]").forEach(sp => {
+    const p = (initState.party || []).find(x => x.id === sp.getAttribute("data-party-state"));
+    if (p) sp.textContent = partyStateText(p);
+  });
 }
 function renderParty(){
   const wrap = $("initPartyRows"); if (!wrap) return;
@@ -949,6 +964,7 @@ function renderParty(){
       fort: '<label class="init-lab" data-mk="fort" data-mkgrp="partyrow">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>',
       ref: '<label class="init-lab" data-mk="ref" data-mkgrp="partyrow">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>',
       will: '<label class="init-lab" data-mk="will" data-mkgrp="partyrow">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>',
+      state: '<span class="init-party-state" data-mk="state" data-mkgrp="partyrow" data-party-state="' + p.id + '" title="This character\'s current status in the fight — hit points and statuses, kept live as the fight changes, whatever they may be">' + esc(partyStateText(p)) + '</span>',
       del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="partyrow" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>'
     };
     const ord = (window.__mkOrder ? window.__mkOrder("partyrow", PARTYROW_KEYS) : PARTYROW_KEYS);
@@ -972,7 +988,7 @@ function renderParty(){
 }
 const ROW1_KEYS = ["drag","turn","pic","name","notes","init","roll","mod","ac","fort","ref","will","dup","toparty","del"];
 const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status"];
-const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","del"];
+const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","state","del"];
 const SAVED_KEYS = ["body","btns"];
 function renderInitiative(){
   const wrap = $("initList"); if (!wrap) return;
@@ -981,7 +997,7 @@ function renderInitiative(){
   renderInitLog();
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
-  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.classList.toggle("on", !!initState.rolling); rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
+  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
   const rows = initSorted();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
@@ -992,6 +1008,7 @@ function renderInitiative(){
   if (!rows.length) {
     nn.textContent = "";
     wrap.innerHTML = '';
+    paintPartyStates();
     return;
   }
   let ti = rows.findIndex(c => c.id === initState.turnId);
@@ -1006,7 +1023,6 @@ function renderInitiative(){
     const active = c.id === initState.turnId;
     const hint = initHpHint(c);
     const dead = hint === "Dead";
-    const rowOpen = initRowOpen.has(c.id);
     const num = v => (v === null || v === undefined ? "" : v);
     let bar = "";
     if (typeof c.hp === "number" && typeof c.maxHp === "number" && c.maxHp > 0) {
@@ -1071,28 +1087,15 @@ function renderInitiative(){
       status: '<span style="display:inline-flex;gap:.45rem;align-items:center" data-mk="status" data-mkgrp="row2"><select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
         '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts \u2014 leave blank for no countdown" data-init-dur="' + c.id + '"></span>'
     };
+    const segAll = Object.assign({}, seg1, seg2);
     const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
     const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
-    return '<div class="init-row' + (active ? ' active' : '') + (rowOpen ? '' : ' pfold') + '" data-row-id="' + c.id + '">' +
-      '<div class="init-line1">' + ord1.map(k => seg1[k] || "").join("") + '<button type="button" class="init-rowfold" data-init-rowfold="' + c.id + '" aria-expanded="' + (rowOpen ? "true" : "false") + '" aria-label="More controls for ' + esc(c.name) + '" title="More controls for this combatant — notes, saves, duplicate, delay, ready, surprised, status and the rest; tap again to fold them away">' + (rowOpen ? "▴" : "▸") + '</button></div>' +
-      '<div class="init-line2">' + ord2.map(k => seg2[k] || "").join("") + '</div>' + bar + chips + '</div>';
+    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
+      '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '</div>' +
+      '<div class="init-line2">' + ord2.map(k => segAll[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
   const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
-  wrap.querySelectorAll("[data-init-rowfold]").forEach(b => b.addEventListener("click", () => {
-    const id = b.dataset.initRowfold;
-    const row = b.closest(".init-row");
-    if (initRowOpen.has(id)) {
-      initRowOpen.delete(id);
-      if (row) row.classList.add("pfold");
-      b.textContent = "▸"; b.setAttribute("aria-expanded", "false");
-    } else {
-      initRowOpen.add(id);
-      if (row) row.classList.remove("pfold");
-      b.textContent = "▴"; b.setAttribute("aria-expanded", "true");
-    }
-    try { localStorage.setItem("apoc-init-rowopen", JSON.stringify([...initRowOpen])); } catch (e) {}
-  }));
   wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initVal);
     if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
@@ -1296,6 +1299,7 @@ function renderInitiative(){
     h.addEventListener("pointercancel", up);
   }));
   initTickClocks();
+  paintPartyStates();
 }
 /* Everything a new round brings, shared by the Next-turn wrap
    and the round counter's click-to-advance: the log line,
@@ -1616,32 +1620,9 @@ function initClearLog(){
   saveInitiative(); renderInitiative();
 }
 $("initClearLogBtn").addEventListener("click", initClearLog);
-/* Phone one-screen folds (Shaun, 2026-11-19): on the phone side
-   the combat log and the saved-scenarios list fold away so the
-   tracker fits one screen; their headings bring them back in
-   one tap. The folds are per-device and remember themselves;
-   the CSS hides things only at phone widths, and never while
-   arranging. (The action bar's own fold was removed 2026-11-20
-   at Shaun's order — every bar button shows outright.) */
-(function(){
-  try {
-    if (localStorage.getItem("apoc-init-logopen") === "1") { const b = document.querySelector('[data-block="log"]'); if (b) b.classList.add("log-open"); }
-    if (localStorage.getItem("apoc-init-savedopen") === "1") { const b = document.querySelector('[data-block="saved"]'); if (b) b.classList.add("saved-open"); }
-  } catch (e) {}
-  const logWrap = $("initLog");
-  if (logWrap) logWrap.addEventListener("click", e => {
-    if (!e.target.closest("h4")) return;
-    const blk = e.target.closest("[data-block]"); if (!blk) return;
-    const open = blk.classList.toggle("log-open");
-    try { localStorage.setItem("apoc-init-logopen", open ? "1" : "0"); } catch (err) {}
-  });
-  const svH = document.querySelector(".init-saved-head h4");
-  if (svH) svH.addEventListener("click", () => {
-    const blk = svH.closest("[data-block]"); if (!blk) return;
-    const open = blk.classList.toggle("saved-open");
-    try { localStorage.setItem("apoc-init-savedopen", open ? "1" : "0"); } catch (err) {}
-  });
-})();
+/* One surface (Shaun, 2026-11-20): the combat log and the
+   saved-scenarios list stand open on the page at every width —
+   no heading folds them away. */
 /* Picture slots (Shaun, 2026-11-19): every combatant and every
    roster member carries a small picture — a URL in the shared
    state, never a blob. Upload is the primary route (the file
@@ -1707,27 +1688,9 @@ $("initPicFile").addEventListener("change", async (e) => {
     initPicSet(url);
   } catch (err) { if (note) note.textContent = "The upload didn't go through — paste a link instead."; }
 });
-/* Nested add forms (Shaun, 2026-11-19): the whole add-combatant
-   form nests inside its Add foe button — which sits in
-   the action bar, so a closed form leaves no box on the page at
-   all — and the roster's add form inside its Add PC button,
-   which stays in the roster box. The open/closed choice is kept
-   per device; closed is the shipped default. */
-function initFoldGet(k){ try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } }
-function initFoldSet(k, v){ try { localStorage.setItem(k, v ? "1" : "0"); } catch (e) {} }
-function initFoldApply(){
-  const f = document.querySelector(".init-form");
-  const fo = initFoldGet("apoc-init-addopen");
-  if (f) f.classList.toggle("folded", !fo);
-  const tb = $("initAddToggle"); if (tb) tb.textContent = (fo ? "▾" : "▸") + " Add foe";
-  const pa = document.querySelector(".init-party-add");
-  const po = initFoldGet("apoc-init-partyaddopen");
-  if (pa) pa.classList.toggle("folded", !po);
-  const pb = $("initPartyAddToggle"); if (pb) pb.textContent = (po ? "▾" : "▸") + " Add PC";
-}
-$("initAddToggle").addEventListener("click", () => { initFoldSet("apoc-init-addopen", !initFoldGet("apoc-init-addopen")); initFoldApply(); });
-$("initPartyAddToggle").addEventListener("click", () => { initFoldSet("apoc-init-partyaddopen", !initFoldGet("apoc-init-partyaddopen")); initFoldApply(); });
-initFoldApply();
+/* One surface (Shaun, 2026-11-20): the add-combatant form and
+   the roster's add form stand open on the page — no nesting
+   inside toggle buttons. */
 function initClear(){
   if (!initState.list.length) return;
   /* In-page confirm (two taps) — the native confirm() dialog is
@@ -1885,12 +1848,23 @@ $("initClockResetBtn").addEventListener("click", () => {
   sessionTally.inMs = 0; sessionTally.outMs = 0; sessionTally.combatMs = 0;
   sessionPersist(); paintSessionClocks();
 });
-$("initRollingBtn").addEventListener("click", () => {
-  initState.rolling = !initState.rolling;
-  initLog("Rolling initiative " + (initState.rolling ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
+$("initRollingBtn").addEventListener("click", (ev) => {
+  const seg = ev.target && ev.target.closest ? ev.target.closest("[data-onoff]") : null;
+  if (!seg) return;
+  const want = seg.getAttribute("data-onoff") === "on";
+  if (initState.rolling === want) return;
+  initState.rolling = want;
+  initLog("Rolling initiative " + (want ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
   saveInitiative(); renderInitiative();
 });
 $("initAddBtn").addEventListener("click", initAdd);
+$("initAddFoeBtn").addEventListener("click", () => {
+  const b = $("initAddFoeBtn"), form = document.querySelector("#initiativePanel .init-form");
+  if (!form) return;
+  const open = form.classList.contains("folded");
+  form.classList.toggle("folded", !open); if (b) b.setAttribute("aria-expanded", String(open));
+  if (open) { const n = $("initName"); if (n) n.focus(); }
+});
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
 $("initRollAllBtn").addEventListener("click", initRollAll);
@@ -1900,7 +1874,7 @@ $("initUndoBtn").addEventListener("click", initUndo);
 $("initPartyAddBtn").addEventListener("click", initAddParty);
 $("initPartyBtn").addEventListener("click", () => { const p = $("initParty"); if (p) { p.hidden = !p.hidden; if (!p.hidden) renderParty(); } });
 $("initChimeBtn").addEventListener("click", () => {
-  try { localStorage.setItem("apoc-init-chime", initChimeOn() ? "0" : "1"); } catch (e) {}
+  try { localStorage.setItem("apoc-personal-chime", initChimeOn() ? "0" : "1"); } catch (e) {}
   initChimeBtnLabel();
 });
 $("initPartyNewBtn").addEventListener("click", () => {
@@ -1960,21 +1934,18 @@ window.addEventListener("pagehide", () => {
 
 </script>
 <script>
-/* Arrange: EVERYTHING on this page moves (Shaun, 2026-11-18 —
-   "when I say give all the buttons in John's House the ability
-   to move, I mean ALL of them"). One unlock (Move buttons) makes
-   the whole surface arrangeable: the page's blocks (header,
-   action bar, party roster, add form, combatants, combat log,
-   saved scenarios) shift against each other by their grip
-   strips; control groups reorder inside themselves (the header
-   clocks, the action bar — the original v51.55 system — the
-   add form, the roster's add row); and the rows are templates:
-   moving a control in any combatant row, party row, or saved
-   row sets the layout every row of that kind follows. Drag onto
-   another item to swap, tap to select, and the footprint row
-   steps the selected item S / M / L / XL. While unlocked, taps
-   fire nothing. Every load starts locked; layouts persist per
-   device, on the phone side and the laptop side alike. */
+/* Free-form editing (Shaun's personal copy, 2026-11-19):
+   this page's arrange system is a full editor. Unlock with
+   Edit page and every control can be dragged into any
+   container on the page — a bar button into the header, a
+   header control into the bar, a row control onto the other
+   line — resized continuously with the − / + stepper,
+   nudged pixel by pixel with the arrow pad, and the blocks
+   themselves reorder and take widths so two can sit side by
+   side. Reset layout always restores the shipped page, and
+   nudges clamp at the panel's edges so the page can never
+   scroll sideways. Layouts persist per device. Every load
+   starts locked. */
 (function () {
   var panel = document.getElementById("initiativePanel");
   var bar = panel ? panel.querySelector(".init-controls") : null;
@@ -1986,156 +1957,239 @@ window.addEventListener("pagehide", () => {
   var sizeDown = document.getElementById("initSizeDown");
   var sizeUp = document.getElementById("initSizeUp");
   if (!panel || !bar || !lockBtn || !resetBtn) return;
-  var BARKEY = "apoc-init-bar-v1", LAYKEY = "apoc-init-layout-v2";
-  var LEVELS = ["S", "M", "L", "XL"];
+  var FFKEY = "apoc-personal-freeform-v1";
+  var ROW1 = ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"];
+  var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"];
+  var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "state", "del"];
+  var SROW = ["body", "btns"];
+  var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
+  var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
   var slice = function (nl) { return Array.prototype.slice.call(nl); };
-  var barBtns = slice(bar.querySelectorAll(".btn"));
-  barBtns.forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
-  var barShipped = barBtns.map(function (b) { return b.id; });
-  var DEFAULTS = {
-    blocks: ["header", "bar", "party", "form", "list", "log", "saved"],
-    head: ["round", "sessin", "sessout", "world", "helpq", "reset"],
-    form: ["name", "total", "mod", "ac", "hp", "qty", "add"],
-    partyadd: ["paddtoggle", "pname", "padd"],
-    logbar: ["clearlog"],
-    row1: ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"],
-    row2: ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"],
-    partyrow: ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "del"],
-    saved: ["body", "btns"]
-  };
-  var TEMPLATE = { row1: 1, row2: 1, partyrow: 1, saved: 1 };
-  var arranging = false;
-  var sel = { grp: "bar", key: barShipped[0] };
+  slice(bar.querySelectorAll(".btn")).forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
 
   function load(key) { try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-  function store(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
-  function layRec() { return load(LAYKEY) || {}; }
-  function validOrder(grp, stored, keys) {
-    var known = keys || DEFAULTS[grp] || [];
+  function store() { try { localStorage.setItem(FFKEY, JSON.stringify(rec)); } catch (e) {} }
+  function contEl(name) { return panel.querySelector(CONTS[name]); }
+  function staticKeys() {
+    var out = [];
+    Object.keys(CONTS).forEach(function (cn) { var c = contEl(cn); if (c) slice(c.querySelectorAll('[data-mk]:not([data-mkgrp="blocks"])')).forEach(function (el) { out.push(el.getAttribute("data-mk")); }); });
+    return out;
+  }
+  function homeOf(key) {
+    for (var cn in CONTS) { var c = contEl(cn); if (c && c.querySelector('[data-mk="' + key + '"]')) return cn; }
+    return "bar";
+  }
+  function defaultPlace() {
+    var p = {};
+    Object.keys(CONTS).forEach(function (cn) { var c = contEl(cn); p[cn] = c ? slice(c.querySelectorAll('[data-mk]:not([data-mkgrp="blocks"])')).map(function (el) { return el.getAttribute("data-mk"); }) : []; });
+    return p;
+  }
+  function validList(stored, known) {
     var out = (stored || []).filter(function (k) { return known.indexOf(k) >= 0; });
     known.forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); });
     return out;
   }
-  window.__mkOrder = function (grp, keys) { return validOrder(grp, layRec()[grp], keys); };
-
-  /* ---- the action bar (its original record and size scheme) ---- */
-  function mkPhone() { return window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)").matches; }
-  function applyBarSize(btn, level) {
-    if (level === 0) { btn.style.flex = "0 1 auto"; if (mkPhone()) { btn.style.padding = ".06rem .3rem"; btn.style.fontSize = ".72rem"; } else { btn.style.padding = ".32rem .55rem"; btn.style.fontSize = ".85rem"; } }
-    else if (level === 2) { btn.style.flex = "1 1 34%"; btn.style.padding = ""; btn.style.fontSize = ""; }
-    else if (level === 3) { btn.style.flex = "1 1 100%"; btn.style.padding = ""; btn.style.fontSize = ""; }
-    else { btn.style.flex = ""; btn.style.padding = ""; btn.style.fontSize = ""; }
-    btn.setAttribute("data-size", String(level));
-  }
-  function barLayout() {
-    var sizes = {};
-    barBtns.forEach(function (b) { var lv = parseInt(b.getAttribute("data-size") || "1", 10); if (lv !== 1) sizes[b.id] = lv; });
-    return { order: slice(bar.querySelectorAll(".btn")).map(function (b) { return b.id; }), sizes: sizes };
-  }
-  function applyBar() {
-    var layout = load(BARKEY);
-    if (!layout || !layout.order) {
-      barShipped.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
-      barBtns.forEach(function (b) { applyBarSize(b, 1); b.removeAttribute("data-size"); });
-      return;
-    }
-    layout.order.forEach(function (id) { var b = document.getElementById(id); if (b) bar.appendChild(b); });
-    barBtns.forEach(function (b) { applyBarSize(b, (layout.sizes || {})[b.id] != null ? (layout.sizes || {})[b.id] : 1); });
-  }
-
-  /* ---- everything else: sizes, static orders, selection ---- */
-  function applyMkSize(el, level) {
-    if (mkPhone()) {
-      if (level === 0) { el.style.fontSize = ".68rem"; el.style.padding = ".08rem .25rem"; }
-      else if (level === 2) { el.style.fontSize = ".86rem"; el.style.padding = ".24rem .45rem"; }
-      else if (level === 3) { el.style.fontSize = ".95rem"; el.style.padding = ".34rem .6rem"; }
-      else { el.style.fontSize = ""; el.style.padding = ""; }
-      return;
-    }
-    if (level === 0) { el.style.fontSize = ".8rem"; el.style.padding = ".14rem .35rem"; }
-    else if (level === 2) { el.style.fontSize = ".98rem"; el.style.padding = ".38rem .62rem"; }
-    else if (level === 3) { el.style.fontSize = "1.08rem"; el.style.padding = ".52rem .8rem"; }
-    else { el.style.fontSize = ""; el.style.padding = ""; }
-  }
-  function applySizes() {
-    var sizes = layRec().sizes || {};
-    slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
-      var grp = el.getAttribute("data-mkgrp"); if (grp === "bar") return;
-      var lv = sizes[grp + ":" + el.getAttribute("data-mk")];
-      applyMkSize(el, lv == null ? 1 : lv);
-      el.classList.toggle("mk-selected", arranging && sel.grp === grp && sel.key === el.getAttribute("data-mk"));
+  function validPlace(stored) {
+    var keys = staticKeys(), p = {}, seen = {};
+    Object.keys(CONTS).forEach(function (cn) {
+      p[cn] = ((stored || {})[cn] || []).filter(function (k) { if (keys.indexOf(k) < 0 || seen[k]) return false; seen[k] = 1; return true; });
     });
-    barBtns.forEach(function (b) { b.classList.toggle("bar-selected", arranging && sel.grp === "bar" && sel.key === b.id); });
+    keys.forEach(function (k) { if (!seen[k]) p[homeOf(k)].push(k); });
+    return p;
   }
-  window.__mkApply = applySizes;
-  function containerOf(grp) {
-    if (grp === "blocks") return panel;
-    if (grp === "head") return panel.querySelector(".init-head");
-    if (grp === "form") return panel.querySelector(".init-form");
-    if (grp === "partyadd") return panel.querySelector(".init-party-add");
-    if (grp === "logbar") return panel.querySelector(".init-saved-head");
+  function validLines(stored) {
+    var union = ROW1.concat(ROW2), seen = {}, out = { row1: [], row2: [] };
+    ["row1", "row2"].forEach(function (ln) {
+      out[ln] = ((stored || {})[ln] || []).filter(function (k) { if (union.indexOf(k) < 0 || seen[k]) return false; seen[k] = 1; return true; });
+    });
+    ROW1.forEach(function (k) { if (!seen[k]) out.row1.push(k); });
+    ROW2.forEach(function (k) { if (!seen[k]) out.row2.push(k); });
+    return out;
+  }
+  var shippedPlace = defaultPlace();
+  var rec = load(FFKEY) || {};
+  rec.place = validPlace(rec.place || defaultPlace());
+  rec.lines = validLines(rec.lines);
+  var prowHadState = (rec.prow || []).indexOf("state") >= 0;
+  rec.prow = validList(rec.prow, PROW);
+  if (!prowHadState) { var psi = rec.prow.indexOf("state"), pdi = rec.prow.indexOf("del"); if (psi >= 0 && pdi >= 0 && psi > pdi) { rec.prow.splice(psi, 1); rec.prow.splice(rec.prow.indexOf("del"), 0, "state"); } }
+  rec.srow = validList(rec.srow, SROW);
+  rec.blocks = validList(rec.blocks, BLOCKS);
+  rec.bwidth = rec.bwidth || {};
+  rec.scale = rec.scale || {};
+  rec.nudge = rec.nudge || {};
+
+  window.__mkOrder = function (grp, keys) {
+    if (grp === "row1") return rec.lines.row1.slice();
+    if (grp === "row2") return rec.lines.row2.slice();
+    if (grp === "partyrow") return rec.prow.slice();
+    if (grp === "saved") return rec.srow.slice();
+    return keys;
+  };
+
+  /* ---- placement ---- */
+  function findStatic(key) {
+    for (var cn in CONTS) { var c = contEl(cn); if (!c) continue; var el = c.querySelector('[data-mk="' + key + '"]:not([data-mkgrp="blocks"])'); if (el) return el; }
     return null;
   }
-  function applyStatic() {
-    var rec = layRec();
-    validOrder("blocks", rec.blocks).forEach(function (k) { var b = panel.querySelector('[data-block="' + k + '"]'); if (b) panel.appendChild(b); });
-    ["head", "form", "partyadd", "logbar"].forEach(function (grp) {
-      var cont = containerOf(grp); if (!cont) return;
-      validOrder(grp, rec[grp]).forEach(function (k) { var el = cont.querySelector('[data-mk="' + k + '"]'); if (el) cont.appendChild(el); });
+  function applyPlace() {
+    Object.keys(CONTS).forEach(function (cn) {
+      var c = contEl(cn); if (!c) return;
+      rec.place[cn].forEach(function (k) { var el = findStatic(k); if (el) c.appendChild(el); });
     });
   }
-  function nameOf(grp, key) {
-    var el = panel.querySelector('[data-mkgrp="' + grp + '"][data-mk="' + key + '"]');
+  function applyBlocks() {
+    rec.blocks.forEach(function (k) { var b = panel.querySelector('[data-block="' + k + '"]'); if (b) panel.appendChild(b); });
+    BLOCKS.forEach(function (k) {
+      var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
+      var w = rec.bwidth[k];
+      b.style.width = (w && w < 100) ? w + "%" : "";
+    });
+    /* Saved scenarios is locked in place (Shaun, 2026-11-20): directly
+       below the buttons, above every result — it is not in BLOCKS, so
+       no saved layout, drag or reset can move it; this pins it back
+       under the action bar after every reorder. */
+    var sv = panel.querySelector('[data-block="saved"]'), bb = panel.querySelector('[data-block="bar"]');
+    if (sv && bb) bb.after(sv);
+  }
+
+  /* ---- looks: continuous scale, nudge, selection, clamp ---- */
+  function mkPhone() { return window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)").matches; }
+  var bases = {};
+  function baseOf(id, el) {
+    var bk = id + "|" + (mkPhone() ? "p" : "d");
+    if (bases[bk]) return bases[bk];
+    var keepF = el.style.fontSize, keepP = el.style.padding;
+    el.style.fontSize = ""; el.style.padding = "";
+    var cs = window.getComputedStyle(el);
+    var b = { fs: parseFloat(cs.fontSize) || 16, pt: parseFloat(cs.paddingTop) || 0, pr: parseFloat(cs.paddingRight) || 0, pb: parseFloat(cs.paddingBottom) || 0, pl: parseFloat(cs.paddingLeft) || 0 };
+    el.style.fontSize = keepF; el.style.padding = keepP;
+    bases[bk] = b; return b;
+  }
+  function familyOf(el) {
+    if (el.closest("[data-block]") && el.getAttribute("data-mkgrp") === "blocks") return "blocks";
+    if (el.closest(".init-row")) return "r";
+    if (el.closest(".init-party-row")) return "p";
+    if (el.closest(".init-saved-row")) return "v";
+    return "s";
+  }
+  var arranging = false;
+  var sel = { fam: "s", key: "initNextBtn" };
+  function selId() { return sel.fam + ":" + sel.key; }
+  function applyLooks() {
+    slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
+      var fam = familyOf(el), key = el.getAttribute("data-mk"), id = fam + ":" + key;
+      if (fam !== "blocks") {
+        var s = rec.scale[id];
+        if (s && s !== 1) { var b = baseOf(id, el); el.style.fontSize = (b.fs * s).toFixed(1) + "px"; el.style.padding = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; }
+        else { el.style.fontSize = ""; el.style.padding = ""; }
+        var n = rec.nudge[id];
+        el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
+      }
+      el.classList.toggle("mk-selected", arranging && sel.fam === fam && sel.key === key);
+    });
+    clampNudges();
+  }
+  function clampNudges() {
+    var pr = panel.getBoundingClientRect(), changed = false;
+    Object.keys(rec.nudge).forEach(function (id) {
+      var parts = id.split(":"), fam = parts[0], key = parts[1];
+      slice(panel.querySelectorAll('[data-mk="' + key + '"]')).forEach(function (el) {
+        if (familyOf(el) !== fam) return;
+        var r = el.getBoundingClientRect(), n = rec.nudge[id];
+        if (r.right > pr.right + 0.5) { n[0] -= Math.ceil(r.right - pr.right); changed = true; }
+        if (r.left < pr.left - 0.5) { n[0] += Math.ceil(pr.left - r.left); changed = true; }
+      });
+      var n2 = rec.nudge[id];
+      if (n2 && n2[0] === 0 && n2[1] === 0) { delete rec.nudge[id]; changed = true; }
+    });
+    if (changed) {
+      store();
+      slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
+        var id = familyOf(el) + ":" + el.getAttribute("data-mk"), n = rec.nudge[id];
+        if (familyOf(el) !== "blocks") el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
+      });
+    }
+  }
+  window.__mkApply = applyLooks;
+
+  /* ---- selection and the edit row ---- */
+  function nameOf(fam, key) {
+    var el = panel.querySelector('[data-mk="' + key + '"]');
     if (!el) return key;
     return ((el.getAttribute("aria-label") || el.textContent || el.getAttribute("title") || key) + "").trim().replace(/\s+/g, " ").slice(0, 30) || key;
   }
-  function levelOf(grp, key) {
-    if (grp === "bar") { var b = document.getElementById(key); return b ? parseInt(b.getAttribute("data-size") || "1", 10) : 1; }
-    var lv = (layRec().sizes || {})[grp + ":" + key];
-    return lv == null ? 1 : lv;
+  function readOf() {
+    if (sel.fam === "blocks") return (rec.bwidth[sel.key] || 100) + "% wide";
+    return Math.round((rec.scale[selId()] || 1) * 100) + "%";
   }
-  function select(grp, key) {
-    sel = { grp: grp, key: key };
-    if (sizeName) sizeName.textContent = nameOf(grp, key);
-    if (sizeRead) sizeRead.textContent = LEVELS[levelOf(grp, key)];
-    applySizes();
+  function select(fam, key) {
+    sel = { fam: fam, key: key };
+    if (sizeName) sizeName.textContent = sel.fam === "blocks" ? nameOf("blocks", key) : nameOf(fam, key);
+    if (sizeRead) sizeRead.textContent = readOf();
+    applyLooks();
   }
   function stepSize(dir) {
-    var lv = Math.max(0, Math.min(3, levelOf(sel.grp, sel.key) + dir));
-    if (sel.grp === "bar") {
-      var b = document.getElementById(sel.key); if (!b) return;
-      applyBarSize(b, lv); store(BARKEY, barLayout());
+    if (sel.fam === "blocks") {
+      var w = rec.bwidth[sel.key] || 100;
+      w = Math.max(40, Math.min(100, w + dir * 10));
+      if (w >= 100) delete rec.bwidth[sel.key]; else rec.bwidth[sel.key] = w;
+      store(); applyBlocks();
     } else {
-      var rec = layRec(); rec.sizes = rec.sizes || {};
-      if (lv === 1) delete rec.sizes[sel.grp + ":" + sel.key]; else rec.sizes[sel.grp + ":" + sel.key] = lv;
-      store(LAYKEY, rec); applySizes();
+      var id = selId(), s = rec.scale[id] || 1;
+      s = Math.max(0.5, Math.min(2, Math.round(s * (dir > 0 ? 1.1 : 0.9) * 100) / 100));
+      if (s === 1) delete rec.scale[id]; else rec.scale[id] = s;
+      store(); applyLooks();
     }
-    if (sizeRead) sizeRead.textContent = LEVELS[lv];
+    if (sizeRead) sizeRead.textContent = readOf();
   }
   if (sizeDown) sizeDown.addEventListener("click", function () { stepSize(-1); });
   if (sizeUp) sizeUp.addEventListener("click", function () { stepSize(1); });
+  function nudgeBy(dx, dy) {
+    if (sel.fam === "blocks") return;
+    var id = selId(), n = rec.nudge[id] || [0, 0];
+    n = [n[0] + dx, n[1] + dy];
+    if (n[0] === 0 && n[1] === 0) delete rec.nudge[id]; else rec.nudge[id] = n;
+    store(); applyLooks();
+  }
+  [["initNudgeL", -2, 0], ["initNudgeR", 2, 0], ["initNudgeU", 0, -2], ["initNudgeD", 0, 2]].forEach(function (cfg) {
+    var b = document.getElementById(cfg[0]);
+    if (b) b.addEventListener("click", function () { nudgeBy(cfg[1], cfg[2]); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!arranging) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+    var step = e.shiftKey ? 10 : 2;
+    if (e.key === "ArrowLeft") { nudgeBy(-step, 0); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { nudgeBy(step, 0); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { nudgeBy(0, -step); e.preventDefault(); }
+    else if (e.key === "ArrowDown") { nudgeBy(0, step); e.preventDefault(); }
+  });
 
   function setArranging(on) {
     arranging = on;
     document.body.classList.toggle("init-arranging", on);
-    lockBtn.textContent = on ? "🔒 Lock buttons" : "🔓 Move buttons";
+    lockBtn.textContent = on ? "🔒 Done editing" : "🔓 Edit page";
     lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
     resetBtn.hidden = !on;
     if (sizeRow) sizeRow.hidden = !on;
-    select(sel.grp, sel.key);
+    select(sel.fam, sel.key);
   }
   lockBtn.addEventListener("click", function () { setArranging(!arranging); });
   resetBtn.addEventListener("click", function () {
-    try { localStorage.removeItem(BARKEY); localStorage.removeItem(LAYKEY); } catch (e) {}
-    applyBar(); applyStatic();
+    try { localStorage.removeItem(FFKEY); localStorage.removeItem("apoc-personal-bar-v1"); localStorage.removeItem("apoc-personal-layout-v2"); } catch (e) {}
+    rec = { place: JSON.parse(JSON.stringify(shippedPlace)), lines: { row1: ROW1.slice(), row2: ROW2.slice() }, prow: PROW.slice(), srow: SROW.slice(), blocks: BLOCKS.slice(), bwidth: {}, scale: {}, nudge: {} };
+    bases = {};
+    applyPlace(); applyBlocks();
     if (typeof renderInitiative === "function") renderInitiative();
     if (typeof renderParty === "function") renderParty();
     if (typeof renderInitSaved === "function") renderInitSaved();
-    applySizes(); select("bar", barShipped[0]);
+    applyLooks(); select("s", "initNextBtn");
   });
 
-  /* Block grips: one strip per block, visible only while arranging. */
-  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  /* Block grips: one strip per block, visible only while editing. */
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log" };
   Object.keys(BLOCK_NAMES).forEach(function (k) {
     var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
     var g = document.createElement("div");
@@ -2145,25 +2199,26 @@ window.addEventListener("pagehide", () => {
     b.insertBefore(g, b.firstChild);
   });
 
-  /* While arranging, taps inside the blocks select and never fire. */
+  /* While editing, taps inside the blocks select and never fire. */
   panel.addEventListener("click", function (ev) {
     if (!arranging) return;
     var inBlock = ev.target.closest && ev.target.closest("[data-block]");
     if (!inBlock) return;
     ev.preventDefault(); ev.stopPropagation();
     var mk = ev.target.closest("[data-mk]");
-    if (mk && panel.contains(mk)) select(mk.getAttribute("data-mkgrp"), mk.getAttribute("data-mk"));
+    if (mk && panel.contains(mk)) select(familyOf(mk), mk.getAttribute("data-mk"));
   }, true);
 
-  /* One dragger for every group. */
+  /* One dragger for every family; drops insert, they do not swap. */
   var drag = null;
+  function lineOf(el) { return el.closest(".init-line1") ? "row1" : (el.closest(".init-line2") ? "row2" : null); }
   panel.addEventListener("pointerdown", function (ev) {
     if (!arranging) return;
     var mk = ev.target.closest && ev.target.closest("[data-mk]");
     if (!mk || !panel.contains(mk)) return;
-    var grp = mk.getAttribute("data-mkgrp"), key = mk.getAttribute("data-mk");
-    select(grp, key);
-    drag = { grp: grp, key: key, el: grp === "blocks" ? mk.closest("[data-block]") : mk, targetEl: null, targetKey: null, on: false, x: ev.clientX, y: ev.clientY };
+    var fam = familyOf(mk), key = mk.getAttribute("data-mk");
+    select(fam, key);
+    drag = { fam: fam, key: key, el: fam === "blocks" ? mk.closest("[data-block]") : mk, targetEl: null, targetKey: null, targetLine: null, after: false, on: false, x: ev.clientX, y: ev.clientY };
     try { mk.setPointerCapture(ev.pointerId); } catch (e) {}
     ev.preventDefault();
   });
@@ -2173,52 +2228,53 @@ window.addEventListener("pagehide", () => {
     if (!drag.on) return;
     var el = document.elementFromPoint(ev.clientX, ev.clientY);
     var t = el && el.closest ? el.closest("[data-mk]") : null;
-    if (t && t.getAttribute("data-mkgrp") === drag.grp && t.getAttribute("data-mk") !== drag.key) {
-      if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
-      drag.targetEl = drag.grp === "blocks" ? t.closest("[data-block]") : t;
-      if (drag.targetEl) drag.targetEl.classList.add("drop-target");
-      drag.targetKey = t.getAttribute("data-mk");
-    }
+    if (!t || t.getAttribute("data-mk") === drag.key && drag.fam !== "r") { return; }
+    if (!t || familyOf(t) !== drag.fam) return;
+    if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
+    drag.targetEl = drag.fam === "blocks" ? t.closest("[data-block]") : t;
+    if (drag.targetEl) drag.targetEl.classList.add("drop-target");
+    drag.targetKey = t.getAttribute("data-mk");
+    drag.targetLine = drag.fam === "r" ? lineOf(t) : null;
+    var r = t.getBoundingClientRect();
+    drag.after = ev.clientX > r.left + r.width / 2;
   });
-  function rerender(grp) {
-    if (grp === "row1" || grp === "row2") { if (typeof renderInitiative === "function") renderInitiative(); }
-    else if (grp === "partyrow") { if (typeof renderParty === "function") renderParty(); }
-    else if (grp === "saved") { if (typeof renderInitSaved === "function") renderInitSaved(); }
+  function removeFrom(list, key) { var i = list.indexOf(key); if (i >= 0) list.splice(i, 1); }
+  function insertNear(list, targetKey, key, after) {
+    var i = list.indexOf(targetKey);
+    if (i < 0) { list.push(key); return; }
+    list.splice(after ? i + 1 : i, 0, key);
   }
-  function commitSwap(grp, a, b) {
-    if (grp === "bar") {
-      var kids = slice(bar.querySelectorAll(".btn"));
-      var i = kids.findIndex(function (k) { return k.id === a; }), j = kids.findIndex(function (k) { return k.id === b; });
-      if (i < 0 || j < 0) return;
-      kids[i] = document.getElementById(b); kids[j] = document.getElementById(a);
-      kids.forEach(function (k) { bar.appendChild(k); });
-      store(BARKEY, barLayout());
-      return;
+  function rerender(fam) {
+    if (fam === "r") { if (typeof renderInitiative === "function") renderInitiative(); }
+    else if (fam === "p") { if (typeof renderParty === "function") renderParty(); }
+    else if (fam === "v") { if (typeof renderInitSaved === "function") renderInitSaved(); }
+  }
+  function commitDrag() {
+    if (!drag.targetKey || drag.targetKey === drag.key && drag.fam !== "r") return;
+    var key = drag.key, tk = drag.targetKey, after = drag.after;
+    if (drag.fam === "blocks") {
+      removeFrom(rec.blocks, key); insertNear(rec.blocks, tk, key, after); store(); applyBlocks();
+    } else if (drag.fam === "s") {
+      Object.keys(CONTS).forEach(function (cn) { removeFrom(rec.place[cn], key); });
+      var dest = null;
+      Object.keys(CONTS).forEach(function (cn) { if (rec.place[cn].indexOf(tk) >= 0) dest = cn; });
+      if (!dest) dest = "bar";
+      insertNear(rec.place[dest], tk, key, after); store(); applyPlace();
+    } else if (drag.fam === "r") {
+      if (tk === key && drag.targetLine === (rec.lines.row1.indexOf(key) >= 0 ? "row1" : "row2")) return;
+      removeFrom(rec.lines.row1, key); removeFrom(rec.lines.row2, key);
+      var line = drag.targetLine || "row1";
+      insertNear(rec.lines[line], tk, key, after); store(); rerender("r");
+    } else if (drag.fam === "p") {
+      removeFrom(rec.prow, key); insertNear(rec.prow, tk, key, after); store(); rerender("p");
+    } else if (drag.fam === "v") {
+      removeFrom(rec.srow, key); insertNear(rec.srow, tk, key, after); store(); rerender("v");
     }
-    if (TEMPLATE[grp]) {
-      var rec = layRec(); var ord = validOrder(grp, rec[grp]);
-      var i2 = ord.indexOf(a), j2 = ord.indexOf(b);
-      if (i2 < 0 || j2 < 0) return;
-      ord[i2] = b; ord[j2] = a; rec[grp] = ord; store(LAYKEY, rec);
-      rerender(grp); applySizes();
-      return;
-    }
-    var cont = containerOf(grp); if (!cont) return;
-    var selq = grp === "blocks" ? "[data-block]" : '[data-mkgrp="' + grp + '"]';
-    var items = slice(cont.querySelectorAll(selq));
-    var ea = grp === "blocks" ? cont.querySelector('[data-block="' + a + '"]') : cont.querySelector('[data-mk="' + a + '"]');
-    var eb = grp === "blocks" ? cont.querySelector('[data-block="' + b + '"]') : cont.querySelector('[data-mk="' + b + '"]');
-    if (!ea || !eb) return;
-    var i3 = items.indexOf(ea), j3 = items.indexOf(eb);
-    items[i3] = eb; items[j3] = ea;
-    items.forEach(function (k) { cont.appendChild(k); });
-    var rec2 = layRec();
-    rec2[grp] = items.map(function (k) { return grp === "blocks" ? k.getAttribute("data-block") : k.getAttribute("data-mk"); });
-    store(LAYKEY, rec2);
+    applyLooks();
   }
   function endDrag() {
     if (!drag) return;
-    if (drag.on && drag.targetKey && drag.targetKey !== drag.key) commitSwap(drag.grp, drag.key, drag.targetKey);
+    if (drag.on && drag.targetKey) commitDrag();
     if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
     if (drag.el) drag.el.classList.remove("dragging");
     drag = null;
@@ -2226,16 +2282,16 @@ window.addEventListener("pagehide", () => {
   panel.addEventListener("pointerup", endDrag);
   panel.addEventListener("pointercancel", endDrag);
 
-  /* Fresh row instances pick up sizes and selection automatically. */
+  /* Fresh row instances pick up scale and nudge automatically. */
   var raf = 0;
   new MutationObserver(function () {
     if (raf) return;
-    raf = requestAnimationFrame(function () { raf = 0; applySizes(); });
+    raf = requestAnimationFrame(function () { raf = 0; applyLooks(); });
   }).observe(panel, { childList: true, subtree: true });
 
-  applyBar();
-  applyStatic();
-  applySizes();
+  applyPlace();
+  applyBlocks();
+  applyLooks();
 })();
 </script>
 
@@ -2270,6 +2326,7 @@ window.addEventListener("pagehide", () => {
     const el = e.target.closest ? e.target.closest("[title]") : null;
     cancel(); hide(); fired = false;
     if (!el) { target = null; return; }
+    if (el.closest && el.closest("[data-nohold]")) { target = null; return; }
     target = el; sx = e.clientX; sy = e.clientY;
     timer = setTimeout(() => { fired = true; show(el); }, 550);
   }, true);
