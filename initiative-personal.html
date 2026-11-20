@@ -91,8 +91,7 @@
   #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
-  #initiativePanel .init-form-fields{display:flex;gap:.5rem;flex-wrap:wrap;flex:1 1 100%;align-items:center}
-  #initiativePanel .init-form-fields[hidden]{display:none}
+  #initiativePanel .init-form.folded > *:not(#initAddFoeBtn){display:none !important}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
   #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
@@ -375,9 +374,8 @@
         <button type="button" class="btn" data-mk="padd" data-mkgrp="partyadd" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
       </div>
     </div>
-    <div class="init-form init-block" data-block="form">
-      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" aria-expanded="false" title="Add a foe — tap to open the combatant line folded under this button; tap again to fold it away">Add foe</button>
-      <div class="init-form-fields" id="initFormFields" hidden>
+    <div class="init-form init-block folded" data-block="form">
+      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" aria-expanded="false" title="Add a foe — tap to open the combatant line nested under this button; tap again to fold it away">Add foe</button>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
@@ -385,7 +383,6 @@
       <input id="initHp" data-mk="hp" data-mkgrp="form" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
       <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
       <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
-      </div>
     </div>
     <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
       <span class="init-pic-for" id="initPicFor"></span>
@@ -1822,8 +1819,8 @@ $("initRollingBtn").addEventListener("click", () => {
 });
 $("initAddBtn").addEventListener("click", initAdd);
 $("initAddFoeBtn").addEventListener("click", () => {
-  const f = $("initFormFields"), b = $("initAddFoeBtn"), open = f.hidden;
-  f.hidden = !open; b.setAttribute("aria-expanded", String(open));
+  const b = $("initAddFoeBtn"), form = b.closest(".init-form"), open = form.classList.contains("folded");
+  form.classList.toggle("folded", !open); b.setAttribute("aria-expanded", String(open));
   if (open) $("initName").focus();
 });
 $("initNextBtn").addEventListener("click", initNext);
