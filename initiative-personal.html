@@ -385,6 +385,7 @@
       <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
       <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
       <span class="init-pic-for" id="initPicFor"></span>
       <button type="button" class="btn" id="initPicUploadBtn" title="Upload a picture from this device — it is stored with the campaign pictures, and the link is what stays on the row">Upload a picture</button>
@@ -395,7 +396,6 @@
       <span class="init-pic-note" id="initPicNote"></span>
     </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
     <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1923,7 +1923,7 @@ window.addEventListener("pagehide", () => {
   var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"];
   var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "del"];
   var SROW = ["body", "btns"];
-  var BLOCKS = ["header", "bar", "party", "form", "list", "log", "saved"];
+  var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
   var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
   var slice = function (nl) { return Array.prototype.slice.call(nl); };
   slice(bar.querySelectorAll(".btn")).forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
@@ -2142,7 +2142,7 @@ window.addEventListener("pagehide", () => {
   });
 
   /* Block grips: one strip per block, visible only while editing. */
-  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log" };
   Object.keys(BLOCK_NAMES).forEach(function (k) {
     var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
     var g = document.createElement("div");
