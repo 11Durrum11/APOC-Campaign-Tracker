@@ -219,7 +219,7 @@
   #initiativePanel .init-party[hidden]{display:none}
   #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
   #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
-  #initiativePanel .init-party-name{font:inherit;flex:0 1 4rem;min-width:2.5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-name{font:inherit;flex:0 0 auto;width:13.5em;box-sizing:content-box;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-party-state{flex:1 1 auto;min-width:0;font-size:.88em;opacity:.9}
   #initiativePanel .init-party-state:empty{display:none}
   #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
@@ -957,13 +957,14 @@ function renderParty(){
   wrap.innerHTML = (initState.party || []).map(p => {
     const seg = {
       pic: '<button type="button" class="init-pic' + (p.pic ? ' has' : '') + '" data-mk="pic" data-mkgrp="partyrow" data-party-pic="' + p.id + '" aria-label="Picture for ' + esc(p.name) + '" title="' + (p.pic ? 'Picture for ' + esc(p.name) + ' — tap to change or remove it; it comes along when they join the fight' : 'Add a picture for ' + esc(p.name) + ' — tap to upload one or paste a link; it comes along when they join the fight') + '">' + (p.pic ? '<img src="' + esc(p.pic) + '" alt="">' : '<span aria-hidden="true">🖼</span>') + '</button>',
-      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '"><span class="init-party-state" data-party-state="' + p.id + '" title="This character\'s current state in the fight — hit points and statuses, kept live as the fight changes">' + esc(partyStateText(p)) + '</span>',
+      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">',
       mod: '<label class="init-lab" data-mk="mod" data-mkgrp="partyrow">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>',
       ac: '<label class="init-lab" data-mk="ac" data-mkgrp="partyrow">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>',
       hp: '<label class="init-lab" data-mk="hp" data-mkgrp="partyrow">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>',
       fort: '<label class="init-lab" data-mk="fort" data-mkgrp="partyrow">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>',
       ref: '<label class="init-lab" data-mk="ref" data-mkgrp="partyrow">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>',
       will: '<label class="init-lab" data-mk="will" data-mkgrp="partyrow">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>',
+      state: '<span class="init-party-state" data-mk="state" data-mkgrp="partyrow" data-party-state="' + p.id + '" title="This character\'s current status in the fight — hit points and statuses, kept live as the fight changes, whatever they may be">' + esc(partyStateText(p)) + '</span>',
       del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="partyrow" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>'
     };
     const ord = (window.__mkOrder ? window.__mkOrder("partyrow", PARTYROW_KEYS) : PARTYROW_KEYS);
@@ -987,7 +988,7 @@ function renderParty(){
 }
 const ROW1_KEYS = ["drag","turn","pic","name","notes","init","roll","mod","ac","fort","ref","will","dup","toparty","del"];
 const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status"];
-const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","del"];
+const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","state","del"];
 const SAVED_KEYS = ["body","btns"];
 function renderInitiative(){
   const wrap = $("initList"); if (!wrap) return;
@@ -1959,7 +1960,7 @@ window.addEventListener("pagehide", () => {
   var FFKEY = "apoc-personal-freeform-v1";
   var ROW1 = ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"];
   var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"];
-  var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "del"];
+  var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "state", "del"];
   var SROW = ["body", "btns"];
   var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
   var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
@@ -2009,7 +2010,9 @@ window.addEventListener("pagehide", () => {
   var rec = load(FFKEY) || {};
   rec.place = validPlace(rec.place || defaultPlace());
   rec.lines = validLines(rec.lines);
+  var prowHadState = (rec.prow || []).indexOf("state") >= 0;
   rec.prow = validList(rec.prow, PROW);
+  if (!prowHadState) { var psi = rec.prow.indexOf("state"), pdi = rec.prow.indexOf("del"); if (psi >= 0 && pdi >= 0 && psi > pdi) { rec.prow.splice(psi, 1); rec.prow.splice(rec.prow.indexOf("del"), 0, "state"); } }
   rec.srow = validList(rec.srow, SROW);
   rec.blocks = validList(rec.blocks, BLOCKS);
   rec.bwidth = rec.bwidth || {};
