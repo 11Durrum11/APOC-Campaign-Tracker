@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John's House (Personal) — Initiative Tracker · APOC Survival</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --background:hsl(222 22% 10%);
+    --foreground:hsl(42 38% 88%);
+    --card:hsla(222,20%,14%,0);
+    --card-foreground:hsl(42 38% 88%);
+    --card-border:hsl(220 16% 24%);
+    --popover:hsla(222,20%,13%,0);
+    --primary:hsl(38 92% 50%);
+    --primary-foreground:hsl(30 40% 10%);
+    --secondary:hsla(220,16%,20%,0);
+    --muted:hsla(220,16%,20%,0);
+    --muted-foreground:hsl(220 12% 62%);
+    --accent:hsla(222,18%,22%,0);
+    --accent-foreground:hsl(42 38% 90%);
+    --destructive:hsl(0 62% 46%);
+    --border:hsl(220 16% 24%);
+    --input:hsl(220 16% 26%);
+    --ring:hsl(38 92% 50%);
+    --radius:12px;
+    --scene-image:url("assets/scenes/bastion-streets.webp");
+  }
+  body{
+    margin:0;background:var(--background);color:var(--foreground);
+    font-family:Georgia,"Times New Roman",serif;line-height:1.5;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;
+  }
+  /* The backdrop: the hub's own pinned scene layer and scrim,
+     verbatim — the slideshow cycles --scene-image underneath. */
+  body::before{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-2;
+    background-image:var(--scene-image);background-size:cover;background-position:center;
+    opacity:var(--bg-opacity,.45);transition:opacity 1.5s ease;
+  }
+  body::after{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;
+    background:
+      linear-gradient(180deg,hsla(222,22%,10%,.62),hsla(222,22%,10%,.86) 46%,hsla(222,22%,10%,.96) 100%),
+      radial-gradient(ellipse at 50% 0%,transparent 0%,hsla(222,22%,10%,.40) 72%);
+  }
+  *{box-sizing:border-box}
+  a{color:var(--primary)}
+  button,input,select,textarea{font:inherit}
+  button,select,input,textarea{color:var(--foreground)}
+  button{cursor:pointer}
+  :focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+  .page{width:min(1180px,100%);margin:0 auto;padding:0 16px 8px}
+  .panel{
+    background:hsla(222,20%,14%,0);border:1px solid var(--card-border);backdrop-filter:blur(3px);
+    border-radius:var(--radius);padding:8px 10px;margin-top:6px;
+    box-shadow:0 14px 32px rgba(0,0,0,.18);
+  }
+  .panel h2{margin:0 0 6px;font-size:clamp(1.3rem,3.4vw,1.7rem);font-weight:500}
+  .panel h3{font-weight:500}
+  .muted{color:var(--muted-foreground)}
+  .small{font-size:.9rem}
+  .btn{
+    border:1px solid var(--card-border);background:var(--secondary);color:var(--foreground);
+    border-radius:9px;padding:6px 11px;min-height:34px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .btn:hover{background:var(--accent);color:var(--accent-foreground)}
+  .btn.primary{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
+  .btn.danger{background:transparent;border-color:var(--destructive);color:#f0b1b1}
+  .btn.danger:hover{background:transparent;color:#f0b1b1}
+  [hidden]{display:none !important}
+  /* Page furniture: a slim top bar tying the page to the hub —
+     back to the Campaign Hub on the left, the campaign wordmark
+     on the right, both in the hub's own type and colours. */
+  .init-topbar{display:flex;align-items:center;justify-content:flex-start;gap:.75rem;padding-top:6px;flex-wrap:wrap}
+  .init-brand{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+  .init-topbar-title{color:var(--primary);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+  /* Campaign Initiative Tracker panel — John's House, full combat
+     build (2026-11-18: AC, HP with damage/healing by amount, 3.5
+     statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
+     — the recovered AIDM Roster feature set). Every
+     rule is scoped under #initiativePanel so nothing else on the
+     page collides with it. */
+  #initiativePanel{display:flex;flex-wrap:wrap;align-content:flex-start}
+  #initiativePanel .init-block{flex:0 0 auto;width:100%}
+  #initiativePanel .init-head{display:flex;align-items:center;justify-content:space-between;gap:.55rem;flex-wrap:wrap}
+  #initiativePanel .init-round{font-weight:700;letter-spacing:.04em}
+  #initiativePanel .init-nownext{margin:.22rem 0 0;font-weight:600;min-height:1.2em}
+  #initiativePanel .init-form{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}
+  #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-form input[type="number"]{width:5.5rem}
+  #initiativePanel .init-form input#initName{flex:1 1 10rem}
+  #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
+  #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
+  #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
+  #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.32rem;flex-wrap:wrap}
+  #initiativePanel .init-line2{margin-top:.32rem}
+  #initiativePanel .init-turn{width:1.1rem;text-align:center;visibility:hidden}
+  #initiativePanel .init-row.active .init-turn{visibility:visible}
+  #initiativePanel .init-name{flex:1 1 6rem;min-width:0;overflow-wrap:anywhere;font-weight:600;cursor:default}
+  #initiativePanel .init-name.struck{text-decoration:line-through}
+  #initiativePanel .init-lab{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;opacity:.9}
+  #initiativePanel .init-lab input{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-hp-group,#initiativePanel .init-amt-group{display:inline-flex;align-items:center;gap:.3rem}
+  #initiativePanel .init-hp,#initiativePanel .init-hpmax{font:inherit;width:3.6rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-amt{font:inherit;width:4rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-bar{display:flex;width:100%;align-self:stretch;height:6px;border-radius:3px;background:rgba(127,127,127,.35);margin-top:.45rem;overflow:hidden}
+  #initiativePanel .init-bar span{height:100%}
+  #initiativePanel .init-hint{font-weight:700;font-style:italic}
+  #initiativePanel .init-status-add{font:inherit;font-size:.95rem;font-weight:600;padding:.34rem .45rem;border:1px solid #111;border-radius:6px;background:#fff;color:#111}
+  #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
+  #initiativePanel .init-chip{background:#fff;color:#000;border:1px solid #111;border-radius:999px;padding:.16rem .35rem .16rem .65rem;font-size:.92rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem}
+  #initiativePanel .init-chip button{font:inherit;font-weight:700;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
+  /* Per-character notes (Shaun, 2026-11-18): the notes field sits
+     on the name line, immediately after the character's name,
+     growing to fill the space before the Init field; on narrow
+     screens it wraps to its own sub-line right under the name. */
+  #initiativePanel .init-notes{flex:1 1 8rem;min-width:6rem;font:inherit;font-size:.9rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  /* Action buttons on TOP (Shaun, 2026-11-18): the controls sit
+     right under the header / Now-Next line, above the form and the
+     combatant list, and stick to the top of the view while a long
+     list scrolls under them. */
+  #initiativePanel .init-controls{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.4rem 0;padding:.35rem .45rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
+     row and size row exist only on the phone side (phones and
+     tablets); the desktop page never shows them. */
+  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+  #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.65rem;margin-bottom:.28rem}
+  #initiativePanel #initClearLogBtn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
+  #initiativePanel .init-pic{flex:0 0 auto;width:2.1em;height:2.1em;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px dashed var(--card-border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;overflow:hidden}
+  #initiativePanel .init-pic.has{border-style:solid}
+  #initiativePanel .init-pic img{width:100%;height:100%;object-fit:cover;display:block}
+  #initiativePanel .init-saved-pic{width:20px;height:20px;object-fit:cover;border-radius:4px;vertical-align:-5px}
+  #initiativePanel .init-pic-chooser{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;padding:.5rem .6rem;margin:.35rem 0;border:1px solid var(--card-border);border-radius:10px;background:hsl(222,20%,14%)}
+  #initiativePanel .init-pic-chooser[hidden]{display:none}
+  #initiativePanel .init-pic-for{font-weight:700}
+  #initiativePanel .init-pic-chooser input[type="url"]{font:inherit;flex:1 1 12rem;padding:.4rem .55rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-pic-x{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem .35rem}
+  #initiativePanel .init-pic-note{flex:1 1 100%;color:var(--muted);font-size:.9em}
+  #initiativePanel .init-pic-note:empty{display:none}
+  #initiativePanel .init-form.folded > *:not(.block-grip){display:none !important}
+  #initiativePanel .init-party-add.folded > *:not(#initPartyAddToggle){display:none !important}
+  /* The Add foe button lives in the action bar now
+     (Shaun, 2026-11-19), so a folded form has nothing of its
+     own left to show: the whole block leaves the page until
+     the form is opened. While arranging it stays on the page
+     as a strip, so its grip can still be dragged. */
+  #initiativePanel .init-form.folded{display:none}
+  body.init-arranging #initiativePanel .init-form.folded{display:flex}
+  #initiativePanel .init-fold-toggle{flex:0 0 auto}
+  /* Phone one-screen folds (Shaun, 2026-11-19): these two
+     toggles exist only on the phone side — the base page never
+     shows them; the phone media block turns them on. */
+  #initiativePanel .init-rowfold{display:none}
+  #initiativePanel .init-more-btn{display:none}
+  body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
+  .init-topbar .init-size-row{display:none}
+  #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{font:inherit;font-size:.8rem;font-weight:600;padding:.3rem .65rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer}
+  .block-grip{display:none}
+  body.init-arranging .block-grip{display:flex;flex:1 1 100%;align-items:center;gap:.4rem;font-size:.78rem;font-weight:700;letter-spacing:.03em;opacity:.9;padding:.28rem .5rem;border:1px dashed rgba(242,234,216,.4);border-radius:8px;cursor:grab;margin-bottom:.35rem;touch-action:none}
+  body.init-arranging .init-block{outline:1px dashed rgba(242,234,216,.30);outline-offset:5px;border-radius:10px}
+  body.init-arranging [data-mk]{cursor:grab;touch-action:none}
+  [data-mk].mk-selected{outline:2px solid var(--primary);outline-offset:1px}
+  [data-mk].dragging{opacity:.55}
+  [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
+  .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
+  #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
+  .press-tip{position:fixed;z-index:9999;max-width:min(78vw,340px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  [title]{-webkit-touch-callout:none}
+  .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
+  #initiativePanel .init-empty{opacity:.8;font-style:italic}
+  #initiativePanel .init-saved-head h4{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-saved-row{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .6rem;border:1px solid var(--card-border);border-radius:8px;margin-bottom:.35rem;font-size:.9rem}
+  #initiativePanel .init-saved-row .init-saved-body{flex:1 1 auto;min-width:0}
+  #initiativePanel .init-saved-row .when{font-weight:600}
+  #initiativePanel .init-saved-del{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .5rem;line-height:1.3}
+  /* Accessories (Shaun, 2026-11-18 — "put ALL of it in"): combat
+     clock, drag handle, saves on the line, Delay/Ready, temp HP and
+     nonlethal fields, status durations, the party roster, the
+     combat log, saved-scenario Load. */
+  #initiativePanel .init-clock{font-weight:600;opacity:.85}
+  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.65;font-weight:600;cursor:pointer}
+  #initiativePanel .init-worldclock:hover{opacity:.95}
+  #initiativePanel .init-sessout{font-weight:600;opacity:.65}
+  #initiativePanel .init-round{cursor:pointer}
+  #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:hsla(222,20%,14%,.35)}
+  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;padding:.18rem .5rem}
+  #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
+  #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
+  #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
+  #initiativePanel .init-time-input{width:4.6rem}
+  #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
+  #initiativePanel button.init-clock.running,#initiativePanel button.init-sessout.running{color:#f3c969;border-color:#f3c969;opacity:1}
+  #initiativePanel .init-stint{cursor:pointer}
+  #initiativePanel .init-clocks{display:inline-flex;gap:.55rem;align-items:center;font-variant-numeric:tabular-nums}
+  #initiativePanel .init-stint{font-weight:700}
+  #initiativePanel .init-total{opacity:.75;font-size:.88em}
+  #initiativePanel .init-drag{cursor:grab;touch-action:none;padding:.2rem .3rem;opacity:.7;user-select:none;-webkit-user-select:none}
+  #initiativePanel .init-row.dragging{opacity:.55;outline:2px dashed var(--mv-blue, #8fb4ff);position:relative;z-index:5}
+  #initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-nlbtn{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-ready.on{background:#f3c969;color:#000;border-color:#f3c969;font-weight:700}
+  #initiativePanel .init-surprised{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-surprised.on{background:#ffe1a8;color:#000;border-color:#ffe1a8;font-weight:700}
+  #initiativePanel .init-chip.surprised{background:#ffe1a8;color:#111}
+  #initiativePanel .init-controls .btn.on{background:#f3c969;color:#111;border-color:#f3c969;font-weight:700}
+  #initiativePanel .init-delay.jumpin{background:var(--mv-blue, #8fb4ff);color:#000;border-color:var(--mv-blue, #8fb4ff);font-weight:700}
+  #initiativePanel .init-save{width:2.7rem !important}
+  #initiativePanel .init-tmp,#initiativePanel .init-nl{font:inherit;width:3.2rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-cr{font:inherit;width:3.2rem;padding:.25rem .4rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-dur{font:inherit;font-weight:600;width:3.9rem;padding:.3rem .45rem;border:1px solid #111;border-radius:6px;background:#fff;color:#111}
+  #initiativePanel .init-chip.readied{background:#f3c969;color:#000;border-color:#7a5a08;padding:.16rem .65rem}
+  #initiativePanel .init-chip.delaying{background:#e8e8e8;color:#111;border-style:dashed;padding:.16rem .65rem}
+  #initiativePanel .init-party{margin:.55rem 0;padding:.55rem .7rem;border:1px solid var(--card-border);border-radius:8px}
+  #initiativePanel .init-party[hidden]{display:none}
+  #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
+  #initiativePanel .init-party-name{font:inherit;flex:1 1 8rem;min-width:5rem;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-party-add{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
+  #initiativePanel .init-party-add input{font:inherit;flex:1 1 10rem;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-log{margin-top:.65rem}
+  #initiativePanel .init-log h4{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-logbox{max-height:180px;overflow-y:auto;border:1px solid var(--card-border);border-radius:8px;padding:.45rem .6rem;font-size:.85rem}
+  #initiativePanel .init-logbox div{padding:.1rem 0;border-bottom:1px dashed rgba(127,127,127,.25)}
+  #initiativePanel .init-logbox div:last-child{border-bottom:none}
+  #initiativePanel .init-saved-btns{display:inline-flex;gap:.35rem;flex:none}
+  #initiativePanel .init-saved-load{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.1rem .55rem;line-height:1.3}
+  #initiativePanel .init-saved-log{margin-top:.3rem;font-size:.85rem}
+  #initiativePanel .init-saved-log summary{cursor:pointer;opacity:.85}
+  #initiativePanel .init-controls .btn[disabled]{opacity:.45;cursor:default}
+  #initiativePanel .init-controls .btn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
+  /* Phone side (Shaun's definition, 2026-11-18): phones AND tablets. */
+  @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
+    .panel{padding:16px}
+    #initiativePanel .init-form input{font-size:16px;min-height:44px}
+    #initiativePanel .init-form input#initName{flex:1 1 100%}
+    #initiativePanel .init-form input[type="number"]{flex:1 1 0;width:auto}
+    #initiativePanel .init-form .btn{min-height:44px;flex:1 1 0}
+    #initiativePanel .init-row{padding:.55rem .6rem}
+    #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
+    #initiativePanel .init-status-add{font-size:16px;min-height:40px}
+    #initiativePanel .init-notes{font-size:16px;min-height:40px}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:40px;min-height:40px}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-dur,#initiativePanel .init-cr{font-size:16px;min-height:40px}
+    #initiativePanel .init-drag{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:16px;min-height:40px}
+    #initiativePanel .init-party-add .btn{min-height:44px}
+    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:40px;min-height:40px}
+    #initiativePanel .init-head{gap:.35rem .5rem}
+    #initiativePanel .init-stint{padding:.3rem .25rem}
+    #initiativePanel .init-clock,#initiativePanel .init-sessout{padding:.3rem .15rem}
+    #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
+    #initiativePanel .init-controls .btn{min-height:44px}
+    #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
+    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:36px;padding:.35rem .75rem}
+    body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
+    body.init-arranging #initiativePanel .init-controls .btn{touch-action:none;cursor:grab}
+    body.init-arranging #initiativePanel .init-controls .btn.bar-selected{border-color:var(--primary);border-style:solid;box-shadow:0 0 0 2px var(--primary)}
+    body.init-arranging #initiativePanel .init-controls .btn.dragging{opacity:.55}
+    body.init-arranging #initiativePanel .init-controls .btn.drop-target{border-color:var(--primary);border-style:dashed}
+  }
+  /* One phone screen (Shaun, 2026-11-19): the whole tracker —
+     header, action bar, the fight itself, log and saved — fits
+     the phone's screen height with no up-and-down scrolling.
+     Everything is tightened, and the secondary pieces fold:
+     each row's extra controls behind its ▸, the action bar's
+     tail behind More, the combat log and the saved list behind
+     their headings. Nothing is removed; every fold opens in one
+     tap, remembers itself per device, and lets go entirely
+     while arranging. */
+  @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
+    .panel{padding:5px 7px}
+    .page{padding:0 5px 3px}
+    .panel{margin-top:3px}
+    .init-topbar{padding-top:2px;gap:.3rem}
+    .init-topbar .btn{font-size:.76rem;padding:.12rem .45rem;min-height:0}
+    .init-brand{font-size:.55rem;letter-spacing:.08em}
+    .init-topbar-title{font-size:.6rem;letter-spacing:.1em}
+    #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:22px;padding:.1rem .4rem;font-size:.74rem}
+    #initiativePanel .init-head{gap:.15rem .28rem}
+    #initiativePanel .init-head .init-lock-btn{min-height:20px}
+    #initiativePanel .init-round{font-size:.92rem}
+    #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
+    #initiativePanel .init-worldclock{font-size:.76rem}
+    #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
+    #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.86rem;min-height:1em;line-height:1.15}
+    #initiativePanel .init-controls{gap:.24rem;margin:.2rem 0;padding:.18rem .24rem}
+    #initiativePanel .init-controls .btn{min-height:22px;padding:.07rem .4rem;font-size:.78rem}
+    #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
+    #initiativePanel .init-list{gap:.15rem;margin:.18rem 0 .24rem}
+    #initiativePanel .init-row{padding:.08rem .34rem;border-radius:7px}
+    #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.11rem}
+    #initiativePanel .init-line2{margin-top:.08rem}
+    #initiativePanel .init-name{font-size:.9rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
+    #initiativePanel .init-drag{min-width:22px;min-height:22px;padding:.04rem .06rem}
+    #initiativePanel .init-turn{display:none}
+  #initiativePanel .init-roundbox .init-round{padding:.06rem .35rem}
+  #initiativePanel .init-round-btn{min-height:22px;padding:.08rem .32rem}
+  #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
+    #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
+    #initiativePanel .init-lab input{width:1.9rem;font-size:13px;min-height:22px;padding:.05rem .14rem}
+    #initiativePanel .init-save{width:2rem !important}
+    #initiativePanel .init-roll,#initiativePanel .init-del,#initiativePanel .init-step,#initiativePanel .init-dmg,#initiativePanel .init-heal,#initiativePanel .init-dup,#initiativePanel .init-toparty,#initiativePanel .init-delay,#initiativePanel .init-ready,#initiativePanel .init-surprised,#initiativePanel .init-nlbtn{min-width:22px;min-height:22px;padding:.05rem .2rem;font-size:.76rem}
+    #initiativePanel .init-hp,#initiativePanel .init-hpmax{width:2.05rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
+    #initiativePanel .init-amt{width:2.3rem;font-size:13px;min-height:22px;padding:.05rem .16rem}
+    #initiativePanel .init-tmp,#initiativePanel .init-nl,#initiativePanel .init-cr{width:2.2rem;font-size:13px;min-height:22px;padding:.05rem .18rem}
+    #initiativePanel .init-notes{font-size:13px;min-height:22px;padding:.06rem .3rem;flex:1 1 2.8rem;min-width:2.4rem}
+    #initiativePanel .init-status-add{font-size:13px;min-height:22px;padding:.06rem .22rem}
+    #initiativePanel .init-dur{width:2.9rem;font-size:13px;min-height:22px;padding:.06rem .22rem}
+    #initiativePanel .init-bar{height:4px;margin-top:.08rem}
+    #initiativePanel .init-chips{gap:.18rem;margin-top:.06rem}
+    #initiativePanel .init-chip{font-size:.74rem;padding:.02rem .2rem .02rem .38rem}
+    #initiativePanel .init-clocks{gap:.28rem;font-size:.72rem;line-height:1.15}
+    #initiativePanel .init-hint{font-size:.78rem}
+    #initiativePanel .init-log{margin-top:.35rem}
+    #initiativePanel .init-log h4{margin-bottom:.15rem;cursor:pointer;line-height:1.2}
+    #initiativePanel .init-logbox{max-height:96px;font-size:.78rem;padding:.28rem .42rem}
+    #initiativePanel .init-saved-head{margin-top:.35rem;margin-bottom:.12rem}
+    #initiativePanel .init-saved-head .init-lock-btn{min-height:20px;padding-top:.06rem;padding-bottom:.06rem}
+    #initiativePanel .init-saved-head h4{cursor:pointer}
+    #initiativePanel .init-saved-row{padding:.22rem .42rem;font-size:.79rem;margin-bottom:.22rem}
+    #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:22px}
+    #initiativePanel .init-party{padding:.4rem .5rem}
+    #initiativePanel .init-party-row{padding:.12rem 0}
+    #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:24px}
+    #initiativePanel .init-party-add .btn{min-height:25px}
+    /* The folds themselves. */
+    #initiativePanel .init-rowfold{display:inline-flex;align-items:center;justify-content:center;min-width:22px;min-height:22px;padding:.04rem .15rem;font:inherit;font-size:.78rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer;flex:0 0 auto}
+    #initiativePanel .init-more-btn{display:inline-flex;align-items:center;min-height:23px;padding:.12rem .5rem;font:inherit;font-size:.78rem;font-weight:600;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);cursor:pointer}
+body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="notes"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="fort"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="ref"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="will"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="dup"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="toparty"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="delay"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="ready"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="surprised"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="tmp"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="nl"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="cr"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line1>[data-mk="status"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="notes"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="fort"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="ref"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="will"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="dup"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="toparty"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="delay"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="ready"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="surprised"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="tmp"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="nl"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="cr"],body:not(.init-arranging) #initiativePanel .init-row.pfold .init-line2>[data-mk="status"]{display:none !important}
+    body:not(.init-arranging) #initiativePanel .init-row.pfold .init-total{display:none !important}
+    body:not(.init-arranging) #initiativePanel:has(.init-controls:not(.bar-open)) :is(#initRollingBtn,#initClearBtn,#initAddToggle,#initPartyAddBtn,#initPartyBtn,#initChimeBtn){display:none !important}
+    body:not(.init-arranging) #initiativePanel [data-block="log"]:not(.log-open) .init-logbox{display:none !important}
+    body:not(.init-arranging) #initiativePanel [data-block="saved"]:not(.saved-open) #initSaved{display:none !important}
+    #initiativePanel .init-log h4::after{content:" ▸";opacity:.65}
+    #initiativePanel [data-block="log"].log-open .init-log h4::after{content:" ▾"}
+    #initiativePanel .init-saved-head h4::after{content:" ▸";opacity:.65}
+    #initiativePanel [data-block="saved"].saved-open .init-saved-head h4::after{content:" ▾"}
+  }
+</style>
+</head>
+<body data-scene="bastion-streets">
+<div class="page">
+  <div class="init-topbar">
+    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
+    <span class="init-topbar-title">John's House — Initiative Tracker</span>
+    <div class="init-lock-row" id="initLockRow">
+      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back in its shipped place and size, from any arrangement" hidden>Reset layout</button>
+      <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
+    </div>
+    <div class="init-size-row" id="initSizeRow" hidden>
+      <span>Selected: <strong id="initSizeName">Next turn</strong></span>
+      <button type="button" class="init-lock-btn" id="initSizeDown" title="Shrink the selected control a step — for a block, narrow it a step">−</button>
+      <span class="init-size-read" id="initSizeRead">100%</span>
+      <button type="button" class="init-lock-btn" id="initSizeUp" title="Grow the selected control a step — for a block, widen it a step">+</button>
+      <button type="button" class="init-lock-btn" id="initNudgeL" title="Nudge the selected control left a couple of pixels (arrow keys work too, Shift for bigger steps)">&#9664;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeU" title="Nudge the selected control up a couple of pixels">&#9650;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeD" title="Nudge the selected control down a couple of pixels">&#9660;</button>
+      <button type="button" class="init-lock-btn" id="initNudgeR" title="Nudge the selected control right a couple of pixels">&#9654;</button>
+    </div>
+    <span class="init-brand">APOC Survival &middot; 2511 DR</span>
+  </div>
+  <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
+    <div class="init-block" data-block="header">
+    <div class="init-head">
+      <span class="init-roundbox" data-mk="round" data-mkgrp="head"><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
+      <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
+      <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
+      <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</span>
+      <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+    </div>
+    <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
+    </div>
+    <div class="init-controls init-block" data-block="bar">
+      <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
+      <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
+      <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
+      <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: while on, everyone re-rolls initiative and the order re-sorts at the start of every new round">Rolling: Off</button>
+      <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
+      <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
+      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
+      <button type="button" class="btn init-fold-toggle" id="initAddToggle" title="Add foe — open the form to add someone to the fight; tap again to fold it away">▸ Add foe</button>
+      <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
+      <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
+      <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
+      <button type="button" class="init-more-btn" id="initMoreBtn" title="Show the rest of the action bar — Clear all, Add foe, Add party, the roster and the chime; tap again to fold them away">More ▸</button>
+    </div>
+    <div class="init-party init-block" data-block="party" id="initParty" hidden>
+      <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
+      <div id="initPartyRows"></div>
+      <div class="init-party-add">
+        <button type="button" class="btn init-fold-toggle" data-mk="paddtoggle" data-mkgrp="partyadd" id="initPartyAddToggle" title="Add PC — open the form to add someone to the PC roster; tap again to fold it away">▸ Add PC</button>
+        <input id="initPartyName" data-mk="pname" data-mkgrp="partyadd" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
+        <button type="button" class="btn" data-mk="padd" data-mkgrp="partyadd" id="initPartyNewBtn" title="Add this member to the roster">Add member</button>
+      </div>
+    </div>
+    <div class="init-form init-block" data-block="form">
+      <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
+      <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
+      <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
+      <input id="initAc" data-mk="ac" data-mkgrp="form" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
+      <input id="initHp" data-mk="hp" data-mkgrp="form" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
+      <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
+      <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
+    </div>
+    <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
+      <span class="init-pic-for" id="initPicFor"></span>
+      <button type="button" class="btn" id="initPicUploadBtn" title="Upload a picture from this device — it is stored with the campaign pictures, and the link is what stays on the row">Upload a picture</button>
+      <input type="url" id="initPicUrl" placeholder="…or paste a picture link" aria-label="Picture link" title="Paste a link to a picture instead of uploading one">
+      <button type="button" class="btn" id="initPicUrlBtn" title="Use the pasted link as the picture">Set link</button>
+      <button type="button" class="btn" id="initPicRemoveBtn" title="Take the picture off — the slot goes back to empty">Remove</button>
+      <button type="button" class="init-pic-x" id="initPicCloseBtn" aria-label="Close the picture picker" title="Close the picture picker">✕</button>
+      <span class="init-pic-note" id="initPicNote"></span>
+    </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
+    <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back. On a phone, tap the heading to show or hide the list">Saved scenarios</h4><button type="button" class="init-lock-btn" data-mk="clearlog" data-mkgrp="logbar" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+/* ================= Shared backend config (same as the hub) ================= */
+const SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
+const SETTINGS_TABLE = "site_settings";
+let db = null;
+try {
+  if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) { db = null; }
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================= Scenes + background slideshow (the hub's own) ================= */
+const SCENES = {
+  "bastion-streets":      { label:"The Bastion — fogbound streets",    file:"assets/scenes/bastion-streets.webp" },
+  "market-guild-streets": { label:"The Bastion — market & guild streets", file:"assets/scenes/market-guild-streets.webp" },
+  "lower-quarter":        { label:"The Bastion — lower quarter",       file:"assets/scenes/lower-quarter.webp" },
+  "city-approach":        { label:"The Bastion — city approach road",  file:"assets/scenes/city-approach.webp" },
+  "winding-dock-road":    { label:"The Bastion — winding dock road",   file:"assets/scenes/winding-dock-road.webp" },
+  "watch-precinct":       { label:"The Bastion — watch precinct streets", file:"assets/scenes/watch-precinct.webp" },
+  "broad-avenue":         { label:"The Bastion — broad avenue",        file:"assets/scenes/broad-avenue.webp" }
+};
+const BG_FILES = [...new Set(Object.values(SCENES).map(x => x.file))];
+let bgIdx = 0;
+BG_FILES.forEach(f => { const im = new Image(); im.src = f; });
+function paintBackdrop(){
+  document.body.style.setProperty("--scene-image", `url("${BG_FILES[bgIdx]}")`);
+}
+function cycleBackdrop(){
+  document.body.style.setProperty("--bg-opacity", "0");
+  setTimeout(() => {
+    bgIdx = (bgIdx + 1) % BG_FILES.length;
+    paintBackdrop();
+    document.body.style.setProperty("--bg-opacity", ".45");
+  }, 1500);
+}
+function jumpBackdropTo(sceneKey){
+  const f = SCENES[sceneKey] && SCENES[sceneKey].file;
+  const i = f ? BG_FILES.indexOf(f) : -1;
+  if (i >= 0) { bgIdx = i; paintBackdrop(); }
+}
+if (BG_FILES.length > 1) {
+  setInterval(cycleBackdrop, 14000);
+}
+/* Start the show where the campaign currently is, like the hub does. */
+(async function startBackdropAtCampaignScene(){
+  if (!db) return;
+  try {
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", "campaign_status").maybeSingle();
+    const scene = data && data.value && data.value.scene;
+    if (scene && SCENES[scene]) jumpBackdropTo(scene);
+  } catch (e) {}
+})();
+</script>
+<script>
+"use strict";
+/* ================= Campaign Initiative Tracker =================
+   John's House — a shared combat board for the campaign, on its
+   own page since v51.44. Shared board: one row in site_settings,
+   key "campaign_initiative_shaun", read and written by every visitor;
+   the board re-reads every few seconds while the page is open so
+   the table stays in step. Rows sort by initiative, highest first
+   (or by hand once a drag or a Jump-in sets the manual order); the
+   turn marker follows turnId so re-sorting never loses whose turn
+   it is.
+   OPEN/CLOSE RULE (Shaun, 2026-11-18): every open starts a NEW
+   BLANK scenario; every close SAVES the board that was run into
+   the saved list (newest first, last 20 kept) shown in the panel.
+   A board left un-closed is saved at the next open instead, so
+   nothing run is ever lost.
+   ACCESSORIES (Shaun, 2026-11-18 — "put ALL of it in"): Delay and
+   Ready with Jump-in, loading a saved scenario back, a persistent
+   Party roster with one-tap Add party, quantity adds, per-row
+   duplicate, drag reorder by handle, one-tap Undo of destructive
+   acts, status durations that tick down by round, temporary HP,
+   nonlethal damage with the 3.5 knockout hints, Fort/Ref/Will on
+   the line, an auto-written combat log carried into saved
+   scenarios, a combat clock at 6 seconds a round, a turn chime
+   with a mute toggle. */
+const INIT_KEY = "campaign_initiative_shaun";
+const INIT_CONDITIONS = {
+  "Blinded": "−2 AC and loses Dex bonus to AC; −4 on Search and most Str/Dex-based checks; all opponents have total concealment (50% miss).",
+  "Confused": "Acts randomly each round (d%): attacks the caster, acts normally, babbles, flees, or attacks the nearest creature.",
+  "Cowering": "Frozen in fear: no actions, −2 AC, loses Dex bonus to AC.",
+  "Dazed": "Can take no actions (but defends normally, no AC penalty).",
+  "Dazzled": "−1 on attack rolls, Spot and Search checks from bright light.",
+  "Dead": "Dead at −10 hit points or by a death effect; the body is an object, not a creature, and takes no actions.",
+  "Deafened": "−4 initiative, automatically fails Listen, 20% failure on spells with verbal components.",
+  "Disabled": "At 0 HP: only a move or standard action; taking a strenuous action deals 1 damage.",
+  "Dying": "Unconscious at −1 to −9 HP; loses 1 HP per round until stabilised (10% chance each round).",
+  "Energy Drained": "Per negative level: −1 on attacks, saves and checks, −5 HP, −1 effective level, spell slots lost.",
+  "Entangled": "−2 on attacks, −4 Dex, moves at half speed, cannot run or charge; casting needs Concentration (DC 15 + spell level).",
+  "Exhausted": "−6 Str and Dex, moves at half speed, cannot run or charge; 1 hour of rest reduces it to fatigued.",
+  "Fascinated": "Sits or stands quietly, −4 on reactive Spot/Listen; a potential threat allows a new save, an obvious threat breaks it.",
+  "Fatigued": "−2 Str and Dex, cannot run or charge; anything that would fatigue again makes it exhausted.",
+  "Flat-Footed": "Hasn't acted yet: loses Dex bonus to AC and cannot make attacks of opportunity.",
+  "Frightened": "−2 on attacks, saves and checks; flees if able, but can fight if cornered.",
+  "Grappling": "In a grapple: loses Dex bonus to AC against everyone except the grappler; only grapple actions (or light weapons).",
+  "Helpless": "Dexterity 0 (−5 modifier); melee attackers get +4 to hit; can be coup de graced.",
+  "Incorporeal": "No physical body: immune to nonmagical attacks, magic has a 50% miss chance against it, it can pass through solid objects, and it moves silently.",
+  "Invisible": "+2 on attacks against sighted foes, who lose their Dex bonus to AC; total concealment (50% miss).",
+  "Knocked Down": "Knocked prone: −4 on melee attacks, −4 AC vs melee, +4 AC vs ranged; standing costs a move action.",
+  "Nauseated": "Can take only a single move action each round — no attacks, spells or concentration.",
+  "On Fire": "Takes 1d6 fire damage each round until extinguished (Reflex DC 15).",
+  "Panicked": "−2 on saves and checks, drops everything held and flees by a random route; cowers if cornered.",
+  "Paralyzed": "Strength and Dexterity 0; helpless; can take purely mental actions only.",
+  "Petrified": "Turned to stone and unconscious; unaware of surroundings; if the stone breaks, so does the creature.",
+  "Pinned": "Held immobile in a grapple: loses Dex bonus to AC and takes −4 AC against everyone but the grappler.",
+  "Poisoned": "Suffers the poison's effect: initial damage on the failed save, secondary damage 1 minute later (ability damage per the poison).",
+  "Prone": "−4 on melee attacks, cannot use most ranged weapons; +4 AC vs ranged, −4 AC vs melee; standing is a move action.",
+  "Shaken": "−2 on attack rolls, saving throws and skill/ability checks.",
+  "Sickened": "−2 on attack rolls, weapon damage rolls, saving throws and skill/ability checks.",
+  "Stable": "Dying but no longer losing HP each round; still unconscious.",
+  "Staggered": "When nonlethal damage equals current HP: only a single move or standard action each round.",
+  "Stunned": "Drops everything held, can take no actions, −2 AC, loses Dex bonus to AC.",
+  "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
+  "Unconscious": "Knocked out and helpless; cannot act or perceive."
+};
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
+let initUndoStack = [];
+function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function stName(s){ return typeof s === "string" ? s : (s && (s.n || s.name)) || ""; }
+function stDur(s){ return (s && typeof s === "object" && typeof s.d === "number") ? s.d : null; }
+function stNorm(s){
+  if (typeof s === "string") return { n: s, d: null };
+  if (s && typeof s === "object") return { n: s.n || s.name || "", d: (typeof s.d === "number" ? s.d : null) };
+  return { n: "", d: null };
+}
+function initNorm(c){
+  return {
+    id: c.id || initUid(), name: c.name,
+    init: (c.init === undefined ? null : c.init),
+    mod: c.mod || 0,
+    ac: (c.ac === undefined ? null : c.ac),
+    hp: (c.hp === undefined ? null : c.hp),
+    maxHp: (c.maxHp === undefined ? null : c.maxHp),
+    tempHp: c.tempHp || 0,
+    nonlethal: c.nonlethal || 0,
+    fort: (c.fort === undefined ? null : c.fort),
+    ref: (c.ref === undefined ? null : c.ref),
+    will: (c.will === undefined ? null : c.will),
+    cr: (c.cr === undefined || c.cr === null) ? "" : String(c.cr),
+    statuses: Array.isArray(c.statuses) ? c.statuses.map(stNorm).filter(s => s.n) : [],
+    notes: typeof c.notes === "string" ? c.notes : "",
+    pic: typeof c.pic === "string" ? c.pic : "",
+    delaying: !!c.delaying,
+    readied: !!c.readied,
+    surprised: !!c.surprised,
+    wasSurprised: !!c.wasSurprised,
+    turnMs: c.turnMs || 0,
+    lastStint: c.lastStint || 0,
+    seq: c.seq || 0
+  };
+}
+function partyNorm(p){
+  return {
+    id: p.id || initUid(), name: p.name || "",
+    mod: p.mod || 0,
+    ac: (p.ac === undefined ? null : p.ac),
+    maxHp: (p.maxHp === undefined ? null : p.maxHp),
+    fort: (p.fort === undefined ? null : p.fort),
+    ref: (p.ref === undefined ? null : p.ref),
+    will: (p.will === undefined ? null : p.will),
+    pic: typeof p.pic === "string" ? p.pic : ""
+  };
+}
+function initLog(text){
+  if (!Array.isArray(initState.log)) initState.log = [];
+  initState.log.push("R" + (initState.round || 1) + " · " + text);
+  if (initState.log.length > 200) initState.log.splice(0, initState.log.length - 200);
+}
+/* Session stopwatch — time in combat / time out of combat
+   (Shaun, 2026-11-18, corrected the same day: "in and out" meant
+   in combat and out of combat, not per-combatant turn timers).
+   The tallies are per-device session state, like the chime setting
+   and Undo — never shared-store state, so two open screens never
+   double-count into one record. Which side is accumulating is
+   Shaun's manual choice alone (his ruling, 2026-11-18): neither
+   tally runs on page open, and the board's combat state starts
+   nothing. Time is settled by timestamps, not by
+   counting ticks: sessionSettle credits the elapsed span to the
+   side that was running, then re-reads the mode. It runs on the
+   one-second ticker, on every render, and at the top of the
+   actions that flip combat state, so a flip is accounted to the
+   second. Time with the page closed counts for neither side. */
+function fmtClock(ms){
+  const s = Math.max(0, Math.floor((ms || 0) / 1000));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+const sessionTally = (() => {
+  let t = null;
+  try { t = JSON.parse(sessionStorage.getItem("apoc-personal-session") || "null"); } catch (e) {}
+  if (!t || typeof t.inMs !== "number" || typeof t.outMs !== "number") t = { inMs: 0, outMs: 0, combatMs: 0, mode: "off" };
+  if (["in", "out", "off"].indexOf(t.tallyMode) < 0) t.tallyMode = "off";
+  t.boardWas = t.boardWas === "in" ? "in" : "out";
+  t.last = Date.now();
+  return t;
+})();
+function sessionPersist(){
+  try { sessionStorage.setItem("apoc-personal-session", JSON.stringify(sessionTally)); } catch (e) {}
+}
+/* Which tally is accumulating. MANUAL-ONLY (Shaun's ruling,
+   2026-11-18, superseding the automatic default): neither
+   tally runs until he clicks one — on page open both sit
+   stopped at their totals, and a board flip starts nothing.
+   Clicking a tally runs it; clicking the running one stops
+   both; his choice holds until he clicks again. Combat-end
+   lines and saved durations read whatever the in-combat
+   tally actually accumulated — zero if he never started it. */
+function sessionEffMode(){
+  if (sessionTally.tallyMode === "in" || sessionTally.tallyMode === "out" || sessionTally.tallyMode === "off") return sessionTally.tallyMode;
+  return "off";
+}
+function sessionSettle(){
+  const now = Date.now();
+  const dt = Math.max(0, now - (sessionTally.last || now));
+  if (sessionTally.mode === "in") { sessionTally.inMs += dt; sessionTally.combatMs += dt; }
+  else if (sessionTally.mode === "out") sessionTally.outMs += dt;
+  const boardMode = (initState.started && initState.list.length) ? "in" : "out";
+  if (boardMode === "in" && sessionTally.boardWas !== "in") sessionTally.combatMs = 0; /* a new combat begins */
+  sessionTally.boardWas = boardMode;
+  sessionTally.mode = sessionEffMode();
+  sessionTally.last = now;
+  sessionPersist();
+}
+function initTallyClick(side){
+  sessionSettle();
+  sessionTally.tallyMode = (sessionEffMode() === side) ? "off" : side;
+  sessionTally.mode = sessionEffMode();
+  sessionPersist();
+  paintSessionClocks();
+}
+function paintSessionClocks(){
+  const eff = sessionEffMode();
+  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = "In combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("running", eff === "in"); }
+  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("running", eff === "out"); }
+}
+/* Press a combatant's turn timer to stop it, press again to
+   start it (Shaun, 2026-11-18 — both sides). The shared turn
+   clock freezes for every screen via turnPaused; on resume the
+   turn start shifts forward by the paused span, so the break
+   never counts. (The header tallies have their own click
+   control — see initTallyClick.) */
+function initToggleClockPause(){
+  const now = Date.now();
+  if (initState.turnPaused) {
+    if (initState.turnStart) initState.turnStart += (now - initState.turnPaused);
+    initState.turnPaused = null;
+  } else if (initState.turnStart) {
+    initState.turnPaused = now;
+  } else return;
+  saveInitiative();
+  renderInitiative();
+}
+function initStintText(c){
+  const active = initState.turnId === c.id;
+  const glyph = (active && initState.turnStart && initState.turnPaused) ? "⏸" : "⏱";
+  return glyph + " " + fmtClock(active ? initStintMs(c) : (c.lastStint || 0));
+}
+function initTickClocks(){
+  sessionSettle();
+  paintSessionClocks();
+  document.querySelectorAll("[data-stint]").forEach(el => {
+    const c = initState.list.find(x => x.id === el.dataset.stint);
+    if (c) el.textContent = initStintText(c);
+  });
+  document.querySelectorAll("[data-total]").forEach(el => {
+    const c = initState.list.find(x => x.id === el.dataset.total);
+    if (c) el.textContent = "Total " + fmtClock((c.turnMs || 0) + initStintMs(c));
+  });
+}
+/* Per-combatant turn timers (Shaun, 2026-11-18 — he wants BOTH
+   systems, kept separate): each combatant's own stopwatch notation
+   on their row. The current holder's stint runs from
+   initState.turnStart, a timestamp in the SHARED state, so every
+   open screen ticks from the same start and a screen loading
+   mid-turn picks the stint up where it really began. Finished
+   stints bank into turnMs; lastStint keeps the most recent one.
+   Elapsed is always derived from the timestamp — the ticker only
+   repaints. Undo never touches these clocks. */
+function initStintMs(c){
+  return (initState.turnId === c.id && initState.turnStart) ? Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart) : 0;
+}
+function initCloseStint(id, logIt){
+  if (!id || !initState.turnStart) return;
+  const c = initState.list.find(x => x.id === id); if (!c) return;
+  const stint = Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart);
+  c.turnMs = (c.turnMs || 0) + stint;
+  c.lastStint = stint;
+  if (logIt && stint >= 1000) initLog("⏱ " + c.name + " held the turn for " + fmtClock(stint) + ".");
+}
+function initOpenStint(){
+  initState.turnStart = Date.now();
+}
+function initZeroClocks(){
+  initState.list.forEach(c => { c.turnMs = 0; c.lastStint = 0; });
+  initState.turnStart = null;
+  initState.turnPaused = null;
+}
+function initSnapshot(){
+  try {
+    initUndoStack.push(JSON.stringify({ list: initState.list, turnId: initState.turnId, round: initState.round, started: initState.started, manual: initState.manual }));
+    if (initUndoStack.length > 10) initUndoStack.shift();
+  } catch (e) {}
+}
+function initUndo(){
+  const s = initUndoStack.pop();
+  if (!s) return;
+  sessionSettle();
+  /* The turn timers are never rewound: totals earned stay earned,
+     and the running stint keeps its start. */
+  const totals = {};
+  initState.list.forEach(c => { totals[c.id] = [c.turnMs || 0, c.lastStint || 0]; });
+  try {
+    const v = JSON.parse(s);
+    initState.list = v.list; initState.turnId = v.turnId; initState.round = v.round;
+    initState.started = v.started; initState.manual = v.manual;
+  } catch (e) { return; }
+  initState.list.forEach(c => { if (totals[c.id]) { c.turnMs = totals[c.id][0]; c.lastStint = totals[c.id][1]; } });
+  /* The combat log is a record of the fight, not board state: it
+     is never rewound, even when the act it describes is undone. */
+  saveInitiative(); renderInitiative();
+}
+function archiveInitiative(){
+  if (!initState.list.length) return;
+  sessionSettle();
+  /* The saved scenario carries the combat's in-combat duration,
+     and its log notes the end. */
+  const combatMs = initState.started ? sessionTally.combatMs : 0;
+  const entryLog = Array.isArray(initState.log) ? initState.log.slice() : [];
+  if (initState.started && combatMs >= 1000) entryLog.push("R" + (initState.round || 1) + " · Combat ended — " + fmtClock(combatMs) + " in combat.");
+  if (initState.started) { sessionTally.combatMs = 0; sessionPersist(); }
+  const entry = {
+    id: initUid(),
+    endedAt: Date.now(),
+    round: initState.round || 1,
+    combatMs: combatMs,
+    list: initSorted().map(c => {
+      const live = (initState.turnId === c.id && initState.turnStart) ? Math.max(0, (initState.turnPaused || Date.now()) - initState.turnStart) : 0;
+      return {
+        name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
+        tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
+        fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
+        turnMs: (c.turnMs || 0) + live, lastStint: live || c.lastStint || 0,
+        surprised: !!c.wasSurprised,
+        delaying: !!c.delaying, readied: !!c.readied,
+        statuses: (c.statuses || []).map(s => ({ n: stName(s), d: stDur(s) })),
+        notes: c.notes || "",
+        pic: c.pic || ""
+      };
+    }),
+    log: entryLog
+  };
+  const mergedSaved = [entry].concat(initState.saved || []);
+  /* Entries the 20-cap drops here were removed on purpose —
+     the save merge must not resurrect them from the store. */
+  mergedSaved.slice(20).forEach(s => { if (s && s.id) initSavedGone.add(s.id); });
+  initState.saved = mergedSaved.slice(0, 20);
+  initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
+  initState.manual = false; initState.log = []; initState.turnStart = null; initState.turnPaused = null;
+  saveInitiative();
+}
+function renderInitSaved(){
+  const wrap = $("initSaved"); if (!wrap) return;
+  const saved = initState.saved || [];
+  if (!saved.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = saved.map((s, si) => {
+    const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    const who = (s.list || []).map(c => {
+      let t = (c.pic ? '<img class="init-saved-pic" src="' + esc(c.pic) + '" alt=""> ' : '') + esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
+      if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
+      if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
+      if (c.turnMs) t += " · ⏱ " + fmtClock(c.turnMs) + " on the turn";
+      if (c.surprised) t += " · Surprised in Round 1";
+      if (c.readied) t += " · Readied";
+      if (c.delaying) t += " · Delaying";
+      if (c.notes) t += " · 📝 " + esc(c.notes);
+      return t;
+    }).join("<br>");
+    const logFold = (Array.isArray(s.log) && s.log.length)
+      ? '<details class="init-saved-log"><summary title="The combat log from that fight">Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
+      : "";
+    const segS = {
+      body: '<span class="init-saved-body" data-mk="body" data-mkgrp="saved"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + (s.combatMs ? " · ⏱ " + fmtClock(s.combatMs) + " in combat" : "") + "<br>" + who + logFold + '</span>',
+      btns: '<span class="init-saved-btns" data-mk="btns" data-mkgrp="saved"><button type="button" class="init-saved-load" data-saved-load="' + si + '" title="Load this saved fight back onto the board — the current board is saved first">Load</button>' +
+      '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario" title="Delete this saved scenario">×</button></span>'
+    };
+    const ordS = (window.__mkOrder ? window.__mkOrder("saved", SAVED_KEYS) : SAVED_KEYS);
+    return '<div class="init-saved-row">' + ordS.map(k => segS[k] || "").join("") + '</div>';
+  }).join("");
+  wrap.querySelectorAll("[data-saved-del]").forEach(b => b.addEventListener("click", () => {
+    const goneSaved = initState.saved[parseInt(b.dataset.savedDel, 10)];
+    if (goneSaved && goneSaved.id) initSavedGone.add(goneSaved.id);
+    initState.saved.splice(parseInt(b.dataset.savedDel, 10), 1);
+    saveInitiative();
+    renderInitSaved();
+  }));
+  wrap.querySelectorAll("[data-saved-load]").forEach(b => b.addEventListener("click", () => {
+    initLoadSaved(parseInt(b.dataset.savedLoad, 10));
+  }));
+}
+function initLoadSaved(idx){
+  const entry = (initState.saved || [])[idx]; if (!entry) return;
+  if (initState.list.length) archiveInitiative();
+  initState.list = (entry.list || []).map((c, i) => {
+    const n = initNorm(Object.assign({}, c, { id: initUid(), seq: i + 1 }));
+    n.turnMs = 0; n.lastStint = 0; n.wasSurprised = !!n.surprised;
+    return n;
+  });
+  initState.round = 1; initState.started = false; initState.manual = false;
+  initState.turnStart = null; initState.turnPaused = null;
+  initState.log = [];
+  initLog("Loaded the saved scenario from " + new Date(entry.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " — a fresh fight.");
+  initPinTop();
+  saveInitiative(); renderInitiative();
+}
+let initLoaded = false;
+function initVal(c){ return (c.init === null || c.init === undefined || c.init === "") ? -Infinity : c.init; }
+function initSorted(){
+  const arr = initState.list.slice();
+  if (initState.manual) arr.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+  else arr.sort((a, b) => (initVal(b) - initVal(a)) || ((a.seq || 0) - (b.seq || 0)));
+  return arr;
+}
+/* Until the first turn is taken, the marker sits on top of the order,
+   so building the board always starts at the highest initiative. */
+function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
+function initRoll(mod){ return Math.floor(Math.random() * 20) + 1 + (mod || 0); }
+function initHpHint(c){
+  if (typeof c.hp !== "number") return "";
+  if (c.hp <= -10) return "Dead";
+  if (c.hp < 0) return "Dying";
+  if (c.hp === 0) return "Disabled";
+  const nl = c.nonlethal || 0;
+  if (nl > c.hp) return "Unconscious";
+  if (nl > 0 && nl === c.hp) return "Staggered";
+  return "";
+}
+function initDownLog(c, beforeHint){
+  const after = initHpHint(c);
+  if (after && after !== beforeHint) {
+    if (after === "Dead") initLog(c.name + " is dead.");
+    else if (after === "Dying") initLog(c.name + " is dying.");
+    else if (after === "Disabled") initLog(c.name + " is disabled.");
+    else if (after === "Unconscious") initLog(c.name + " is knocked out.");
+    else if (after === "Staggered") initLog(c.name + " is staggered by nonlethal damage.");
+  }
+}
+function initApplyDamage(c, amt){
+  if (!amt) return;
+  const beforeHint = initHpHint(c);
+  let left = amt, absorbed = 0;
+  if ((c.tempHp || 0) > 0) { absorbed = Math.min(c.tempHp, left); c.tempHp -= absorbed; left -= absorbed; }
+  c.hp = (typeof c.hp === "number" ? c.hp : 0) - left;
+  initLog(c.name + " took " + amt + " damage" + (absorbed ? " (" + absorbed + " soaked by temporary HP)" : "") + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
+  initDownLog(c, beforeHint);
+}
+function initApplyHeal(c, amt){
+  if (!amt) return;
+  let hp = (typeof c.hp === "number" ? c.hp : 0) + amt;
+  if (typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
+  c.hp = hp;
+  initLog(c.name + " healed " + amt + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
+}
+function initApplyNonlethal(c, amt){
+  if (!amt) return;
+  const beforeHint = initHpHint(c);
+  c.nonlethal = (c.nonlethal || 0) + amt;
+  initLog(c.name + " took " + amt + " nonlethal damage (total " + c.nonlethal + ").");
+  initDownLog(c, beforeHint);
+}
+function initTickStatuses(){
+  initState.list.forEach(c => {
+    if (!Array.isArray(c.statuses)) return;
+    const kept = [];
+    c.statuses.forEach(s => {
+      const d = stDur(s);
+      if (d === null) { kept.push(s); return; }
+      const nd = d - 1;
+      if (nd <= 0) initLog(c.name + "'s " + stName(s) + " expired.");
+      else kept.push({ n: stName(s), d: nd });
+    });
+    c.statuses = kept;
+  });
+}
+function initNextIdx(rows, from, dir){
+  const n = rows.length;
+  let i = from, steps = 0;
+  do { i = (i + dir + n) % n; steps++; } while ((rows[i].delaying || (initState.round === 1 && rows[i].surprised)) && steps < n);
+  return i;
+}
+let initAudio = null;
+function initChimeOn(){ try { return localStorage.getItem("apoc-personal-chime") !== "0"; } catch (e) { return true; } }
+/* Phone one-screen folds: the set of combatant rows whose extra
+   controls are OPEN on this device. Every other row carries the
+   pfold class; the phone CSS folds its secondary segments away
+   so the fight fits one screen. Desktop never folds. */
+let initRowOpen = new Set();
+try { (JSON.parse(localStorage.getItem("apoc-personal-rowopen") || "[]") || []).forEach(x => initRowOpen.add(x)); } catch (e) {}
+function initChime(){
+  if (!initChimeOn()) return;
+  try {
+    initAudio = initAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (initAudio.state === "suspended") initAudio.resume();
+    const t = initAudio.currentTime;
+    [880, 1174.66].forEach((f, i) => {
+      const o = initAudio.createOscillator(), g = initAudio.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      const at = t + i * 0.09;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.07, at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
+      o.connect(g); g.connect(initAudio.destination);
+      o.start(at); o.stop(at + 0.25);
+    });
+  } catch (e) {}
+}
+function initChimeBtnLabel(){ const b = $("initChimeBtn"); if (b) b.textContent = initChimeOn() ? "🔔" : "🔇"; }
+function renderInitLog(){
+  const wrap = $("initLog"); if (!wrap) return;
+  const log = Array.isArray(initState.log) ? initState.log : [];
+  if (!log.length) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens. On a phone, tap the heading to show or hide it">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+}
+function renderParty(){
+  const wrap = $("initPartyRows"); if (!wrap) return;
+  if (initPicTarget && initPicTarget.kind === "party" && !initPicObj()) initPicClose();
+  const num = v => (v === null || v === undefined ? "" : v);
+  wrap.innerHTML = (initState.party || []).map(p => {
+    const seg = {
+      pic: '<button type="button" class="init-pic' + (p.pic ? ' has' : '') + '" data-mk="pic" data-mkgrp="partyrow" data-party-pic="' + p.id + '" aria-label="Picture for ' + esc(p.name) + '" title="' + (p.pic ? 'Picture for ' + esc(p.name) + ' — tap to change or remove it; it comes along when they join the fight' : 'Add a picture for ' + esc(p.name) + ' — tap to upload one or paste a link; it comes along when they join the fight') + '">' + (p.pic ? '<img src="' + esc(p.pic) + '" alt="">' : '<span aria-hidden="true">🖼</span>') + '</button>',
+      name: '<input type="text" class="init-party-name" data-mk="name" data-mkgrp="partyrow" value="' + esc(p.name) + '" aria-label="Party member name" title="Party member\'s name" data-party-name="' + p.id + '">',
+      mod: '<label class="init-lab" data-mk="mod" data-mkgrp="partyrow">Mod <input type="number" value="' + (p.mod || 0) + '" aria-label="Initiative modifier" title="Initiative modifier — rolled when they join the fight" data-party-mod="' + p.id + '"></label>',
+      ac: '<label class="init-lab" data-mk="ac" data-mkgrp="partyrow">AC <input type="number" value="' + num(p.ac) + '" aria-label="Armour class" title="Armour class" data-party-ac="' + p.id + '"></label>',
+      hp: '<label class="init-lab" data-mk="hp" data-mkgrp="partyrow">HP <input type="number" value="' + num(p.maxHp) + '" aria-label="Max HP" title="Hit points — they join the fight at full" data-party-hp="' + p.id + '"></label>',
+      fort: '<label class="init-lab" data-mk="fort" data-mkgrp="partyrow">F <input type="number" value="' + num(p.fort) + '" aria-label="Fortitude save" title="Fortitude save" data-party-fort="' + p.id + '"></label>',
+      ref: '<label class="init-lab" data-mk="ref" data-mkgrp="partyrow">R <input type="number" value="' + num(p.ref) + '" aria-label="Reflex save" title="Reflex save" data-party-ref="' + p.id + '"></label>',
+      will: '<label class="init-lab" data-mk="will" data-mkgrp="partyrow">W <input type="number" value="' + num(p.will) + '" aria-label="Will save" title="Will save" data-party-will="' + p.id + '"></label>',
+      del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="partyrow" data-party-del="' + p.id + '" aria-label="Remove ' + esc(p.name) + ' from the party" title="Remove this member from the roster">✕</button>'
+    };
+    const ord = (window.__mkOrder ? window.__mkOrder("partyrow", PARTYROW_KEYS) : PARTYROW_KEYS);
+    return '<div class="init-party-row">' + ord.map(k => seg[k] || "").join("") + '</div>';
+  }).join("");
+  const findP = id => (initState.party || []).find(x => x.id === id);
+  const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
+  wrap.querySelectorAll("[data-party-name]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyName); if (p) { p.name = inp.value; saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-mod]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyMod); if (p) { p.mod = parseInt(inp.value, 10) || 0; saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-ac]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyAc); if (p) { p.ac = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-hp]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyHp); if (p) { p.maxHp = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-fort]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyFort); if (p) { p.fort = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-ref]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyRef); if (p) { p.ref = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-will]").forEach(inp => inp.addEventListener("change", () => { const p = findP(inp.dataset.partyWill); if (p) { p.will = numOrNull(inp.value); saveInitiative(); } }));
+  wrap.querySelectorAll("[data-party-del]").forEach(b => b.addEventListener("click", () => {
+    initPartyGone.add(b.dataset.partyDel);
+    initState.party = (initState.party || []).filter(x => x.id !== b.dataset.partyDel);
+    saveInitiative(); renderParty();
+  }));
+  wrap.querySelectorAll("[data-party-pic]").forEach(b => b.addEventListener("click", () => initPicOpen("party", b.dataset.partyPic)));
+}
+const ROW1_KEYS = ["drag","turn","pic","name","notes","init","roll","mod","ac","fort","ref","will","dup","toparty","del"];
+const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status"];
+const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","del"];
+const SAVED_KEYS = ["body","btns"];
+function renderInitiative(){
+  const wrap = $("initList"); if (!wrap) return;
+  if (initPicTarget && !initPicObj()) initPicClose();
+  renderInitSaved();
+  renderInitLog();
+  const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
+  initPaintArms();
+  const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.textContent = initState.rolling ? "Rolling: On" : "Rolling: Off"; rollBtn.classList.toggle("on", !!initState.rolling); rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
+  const rows = initSorted();
+  const round = initState.round || 1;
+  $("initRound").textContent = "Round " + round;
+  paintSessionClocks();
+  const worldEl = $("initWorldClock");
+  if (worldEl) { const secs = round * 6; worldEl.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
+  const nn = $("initNowNext");
+  if (!rows.length) {
+    nn.textContent = "";
+    wrap.innerHTML = '';
+    return;
+  }
+  let ti = rows.findIndex(c => c.id === initState.turnId);
+  if (ti < 0) ti = 0;
+  if (rows.length === 1) nn.textContent = "Now: " + rows[ti].name;
+  else {
+    const ni = initNextIdx(rows, ti, 1);
+    nn.textContent = "Now: " + rows[ti].name + " · Next: " + rows[ni].name;
+  }
+  const statusOptions = '<option value="">+ Status</option>' + Object.keys(INIT_CONDITIONS).map(k => '<option value="' + esc(k) + '">' + esc(k) + '</option>').join("");
+  wrap.innerHTML = rows.map(c => {
+    const active = c.id === initState.turnId;
+    const hint = initHpHint(c);
+    const dead = hint === "Dead";
+    const rowOpen = initRowOpen.has(c.id);
+    const num = v => (v === null || v === undefined ? "" : v);
+    let bar = "";
+    if (typeof c.hp === "number" && typeof c.maxHp === "number" && c.maxHp > 0) {
+      const denom = Math.max(c.maxHp, c.hp + (c.tempHp || 0));
+      const pct = Math.max(0, Math.min(100, c.hp / denom * 100));
+      const col = pct > 50 ? "#57a85a" : (pct > 25 ? "#d9a441" : "#cf4b41");
+      const tpct = Math.max(0, (c.tempHp || 0) / denom * 100);
+      bar = '<div class="init-bar" title="Hit points left — green is healthy, amber is hurt, red is dire; the pale blue part is temporary HP"><span style="width:' + pct + '%;background:' + col + '"></span>' + (tpct > 0 ? '<span style="width:' + tpct + '%;background:#9fd8e8"></span>' : '') + '</div>';
+    }
+    const chipsArr = [];
+    (c.statuses || []).forEach((s, i) => {
+      const n = stName(s), d = stDur(s);
+      chipsArr.push('<span class="init-chip" title="' + esc(INIT_CONDITIONS[n] || "") + '">' + esc(n) + (d !== null ? ' · ' + d : '') +
+        '<button type="button" data-chip-del="' + c.id + '" data-chip-idx="' + i + '" aria-label="Remove ' + esc(n) + ' from ' + esc(c.name) + '" title="Remove ' + esc(n) + ' from ' + esc(c.name) + '">×</button></span>');
+    });
+    if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
+    if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
+    if (c.surprised) chipsArr.push('<span class="init-chip surprised" title="Surprised — sits out Round 1; the mark clears when Round 2 begins">😲 Surprised</span>');
+    const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
+    const seg1 = {
+      drag: '<span class="init-drag" data-mk="drag" data-mkgrp="row1" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>',
+      turn: '<span class="init-turn" data-mk="turn" data-mkgrp="row1" aria-hidden="true">\u25B6</span>',
+      pic: '<button type="button" class="init-pic' + (c.pic ? ' has' : '') + '" data-mk="pic" data-mkgrp="row1" data-init-pic="' + c.id + '" aria-label="Picture for ' + esc(c.name) + '" title="' + (c.pic ? 'Picture for ' + esc(c.name) + ' — tap to change or remove it' : 'Add a picture for ' + esc(c.name) + ' — tap to upload one or paste a link') + '">' + (c.pic ? '<img src="' + esc(c.pic) + '" alt="">' : '<span aria-hidden="true">🖼</span>') + '</button>',
+      name: '<span class="init-name' + (dead ? ' struck' : '') + '" data-mk="name" data-mkgrp="row1">' + esc(c.name) + '</span>',
+      notes: '<input type="text" class="init-notes" data-mk="notes" data-mkgrp="row1" placeholder="Notes" aria-label="Notes for ' + esc(c.name) + '" title="Notes for this combatant \u2014 saved with them" data-init-notes="' + c.id + '" value="' + esc(c.notes || "") + '">',
+      init: '<label class="init-lab" data-mk="init" data-mkgrp="row1">Init <input class="init-val" type="number" value="' + num(c.init) + '" aria-label="Initiative for ' + esc(c.name) + '" title="Initiative total \u2014 change it and the order re-sorts" data-init-val="' + c.id + '"></label>',
+      roll: '<button type="button" class="init-roll" data-mk="roll" data-mkgrp="row1" data-init-roll="' + c.id + '" title="Roll d20 + modifier for ' + esc(c.name) + '" aria-label="Roll initiative for ' + esc(c.name) + '">\uD83C\uDFB2</button>',
+      mod: '<label class="init-lab" data-mk="mod" data-mkgrp="row1">Mod <input class="init-mod" type="number" value="' + (c.mod || 0) + '" aria-label="Initiative modifier for ' + esc(c.name) + '" title="Initiative modifier, used by the dice button and Roll ALL" data-init-mod="' + c.id + '"></label>',
+      ac: '<label class="init-lab" data-mk="ac" data-mkgrp="row1">AC <input class="init-ac" type="number" value="' + num(c.ac) + '" aria-label="Armour class for ' + esc(c.name) + '" title="Armour class" data-init-ac="' + c.id + '"></label>',
+      fort: '<label class="init-lab" data-mk="fort" data-mkgrp="row1">F <input class="init-save" type="number" value="' + num(c.fort) + '" aria-label="Fortitude save for ' + esc(c.name) + '" title="Fortitude save" data-init-fort="' + c.id + '"></label>',
+      ref: '<label class="init-lab" data-mk="ref" data-mkgrp="row1">R <input class="init-save" type="number" value="' + num(c.ref) + '" aria-label="Reflex save for ' + esc(c.name) + '" title="Reflex save" data-init-ref="' + c.id + '"></label>',
+      will: '<label class="init-lab" data-mk="will" data-mkgrp="row1">W <input class="init-save" type="number" value="' + num(c.will) + '" aria-label="Will save for ' + esc(c.name) + '" title="Will save" data-init-will="' + c.id + '"></label>',
+      dup: '<button type="button" class="init-dup" data-mk="dup" data-mkgrp="row1" data-init-dup="' + c.id + '" title="Duplicate ' + esc(c.name) + '" aria-label="Duplicate ' + esc(c.name) + '">\u29C9</button>',
+      toparty: '<button type="button" class="init-toparty" data-mk="toparty" data-mkgrp="row1" data-init-toparty="' + c.id + '" title="Add ' + esc(c.name) + ' to the PC roster" aria-label="Add ' + esc(c.name) + ' to the PC roster">\uD83D\uDC65</button>',
+      del: '<button type="button" class="init-del" data-mk="del" data-mkgrp="row1" data-init-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">\u2715</button>'
+    };
+    const seg2 = {
+      delay: (c.delaying
+        ? '<button type="button" class="init-delay jumpin" data-mk="delay" data-mkgrp="row2" data-init-jumpin="' + c.id + '" title="Jump in: act right after the current combatant">Jump in</button>'
+        : '<button type="button" class="init-delay" data-mk="delay" data-mkgrp="row2" data-init-delay="' + c.id + '" title="Delay: sit out the turn \u2014 Next will skip them until they jump back in">Delay</button>'),
+      ready: '<button type="button" class="init-ready' + (c.readied ? ' on' : '') + '" data-mk="ready" data-mkgrp="row2" data-init-ready="' + c.id + '" title="Ready: mark that this combatant is holding a readied action">Ready</button>',
+      surprised: '<button type="button" class="init-surprised' + (c.surprised ? ' on' : '') + '" data-mk="surprised" data-mkgrp="row2" data-init-surprised="' + c.id + '" title="Surprised: mark that this combatant is caught off guard \u2014 they sit out Round 1, and the mark clears when Round 2 begins">Surprised</button>',
+      clocks: '<span class="init-clocks" data-mk="clocks" data-mkgrp="row2"><span class="init-stint" data-stint="' + c.id + '" title="Their own turn timer \u2014 starts when their turn begins, stops when it passes on. Tap to pause or resume the clocks">' + initStintText(c) + '</span>' +
+        '<span class="init-total" data-total="' + c.id + '" title="Their total time on the turn across the whole fight">Total ' + fmtClock((c.turnMs || 0) + (active ? initStintMs(c) : 0)) + '</span></span>',
+      hp: '<span class="init-hp-group" data-mk="hp" data-mkgrp="row2">' +
+          '<button type="button" class="init-step" data-init-step="-1" data-for="' + c.id + '" aria-label="One less HP for ' + esc(c.name) + '" title="One less hit point (temporary HP soaks first)">\u2212</button>' +
+          '<input class="init-hp" type="number" value="' + num(c.hp) + '" aria-label="Current HP for ' + esc(c.name) + '" title="Current hit points" data-init-hp="' + c.id + '">' +
+          '<span>/</span>' +
+          '<input class="init-hpmax" type="number" value="' + num(c.maxHp) + '" aria-label="Max HP for ' + esc(c.name) + '" title="Maximum hit points" data-init-hpmax="' + c.id + '">' +
+          '<button type="button" class="init-step" data-init-step="1" data-for="' + c.id + '" aria-label="One more HP for ' + esc(c.name) + '" title="One more hit point">+</button>' +
+        '</span>',
+      tmp: '<label class="init-lab" data-mk="tmp" data-mkgrp="row2">Tmp <input class="init-tmp" type="number" value="' + (c.tempHp || 0) + '" aria-label="Temporary HP for ' + esc(c.name) + '" title="Temporary hit points \u2014 damage burns these before real HP" data-init-tmp="' + c.id + '"></label>',
+      nl: '<label class="init-lab" data-mk="nl" data-mkgrp="row2">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken \u2014 equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>',
+      cr: '<label class="init-lab" data-mk="cr" data-mkgrp="row2">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating \u2014 recorded with the combatant and kept in saved scenarios" data-init-cr="' + c.id + '"></label>',
+      amt: '<span class="init-amt-group" data-mk="amt" data-mkgrp="row2">' +
+          '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons" data-init-amt="' + c.id + '">' +
+          '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">\u2212Dmg</button>' +
+          '<button type="button" class="init-heal" data-init-heal="' + c.id + '" title="Heal the Amt in hit points">+Heal</button>' +
+          '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '" title="Deal the Amt as nonlethal damage">+NL</button>' +
+        '</span>',
+      hint: '<span class="init-hint" data-mk="hint" data-mkgrp="row2">' + (hint || '') + '</span>',
+      status: '<span style="display:inline-flex;gap:.45rem;align-items:center" data-mk="status" data-mkgrp="row2"><select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
+        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts \u2014 leave blank for no countdown" data-init-dur="' + c.id + '"></span>'
+    };
+    const segAll = Object.assign({}, seg1, seg2);
+    const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
+    const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
+    return '<div class="init-row' + (active ? ' active' : '') + (rowOpen ? '' : ' pfold') + '" data-row-id="' + c.id + '">' +
+      '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '<button type="button" class="init-rowfold" data-init-rowfold="' + c.id + '" aria-expanded="' + (rowOpen ? "true" : "false") + '" aria-label="More controls for ' + esc(c.name) + '" title="More controls for this combatant — notes, saves, duplicate, delay, ready, surprised, status and the rest; tap again to fold them away">' + (rowOpen ? "▴" : "▸") + '</button></div>' +
+      '<div class="init-line2">' + ord2.map(k => segAll[k] || "").join("") + '</div>' + bar + chips + '</div>';
+  }).join("");
+  const find = id => initState.list.find(x => x.id === id);
+  const numOrNull = v => (v === "" ? null : (parseInt(v, 10) || 0));
+  wrap.querySelectorAll("[data-init-rowfold]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.initRowfold;
+    const row = b.closest(".init-row");
+    if (initRowOpen.has(id)) {
+      initRowOpen.delete(id);
+      if (row) row.classList.add("pfold");
+      b.textContent = "▸"; b.setAttribute("aria-expanded", "false");
+    } else {
+      initRowOpen.add(id);
+      if (row) row.classList.remove("pfold");
+      b.textContent = "▴"; b.setAttribute("aria-expanded", "true");
+    }
+    try { localStorage.setItem("apoc-personal-rowopen", JSON.stringify([...initRowOpen])); } catch (e) {}
+  }));
+  wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initVal);
+    if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-notes]").forEach(inp => {
+    inp.addEventListener("input", () => { const c = find(inp.dataset.initNotes); if (c) c.notes = inp.value; });
+    inp.addEventListener("change", () => saveInitiative());
+  });
+  wrap.querySelectorAll("[data-init-mod]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initMod);
+    if (c) { c.mod = parseInt(inp.value, 10) || 0; saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-ac]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initAc);
+    if (c) { c.ac = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-fort]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initFort);
+    if (c) { c.fort = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-ref]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initRef);
+    if (c) { c.ref = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-will]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initWill);
+    if (c) { c.will = numOrNull(inp.value); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-hp]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initHp);
+    if (c) { initSnapshot(); c.hp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-hpmax]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initHpmax);
+    if (c) { c.maxHp = numOrNull(inp.value); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-cr]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initCr);
+    if (c) { c.cr = inp.value.trim(); saveInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-tmp]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initTmp);
+    if (c) { c.tempHp = Math.max(0, parseInt(inp.value, 10) || 0); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-nl]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initNl);
+    if (c) { c.nonlethal = Math.max(0, parseInt(inp.value, 10) || 0); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-roll]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initRoll);
+    if (c) { c.init = initRoll(c.mod); initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-pic]").forEach(b => b.addEventListener("click", () => initPicOpen("row", b.dataset.initPic)));
+  wrap.querySelectorAll("[data-init-step]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.for);
+    if (c) {
+      const d = parseInt(b.dataset.initStep, 10) || 0;
+      initSnapshot();
+      if (d < 0) initApplyDamage(c, 1);
+      else initApplyHeal(c, 1);
+      saveInitiative(); renderInitiative();
+    }
+  }));
+  const amtFor = id => { const inp = wrap.querySelector('[data-init-amt="' + id + '"]'); return Math.abs(parseInt(inp && inp.value, 10) || 0); };
+  wrap.querySelectorAll("[data-init-dmg]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDmg); if (!c) return;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyDamage(c, amt);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-heal]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initHeal); if (!c) return;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyHeal(c, amt);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-nlbtn]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initNlbtn); if (!c) return;
+    const amt = amtFor(c.id);
+    if (!amt) { const inp = wrap.querySelector('[data-init-amt="' + c.id + '"]'); if (inp) inp.focus(); return; }
+    initSnapshot(); initApplyNonlethal(c, amt);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-status]").forEach(sel => sel.addEventListener("change", () => {
+    const c = find(sel.dataset.initStatus);
+    if (c && sel.value) {
+      const durInp = wrap.querySelector('[data-init-dur="' + c.id + '"]');
+      const d = durInp ? (parseInt(durInp.value, 10) || 0) : 0;
+      c.statuses = (c.statuses || []).filter(s => stName(s) !== sel.value);
+      c.statuses.push({ n: sel.value, d: d > 0 ? d : null });
+      initLog(c.name + " is now " + sel.value + (d > 0 ? " (" + d + " rounds)" : "") + ".");
+      saveInitiative(); renderInitiative();
+    }
+  }));
+  wrap.querySelectorAll("[data-init-dur]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initDur);
+    if (!c || !(c.statuses || []).length) return;
+    const d = parseInt(inp.value, 10) || 0;
+    const last = c.statuses[c.statuses.length - 1];
+    c.statuses[c.statuses.length - 1] = { n: stName(last), d: d > 0 ? d : null };
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-stint]").forEach(el => el.addEventListener("click", initToggleClockPause));
+  wrap.querySelectorAll("[data-chip-del]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.chipDel);
+    if (c) { c.statuses.splice(parseInt(b.dataset.chipIdx, 10), 1); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-delay]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDelay); if (!c) return;
+    c.delaying = true;
+    initLog(c.name + " delays.");
+    if (initState.turnId === c.id) initAdvance(1, true);
+    else { saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-init-jumpin]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initJumpin); if (!c) return;
+    initJumpIn(c);
+  }));
+  wrap.querySelectorAll("[data-init-surprised]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initSurprised); if (!c) return;
+    c.surprised = !c.surprised;
+    if (c.surprised) {
+      c.wasSurprised = true;
+      initLog(c.name + " is surprised — sits out Round 1.");
+      if (initState.started && initState.round === 1 && initState.turnId === c.id) { initAdvance(1, true); return; }
+    }
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-ready]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initReady); if (!c) return;
+    c.readied = !c.readied;
+    initLog(c.name + (c.readied ? " readies an action." : " is no longer readied."));
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-dup]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initDup); if (!c) return;
+    const copy = initNorm(JSON.parse(JSON.stringify(c)));
+    copy.id = initUid(); copy.turnMs = 0; copy.lastStint = 0; copy.surprised = false; copy.wasSurprised = false;
+    copy.seq = initState.list.reduce((m, x) => Math.max(m, x.seq || 0), 0) + 1;
+    initState.list.push(copy);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-toparty]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initToparty); if (!c) return;
+    if (!(initState.party || []).some(p => p.name === c.name)) {
+      initState.party = (initState.party || []).concat([partyNorm({ name: c.name, mod: c.mod, ac: c.ac, maxHp: c.maxHp, fort: c.fort, ref: c.ref, will: c.will, pic: c.pic || "" })]);
+      saveInitiative(); renderParty();
+    }
+  }));
+  wrap.querySelectorAll("[data-init-del]").forEach(b => b.addEventListener("click", () => {
+    const gone = b.dataset.initDel;
+    initSnapshot();
+    const wasRunning = initState.turnId === gone && !!initState.turnStart;
+    if (initState.turnId === gone) initCloseStint(gone, true);
+    initState.list = initState.list.filter(x => x.id !== gone);
+    if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
+    if (wasRunning) { if (initState.list.length) initOpenStint(); else initState.turnStart = null; }
+    /* A blank scenario starts with a blank log: when the board
+       becomes empty, the log clears with it instead of greeting
+       the next visit above an empty board. */
+    if (!initState.list.length) initState.log = [];
+    saveInitiative(); renderInitiative();
+  }));
+  /* Drag reorder by the handle: pointer-driven, so it works with
+     touch; the rest of the row never starts a drag, so the page
+     still scrolls normally everywhere else. */
+  wrap.querySelectorAll("[data-drag]").forEach(h => h.addEventListener("pointerdown", ev => {
+    if (document.body.classList.contains("init-arranging")) return;
+    ev.preventDefault();
+    const rowEl = h.closest(".init-row"); if (!rowEl) return;
+    const id = h.dataset.drag;
+    const startY = ev.clientY;
+    rowEl.classList.add("dragging");
+    try { h.setPointerCapture(ev.pointerId); } catch (e) {}
+    const move = mv => { rowEl.style.transform = "translateY(" + (mv.clientY - startY) + "px)"; };
+    const up = upEv => {
+      h.removeEventListener("pointermove", move);
+      h.removeEventListener("pointerup", up);
+      h.removeEventListener("pointercancel", up);
+      rowEl.classList.remove("dragging");
+      rowEl.style.transform = "";
+      const rowsEls = Array.from(wrap.querySelectorAll(".init-row"));
+      let target = rowsEls.length - 1;
+      for (let k = 0; k < rowsEls.length; k++) {
+        const r = rowsEls[k].getBoundingClientRect();
+        if (upEv.clientY < r.top + r.height / 2) { target = k; break; }
+      }
+      const order = initSorted();
+      const from = order.findIndex(x => x.id === id);
+      if (from < 0) return;
+      const item = order.splice(from, 1)[0];
+      order.splice(target, 0, item);
+      order.forEach((x, idx) => { x.seq = idx + 1; });
+      initState.manual = true;
+      saveInitiative(); renderInitiative();
+    };
+    h.addEventListener("pointermove", move);
+    h.addEventListener("pointerup", up);
+    h.addEventListener("pointercancel", up);
+  }));
+  initTickClocks();
+}
+/* Everything a new round brings, shared by the Next-turn wrap
+   and the round counter's click-to-advance: the log line,
+   duration ticks, the surprise round ending, and — while the
+   rolling toggle is on — a full re-roll and re-sort. Returns
+   the new order's top id when rolling re-sorted, else null. */
+function initNewRound(){
+  initState.round = (initState.round || 1) + 1;
+  initLog("— Round " + initState.round + " begins —");
+  initTickStatuses();
+  if (initState.round === 2) initClearSurprise(true);
+  if (initState.rolling && initState.list.length) {
+    initState.list.forEach(c => { c.init = initRoll(c.mod); });
+    initState.manual = false;
+    initLog("Rolling initiative — new order rolled for Round " + initState.round + ".");
+    const nr = initSorted();
+    return nr.length ? nr[0].id : null;
+  }
+  return null;
+}
+function initClearSurprise(logIt){
+  let any = false;
+  initState.list.forEach(c => { if (c.surprised) { c.surprised = false; any = true; } });
+  if (any && logIt) initLog("The surprise round ends.");
+}
+function initAdvance(dir, silent){
+  const rows = initSorted(); if (!rows.length) return;
+  sessionSettle();
+  /* The outgoing holder's stint ends here (logged); the incoming
+     holder's begins. On the very first advance no stint is open
+     yet, so the close is a no-op and the open starts that
+     combatant's clock — timing begins with the first turn taken. */
+  initCloseStint(initState.turnId, true);
+  initState.started = true;
+  let i = rows.findIndex(c => c.id === initState.turnId);
+  if (i < 0) i = 0;
+  const before = initState.turnId;
+  const ni = initNextIdx(rows, i, dir);
+  /* Stepping forward past the end of the order (ni lands at or
+     behind where we started) means a new round: tick durations.
+     Stepping backward past the top likewise steps the round back,
+     but durations never rewind. */
+  let rollingTop = null;
+  if (dir > 0 && ni <= i) rollingTop = initNewRound();
+  if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
+  initState.turnId = rollingTop || rows[ni].id;
+  initOpenStint();
+  if (!silent && initState.turnId !== before) initChime();
+  saveInitiative(); renderInitiative();
+}
+function initNext(){ initAdvance(1); }
+function initPrev(){
+  const rows = initSorted(); if (!rows.length) return;
+  /* Floored at the start of Round 1 (fix, 2026-11-18): with the
+     turn on the first combatant in Round 1 there is nowhere to
+     step back to — Prev is a no-op rather than wrapping to the
+     last combatant while the round stays 1. */
+  const i = rows.findIndex(c => c.id === initState.turnId);
+  if ((initState.round || 1) <= 1 && i <= 0) return;
+  initAdvance(-1);
+}
+function initJumpIn(c){
+  const rows = initSorted();
+  const hi = rows.findIndex(x => x.id === initState.turnId);
+  if (hi < 0) return;
+  const holder = rows[hi];
+  const order = rows.filter(x => x.id !== c.id);
+  const at = order.findIndex(x => x.id === holder.id);
+  order.splice(at + 1, 0, c);
+  order.forEach((x, idx) => { x.seq = idx + 1; });
+  initState.manual = true;
+  c.delaying = false;
+  initLog(c.name + " jumps in after " + holder.name + ".");
+  saveInitiative(); renderInitiative();
+}
+async function loadInitiative(){
+  if (!db) { initLoaded = true; renderInitiative(); renderParty(); return; }
+  const gen = initSaveGen;
+  try {
+    const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
+    /* A read that lands late must never rewind the board (fix,
+       2026-11-18): if a save was issued while this read was in
+       flight, the read is stale — discard it; the next poll
+       re-syncs. And a read never rebuilds the rows under the
+       user's finger: if focus sits inside the panel when the
+       read resolves, skip applying it for the same reason. */
+    if (gen !== initSaveGen || initDirty) { initLoaded = true; return; }
+    const panelEl = $("initiativePanel");
+    if (panelEl && panelEl.contains(document.activeElement)) { initLoaded = true; return; }
+    const v = data && data.value;
+    /* Freshness token (fix, 2026-11-19): every write carries a
+       rising rev, and this page tracks the newest rev it has
+       written or applied. A read whose rev is older than that
+       is a stale snapshot — the server executed the select
+       against state from before a save landed — so it is
+       discarded whole, board, saved list and all; the next
+       poll brings the current state. This closes the window
+       the generation guard cannot see, where the save predates
+       the read and only the data is old. */
+    if (v && (v.rev || 0) < initRev) { initLoaded = true; return; }
+    if (v && Array.isArray(v.list)) { initState = {
+      list: v.list.map(initNorm),
+      turnId: v.turnId ?? null,
+      round: v.round || 1,
+      started: !!v.started,
+      saved: Array.isArray(v.saved) ? v.saved : [],
+      party: Array.isArray(v.party) ? v.party.map(partyNorm) : [],
+      log: Array.isArray(v.log) ? v.log : [],
+      manual: !!v.manual,
+      turnStart: v.turnStart ?? null,
+      turnPaused: v.turnPaused ?? null,
+      rolling: !!v.rolling
+    };
+    initRev = Math.max(initRev, v.rev || 0);
+    initLastKnown = v;
+    /* What arrived from the store is mirrored, not worked —
+       this page archives on pagehide only after its own hand
+       has been on the board (see the pagehide gate below). */
+    initBoardTouched = false; }
+  } catch (e) {}
+  initLoaded = true;
+  renderInitiative(); renderParty();
+}
+/* Saves are SERIALIZED and the poll never rewinds (fix, 2026-11-18):
+   every save queues behind the previous one and carries a snapshot
+   of the state at its own call, so writes land in the order they
+   were issued; while any save is in flight the board is "dirty" and
+   the 5-second poll skips its reload, so a mid-flight read can
+   never replace fresh local work (damage, log lines) with a stale
+   stored state. */
+let initSaveChain = Promise.resolve();
+let initSaveGen = 0;
+let initDirty = false;
+/* Persistence hardening (fix, 2026-11-19) — the hunt's
+   save-loss fault had three real doors, and each gets a lock:
+   (1) REV — every write carries a rising revision number and
+   a page never applies a read older than the newest revision
+   it has written or seen (the guard lives in loadInitiative),
+   so a stale snapshot can no longer rewind the board, the
+   saved list, or the turn totals.
+   (2) MERGE — a save never drops what it never saw: inside
+   the serialized chain, each write first re-reads the store
+   and unions the saved scenarios and the party roster by id,
+   holding back only the entries this page deliberately
+   removed (initSavedGone / initPartyGone). One tab's stale
+   state can no longer erase another tab's saves.
+   (3) TOUCHED — pagehide archives only when the board was
+   actually worked from this page since the last applied
+   read; a tab that merely mirrored the board closes
+   silently (the gate lives at the pagehide handler). */
+let initRev = 0;
+let initWriter = Math.random().toString(36).slice(2, 8);
+let initLastKnown = null;
+let initBoardTouched = false;
+const initSavedGone = new Set();
+const initPartyGone = new Set();
+function initMergeSavedParty(snap, cur){
+  if (!cur) return snap;
+  if (Array.isArray(cur.saved)) {
+    const have = new Set((snap.saved || []).map(s => s && s.id));
+    const extra = cur.saved.filter(s => s && s.id && !have.has(s.id) && !initSavedGone.has(s.id));
+    if (extra.length) {
+      snap.saved = (snap.saved || []).concat(extra)
+        .sort((a, b) => (b.endedAt || 0) - (a.endedAt || 0)).slice(0, 20);
+    }
+  }
+  if (Array.isArray(cur.party)) {
+    const have = new Set((snap.party || []).map(p => p && p.id));
+    const extra = cur.party.filter(p => p && p.id && !have.has(p.id) && !initPartyGone.has(p.id));
+    if (extra.length) snap.party = (snap.party || []).concat(extra);
+  }
+  return snap;
+}
+function saveInitiative(){
+  /* Touched is set before the db check (fix, 2026-11-19): a
+     board worked in a tab whose store client never came up
+     is still a worked board, and its pagehide archive rides
+     the plain keepalive fetch, which needs no client. */
+  initBoardTouched = true;
+  if (!db) return;
+  initDirty = true;
+  const myGen = ++initSaveGen;
+  const snap = JSON.parse(JSON.stringify(initState));
+  initSaveChain = initSaveChain.then(async () => {
+    try {
+      let cur = null;
+      try {
+        const { data } = await db.from(SETTINGS_TABLE).select("value").eq("key", INIT_KEY).maybeSingle();
+        cur = data && data.value;
+      } catch (e) {}
+      if (cur && typeof cur.rev === "number" && cur.rev > initRev) initRev = cur.rev;
+      if (cur) initLastKnown = cur;
+      initMergeSavedParty(snap, cur);
+      snap.rev = ++initRev;
+      snap.by = initWriter;
+      await db.from(SETTINGS_TABLE).upsert(
+        { key: INIT_KEY, value: snap, updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+      initLastKnown = snap;
+      if (myGen === initSaveGen) {
+        /* Show this page the entries the merge preserved. */
+        if (JSON.stringify(initState.saved) !== JSON.stringify(snap.saved)) { initState.saved = snap.saved; renderInitSaved(); }
+        if (JSON.stringify(initState.party) !== JSON.stringify(snap.party)) { initState.party = snap.party; renderParty(); }
+      }
+    } catch (e) {}
+    if (myGen === initSaveGen) initDirty = false;
+  });
+}
+function initAdd(){
+  const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp"), qtyEl = $("initQty");
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  const mod = parseInt(modEl.value, 10) || 0;
+  const typed = totalEl.value !== "" ? (parseInt(totalEl.value, 10) || 0) : null;
+  const ac = acEl.value === "" ? null : (parseInt(acEl.value, 10) || 0);
+  const maxHp = hpEl.value === "" ? null : (parseInt(hpEl.value, 10) || 0);
+  let qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
+  qty = Math.max(1, Math.min(50, qty));
+  let seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0);
+  for (let k = 1; k <= qty; k++) {
+    seq += 1;
+    initState.list.push(initNorm({
+      id: initUid(),
+      name: qty > 1 ? name + " " + k : name,
+      init: typed !== null ? typed : initRoll(mod),
+      mod, ac, hp: maxHp, maxHp,
+      statuses: [], notes: "", seq
+    }));
+  }
+  initPinTop();
+  if (!initState.turnId) initState.turnId = initSorted()[0].id;
+  nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
+  if (qtyEl) qtyEl.value = "1";
+  saveInitiative(); renderInitiative(); nameEl.focus();
+}
+function initAddParty(){
+  const roster = initState.party || [];
+  if (!roster.length) return;
+  let seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0);
+  let added = 0;
+  roster.forEach(p => {
+    if (initState.list.some(c => c.name === p.name)) return;
+    seq += 1; added += 1;
+    initState.list.push(initNorm({
+      id: initUid(), name: p.name, init: initRoll(p.mod), mod: p.mod, ac: p.ac,
+      hp: p.maxHp, maxHp: p.maxHp, fort: p.fort, ref: p.ref, will: p.will,
+      statuses: [], notes: "", pic: p.pic || "", seq
+    }));
+  });
+  if (added) initLog("The party joins the fight (" + added + " added).");
+  initPinTop();
+  if (!initState.turnId && initState.list.length) initState.turnId = initSorted()[0].id;
+  saveInitiative(); renderInitiative();
+}
+function initRollAll(){
+  if (!initState.list.length) return;
+  sessionSettle();
+  initState.list.forEach(c => { c.init = initRoll(c.mod); });
+  initState.manual = false;
+  initState.started = false;
+  initZeroClocks();
+  initPinTop();
+  /* The new holder's stint opens with the new order (fix,
+     2026-11-18): zeroed totals are by design, but the clock on
+     the combatant now holding the turn must run, so the next
+     Next banks it with its log line like any other stint. */
+  if (initState.list.length) initOpenStint();
+  saveInitiative(); renderInitiative();
+}
+function initReset(){
+  const rows = initSorted(); if (!rows.length) return;
+  sessionSettle();
+  initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  initState.list.forEach(c => { c.surprised = false; c.wasSurprised = false; });
+  initZeroClocks();
+  /* Same stint rule as Roll ALL (fix, 2026-11-18): the holder
+     at the top starts their clock when the board settles. */
+  initOpenStint();
+  saveInitiative(); renderInitiative();
+}
+/* Two-tap arms carry an EXPIRY TIMESTAMP, and every render
+   re-applies the armed label from it (fix, 2026-11-18): the
+   armed state lives in the timestamp, not in one button
+   element's label, so no re-render — the log's, the board's,
+   anyone's — can quietly disarm a button inside its window
+   and leave the next tap to mean something else. */
+let initClearArmUntil = 0;
+let initClearLogArmUntil = 0;
+function initPaintArms(){
+  const now = Date.now();
+  const all = $("initClearBtn");
+  if (all) {
+    const armed = now < initClearArmUntil;
+    all.textContent = armed ? "Tap again to clear" : "Clear all";
+    all.classList.toggle("armed", armed);
+  }
+  const log = $("initClearLogBtn");
+  if (log) {
+    const armed = now < initClearLogArmUntil;
+    log.textContent = armed ? "Tap again to clear" : "Clear log";
+    log.classList.toggle("armed", armed);
+  }
+}
+function initClearLog(){
+  if (!initState.log || !initState.log.length) return;
+  /* Same two-tap arm as Clear all — one stray tap at a live
+     table should not wipe the fight's record. Saved scenarios
+     keep their own logs; only the live log clears. */
+  if (Date.now() >= initClearLogArmUntil) {
+    initClearLogArmUntil = Date.now() + 10000;
+    initPaintArms();
+    setTimeout(initPaintArms, 4100);
+    return;
+  }
+  initClearLogArmUntil = 0;
+  initState.log = [];
+  saveInitiative(); renderInitiative();
+}
+$("initClearLogBtn").addEventListener("click", initClearLog);
+/* Phone one-screen folds (Shaun, 2026-11-19): on the phone side
+   the combat log, the saved-scenarios list and the action bar's
+   tail fold away so the whole tracker fits one screen; the
+   headings and the More button bring them back in one tap. The
+   folds are per-device and remember themselves; the CSS hides
+   things only at phone widths, and never while arranging. */
+(function(){
+  try {
+    if (localStorage.getItem("apoc-personal-logopen") === "1") { const b = document.querySelector('[data-block="log"]'); if (b) b.classList.add("log-open"); }
+    if (localStorage.getItem("apoc-personal-savedopen") === "1") { const b = document.querySelector('[data-block="saved"]'); if (b) b.classList.add("saved-open"); }
+    if (localStorage.getItem("apoc-personal-baropen") === "1") { const c = document.querySelector(".init-controls"); if (c) c.classList.add("bar-open"); const m = $("initMoreBtn"); if (m) m.textContent = "Less ▴"; }
+  } catch (e) {}
+  const logWrap = $("initLog");
+  if (logWrap) logWrap.addEventListener("click", e => {
+    if (!e.target.closest("h4")) return;
+    const blk = e.target.closest("[data-block]"); if (!blk) return;
+    const open = blk.classList.toggle("log-open");
+    try { localStorage.setItem("apoc-personal-logopen", open ? "1" : "0"); } catch (err) {}
+  });
+  const svH = document.querySelector(".init-saved-head h4");
+  if (svH) svH.addEventListener("click", () => {
+    const blk = svH.closest("[data-block]"); if (!blk) return;
+    const open = blk.classList.toggle("saved-open");
+    try { localStorage.setItem("apoc-personal-savedopen", open ? "1" : "0"); } catch (err) {}
+  });
+  const mBtn = $("initMoreBtn");
+  if (mBtn) mBtn.addEventListener("click", () => {
+    const c = document.querySelector(".init-controls"); if (!c) return;
+    const open = c.classList.toggle("bar-open");
+    mBtn.textContent = open ? "Less ▴" : "More ▸";
+    try { localStorage.setItem("apoc-personal-baropen", open ? "1" : "0"); } catch (err) {}
+  });
+})();
+/* Picture slots (Shaun, 2026-11-19): every combatant and every
+   roster member carries a small picture — a URL in the shared
+   state, never a blob. Upload is the primary route (the file
+   goes to the same cody-artwork bucket the Tavern uses, under
+   portraits/); pasting a link is the fallback. */
+let initPicTarget = null;
+function initPicObj(){
+  if (!initPicTarget) return null;
+  const src = initPicTarget.kind === "party" ? (initState.party || []) : initState.list;
+  return src.find(x => x.id === initPicTarget.id) || null;
+}
+function initPicOpen(kind, id){
+  initPicTarget = { kind, id };
+  const ch = $("initPicChooser"); if (ch) ch.hidden = false;
+  initPicPaint();
+}
+function initPicClose(){
+  initPicTarget = null;
+  const ch = $("initPicChooser"); if (ch) ch.hidden = true;
+}
+function initPicPaint(){
+  const o = initPicObj(); if (!o) { initPicClose(); return; }
+  $("initPicFor").textContent = "Picture for " + o.name;
+  $("initPicUrl").value = o.pic || "";
+  $("initPicRemoveBtn").style.display = o.pic ? "" : "none";
+  $("initPicNote").textContent = "";
+}
+function initPicSet(url){
+  const o = initPicObj(); if (!o) return;
+  const kind = initPicTarget.kind;
+  o.pic = url;
+  saveInitiative();
+  if (kind === "party") renderParty(); else renderInitiative();
+  initPicClose();
+}
+$("initPicCloseBtn").addEventListener("click", initPicClose);
+$("initPicRemoveBtn").addEventListener("click", () => initPicSet(""));
+$("initPicUrlBtn").addEventListener("click", () => {
+  const v = $("initPicUrl").value.trim();
+  if (v) initPicSet(v);
+});
+$("initPicUrl").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); const v = e.target.value.trim(); if (v) initPicSet(v); }
+  else if (e.key === "Escape") { e.preventDefault(); initPicClose(); }
+});
+$("initPicUploadBtn").addEventListener("click", () => { const f = $("initPicFile"); if (f) f.click(); });
+$("initPicFile").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file || !initPicTarget) return;
+  const note = $("initPicNote");
+  if (!db || !db.storage) { if (note) note.textContent = "Uploads aren't reachable from here — paste a link instead."; return; }
+  if (file.size > 10 * 1024 * 1024) { if (note) note.textContent = "That picture is over 10 MB — pick a smaller one, or paste a link."; return; }
+  if (note) note.textContent = "Uploading…";
+  const ext = ((file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "")) || "jpg";
+  const path = "portraits/" + initPicTarget.id + "-" + Date.now() + "." + ext;
+  try {
+    const up = await db.storage.from("cody-artwork").upload(path, file, { upsert: true, contentType: file.type || undefined });
+    if (up.error) throw up.error;
+    const pub = db.storage.from("cody-artwork").getPublicUrl(path);
+    const url = pub && pub.data && pub.data.publicUrl;
+    if (!url) throw new Error("no public url");
+    initPicSet(url);
+  } catch (err) { if (note) note.textContent = "The upload didn't go through — paste a link instead."; }
+});
+/* Nested add forms (Shaun, 2026-11-19): the whole add-combatant
+   form nests inside its Add foe button — which sits in
+   the action bar, so a closed form leaves no box on the page at
+   all — and the roster's add form inside its Add PC button,
+   which stays in the roster box. The open/closed choice is kept
+   per device; closed is the shipped default. */
+function initFoldGet(k){ try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } }
+function initFoldSet(k, v){ try { localStorage.setItem(k, v ? "1" : "0"); } catch (e) {} }
+function initFoldApply(){
+  const f = document.querySelector(".init-form");
+  const fo = initFoldGet("apoc-personal-addopen");
+  if (f) f.classList.toggle("folded", !fo);
+  const tb = $("initAddToggle"); if (tb) tb.textContent = (fo ? "▾" : "▸") + " Add foe";
+  const pa = document.querySelector(".init-party-add");
+  const po = initFoldGet("apoc-personal-partyaddopen");
+  if (pa) pa.classList.toggle("folded", !po);
+  const pb = $("initPartyAddToggle"); if (pb) pb.textContent = (po ? "▾" : "▸") + " Add PC";
+}
+$("initAddToggle").addEventListener("click", () => { initFoldSet("apoc-personal-addopen", !initFoldGet("apoc-personal-addopen")); initFoldApply(); });
+$("initPartyAddToggle").addEventListener("click", () => { initFoldSet("apoc-personal-partyaddopen", !initFoldGet("apoc-personal-partyaddopen")); initFoldApply(); });
+initFoldApply();
+function initClear(){
+  if (!initState.list.length) return;
+  /* In-page confirm (two taps) — the native confirm() dialog is
+     the one control test browsers and some webviews cannot answer,
+     which left this button looking dead; the arm pattern works
+     everywhere a tap does. */
+  if (Date.now() >= initClearArmUntil) {
+    initClearArmUntil = Date.now() + 10000;
+    initPaintArms();
+    setTimeout(initPaintArms, 4100);
+    return;
+  }
+  initClearArmUntil = 0;
+  sessionSettle();
+  const endedMs = initState.started ? sessionTally.combatMs : 0;
+  initSnapshot();
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling };
+  /* The fresh board's log opens with the ended fight's record. */
+  if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
+  if (endedMs) { sessionTally.combatMs = 0; sessionPersist(); }
+  saveInitiative(); renderInitiative();
+}
+/* Click the round counter to advance the round (Shaun,
+   2026-11-18): every effect of a Next-turn wrap — durations
+   tick, rolling initiative re-rolls if on, the in-world clock
+   moves with the round — and the turn returns to the top of
+   the order with a fresh stint. (This replaced the type-a-
+   number editor on the same readout from earlier that day.) */
+function initRoundAdvance(){
+  /* While either round editor is open, no click advances the
+     round (fix, 2026-11-18) — the readout's own click included. */
+  if (initRoundEditing || initTimeEditing) return;
+  const rows = initSorted(); if (!rows.length) return;
+  sessionSettle();
+  initCloseStint(initState.turnId, true);
+  initState.started = true;
+  const top = initNewRound();
+  initState.turnId = top || rows[0].id;
+  initOpenStint();
+  saveInitiative(); renderInitiative();
+}
+$("initRound").addEventListener("click", initRoundAdvance);
+/* Step the round by hand (Shaun, 2026-11-18 — two little
+   arrows at the readout, replacing the typed editor from
+   earlier the same evening): an arrow step is a manual set
+   and changes ONLY the number — no wrap effects, no
+   duration ticks; the in-world clock follows the number
+   because it is read from the round. Floor at Round 1.
+   Clicking the readout keeps its full advance. */
+function initRoundStep(delta){
+  const v = Math.max(1, (initState.round || 1) + delta);
+  if (v === initState.round) return;
+  initState.round = v;
+  saveInitiative(); renderInitiative();
+}
+$("initRoundUpBtn").addEventListener("click", () => initRoundStep(1));
+$("initRoundDownBtn").addEventListener("click", () => initRoundStep(-1));
+/* Set the round by typing it (Shaun, 2026-11-18 — the Set
+   round editor stands alongside the stepper arrows and the
+   readout's click-to-advance): it changes ONLY the number,
+   with the same manual-set semantics as the arrows. */
+let initRoundEditing = false;
+function initRoundSetOpen(){
+  if (initRoundEditing || initTimeEditing) return;
+  const span = $("initRound"); if (!span) return;
+  initRoundEditing = true;
+  const inp = document.createElement("input");
+  /* A text field, not type=number (fix, 2026-11-18): a number
+     input's native spinner — and its arrow-key stepping — fires
+     `change` the moment it is clicked, and the change listener
+     below commits and closes on the spot, so a stray click on
+     the spinner advanced the round +1 and shut the editor. A
+     text field has no steppers: clicks inside it can only place
+     the cursor, and the value changes only by typing. */
+  inp.type = "text"; inp.inputMode = "numeric";
+  inp.value = String(initState.round || 1);
+  inp.className = "init-round-input";
+  inp.title = "Type the round number, then press Enter — Escape cancels";
+  inp.setAttribute("aria-label", "Round number");
+  span.style.display = "none";
+  span.parentNode.insertBefore(inp, span.nextSibling);
+  inp.focus(); inp.select();
+  let done = false;
+  const close = (commit) => {
+    if (done) return; done = true;
+    initRoundEditing = false;
+    const v = parseInt(inp.value, 10);
+    inp.remove(); span.style.display = "";
+    if (commit && Number.isFinite(v) && v >= 1 && v !== initState.round) {
+      initState.round = v;
+      saveInitiative();
+    }
+    renderInitiative();
+  };
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); close(true); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
+  });
+  inp.addEventListener("change", () => close(true));
+  inp.addEventListener("blur", () => close(true));
+}
+$("initRoundSetBtn").addEventListener("click", initRoundSetOpen);
+/* Set the round from the in-world clock (Shaun, 2026-11-19):
+   the clock readout is the round in its other form — six
+   seconds to a round — so clicking it opens a typed time
+   editor and committing sets the round to match. A manual
+   set, like the steppers: only the number changes. A time
+   that is not a whole number of rounds snaps to the
+   nearest round; a bare number is read as seconds. */
+let initTimeEditing = false;
+function initParseTime(text){
+  const t = String(text || "").trim(); if (!t) return null;
+  let secs = null;
+  const m = t.match(/^(\d+):([0-5]?\d)$/);
+  if (m) secs = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  else if (/^\d+$/.test(t)) secs = parseInt(t, 10);
+  if (secs == null || !Number.isFinite(secs)) return null;
+  return Math.max(1, Math.round(secs / 6));
+}
+function initTimeSetOpen(){
+  if (initTimeEditing || initRoundEditing) return;
+  const span = $("initWorldClock"); if (!span) return;
+  initTimeEditing = true;
+  const inp = document.createElement("input");
+  inp.type = "text"; inp.inputMode = "numeric";
+  const secs = (initState.round || 1) * 6;
+  inp.value = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
+  inp.className = "init-round-input init-time-input";
+  inp.title = "Type the in-world time as minutes:seconds, then press Enter — Escape cancels";
+  inp.setAttribute("aria-label", "In-world time, minutes and seconds");
+  span.style.display = "none";
+  span.parentNode.insertBefore(inp, span.nextSibling);
+  inp.focus(); inp.select();
+  let done = false;
+  const close = (commit) => {
+    if (done) return; done = true;
+    initTimeEditing = false;
+    const v = commit ? initParseTime(inp.value) : null;
+    inp.remove(); span.style.display = "";
+    if (v != null && v !== initState.round) { initState.round = v; saveInitiative(); }
+    renderInitiative();
+  };
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); close(true); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
+  });
+  inp.addEventListener("change", () => close(true));
+  inp.addEventListener("blur", () => close(true));
+}
+$("initWorldClock").addEventListener("click", initTimeSetOpen);
+$("initSessIn").addEventListener("click", () => initTallyClick("in"));
+$("initSessOut").addEventListener("click", () => initTallyClick("out"));
+$("initClockResetBtn").addEventListener("click", () => {
+  sessionSettle();
+  sessionTally.inMs = 0; sessionTally.outMs = 0; sessionTally.combatMs = 0;
+  sessionPersist(); paintSessionClocks();
+});
+$("initRollingBtn").addEventListener("click", () => {
+  initState.rolling = !initState.rolling;
+  initLog("Rolling initiative " + (initState.rolling ? "on — the order re-rolls at each new round." : "off — the order stays fixed."));
+  saveInitiative(); renderInitiative();
+});
+$("initAddBtn").addEventListener("click", initAdd);
+$("initNextBtn").addEventListener("click", initNext);
+$("initPrevBtn").addEventListener("click", initPrev);
+$("initRollAllBtn").addEventListener("click", initRollAll);
+$("initResetBtn").addEventListener("click", initReset);
+$("initClearBtn").addEventListener("click", initClear);
+$("initUndoBtn").addEventListener("click", initUndo);
+$("initPartyAddBtn").addEventListener("click", initAddParty);
+$("initPartyBtn").addEventListener("click", () => { const p = $("initParty"); if (p) { p.hidden = !p.hidden; if (!p.hidden) renderParty(); } });
+$("initChimeBtn").addEventListener("click", () => {
+  try { localStorage.setItem("apoc-personal-chime", initChimeOn() ? "0" : "1"); } catch (e) {}
+  initChimeBtnLabel();
+});
+$("initPartyNewBtn").addEventListener("click", () => {
+  const inp = $("initPartyName");
+  const name = inp.value.trim(); if (!name) { inp.focus(); return; }
+  initState.party = (initState.party || []).concat([partyNorm({ name })]);
+  inp.value = "";
+  saveInitiative(); renderParty();
+});
+["initName", "initTotal", "initMod", "initAc", "initHp", "initQty"].forEach(id => { const el = $(id); if (el) el.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }); });
+initChimeBtnLabel();
+/* The clocks repaint once a second — text only, never a save:
+   every value is derived from the shared timestamps. */
+setInterval(initTickClocks, 1000);
+setInterval(() => {
+  const p = $("initiativePanel");
+  if (p && initLoaded && !document.hidden && !initDirty && !p.contains(document.activeElement)) loadInitiative();
+}, 5000);
+/* On this page, arriving is opening and leaving is closing — the
+   open/close rule carried over from the panel unchanged: boot pulls
+   the store fresh, saves any board a previous visit left un-closed,
+   and starts blank; leaving the page saves the board that was run.
+   The leave save re-sends the archived state with keepalive so the
+   write survives the page going away — merged against the freshest
+   store state this page has seen, and gated so a tab that only
+   watched the board writes nothing at all (fix, 2026-11-19). */
+(async function initBoot(){
+  await loadInitiative();
+  archiveInitiative();
+  renderInitiative();
+})();
+window.addEventListener("pagehide", () => {
+  if (!initState.list.length) return;
+  /* A tab that only mirrored this board — opened, watched,
+     never worked — closes silently (fix, 2026-11-19): its
+     leave write carried its whole stale state and could wipe
+     saves made elsewhere since it loaded, roster and all.
+     Only a page the fight was actually worked from archives
+     on the way out. */
+  if (!initBoardTouched) return;
+  archiveInitiative();
+  /* The keepalive payload is merged with the freshest store
+     state this page has seen, so even this last write cannot
+     drop a save or a roster member it never knew about. */
+  const payload = JSON.parse(JSON.stringify(initState));
+  initMergeSavedParty(payload, initLastKnown);
+  payload.rev = ++initRev;
+  payload.by = initWriter;
+  try {
+    fetch(SUPABASE_URL + "/rest/v1/" + SETTINGS_TABLE, {
+      method: "POST", keepalive: true,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ key: INIT_KEY, value: payload, updated_at: new Date().toISOString() })
+    }).catch(() => {});
+  } catch (e) {}
+});
+
+</script>
+<script>
+/* Free-form editing (Shaun's personal copy, 2026-11-19):
+   this page's arrange system is a full editor. Unlock with
+   Edit page and every control can be dragged into any
+   container on the page — a bar button into the header, a
+   header control into the bar, a row control onto the other
+   line — resized continuously with the − / + stepper,
+   nudged pixel by pixel with the arrow pad, and the blocks
+   themselves reorder and take widths so two can sit side by
+   side. Reset layout always restores the shipped page, and
+   nudges clamp at the panel's edges so the page can never
+   scroll sideways. Layouts persist per device. Every load
+   starts locked. */
+(function () {
+  var panel = document.getElementById("initiativePanel");
+  var bar = panel ? panel.querySelector(".init-controls") : null;
+  var lockBtn = document.getElementById("initLockBtn");
+  var resetBtn = document.getElementById("initBarResetBtn");
+  var sizeRow = document.getElementById("initSizeRow");
+  var sizeName = document.getElementById("initSizeName");
+  var sizeRead = document.getElementById("initSizeRead");
+  var sizeDown = document.getElementById("initSizeDown");
+  var sizeUp = document.getElementById("initSizeUp");
+  if (!panel || !bar || !lockBtn || !resetBtn) return;
+  var FFKEY = "apoc-personal-freeform-v1";
+  var ROW1 = ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"];
+  var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"];
+  var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "del"];
+  var SROW = ["body", "btns"];
+  var BLOCKS = ["header", "bar", "party", "form", "list", "log", "saved"];
+  var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
+  var slice = function (nl) { return Array.prototype.slice.call(nl); };
+  slice(bar.querySelectorAll(".btn")).forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
+
+  function load(key) { try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function store() { try { localStorage.setItem(FFKEY, JSON.stringify(rec)); } catch (e) {} }
+  function contEl(name) { return panel.querySelector(CONTS[name]); }
+  function staticKeys() {
+    var out = [];
+    Object.keys(CONTS).forEach(function (cn) { var c = contEl(cn); if (c) slice(c.querySelectorAll('[data-mk]:not([data-mkgrp="blocks"])')).forEach(function (el) { out.push(el.getAttribute("data-mk")); }); });
+    return out;
+  }
+  function homeOf(key) {
+    for (var cn in CONTS) { var c = contEl(cn); if (c && c.querySelector('[data-mk="' + key + '"]')) return cn; }
+    return "bar";
+  }
+  function defaultPlace() {
+    var p = {};
+    Object.keys(CONTS).forEach(function (cn) { var c = contEl(cn); p[cn] = c ? slice(c.querySelectorAll('[data-mk]:not([data-mkgrp="blocks"])')).map(function (el) { return el.getAttribute("data-mk"); }) : []; });
+    return p;
+  }
+  function validList(stored, known) {
+    var out = (stored || []).filter(function (k) { return known.indexOf(k) >= 0; });
+    known.forEach(function (k) { if (out.indexOf(k) < 0) out.push(k); });
+    return out;
+  }
+  function validPlace(stored) {
+    var keys = staticKeys(), p = {}, seen = {};
+    Object.keys(CONTS).forEach(function (cn) {
+      p[cn] = ((stored || {})[cn] || []).filter(function (k) { if (keys.indexOf(k) < 0 || seen[k]) return false; seen[k] = 1; return true; });
+    });
+    keys.forEach(function (k) { if (!seen[k]) p[homeOf(k)].push(k); });
+    return p;
+  }
+  function validLines(stored) {
+    var union = ROW1.concat(ROW2), seen = {}, out = { row1: [], row2: [] };
+    ["row1", "row2"].forEach(function (ln) {
+      out[ln] = ((stored || {})[ln] || []).filter(function (k) { if (union.indexOf(k) < 0 || seen[k]) return false; seen[k] = 1; return true; });
+    });
+    ROW1.forEach(function (k) { if (!seen[k]) out.row1.push(k); });
+    ROW2.forEach(function (k) { if (!seen[k]) out.row2.push(k); });
+    return out;
+  }
+  var shippedPlace = defaultPlace();
+  var rec = load(FFKEY) || {};
+  rec.place = validPlace(rec.place || defaultPlace());
+  rec.lines = validLines(rec.lines);
+  rec.prow = validList(rec.prow, PROW);
+  rec.srow = validList(rec.srow, SROW);
+  rec.blocks = validList(rec.blocks, BLOCKS);
+  rec.bwidth = rec.bwidth || {};
+  rec.scale = rec.scale || {};
+  rec.nudge = rec.nudge || {};
+
+  window.__mkOrder = function (grp, keys) {
+    if (grp === "row1") return rec.lines.row1.slice();
+    if (grp === "row2") return rec.lines.row2.slice();
+    if (grp === "partyrow") return rec.prow.slice();
+    if (grp === "saved") return rec.srow.slice();
+    return keys;
+  };
+
+  /* ---- placement ---- */
+  function findStatic(key) {
+    for (var cn in CONTS) { var c = contEl(cn); if (!c) continue; var el = c.querySelector('[data-mk="' + key + '"]:not([data-mkgrp="blocks"])'); if (el) return el; }
+    return null;
+  }
+  function applyPlace() {
+    Object.keys(CONTS).forEach(function (cn) {
+      var c = contEl(cn); if (!c) return;
+      rec.place[cn].forEach(function (k) { var el = findStatic(k); if (el) c.appendChild(el); });
+    });
+  }
+  function applyBlocks() {
+    rec.blocks.forEach(function (k) { var b = panel.querySelector('[data-block="' + k + '"]'); if (b) panel.appendChild(b); });
+    BLOCKS.forEach(function (k) {
+      var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
+      var w = rec.bwidth[k];
+      b.style.width = (w && w < 100) ? w + "%" : "";
+    });
+  }
+
+  /* ---- looks: continuous scale, nudge, selection, clamp ---- */
+  function mkPhone() { return window.matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1400px)").matches; }
+  var bases = {};
+  function baseOf(id, el) {
+    var bk = id + "|" + (mkPhone() ? "p" : "d");
+    if (bases[bk]) return bases[bk];
+    var keepF = el.style.fontSize, keepP = el.style.padding;
+    el.style.fontSize = ""; el.style.padding = "";
+    var cs = window.getComputedStyle(el);
+    var b = { fs: parseFloat(cs.fontSize) || 16, pt: parseFloat(cs.paddingTop) || 0, pr: parseFloat(cs.paddingRight) || 0, pb: parseFloat(cs.paddingBottom) || 0, pl: parseFloat(cs.paddingLeft) || 0 };
+    el.style.fontSize = keepF; el.style.padding = keepP;
+    bases[bk] = b; return b;
+  }
+  function familyOf(el) {
+    if (el.closest("[data-block]") && el.getAttribute("data-mkgrp") === "blocks") return "blocks";
+    if (el.closest(".init-row")) return "r";
+    if (el.closest(".init-party-row")) return "p";
+    if (el.closest(".init-saved-row")) return "v";
+    return "s";
+  }
+  var arranging = false;
+  var sel = { fam: "s", key: "initNextBtn" };
+  function selId() { return sel.fam + ":" + sel.key; }
+  function applyLooks() {
+    slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
+      var fam = familyOf(el), key = el.getAttribute("data-mk"), id = fam + ":" + key;
+      if (fam !== "blocks") {
+        var s = rec.scale[id];
+        if (s && s !== 1) { var b = baseOf(id, el); el.style.fontSize = (b.fs * s).toFixed(1) + "px"; el.style.padding = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; }
+        else { el.style.fontSize = ""; el.style.padding = ""; }
+        var n = rec.nudge[id];
+        el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
+      }
+      el.classList.toggle("mk-selected", arranging && sel.fam === fam && sel.key === key);
+    });
+    clampNudges();
+  }
+  function clampNudges() {
+    var pr = panel.getBoundingClientRect(), changed = false;
+    Object.keys(rec.nudge).forEach(function (id) {
+      var parts = id.split(":"), fam = parts[0], key = parts[1];
+      slice(panel.querySelectorAll('[data-mk="' + key + '"]')).forEach(function (el) {
+        if (familyOf(el) !== fam) return;
+        var r = el.getBoundingClientRect(), n = rec.nudge[id];
+        if (r.right > pr.right + 0.5) { n[0] -= Math.ceil(r.right - pr.right); changed = true; }
+        if (r.left < pr.left - 0.5) { n[0] += Math.ceil(pr.left - r.left); changed = true; }
+      });
+      var n2 = rec.nudge[id];
+      if (n2 && n2[0] === 0 && n2[1] === 0) { delete rec.nudge[id]; changed = true; }
+    });
+    if (changed) {
+      store();
+      slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
+        var id = familyOf(el) + ":" + el.getAttribute("data-mk"), n = rec.nudge[id];
+        if (familyOf(el) !== "blocks") el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
+      });
+    }
+  }
+  window.__mkApply = applyLooks;
+
+  /* ---- selection and the edit row ---- */
+  function nameOf(fam, key) {
+    var el = panel.querySelector('[data-mk="' + key + '"]');
+    if (!el) return key;
+    return ((el.getAttribute("aria-label") || el.textContent || el.getAttribute("title") || key) + "").trim().replace(/\s+/g, " ").slice(0, 30) || key;
+  }
+  function readOf() {
+    if (sel.fam === "blocks") return (rec.bwidth[sel.key] || 100) + "% wide";
+    return Math.round((rec.scale[selId()] || 1) * 100) + "%";
+  }
+  function select(fam, key) {
+    sel = { fam: fam, key: key };
+    if (sizeName) sizeName.textContent = sel.fam === "blocks" ? nameOf("blocks", key) : nameOf(fam, key);
+    if (sizeRead) sizeRead.textContent = readOf();
+    applyLooks();
+  }
+  function stepSize(dir) {
+    if (sel.fam === "blocks") {
+      var w = rec.bwidth[sel.key] || 100;
+      w = Math.max(40, Math.min(100, w + dir * 10));
+      if (w >= 100) delete rec.bwidth[sel.key]; else rec.bwidth[sel.key] = w;
+      store(); applyBlocks();
+    } else {
+      var id = selId(), s = rec.scale[id] || 1;
+      s = Math.max(0.5, Math.min(2, Math.round(s * (dir > 0 ? 1.1 : 0.9) * 100) / 100));
+      if (s === 1) delete rec.scale[id]; else rec.scale[id] = s;
+      store(); applyLooks();
+    }
+    if (sizeRead) sizeRead.textContent = readOf();
+  }
+  if (sizeDown) sizeDown.addEventListener("click", function () { stepSize(-1); });
+  if (sizeUp) sizeUp.addEventListener("click", function () { stepSize(1); });
+  function nudgeBy(dx, dy) {
+    if (sel.fam === "blocks") return;
+    var id = selId(), n = rec.nudge[id] || [0, 0];
+    n = [n[0] + dx, n[1] + dy];
+    if (n[0] === 0 && n[1] === 0) delete rec.nudge[id]; else rec.nudge[id] = n;
+    store(); applyLooks();
+  }
+  [["initNudgeL", -2, 0], ["initNudgeR", 2, 0], ["initNudgeU", 0, -2], ["initNudgeD", 0, 2]].forEach(function (cfg) {
+    var b = document.getElementById(cfg[0]);
+    if (b) b.addEventListener("click", function () { nudgeBy(cfg[1], cfg[2]); });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!arranging) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+    var step = e.shiftKey ? 10 : 2;
+    if (e.key === "ArrowLeft") { nudgeBy(-step, 0); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { nudgeBy(step, 0); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { nudgeBy(0, -step); e.preventDefault(); }
+    else if (e.key === "ArrowDown") { nudgeBy(0, step); e.preventDefault(); }
+  });
+
+  function setArranging(on) {
+    arranging = on;
+    document.body.classList.toggle("init-arranging", on);
+    lockBtn.textContent = on ? "🔒 Done editing" : "🔓 Edit page";
+    lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    resetBtn.hidden = !on;
+    if (sizeRow) sizeRow.hidden = !on;
+    select(sel.fam, sel.key);
+  }
+  lockBtn.addEventListener("click", function () { setArranging(!arranging); });
+  resetBtn.addEventListener("click", function () {
+    try { localStorage.removeItem(FFKEY); localStorage.removeItem("apoc-personal-bar-v1"); localStorage.removeItem("apoc-personal-layout-v2"); } catch (e) {}
+    rec = { place: JSON.parse(JSON.stringify(shippedPlace)), lines: { row1: ROW1.slice(), row2: ROW2.slice() }, prow: PROW.slice(), srow: SROW.slice(), blocks: BLOCKS.slice(), bwidth: {}, scale: {}, nudge: {} };
+    bases = {};
+    applyPlace(); applyBlocks();
+    if (typeof renderInitiative === "function") renderInitiative();
+    if (typeof renderParty === "function") renderParty();
+    if (typeof renderInitSaved === "function") renderInitSaved();
+    applyLooks(); select("s", "initNextBtn");
+  });
+
+  /* Block grips: one strip per block, visible only while editing. */
+  var BLOCK_NAMES = { header: "Header", bar: "Action bar", party: "PC roster", form: "Add foe", list: "Combatants", log: "Combat log", saved: "Saved scenarios" };
+  Object.keys(BLOCK_NAMES).forEach(function (k) {
+    var b = panel.querySelector('[data-block="' + k + '"]'); if (!b) return;
+    var g = document.createElement("div");
+    g.className = "block-grip";
+    g.setAttribute("data-grip", k); g.setAttribute("data-mk", k); g.setAttribute("data-mkgrp", "blocks");
+    g.textContent = "⠿ " + BLOCK_NAMES[k] + " — drag to move this block";
+    b.insertBefore(g, b.firstChild);
+  });
+
+  /* While editing, taps inside the blocks select and never fire. */
+  panel.addEventListener("click", function (ev) {
+    if (!arranging) return;
+    var inBlock = ev.target.closest && ev.target.closest("[data-block]");
+    if (!inBlock) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var mk = ev.target.closest("[data-mk]");
+    if (mk && panel.contains(mk)) select(familyOf(mk), mk.getAttribute("data-mk"));
+  }, true);
+
+  /* One dragger for every family; drops insert, they do not swap. */
+  var drag = null;
+  function lineOf(el) { return el.closest(".init-line1") ? "row1" : (el.closest(".init-line2") ? "row2" : null); }
+  panel.addEventListener("pointerdown", function (ev) {
+    if (!arranging) return;
+    var mk = ev.target.closest && ev.target.closest("[data-mk]");
+    if (!mk || !panel.contains(mk)) return;
+    var fam = familyOf(mk), key = mk.getAttribute("data-mk");
+    select(fam, key);
+    drag = { fam: fam, key: key, el: fam === "blocks" ? mk.closest("[data-block]") : mk, targetEl: null, targetKey: null, targetLine: null, after: false, on: false, x: ev.clientX, y: ev.clientY };
+    try { mk.setPointerCapture(ev.pointerId); } catch (e) {}
+    ev.preventDefault();
+  });
+  panel.addEventListener("pointermove", function (ev) {
+    if (!arranging || !drag) return;
+    if (Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) > 9) { drag.on = true; drag.el.classList.add("dragging"); }
+    if (!drag.on) return;
+    var el = document.elementFromPoint(ev.clientX, ev.clientY);
+    var t = el && el.closest ? el.closest("[data-mk]") : null;
+    if (!t || t.getAttribute("data-mk") === drag.key && drag.fam !== "r") { return; }
+    if (!t || familyOf(t) !== drag.fam) return;
+    if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
+    drag.targetEl = drag.fam === "blocks" ? t.closest("[data-block]") : t;
+    if (drag.targetEl) drag.targetEl.classList.add("drop-target");
+    drag.targetKey = t.getAttribute("data-mk");
+    drag.targetLine = drag.fam === "r" ? lineOf(t) : null;
+    var r = t.getBoundingClientRect();
+    drag.after = ev.clientX > r.left + r.width / 2;
+  });
+  function removeFrom(list, key) { var i = list.indexOf(key); if (i >= 0) list.splice(i, 1); }
+  function insertNear(list, targetKey, key, after) {
+    var i = list.indexOf(targetKey);
+    if (i < 0) { list.push(key); return; }
+    list.splice(after ? i + 1 : i, 0, key);
+  }
+  function rerender(fam) {
+    if (fam === "r") { if (typeof renderInitiative === "function") renderInitiative(); }
+    else if (fam === "p") { if (typeof renderParty === "function") renderParty(); }
+    else if (fam === "v") { if (typeof renderInitSaved === "function") renderInitSaved(); }
+  }
+  function commitDrag() {
+    if (!drag.targetKey || drag.targetKey === drag.key && drag.fam !== "r") return;
+    var key = drag.key, tk = drag.targetKey, after = drag.after;
+    if (drag.fam === "blocks") {
+      removeFrom(rec.blocks, key); insertNear(rec.blocks, tk, key, after); store(); applyBlocks();
+    } else if (drag.fam === "s") {
+      Object.keys(CONTS).forEach(function (cn) { removeFrom(rec.place[cn], key); });
+      var dest = null;
+      Object.keys(CONTS).forEach(function (cn) { if (rec.place[cn].indexOf(tk) >= 0) dest = cn; });
+      if (!dest) dest = "bar";
+      insertNear(rec.place[dest], tk, key, after); store(); applyPlace();
+    } else if (drag.fam === "r") {
+      if (tk === key && drag.targetLine === (rec.lines.row1.indexOf(key) >= 0 ? "row1" : "row2")) return;
+      removeFrom(rec.lines.row1, key); removeFrom(rec.lines.row2, key);
+      var line = drag.targetLine || "row1";
+      insertNear(rec.lines[line], tk, key, after); store(); rerender("r");
+    } else if (drag.fam === "p") {
+      removeFrom(rec.prow, key); insertNear(rec.prow, tk, key, after); store(); rerender("p");
+    } else if (drag.fam === "v") {
+      removeFrom(rec.srow, key); insertNear(rec.srow, tk, key, after); store(); rerender("v");
+    }
+    applyLooks();
+  }
+  function endDrag() {
+    if (!drag) return;
+    if (drag.on && drag.targetKey) commitDrag();
+    if (drag.targetEl) drag.targetEl.classList.remove("drop-target");
+    if (drag.el) drag.el.classList.remove("dragging");
+    drag = null;
+  }
+  panel.addEventListener("pointerup", endDrag);
+  panel.addEventListener("pointercancel", endDrag);
+
+  /* Fresh row instances pick up scale and nudge automatically. */
+  var raf = 0;
+  new MutationObserver(function () {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; applyLooks(); });
+  }).observe(panel, { childList: true, subtree: true });
+
+  applyPlace();
+  applyBlocks();
+  applyLooks();
+})();
+</script>
+
+<script>
+/* Press-and-hold help (Shaun, 2026-11-18): the hover
+   explanations work on BOTH sides — hover with a mouse, and on
+   touch screens press and hold any control to read what it
+   does, without the control firing. Same words both sides. */
+(() => {
+  let timer = null, target = null, sx = 0, sy = 0, fired = false;
+  const tip = document.createElement("div");
+  tip.className = "press-tip";
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  function show(el){
+    const text = el.getAttribute("title");
+    if (!text) return;
+    tip.textContent = text;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    let y = r.top - th - 10;
+    if (y < 8) y = Math.min(r.bottom + 10, window.innerHeight - th - 8);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function hide(){ tip.hidden = true; }
+  function cancel(){ if (timer) { clearTimeout(timer); timer = null; } }
+  document.addEventListener("pointerdown", e => {
+    if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+    const el = e.target.closest ? e.target.closest("[title]") : null;
+    cancel(); hide(); fired = false;
+    if (!el) { target = null; return; }
+    target = el; sx = e.clientX; sy = e.clientY;
+    timer = setTimeout(() => { fired = true; show(el); }, 550);
+  }, true);
+  document.addEventListener("pointermove", e => {
+    if (target && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) { cancel(); hide(); }
+  }, true);
+  ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { cancel(); setTimeout(hide, 60); }, true));
+  document.addEventListener("scroll", () => { cancel(); hide(); }, true);
+  document.addEventListener("click", e => {
+    if (fired) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); fired = false; }
+  }, true);
+  document.addEventListener("contextmenu", e => {
+    if (fired || (e.target.closest && e.target.closest("[title]"))) e.preventDefault();
+  }, true);
+})();
+</script>
+</body>
+</html>
