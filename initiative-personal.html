@@ -91,9 +91,8 @@
   #initiativePanel .init-form input{font:inherit;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-form input[type="number"]{width:5.5rem}
   #initiativePanel .init-form input#initName{flex:1 1 10rem}
-  #initiativePanel .init-addfoe{flex:1 1 100%;min-height:44px;font-weight:700;font-size:1rem;letter-spacing:.02em;background:var(--accent,#b8860b);color:#14100a;border:1px solid var(--card-border);border-radius:8px;cursor:pointer}
-  #initiativePanel .init-form .init-add-btn{background:#c9a227;border:1px solid #c9a227;color:#1a1405;font-weight:700;font-size:1rem;padding:.5rem 1.2rem;border-radius:8px;flex:1 1 12rem;cursor:pointer}
-  #initiativePanel .init-form .init-add-btn:hover{background:#dcb63a}
+  #initiativePanel .init-form-fields{display:flex;gap:.5rem;flex-wrap:wrap;flex:1 1 100%;align-items:center}
+  #initiativePanel .init-form-fields[hidden]{display:none}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
   #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
@@ -228,7 +227,6 @@
     #initiativePanel .init-form input#initName{flex:1 1 100%}
     #initiativePanel .init-form input[type="number"]{flex:1 1 0;width:auto}
     #initiativePanel .init-form .btn{min-height:44px;flex:1 1 0}
-    #initiativePanel .init-form .init-add-btn{flex:1 1 100%;min-height:48px;font-size:1rem}
     #initiativePanel .init-row{padding:.55rem .6rem}
     #initiativePanel .init-lab input,#initiativePanel .init-hp,#initiativePanel .init-hpmax,#initiativePanel .init-amt{font-size:16px;min-height:40px}
     #initiativePanel .init-status-add{font-size:16px;min-height:40px}
@@ -322,7 +320,6 @@
     #initiativePanel .init-form input#initName{flex:1 1 6rem}
     #initiativePanel .init-form input[type="number"]{flex:0 0 auto;width:3.6rem}
     #initiativePanel .init-form .btn{min-height:26px;flex:0 0 auto;padding:.14rem .6rem;font-size:.8rem}
-    #initiativePanel .init-form .init-add-btn{flex:1 1 100%;min-height:34px;font-size:.9rem;padding:.3rem .6rem}
   }
 </style>
 </head>
@@ -379,13 +376,16 @@
       </div>
     </div>
     <div class="init-form init-block" data-block="form">
+      <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" aria-expanded="false" title="Add a foe — tap to open the combatant line folded under this button; tap again to fold it away">Add foe</button>
+      <div class="init-form-fields" id="initFormFields" hidden>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
       <input id="initAc" data-mk="ac" data-mkgrp="form" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
       <input id="initHp" data-mk="hp" data-mkgrp="form" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
       <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
-      <button type="button" class="btn init-add-btn init-addfoe" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add this foe to the board — name, initiative, AC and HP from the fields above; quantity adds numbered copies">&#9876; Add foe</button>
+      <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
+      </div>
     </div>
     <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
       <span class="init-pic-for" id="initPicFor"></span>
@@ -1821,6 +1821,11 @@ $("initRollingBtn").addEventListener("click", () => {
   saveInitiative(); renderInitiative();
 });
 $("initAddBtn").addEventListener("click", initAdd);
+$("initAddFoeBtn").addEventListener("click", () => {
+  const f = $("initFormFields"), b = $("initAddFoeBtn"), open = f.hidden;
+  f.hidden = !open; b.setAttribute("aria-expanded", String(open));
+  if (open) $("initName").focus();
+});
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
 $("initRollAllBtn").addEventListener("click", initRollAll);
