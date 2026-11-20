@@ -130,6 +130,11 @@
      combatant list, and stick to the top of the view while a long
      list scrolls under them. */
   #initiativePanel .init-controls{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;position:sticky;top:.5rem;z-index:6;margin:.4rem 0;padding:.35rem .45rem;border:1px solid var(--card-border);border-radius:8px;background:hsl(222,20%,14%)}
+  /* Roll ALL and Rolling are ONE button with two halves (Shaun, 2026-11-20):
+     joined at a single seam — the left half rolls everyone, the right half
+     turns rolling initiative on or off. */
+  #initiativePanel #initRollAllBtn{border-right:none;border-top-right-radius:0;border-bottom-right-radius:0}
+  #initiativePanel #initRollingBtn{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-.4rem}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
@@ -280,6 +285,7 @@
     #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
     #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
     #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
+    #initiativePanel #initRollingBtn{margin-left:-.2rem}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
     #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
