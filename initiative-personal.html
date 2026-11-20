@@ -128,7 +128,7 @@
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
-  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+  .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0 0 0 auto}
   #initiativePanel .init-saved-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.65rem;margin-bottom:.28rem}
   #initiativePanel #initClearLogBtn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
   #initiativePanel .init-pic{flex:0 0 auto;width:2.1em;height:2.1em;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px dashed var(--card-border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;overflow:hidden}
@@ -243,7 +243,7 @@
     #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
     #initiativePanel .init-controls .btn{min-height:44px}
     #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
-    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0}
+    .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0 0 0 auto}
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:36px;padding:.35rem .75rem}
     body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
     body.init-arranging #initiativePanel .init-controls .btn{touch-action:none;cursor:grab}
@@ -326,13 +326,13 @@
 <body data-scene="bastion-streets">
 <div class="page">
   <div class="init-topbar">
+    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <span class="init-brand">APOC Survival &middot; 2511 DR</span>
+    <span class="init-topbar-title">John's House — Initiative Tracker</span>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back in its shipped place and size, from any arrangement" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
     </div>
-    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
-    <span class="init-topbar-title">John's House — Initiative Tracker</span>
     <div class="init-size-row" id="initSizeRow" hidden>
       <span>Selected: <strong id="initSizeName">Next turn</strong></span>
       <button type="button" class="init-lock-btn" id="initSizeDown" title="Shrink the selected control a step — for a block, narrow it a step">−</button>
