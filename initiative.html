@@ -398,7 +398,7 @@
       <span class="init-roundbox" data-mk="round" data-mkgrp="head"><button type="button" class="init-round-btn" id="initRoundDownBtn" aria-label="Step the round down" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" aria-label="Step the round up" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" aria-label="Set the round by typing" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
-      <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</button>
+      <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — it starts at 0:00 and gains six seconds with each round. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes">0:00</button>
       <span class="init-helpbox" data-mk="helpq" data-mkgrp="head"><button type="button" class="init-help-zone init-help-q" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-help-zone" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button></span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
@@ -1032,7 +1032,7 @@ function renderInitiative(){
   $("initRound").textContent = "Round " + round;
   paintSessionClocks();
   const worldEl = $("initWorldClock");
-  if (worldEl) { const secs = round * 6; worldEl.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
+  if (worldEl) { const secs = (round - 1) * 6; worldEl.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
   const nn = $("initNowNext");
   if (!rows.length) {
     nn.textContent = "";
@@ -1837,7 +1837,7 @@ function initParseTime(text){
   if (m) secs = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
   else if (/^\d+$/.test(t)) secs = parseInt(t, 10);
   if (secs == null || !Number.isFinite(secs)) return null;
-  return Math.max(1, Math.round(secs / 6));
+  return Math.floor(secs / 6) + 1;
 }
 function initTimeSetOpen(){
   if (initTimeEditing || initRoundEditing) return;
@@ -1845,7 +1845,7 @@ function initTimeSetOpen(){
   initTimeEditing = true;
   const inp = document.createElement("input");
   inp.type = "text"; inp.inputMode = "numeric";
-  const secs = (initState.round || 1) * 6;
+  const secs = ((initState.round || 1) - 1) * 6;
   inp.value = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
   inp.className = "init-round-input init-time-input";
   inp.title = "Type the in-world time as minutes:seconds, then press Enter — Escape cancels";
