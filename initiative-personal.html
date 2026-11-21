@@ -432,7 +432,7 @@
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
       <button type="button" class="btn" id="initRollBlanksBtn" title="Roll d20 + modifier for every combatant who has no initiative total yet — anyone who already has a total keeps it, and marker lines are never rolled">Roll blanks</button>
       <button type="button" class="btn" id="initCollectBtn" aria-pressed="false" title="Collect rolls: while this is on, the board is gathering initiative — every row's total becomes a big tap-to-edit target, and Roll ALL / Roll blanks are off. Turn it off to start the fight">Collect rolls</button>
-      <button type="button" class="btn" id="initMultiBtn" aria-pressed="false" title="Multi-target damage: enter one amount, tap each target row to cycle Full, then Half (saved), then None, and Apply deals it to them all at once">Multi-target</button>
+      <button type="button" class="btn" id="initMultiBtn" aria-pressed="false" title="Multi-target / Apply — one button, two jobs: tap it to open multi-target damage, type one amount, tap each target row to cycle Full, then Half (saved), then None — then tap this same button again and it applies the damage to them all at once">Multi-target / Apply</button>
       <button type="button" class="btn" id="initSummaryBtn" hidden title="The fight so far in totals — damage dealt, damage taken, and healing, per combatant">Summary</button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
@@ -443,7 +443,6 @@
       <div class="init-multi" id="initMultiBar" hidden>
         <label class="init-lab" title="The one amount dealt to every tapped target — simple sums work too, like 12+4">Amount <input id="initMultiAmt" type="text" placeholder="e.g. 12+4" aria-label="Multi-target damage amount"></label>
         <span title="Tap a row once for the full amount, again for half (they saved), a third time to leave them out">Tap rows: Full → Half (saved) → None</span>
-        <button type="button" class="btn" id="initMultiApplyBtn" title="Deal the amount to every tapped target and leave multi-target mode">Apply</button>
         <button type="button" class="btn" id="initMultiCancelBtn" title="Leave multi-target mode without dealing anything">Done</button>
       </div>
     </div>
@@ -2468,8 +2467,7 @@ $("initCollectBtn").addEventListener("click", () => {
   initLog(initState.collect ? "Collecting initiative — totals go in row by row." : "Initiative collection closed.");
   saveInitiative(); renderInitiative();
 });
-$("initMultiBtn").addEventListener("click", () => initSetMulti(!initMultiMode));
-$("initMultiApplyBtn").addEventListener("click", initMultiApply);
+$("initMultiBtn").addEventListener("click", () => { if (!initMultiMode) initSetMulti(true); else initMultiApply(); });
 $("initMultiCancelBtn").addEventListener("click", () => initSetMulti(false));
 $("initSummaryBtn").addEventListener("click", () => { initSummaryOpen = !initSummaryOpen; renderInitSummary(); });
 $("initFightABtn").addEventListener("click", () => initSwitchFight("A"));
