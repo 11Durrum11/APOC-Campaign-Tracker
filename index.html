@@ -166,7 +166,7 @@
      system share sheet where available, else copies the page link. */
   .hub-share-row{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin:0 0 2px}
   .hub-share-btn{font:inherit;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:.22rem .6rem;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);cursor:pointer;opacity:.85}
-  .press-tip{position:fixed;z-index:9999;max-width:min(84vw,400px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.65rem .85rem;font-size:1.05rem;line-height:1.35;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  .press-tip{position:fixed;z-index:9999;max-width:min(88vw,450px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.8rem 1rem;font-size:1.3rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   .hub-share-btn:hover,.hub-share-btn:focus-visible{opacity:1}
   .hub-share-note{font-size:11.5px;opacity:.85}
@@ -2405,6 +2405,44 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
   }
   function hide(){ tip.hidden = true; }
   function cancel(){ if (timer) { clearTimeout(timer); timer = null; } }
+  /* Mouse hover (2026-11-21, hover-help enlargement): the mouse
+     sees the same bubble at the same size — hovering a titled
+     control shows its title in the bubble; the title is stashed
+     while the bubble is up so the native tooltip does not double
+     it, and restored when the pointer leaves. */
+  let hoverEl = null, hoverText = "";
+  function showText(el, text){
+    tip.textContent = text;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    let y = r.top - th - 10;
+    if (y < 8) y = Math.min(r.bottom + 10, window.innerHeight - th - 8);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function clearHover(){
+    if (hoverEl) { hoverEl.setAttribute("title", hoverText); hoverEl = null; hoverText = ""; }
+    hide();
+  }
+  document.addEventListener("pointerover", e => {
+    if (e.pointerType !== "mouse") return;
+    if (hoverEl && hoverEl.contains(e.target)) return;
+    const el = e.target.closest ? e.target.closest("[title]") : null;
+    if (el === hoverEl) return;
+    clearHover();
+    if (!el) return;
+    const text = el.getAttribute("title");
+    if (!text) return;
+    hoverEl = el; hoverText = text;
+    el.removeAttribute("title");
+    showText(el, text);
+  }, true);
+  document.addEventListener("pointerout", e => {
+    if (e.pointerType !== "mouse") return;
+    if (hoverEl && !(e.relatedTarget && hoverEl.contains(e.relatedTarget))) clearHover();
+  }, true);
   document.addEventListener("pointerdown", e => {
     if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
     const el = e.target.closest ? e.target.closest("[title]") : null;
@@ -2417,7 +2455,7 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
     if (target && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) { cancel(); hide(); }
   }, true);
   ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { cancel(); setTimeout(hide, 60); }, true));
-  document.addEventListener("scroll", () => { cancel(); hide(); }, true);
+  document.addEventListener("scroll", () => { cancel(); clearHover(); }, true);
   document.addEventListener("click", e => {
     if (fired) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); fired = false; }
   }, true);

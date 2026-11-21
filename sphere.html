@@ -79,10 +79,10 @@
       [title] { -webkit-touch-callout: none; }
       .hold-tip {
         position: fixed; z-index: 9999; pointer-events: none;
-        display: none; max-width: min(380px, calc(100vw - 16px));
+        display: none; max-width: min(88vw, 450px);
         background: var(--panel-2); color: var(--ink);
         border: 1px solid var(--amber); border-radius: 6px;
-        padding: .6rem .8rem; font-size: 1.01rem; line-height: 1.4;
+        padding: .8rem 1rem; font-size: 1.3rem; line-height: 1.4;
         box-shadow: 0 8px 28px rgba(0, 0, 0, .5);
       }
       .hold-tip.show { display: block; }
@@ -1516,6 +1516,47 @@
         }
         document.addEventListener("pointerup", onUp, true);
         document.addEventListener("pointercancel", onUp, true);
+
+        /* Mouse hover: the mouse sees the same bubble at the same
+           size — hovering a titled control shows its title in the
+           bubble; the title is stashed while it is up so the native
+           tooltip does not double it, and restored on leave. */
+        var mouseEl = null, mouseTitle = "";
+        function hideMouse() {
+          if (mouseEl) { mouseEl.setAttribute("title", mouseTitle); mouseEl = null; mouseTitle = ""; }
+          hideBubble();
+        }
+        function showMouse(el, text) {
+          var b = ensureBubble();
+          b.textContent = text;
+          b.style.visibility = "hidden";
+          b.classList.add("show");
+          var rect = el.getBoundingClientRect();
+          var w = b.offsetWidth, h = b.offsetHeight;
+          var left = rect.left + rect.width / 2 - w / 2;
+          left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+          var top = rect.top - h - 10;
+          if (top < 8) top = rect.bottom + 10;
+          top = Math.max(8, Math.min(top, window.innerHeight - h - 8));
+          b.style.left = left + "px";
+          b.style.top = top + "px";
+          b.style.visibility = "";
+        }
+        document.addEventListener("pointerover", function (ev) {
+          if (ev.pointerType !== "mouse") return;
+          if (mouseEl && mouseEl.contains(ev.target)) return;
+          var el = titledFrom(ev.target);
+          if (el === mouseEl) return;
+          hideMouse();
+          if (!el) return;
+          mouseEl = el; mouseTitle = el.getAttribute("title");
+          el.removeAttribute("title");
+          showMouse(el, mouseTitle);
+        }, true);
+        document.addEventListener("pointerout", function (ev) {
+          if (ev.pointerType !== "mouse") return;
+          if (mouseEl && !(ev.relatedTarget && mouseEl.contains(ev.relatedTarget))) hideMouse();
+        }, true);
 
         /* Swallow the click a shown hold would otherwise fire — exactly once. */
         document.addEventListener("click", function (ev) {
