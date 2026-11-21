@@ -211,13 +211,13 @@
   #initiativePanel .init-roundbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-helpbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-helpbox:hover{background:var(--accent);color:var(--accent-foreground)}
-  #initiativePanel .init-helpbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
+  #initiativePanel .init-helpbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-turnbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-turnbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-turnbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-turn-word{display:inline-flex;align-items:center;padding:6px 1px;pointer-events:none}
-  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;flex:1 1 auto;background:transparent;color:inherit}
-  #initiativePanel .init-round-btn{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 10px !important;font-size:inherit !important;color:inherit !important;flex:0 1 auto;line-height:1.15}
+  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;justify-content:center;padding:6px .22rem;flex:1 1 auto;background:transparent;color:inherit}
+  #initiativePanel .init-round-btn{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:0 1 auto;line-height:1.15}
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
   #initiativePanel .init-time-input{width:4.6rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
@@ -300,27 +300,27 @@
      log and the saved list. Nothing folds and nothing is
      removed; the fit comes from tightening alone. */
   @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
-    .panel{padding:5px 7px}
-    .page{padding:0 5px 3px}
-    .panel{margin-top:3px}
-    .init-topbar{padding-top:2px;gap:.3rem}
+    .panel{padding:3px 7px}
+    .page{padding:0 5px 1px}
+    .panel{margin-top:1px}
+    .init-topbar{padding-top:0;gap:.18rem}
     .init-topbar .btn{font-size:.76rem;padding:.12rem .45rem;min-height:0}
     .init-brand{font-size:.55rem;letter-spacing:.08em}
     .init-topbar-title{font-size:.6rem;letter-spacing:.1em}
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:22px;padding:.1rem .4rem;font-size:.74rem}
-    #initiativePanel .init-head{gap:.15rem .28rem}
+    #initiativePanel .init-head{gap:.07rem .28rem}
     #initiativePanel .init-head .init-lock-btn{min-height:20px}
     #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
     #initiativePanel .init-worldclock{font-size:.76rem}
-    #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
-    #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
+    #initiativePanel .init-nownext{margin:0;font-size:.83rem;min-height:1em;line-height:1.15}
+    #initiativePanel .init-controls{gap:.12rem;margin:.08rem 0;padding:.08rem .2rem}
     #initiativePanel .init-rollbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-rollbox button{padding:.05rem .22rem !important}
     #initiativePanel .init-rollbox[aria-pressed="true"] #initRollingOnBtn,#initiativePanel .init-rollbox[aria-pressed="false"] #initRollingOffBtn{padding-left:.45rem !important;padding-right:.45rem !important}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls .init-turnbox{flex:0 1 auto}
-    #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
-    #initiativePanel .init-row{padding:.05rem .28rem;border-radius:7px}
+    #initiativePanel .init-list{gap:.05rem;margin:.08rem 0 .1rem}
+    #initiativePanel .init-row{padding:.02rem .28rem;border-radius:7px;line-height:1.25}
     #initiativePanel .init-rowfold{display:inline-flex}
     #initiativePanel .init-row.folded [data-mk="notes"],#initiativePanel .init-row.folded [data-mk="fort"],#initiativePanel .init-row.folded [data-mk="ref"],#initiativePanel .init-row.folded [data-mk="will"],#initiativePanel .init-row.folded [data-mk="dup"],#initiativePanel .init-row.folded [data-mk="toparty"],#initiativePanel .init-row.folded [data-mk="delay"],#initiativePanel .init-row.folded [data-mk="ready"],#initiativePanel .init-row.folded [data-mk="surprised"],#initiativePanel .init-row.folded [data-mk="tmp"],#initiativePanel .init-row.folded [data-mk="nl"],#initiativePanel .init-row.folded [data-mk="cr"],#initiativePanel .init-row.folded [data-mk="status"]{display:none !important}
     #initiativePanel .init-row.folded .init-total{display:none}
@@ -329,7 +329,7 @@
     #initiativePanel .init-block[data-block="saved"]:not(.foldopen) #initSaved{display:none}
     #initiativePanel [data-logfold],#initiativePanel [data-savedfold]{cursor:pointer}
     #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.08rem}
-    #initiativePanel .init-line2{margin-top:.05rem}
+    #initiativePanel .init-line2{margin-top:.02rem}
     #initiativePanel .init-name{font-size:.86rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
     #initiativePanel .init-drag{min-width:20px;min-height:20px;padding:.03rem .05rem}
@@ -348,15 +348,15 @@
     #initiativePanel .init-notes{font-size:13px;min-height:20px;padding:.04rem .25rem;flex:1 1 2.3rem;min-width:2rem}
     #initiativePanel .init-status-add{font-size:13px;min-height:20px;padding:.04rem .18rem}
     #initiativePanel .init-dur{width:2.5rem;font-size:13px;min-height:20px;padding:.04rem .18rem}
-    #initiativePanel .init-bar{height:3px;margin-top:.05rem}
-    #initiativePanel .init-chips{gap:.14rem;margin-top:.04rem}
+    #initiativePanel .init-bar{height:3px;margin-top:.02rem}
+    #initiativePanel .init-chips{gap:.14rem;margin-top:.02rem}
     #initiativePanel .init-chip{font-size:.7rem;padding:.01rem .16rem .01rem .3rem}
     #initiativePanel .init-clocks{gap:.22rem;font-size:.7rem;line-height:1.1}
     #initiativePanel .init-hint{font-size:.78rem}
     #initiativePanel .init-log{margin-top:.25rem}
-    #initiativePanel .init-log h4{margin-bottom:.15rem;line-height:1.2}
+    #initiativePanel .init-log h4{margin-bottom:.08rem;line-height:1.2}
     #initiativePanel .init-logbox{max-height:62px;font-size:.76rem;padding:.22rem .36rem}
-    #initiativePanel .init-saved-head{margin-top:.25rem;margin-bottom:.08rem}
+    #initiativePanel .init-saved-head{margin-top:.1rem;margin-bottom:.04rem}
     #initiativePanel .init-saved-head .init-lock-btn{min-height:20px;padding-top:.06rem;padding-bottom:.06rem}
     #initiativePanel .init-saved-row{padding:.16rem .36rem;font-size:.77rem;margin-bottom:.16rem}
     #initiativePanel .init-saved-del,#initiativePanel .init-saved-load{min-width:28px;min-height:22px}
@@ -365,7 +365,7 @@
     #initiativePanel .init-party-name,#initiativePanel .init-party-add input{font-size:13px;min-height:24px}
     #initiativePanel .init-party-add .btn{min-height:25px}
     /* The add form, tightened to stand open on the surface. */
-    #initiativePanel .init-form{gap:.3rem;margin:.25rem 0}
+    #initiativePanel .init-form{gap:.3rem;margin:.12rem 0}
     #initiativePanel .init-form input{font-size:13px;min-height:26px;padding:.14rem .4rem}
     #initiativePanel .init-form input#initName{flex:1 1 6rem}
     #initiativePanel .init-form input[type="number"]{flex:0 0 auto;width:3.6rem}
@@ -375,7 +375,7 @@
       min-height:22px !important; padding:.05rem .38rem !important; font-size:.76rem !important; border-radius:999px !important;
     }
     #initiativePanel .init-helpbox{min-height:22px;font-size:.76rem}
-    #initiativePanel .init-helpbox button{padding:.05rem .5rem !important}
+    #initiativePanel .init-helpbox button{padding:.05rem .22rem !important}
     #initiativePanel .init-turnbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-turnbox button{padding:.05rem .5rem !important}
     #initiativePanel .init-turn-word{padding:.05rem 1px}
@@ -407,7 +407,7 @@
     <div class="init-block" data-block="header">
     <div class="init-head">
       <span class="init-roundbox" data-mk="round" data-mkgrp="head"><button type="button" class="init-round-btn" id="initRoundDownBtn" aria-label="Step the round down" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" aria-label="Step the round up" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" aria-label="Set the round by typing" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
-      <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
+      <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">Combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — it starts at 0:00 and gains six seconds with each round. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes">0:00</button>
       <span class="init-helpbox" data-mk="helpq" data-mkgrp="head"><button type="button" class="init-help-zone init-help-q" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-help-zone" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button></span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
@@ -419,7 +419,7 @@
       <span class="init-rollbox" id="initRollBox" data-mk="initRollAllBtn" data-mkgrp="bar" aria-pressed="false"><button type="button" class="init-roll-zone" id="initRollingOnBtn" aria-label="Rolling initiative on" title="Rolling initiative on: everyone re-rolls initiative and the order re-sorts at the start of every new round">On</button><button type="button" class="init-roll-zone" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button><button type="button" class="init-roll-zone" id="initRollingOffBtn" aria-label="Rolling initiative off" title="Rolling initiative off: the order stays fixed">Off</button></span>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
-      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
+      <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">Undo</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
     </div>
@@ -690,7 +690,7 @@ function initTallyClick(side){
 }
 function paintSessionClocks(){
   const eff = sessionEffMode();
-  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = "In combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("running", eff === "in"); }
+  const iEl = $("initSessIn"); if (iEl) { iEl.textContent = "Combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("running", eff === "in"); }
   const oEl = $("initSessOut"); if (oEl) { oEl.textContent = "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("running", eff === "out"); }
 }
 /* Press a combatant's turn timer to stop it, press again to
