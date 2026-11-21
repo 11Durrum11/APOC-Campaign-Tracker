@@ -101,6 +101,7 @@
   .init-midwords{display:flex;flex-direction:row;align-items:baseline;justify-content:center;gap:.6rem;flex:0 1 auto;order:2;margin:0 auto;text-align:center;min-width:0}
   .init-midwords>span{white-space:nowrap}
   .init-midwords .init-topbar-title{white-space:nowrap;overflow:visible;text-overflow:clip}
+  .init-midwords .init-ver{font-size:.68rem;font-weight:600;letter-spacing:.08em;color:var(--primary);opacity:.55}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
@@ -314,12 +315,13 @@
     .panel{margin-top:1px}
     .init-topbar{display:flex;padding-top:0;gap:.18rem}
     .init-topbar>a.btn{order:0}
-    .init-topbar .init-midwords{flex:0 0 100%;order:0;margin:0;justify-content:flex-start;text-align:left}
+    .init-topbar .init-midwords{flex:0 0 100%;order:0;margin:0;justify-content:flex-start;text-align:left;gap:.35rem}
     .init-topbar .init-lock-row{order:0}
     .init-topbar .init-size-row{order:0}
     .init-topbar .btn{font-size:.76rem;padding:.12rem .45rem;min-height:0}
     .init-brand{font-size:.55rem;letter-spacing:.08em}
     .init-topbar-title{font-size:.6rem;letter-spacing:.1em}
+    .init-midwords .init-ver{font-size:.55rem}
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:22px;padding:.1rem .4rem;font-size:.74rem}
     #initiativePanel .init-head{gap:.07rem .28rem}
     #initiativePanel .init-head .init-lock-btn{min-height:20px}
@@ -397,7 +399,7 @@
 <body data-scene="bastion-streets">
 <div class="page">
   <div class="init-topbar">
-    <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span></span>
+    <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span><span class="init-ver" id="initVer"></span></span>
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back to the table default layout (the layout last published from the editor), or the shipped layout if none has been published" hidden>Reset layout</button>
@@ -415,6 +417,9 @@
       <button type="button" class="init-lock-btn" id="initPublishBtn" title="Publish this layout as the table default — every device that opens John's House without a layout of its own gets the page arranged exactly as it stands on this device right now, and Reset layout returns to it">Publish as table default</button>
     </div>
   </div>
+  <script>
+  (function(){var el=document.getElementById('initVer');if(!el)return;fetch('version.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(j&&j.display)el.textContent='v'+j.display;}).catch(function(){});})();
+  </script>
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-block" data-block="header">
     <div class="init-head">
