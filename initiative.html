@@ -260,6 +260,8 @@
   #initiativePanel .init-party{margin:.55rem 0;padding:.55rem .7rem;border:1px solid var(--card-border);border-radius:8px}
   #initiativePanel .init-party[hidden]{display:none}
   #initiativePanel .init-party h4{margin:0 0 .45rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-party-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:0 0 .45rem}
+  #initiativePanel .init-party-head h4{margin:0}
   #initiativePanel .init-party-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;padding:.3rem 0;border-bottom:1px dashed rgba(127,127,127,.3)}
   #initiativePanel .init-party-name{font:inherit;flex:0 0 auto;width:13.5em;box-sizing:content-box;padding:.3rem .5rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
   #initiativePanel .init-party-state{flex:1 1 auto;min-width:0;font-size:.88em;opacity:.9}
@@ -465,7 +467,6 @@
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">Undo</button>
-      <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initMultiBtn" data-mk="initMultiBtn" data-mkgrp="bar" aria-pressed="false" title="Multi-target / Apply — one button, two jobs: tap it to open multi-target damage, type one amount, tap each target row to cycle Full, then Half (saved), then None — then tap this same button again and it applies the damage to them all at once">Multi-target / Apply</button>
       <div class="init-multi" id="initMultiBar" data-mk="initMultiBar" data-mkgrp="bar" hidden>
@@ -476,7 +477,7 @@
     </div>
     <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 data-savedfold="1" title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios <span class="init-foldglyph" id="initSavedGlyph">\u25B8</span></h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
-      <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
+      <div class="init-party-head"><h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4><button type="button" class="btn" id="initPartyAddBtn" data-mk="initPartyAddBtn" data-mkgrp="partyhead" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button></div>
       <div id="initPartyRows"></div>
       <div class="init-party-add">
         <input id="initPartyName" data-mk="pname" data-mkgrp="partyadd" type="text" placeholder="New member name" aria-label="New party member name" title="Name of a new party member">
@@ -2174,7 +2175,7 @@ window.addEventListener("pagehide", () => {
   var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "state", "del"];
   var SROW = ["body", "btns"];
   var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
-  var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
+  var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head", partyhead: ".init-party-head" };
   var slice = function (nl) { return Array.prototype.slice.call(nl); };
   slice(bar.querySelectorAll(".btn")).forEach(function (b) { if (b.closest("[data-mk]")) return; b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
 
@@ -2201,6 +2202,15 @@ window.addEventListener("pagehide", () => {
     return out;
   }
   function validPlace(stored) {
+    /* v51.112: Add party's shipped home moved from the bar into the
+       roster header. A place record with no partyhead list predates
+       the move — drop the stale bar entry and let the home-append
+       below seat the button in the roster header. Records saved
+       after the move always carry a partyhead list and are
+       respected as-is, including a deliberate drag back to the bar. */
+    if (stored && !Object.prototype.hasOwnProperty.call(stored, "partyhead") && stored.bar) {
+      stored = Object.assign({}, stored, { bar: stored.bar.filter(function (k) { return k !== "initPartyAddBtn"; }) });
+    }
     var keys = staticKeys(), p = {}, seen = {};
     Object.keys(CONTS).forEach(function (cn) {
       p[cn] = ((stored || {})[cn] || []).filter(function (k) { if (keys.indexOf(k) < 0 || seen[k]) return false; seen[k] = 1; return true; });
