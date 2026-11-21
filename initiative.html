@@ -98,8 +98,9 @@
   /* The orange words sit centred in the middle of the page, on the SAME line
      as Campaign Hub and Edit page (Shaun, 2026-11-20): a centred column
      between the two buttons, both words whole. */
-  .init-midwords{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05rem;flex:1 1 0;text-align:center;min-width:0}
-  .init-midwords .init-topbar-title{white-space:normal;overflow:visible;text-overflow:clip}
+  .init-midwords{display:flex;flex-direction:row;align-items:baseline;justify-content:flex-start;gap:.6rem;flex:0 0 100%;text-align:left;min-width:0}
+  .init-midwords>span{white-space:nowrap}
+  .init-midwords .init-topbar-title{white-space:nowrap;overflow:visible;text-overflow:clip}
   /* Campaign Initiative Tracker panel — John's House, full combat
      build (2026-11-18: AC, HP with damage/healing by amount, 3.5
      statuses with hover-only crunch, Roll ALL, Prev, Now/Next,
@@ -383,8 +384,8 @@
 <body data-scene="bastion-streets">
 <div class="page">
   <div class="init-topbar">
-    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span></span>
+    <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <div class="init-lock-row" id="initLockRow">
       <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back to the table default layout (the layout last published from the editor), or the shipped layout if none has been published" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
