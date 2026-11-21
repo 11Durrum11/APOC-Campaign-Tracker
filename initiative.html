@@ -204,14 +204,14 @@
      combat log, saved-scenario Load. */
   #initiativePanel .init-sessout{font-weight:600;opacity:.85}
   #initiativePanel .init-round{cursor:pointer}
-  #initiativePanel .init-roundbox{display:inline-flex;align-items:center;gap:.35rem}
+  #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
+  #initiativePanel .init-roundbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-turnbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-turnbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-turnbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-turn-word{display:inline-flex;align-items:center;padding:6px 1px;pointer-events:none}
-  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;font-size:.85rem;font-weight:600;min-height:34px;padding:6px 11px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box}
-  #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
-  #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
+  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;flex:1 1 auto;background:transparent;color:inherit}
+  #initiativePanel .init-round-btn{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 10px !important;font-size:inherit !important;color:inherit !important;flex:0 1 auto;line-height:1.15}
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
   #initiativePanel .init-time-input{width:4.6rem}
   #initiativePanel button.init-clock,#initiativePanel button.init-sessout{font:inherit;background:transparent;color:var(--foreground);border:1px solid var(--card-border);border-radius:999px;padding:.15rem .6rem;cursor:pointer}
@@ -304,7 +304,6 @@
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:22px;padding:.1rem .4rem;font-size:.74rem}
     #initiativePanel .init-head{gap:.15rem .28rem}
     #initiativePanel .init-head .init-lock-btn{min-height:20px}
-    #initiativePanel .init-round{font-size:.92rem}
     #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
     #initiativePanel .init-worldclock{font-size:.76rem}
     #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
@@ -322,8 +321,9 @@
     #initiativePanel .init-pic{width:1.35em;height:1.35em;font-size:.85rem;border-radius:6px}
     #initiativePanel .init-drag{min-width:20px;min-height:20px;padding:.03rem .05rem}
     #initiativePanel .init-turn{display:none}
-  #initiativePanel .init-roundbox .init-round{padding:.06rem .35rem}
-  #initiativePanel .init-round-btn{min-height:22px;padding:.08rem .32rem}
+  #initiativePanel .init-roundbox{min-height:22px;font-size:.76rem}
+  #initiativePanel .init-roundbox .init-round{padding:.05rem .5rem}
+  #initiativePanel .init-round-btn{padding:.05rem .5rem !important}
   #initiativePanel #initNowNext,#initiativePanel .init-saved-body{overflow-wrap:anywhere}
     #initiativePanel .init-lab{font-size:.66rem;gap:.12rem}
     #initiativePanel .init-lab input{width:1.85rem;font-size:13px;min-height:20px;padding:.03rem .12rem}
@@ -361,7 +361,6 @@
     #initiativePanel button, .init-topbar button, .init-topbar a.btn{
       min-height:22px !important; padding:.05rem .38rem !important; font-size:.76rem !important; border-radius:999px !important;
     }
-    #initiativePanel .init-roundbox .init-round{min-height:22px;padding:.05rem .38rem;font-size:.76rem;border-radius:999px}
     #initiativePanel .init-turnbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-turnbox button{padding:.05rem .5rem !important}
     #initiativePanel .init-turn-word{padding:.05rem 1px}
@@ -391,7 +390,7 @@
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
     <div class="init-block" data-block="header">
     <div class="init-head">
-      <span class="init-roundbox" data-mk="round" data-mkgrp="head"><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
+      <span class="init-roundbox" data-mk="round" data-mkgrp="head"><button type="button" class="init-round-btn" id="initRoundDownBtn" aria-label="Step the round down" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" aria-label="Step the round up" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" aria-label="Set the round by typing" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</button>
