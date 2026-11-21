@@ -119,6 +119,8 @@
   #initiativePanel .init-form.folded input, #initiativePanel .init-form.folded #initAddBtn{display:none !important}
   #initiativePanel .init-list{display:flex;flex-direction:column;gap:.38rem;margin:.3rem 0 .55rem}
   #initiativePanel .init-row{display:flex;flex-direction:column;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;padding:.38rem .55rem}
+  #initiativePanel .init-rowfold{display:none;margin-left:auto}
+  #initiativePanel .init-foldglyph{display:none}
   #initiativePanel .init-row.active{outline:2px solid var(--mv-blue, #8fb4ff);outline-offset:1px;background:hsla(222,20%,14%,.35)}
   #initiativePanel .init-line1,#initiativePanel .init-line2{display:flex;align-items:center;gap:.32rem;flex-wrap:wrap}
   #initiativePanel .init-line2{margin-top:.32rem}
@@ -315,6 +317,13 @@
     #initiativePanel .init-controls .init-turnbox{flex:0 1 auto}
     #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
     #initiativePanel .init-row{padding:.05rem .28rem;border-radius:7px}
+    #initiativePanel .init-rowfold{display:inline-flex}
+    #initiativePanel .init-row.folded [data-mk="notes"],#initiativePanel .init-row.folded [data-mk="fort"],#initiativePanel .init-row.folded [data-mk="ref"],#initiativePanel .init-row.folded [data-mk="will"],#initiativePanel .init-row.folded [data-mk="dup"],#initiativePanel .init-row.folded [data-mk="toparty"],#initiativePanel .init-row.folded [data-mk="delay"],#initiativePanel .init-row.folded [data-mk="ready"],#initiativePanel .init-row.folded [data-mk="surprised"],#initiativePanel .init-row.folded [data-mk="tmp"],#initiativePanel .init-row.folded [data-mk="nl"],#initiativePanel .init-row.folded [data-mk="cr"],#initiativePanel .init-row.folded [data-mk="status"]{display:none !important}
+    #initiativePanel .init-row.folded .init-total{display:none}
+    #initiativePanel .init-foldglyph{display:inline}
+    #initiativePanel .init-logbox.foldclosed{display:none}
+    #initiativePanel .init-block[data-block="saved"]:not(.foldopen) #initSaved{display:none}
+    #initiativePanel [data-logfold],#initiativePanel [data-savedfold]{cursor:pointer}
     #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.08rem}
     #initiativePanel .init-line2{margin-top:.05rem}
     #initiativePanel .init-name{font-size:.86rem;flex:1 1 4.5rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -409,7 +418,7 @@
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
     </div>
-    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
+    <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 data-savedfold="1" title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios <span class="init-foldglyph" id="initSavedGlyph">\u25B8</span></h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
       <h4 title="The saved PC roster — the Add party button drops them all onto the board">PC roster</h4>
       <div id="initPartyRows"></div>
@@ -935,6 +944,10 @@ function initNextIdx(rows, from, dir){
 }
 let initAudio = null;
 function initChimeOn(){ try { return localStorage.getItem("apoc-personal-chime") !== "0"; } catch (e) { return true; } }
+function initRowOpenSet(){ try { return new Set(JSON.parse(localStorage.getItem("apoc-personal-rowopen") || "[]")); } catch (e) { return new Set(); } }
+function initRowOpenSave(set){ try { localStorage.setItem("apoc-personal-rowopen", JSON.stringify(Array.from(set))); } catch (e) {} }
+function initFoldOpen(key){ try { return localStorage.getItem(key) === "1"; } catch (e) { return false; } }
+function initFoldSet(key, open){ try { localStorage.setItem(key, open ? "1" : "0"); } catch (e) {} }
 function initChime(){
   if (!initChimeOn()) return;
   try {
@@ -958,7 +971,10 @@ function renderInitLog(){
   const wrap = $("initLog"); if (!wrap) return;
   const log = Array.isArray(initState.log) ? initState.log : [];
   if (!log.length) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = '<h4 title="Everything that has happened in this fight, written down as it happens">Combat log</h4><div class="init-logbox">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+  const logOpen = initFoldOpen("apoc-personal-logopen");
+  wrap.innerHTML = '<h4 data-logfold="1" title="Everything that has happened in this fight, written down as it happens">Combat log <span class="init-foldglyph">' + (logOpen ? "\u25B4" : "\u25B8") + '</span></h4><div class="init-logbox' + (logOpen ? "" : " foldclosed") + '">' + log.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>';
+  const lh = wrap.querySelector("[data-logfold]");
+  if (lh) lh.addEventListener("click", () => { initFoldSet("apoc-personal-logopen", !initFoldOpen("apoc-personal-logopen")); renderInitLog(); });
 }
 function partyStateText(p){
   const c = (initState.list || []).find(x => x.name === p.name);
@@ -1044,8 +1060,11 @@ function renderInitiative(){
     nn.textContent = "Now: " + rows[ti].name + " · Next: " + rows[ni].name;
   }
   const statusOptions = '<option value="">+ Status</option>' + Object.keys(INIT_CONDITIONS).map(k => '<option value="' + esc(k) + '">' + esc(k) + '</option>').join("");
+  const rowOpen = initRowOpenSet();
+  const arrangingNow = document.body.classList.contains("init-arranging");
   wrap.innerHTML = rows.map(c => {
     const active = c.id === initState.turnId;
+    const rowFolded = !arrangingNow && !rowOpen.has(c.id);
     const hint = initHpHint(c);
     const dead = hint === "Dead";
     const num = v => (v === null || v === undefined ? "" : v);
@@ -1115,8 +1134,8 @@ function renderInitiative(){
     const segAll = Object.assign({}, seg1, seg2);
     const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
     const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
-    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
-      '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '</div>' +
+    return '<div class="init-row' + (active ? ' active' : '') + (rowFolded ? ' folded' : '') + '" data-row-id="' + c.id + '">' +
+      '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '<button type="button" class="init-rowfold" data-rowfold="' + c.id + '" aria-label="Show or hide the extra controls for ' + esc(c.name) + '" title="Show or hide this combatant\'s extra controls \u2014 notes, saves, status and the rest">' + (rowFolded ? '\u25B8' : '\u25B4') + '</button></div>' +
       '<div class="init-line2">' + ord2.map(k => segAll[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
   const find = id => initState.list.find(x => x.id === id);
@@ -1124,6 +1143,11 @@ function renderInitiative(){
   wrap.querySelectorAll("[data-init-val]").forEach(inp => inp.addEventListener("change", () => {
     const c = find(inp.dataset.initVal);
     if (c) { c.init = numOrNull(inp.value); initPinTop(); saveInitiative(); renderInitiative(); }
+  }));
+  wrap.querySelectorAll("[data-rowfold]").forEach(btn => btn.addEventListener("click", () => {
+    const set = initRowOpenSet(); const id = btn.dataset.rowfold;
+    if (set.has(id)) set.delete(id); else set.add(id);
+    initRowOpenSave(set); renderInitiative();
   }));
   wrap.querySelectorAll("[data-init-notes]").forEach(inp => {
     inp.addEventListener("input", () => { const c = find(inp.dataset.initNotes); if (c) c.notes = inp.value; });
@@ -1910,6 +1934,10 @@ $("initPartyNewBtn").addEventListener("click", () => {
 });
 ["initName", "initTotal", "initMod", "initAc", "initHp", "initQty"].forEach(id => { const el = $(id); if (el) el.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); initAdd(); } }); });
 initChimeBtnLabel();
+function initSavedFoldApply(){ const open = initFoldOpen("apoc-personal-savedopen"); const blk = document.querySelector('#initiativePanel .init-block[data-block="saved"]'); if (blk) blk.classList.toggle("foldopen", open); const g = $("initSavedGlyph"); if (g) g.textContent = open ? "\u25B4" : "\u25B8"; }
+const savedFoldH = document.querySelector("[data-savedfold]");
+if (savedFoldH) savedFoldH.addEventListener("click", () => { initFoldSet("apoc-personal-savedopen", !initFoldOpen("apoc-personal-savedopen")); initSavedFoldApply(); });
+initSavedFoldApply();
 /* The clocks repaint once a second — text only, never a save:
    every value is derived from the shared timestamps. */
 setInterval(initTickClocks, 1000);
@@ -2199,6 +2227,7 @@ window.addEventListener("pagehide", () => {
     lockBtn.setAttribute("aria-pressed", on ? "true" : "false");
     resetBtn.hidden = !on;
     if (sizeRow) sizeRow.hidden = !on;
+    if (typeof renderInitiative === "function") renderInitiative();
     select(sel.fam, sel.key);
   }
   lockBtn.addEventListener("click", function () { setArranging(!arranging); });
