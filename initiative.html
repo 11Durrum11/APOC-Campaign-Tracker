@@ -208,7 +208,7 @@
   [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
   .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
   #initiativePanel .init-help-q{flex:none}
-  .press-tip{position:fixed;z-index:9999;max-width:min(88vw,450px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.8rem 1rem;font-size:1.18rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
+  .press-tip{position:fixed;z-index:9999;max-width:min(88vw,450px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.8rem 1rem;font-size:1.3rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
   #initiativePanel .init-empty{opacity:.8;font-style:italic}
@@ -410,6 +410,16 @@
     #initiativePanel .init-turnbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-turnbox button{padding:.05rem .5rem !important}
     #initiativePanel .init-turn-word{padding:.05rem 1px}
+    /* v51.111 phone fit: the multi-target row added a third bar row
+       (+23.9px) and broke the one-screen fit at a 700px visible
+       height. Spacing-only reclaim — no control shrinks, no
+       behavior changes: the page's hairline seams close up. */
+    .panel{padding-top:0;padding-bottom:0}
+    .init-topbar{row-gap:.05rem}
+    #initiativePanel .init-controls{margin:0;padding-top:0;padding-bottom:0;row-gap:.02rem}
+    #initiativePanel .init-saved-head{margin-top:0;margin-bottom:0}
+    #initiativePanel .init-form{margin:0}
+    #initiativePanel .init-list{margin:0}
   }
 </style>
 </head>
@@ -2599,6 +2609,45 @@ window.addEventListener("pagehide", () => {
   }
   function hide(){ tip.hidden = true; }
   function cancel(){ if (timer) { clearTimeout(timer); timer = null; } }
+  /* Mouse hover (2026-11-21, hover-help enlargement): the mouse
+     sees the same bubble at the same size — hovering a titled
+     control shows its title in the bubble; the title is stashed
+     while the bubble is up so the native tooltip does not double
+     it, and restored when the pointer leaves. */
+  let hoverEl = null, hoverText = "";
+  function showText(el, text){
+    tip.textContent = text;
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    let y = r.top - th - 10;
+    if (y < 8) y = Math.min(r.bottom + 10, window.innerHeight - th - 8);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function clearHover(){
+    if (hoverEl) { hoverEl.setAttribute("title", hoverText); hoverEl = null; hoverText = ""; }
+    hide();
+  }
+  document.addEventListener("pointerover", e => {
+    if (e.pointerType !== "mouse") return;
+    if (hoverEl && hoverEl.contains(e.target)) return;
+    const el = e.target.closest ? e.target.closest("[title]") : null;
+    if (el === hoverEl) return;
+    clearHover();
+    if (!el) return;
+    if (el.closest && el.closest("[data-nohold]")) return;
+    const text = el.getAttribute("title");
+    if (!text) return;
+    hoverEl = el; hoverText = text;
+    el.removeAttribute("title");
+    showText(el, text);
+  }, true);
+  document.addEventListener("pointerout", e => {
+    if (e.pointerType !== "mouse") return;
+    if (hoverEl && !(e.relatedTarget && hoverEl.contains(e.relatedTarget))) clearHover();
+  }, true);
   document.addEventListener("pointerdown", e => {
     if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
     const el = e.target.closest ? e.target.closest("[title]") : null;
@@ -2612,7 +2661,7 @@ window.addEventListener("pagehide", () => {
     if (target && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) { cancel(); hide(); }
   }, true);
   ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { cancel(); setTimeout(hide, 60); }, true));
-  document.addEventListener("scroll", () => { cancel(); hide(); }, true);
+  document.addEventListener("scroll", () => { cancel(); clearHover(); }, true);
   document.addEventListener("click", e => {
     if (fired) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); fired = false; }
   }, true);
