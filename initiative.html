@@ -69,6 +69,25 @@
   .btn.primary{background:transparent;border-color:var(--primary);color:var(--primary);font-weight:700}
   .btn.danger{background:transparent;border-color:var(--destructive);color:#f0b1b1}
   .btn.danger:hover{background:transparent;color:#f0b1b1}
+  /* One button spec (Shaun, 2026-11-20): every button on the
+     page is an oval pill sharing one height, font, padding and
+     style — width follows the label. The phone block carries
+     the same spec at phone size. The free-form editor's
+     per-control scale multiplies from this base. */
+  #initiativePanel button, .init-topbar button, .init-topbar a.btn{
+    font-family:inherit !important; font-size:.85rem !important; font-weight:600 !important;
+    min-height:34px !important; padding:6px 11px !important; line-height:1.15 !important;
+    border:1px solid var(--card-border) !important; border-radius:999px !important;
+    background:var(--secondary) !important; color:var(--foreground) !important;
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    cursor:pointer; text-decoration:none; box-sizing:border-box;
+  }
+  #initiativePanel button:hover, .init-topbar button:hover, .init-topbar a.btn:hover{
+    background:var(--accent) !important; color:var(--accent-foreground) !important;
+  }
+  #initiativePanel .init-pic{position:relative}
+  #initiativePanel .init-pic{overflow:hidden}
+  #initiativePanel .init-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:999px}
   [hidden]{display:none !important}
   /* Page furniture: a slim top bar tying the page to the hub —
      back to the Campaign Hub on the left, the campaign wordmark
@@ -169,7 +188,7 @@
   [data-mk].dragging{opacity:.55}
   [data-mk].drop-target{outline:2px dashed var(--primary);outline-offset:1px}
   .init-block.drop-target{outline:2px dashed var(--primary);outline-offset:5px}
-  #initiativePanel .init-help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid #f3c969;border-radius:50%;color:#f3c969;font-weight:700;font-size:12.5px;cursor:help;flex:none}
+  #initiativePanel .init-help-q{flex:none}
   .press-tip{position:fixed;z-index:9999;max-width:min(88vw,450px);background:hsl(222,20%,14%);color:#f2ead8;border:1px solid rgba(242,234,216,.45);border-radius:10px;padding:.8rem 1rem;font-size:1.18rem;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.5);pointer-events:none}
   [title]{-webkit-touch-callout:none}
   .init-size-read{font-weight:700;min-width:1.6rem;text-align:center}
@@ -183,13 +202,10 @@
      clock, drag handle, saves on the line, Delay/Ready, temp HP and
      nonlethal fields, status durations, the party roster, the
      combat log, saved-scenario Load. */
-  #initiativePanel .init-clock{font-weight:600;opacity:.85}
-  #initiativePanel .init-worldclock{font-size:.82rem;opacity:.85;font-weight:600;cursor:pointer}
-  #initiativePanel .init-worldclock:hover{opacity:.95}
   #initiativePanel .init-sessout{font-weight:600;opacity:.85}
   #initiativePanel .init-round{cursor:pointer}
-  #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;border:1px solid var(--card-border);border-radius:8px;overflow:hidden;background:hsla(222,20%,14%,.35)}
-  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;padding:.18rem .5rem}
+  #initiativePanel .init-roundbox{display:inline-flex;align-items:center;gap:.35rem}
+  #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;font-size:.85rem;font-weight:600;min-height:34px;padding:6px 11px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box}
   #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
   #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
   #initiativePanel .init-round-input{font:inherit;font-weight:700;width:4.2rem;padding:.1rem .3rem;background:#fff;color:#111;border:1px solid #111;border-radius:.35rem}
@@ -287,7 +303,6 @@
     #initiativePanel .init-round{font-size:.92rem}
     #initiativePanel button.init-clock,#initiativePanel button.init-sessout{padding:.05rem .4rem;font-size:.76rem}
     #initiativePanel .init-worldclock{font-size:.76rem}
-    #initiativePanel .init-help-q{width:17px;height:17px;font-size:11px}
     #initiativePanel .init-nownext{margin:.06rem 0 0;font-size:.83rem;min-height:1em;line-height:1.15}
     #initiativePanel .init-controls{gap:.2rem;margin:.16rem 0;padding:.14rem .2rem}
     #initiativePanel #initRollingBtn{margin-left:-.1rem}
@@ -338,6 +353,11 @@
     #initiativePanel .init-form input#initName{flex:1 1 6rem}
     #initiativePanel .init-form input[type="number"]{flex:0 0 auto;width:3.6rem}
     #initiativePanel .init-form .btn{min-height:26px;flex:0 0 auto;padding:.14rem .6rem;font-size:.8rem}
+    /* The one button spec at phone size. */
+    #initiativePanel button, .init-topbar button, .init-topbar a.btn{
+      min-height:22px !important; padding:.05rem .38rem !important; font-size:.76rem !important; border-radius:999px !important;
+    }
+    #initiativePanel .init-roundbox .init-round{min-height:22px;padding:.05rem .38rem;font-size:.76rem;border-radius:999px}
   }
 </style>
 </head>
@@ -367,8 +387,8 @@
       <span class="init-roundbox" data-mk="round" data-mkgrp="head"><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundDownBtn" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
-      <span class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</span>
-      <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+      <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</button>
+      <button type="button" class="init-help-q" data-mk="helpq" data-mkgrp="head" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     </div>
@@ -2059,11 +2079,12 @@ window.addEventListener("pagehide", () => {
   function baseOf(id, el) {
     var bk = id + "|" + (mkPhone() ? "p" : "d");
     if (bases[bk]) return bases[bk];
-    var keepF = el.style.fontSize, keepP = el.style.padding;
-    el.style.fontSize = ""; el.style.padding = "";
+    var keepF = el.style.getPropertyValue("font-size"), keepP = el.style.getPropertyValue("padding");
+    var keepFP = el.style.getPropertyPriority("font-size"), keepPP = el.style.getPropertyPriority("padding");
+    el.style.removeProperty("font-size"); el.style.removeProperty("padding");
     var cs = window.getComputedStyle(el);
     var b = { fs: parseFloat(cs.fontSize) || 16, pt: parseFloat(cs.paddingTop) || 0, pr: parseFloat(cs.paddingRight) || 0, pb: parseFloat(cs.paddingBottom) || 0, pl: parseFloat(cs.paddingLeft) || 0 };
-    el.style.fontSize = keepF; el.style.padding = keepP;
+    if (keepF) el.style.setProperty("font-size", keepF, keepFP); if (keepP) el.style.setProperty("padding", keepP, keepPP);
     bases[bk] = b; return b;
   }
   function familyOf(el) {
@@ -2081,8 +2102,8 @@ window.addEventListener("pagehide", () => {
       var fam = familyOf(el), key = el.getAttribute("data-mk"), id = fam + ":" + key;
       if (fam !== "blocks") {
         var s = rec.scale[id];
-        if (s && s !== 1) { var b = baseOf(id, el); el.style.fontSize = (b.fs * s).toFixed(1) + "px"; el.style.padding = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; }
-        else { el.style.fontSize = ""; el.style.padding = ""; }
+        if (s && s !== 1) { var b = baseOf(id, el); var sfs = (b.fs * s).toFixed(1) + "px"; var spd = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; el.style.setProperty("font-size", sfs, "important"); el.style.setProperty("padding", spd, "important"); slice(el.querySelectorAll("button, .init-round")).forEach(function (inner) { inner.style.setProperty("font-size", sfs, "important"); inner.style.setProperty("padding", spd, "important"); }); }
+        else { el.style.removeProperty("font-size"); el.style.removeProperty("padding"); slice(el.querySelectorAll("button, .init-round")).forEach(function (inner) { inner.style.removeProperty("font-size"); inner.style.removeProperty("padding"); }); }
         var n = rec.nudge[id];
         el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
       }
