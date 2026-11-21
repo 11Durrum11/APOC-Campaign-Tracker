@@ -2128,6 +2128,24 @@ window.addEventListener("pagehide", () => {
     if (el.closest(".init-saved-row")) return "v";
     return "s";
   }
+  var innerBases = new WeakMap();
+  function innerBaseOf(el, seg) {
+    var k = mkPhone() ? "p" : "d";
+    var wrap = el.closest ? el.closest("[aria-pressed]") : null;
+    if (wrap) k += "|" + wrap.getAttribute("aria-pressed") + "|" + (el.id || "");
+    var rec2 = innerBases.get(el); if (rec2 && rec2[k]) return rec2[k];
+    var keepF = el.style.getPropertyValue("font-size"), keepP = el.style.getPropertyValue("padding");
+    var keepFP = el.style.getPropertyPriority("font-size"), keepPP = el.style.getPropertyPriority("padding");
+    el.style.removeProperty("font-size"); el.style.removeProperty("padding");
+    var sF = "", sP = "", sFP = "", sPP = "";
+    if (seg && seg !== el) { sF = seg.style.getPropertyValue("font-size"); sP = seg.style.getPropertyValue("padding"); sFP = seg.style.getPropertyPriority("font-size"); sPP = seg.style.getPropertyPriority("padding"); seg.style.removeProperty("font-size"); seg.style.removeProperty("padding"); }
+    var cs = window.getComputedStyle(el);
+    var b = { fs: parseFloat(cs.fontSize) || 16, pt: parseFloat(cs.paddingTop) || 0, pr: parseFloat(cs.paddingRight) || 0, pb: parseFloat(cs.paddingBottom) || 0, pl: parseFloat(cs.paddingLeft) || 0 };
+    if (seg && seg !== el) { if (sF) seg.style.setProperty("font-size", sF, sFP); if (sP) seg.style.setProperty("padding", sP, sPP); }
+    if (keepF) el.style.setProperty("font-size", keepF, keepFP); if (keepP) el.style.setProperty("padding", keepP, keepPP);
+    if (!rec2) { rec2 = {}; innerBases.set(el, rec2); }
+    rec2[k] = b; return b;
+  }
   var arranging = false;
   var sel = { fam: "s", key: "turn" };
   function selId() { return sel.fam + ":" + sel.key; }
@@ -2136,7 +2154,7 @@ window.addEventListener("pagehide", () => {
       var fam = familyOf(el), key = el.getAttribute("data-mk"), id = fam + ":" + key;
       if (fam !== "blocks") {
         var s = rec.scale[id];
-        if (s && s !== 1) { var b = baseOf(id, el); var sfs = (b.fs * s).toFixed(1) + "px"; var spd = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; el.style.setProperty("font-size", sfs, "important"); el.style.setProperty("padding", spd, "important"); slice(el.querySelectorAll("button, .init-round")).forEach(function (inner) { inner.style.setProperty("font-size", sfs, "important"); inner.style.setProperty("padding", spd, "important"); }); }
+        if (s && s !== 1) { var b = baseOf(id, el); var sfs = (b.fs * s).toFixed(1) + "px"; var spd = (b.pt * s).toFixed(1) + "px " + (b.pr * s).toFixed(1) + "px " + (b.pb * s).toFixed(1) + "px " + (b.pl * s).toFixed(1) + "px"; el.style.setProperty("font-size", sfs, "important"); el.style.setProperty("padding", spd, "important"); slice(el.querySelectorAll("button, .init-round")).forEach(function (inner) { var ib = innerBaseOf(inner, el); inner.style.setProperty("font-size", (ib.fs * s).toFixed(1) + "px", "important"); inner.style.setProperty("padding", (ib.pt * s).toFixed(1) + "px " + (ib.pr * s).toFixed(1) + "px " + (ib.pb * s).toFixed(1) + "px " + (ib.pl * s).toFixed(1) + "px", "important"); }); }
         else { el.style.removeProperty("font-size"); el.style.removeProperty("padding"); slice(el.querySelectorAll("button, .init-round")).forEach(function (inner) { inner.style.removeProperty("font-size"); inner.style.removeProperty("padding"); }); }
         var n = rec.nudge[id];
         el.style.transform = n ? "translate(" + n[0] + "px," + n[1] + "px)" : "";
@@ -2236,7 +2254,7 @@ window.addEventListener("pagehide", () => {
   resetBtn.addEventListener("click", function () {
     try { localStorage.removeItem(FFKEY); localStorage.removeItem("apoc-personal-bar-v1"); localStorage.removeItem("apoc-personal-layout-v2"); } catch (e) {}
     rec = { place: JSON.parse(JSON.stringify(shippedPlace)), lines: { row1: ROW1.slice(), row2: ROW2.slice() }, prow: PROW.slice(), srow: SROW.slice(), blocks: BLOCKS.slice(), bwidth: {}, scale: {}, nudge: {} };
-    bases = {};
+    bases = {}; innerBases = new WeakMap();
     applyPlace(); applyBlocks();
     if (typeof renderInitiative === "function") renderInitiative();
     if (typeof renderParty === "function") renderParty();
