@@ -407,7 +407,7 @@
     <div class="init-head">
       <span class="init-roundbox" data-mk="round" data-mkgrp="head"><button type="button" class="init-round-btn" id="initRoundDownBtn" aria-label="Step the round down" title="Step the round number down by one, never below Round 1 — a manual set: only the number changes; durations tick on real advances">&#9660;</button><span class="init-round" id="initRound" title="The current round — click to advance to the next round (the full turn-wrap: durations tick, the turn returns to the top)">Round 1</span><button type="button" class="init-round-btn" id="initRoundUpBtn" aria-label="Step the round up" title="Step the round number up by one — a manual set: only the number changes; durations tick on real advances, and the in-world clock follows the number">&#9650;</button><button type="button" class="init-round-btn" id="initRoundSetBtn" aria-label="Set the round by typing" title="Set the round by typing the number — this changes only the number; durations tick on real advances, and the in-world clock follows the number">&#9998;</button></span>
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">Combat 0:00</button>
-      <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
+      <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Non-combat 0:00</button>
       <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — it starts at 0:00 and gains six seconds with each round. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes">0:00</button>
       <span class="init-helpbox" data-mk="helpq" data-mkgrp="head"><button type="button" class="init-help-zone init-help-q" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-help-zone" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button></span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
@@ -690,7 +690,7 @@ function initTallyClick(side){
 function paintSessionClocks(){
   const eff = sessionEffMode();
   const iEl = $("initSessIn"); if (iEl) { iEl.textContent = "Combat " + fmtClock(sessionTally.inMs); iEl.classList.toggle("running", eff === "in"); }
-  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = "Out of combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("running", eff === "out"); }
+  const oEl = $("initSessOut"); if (oEl) { oEl.textContent = "Non-combat " + fmtClock(sessionTally.outMs); oEl.classList.toggle("running", eff === "out"); }
 }
 /* Press a combatant's turn timer to stop it, press again to
    start it (Shaun, 2026-11-18 — both sides). The shared turn
