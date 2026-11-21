@@ -205,6 +205,7 @@
   #initiativePanel .init-sessout{font-weight:600;opacity:.85}
   #initiativePanel .init-round{cursor:pointer}
   #initiativePanel .init-roundbox{display:inline-flex;align-items:center;gap:.35rem}
+  #initiativePanel .init-turnbox{display:inline-flex;align-items:center;gap:.35rem}
   #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;font-size:.85rem;font-weight:600;min-height:34px;padding:6px 11px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box}
   #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
   #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
@@ -273,7 +274,7 @@
     #initiativePanel .init-clock,#initiativePanel .init-sessout{padding:.3rem .15rem}
     #initiativePanel .init-clock,#initiativePanel .init-sessout,#initiativePanel .init-worldclock{font-size:.85rem}
     #initiativePanel .init-controls .btn{min-height:44px}
-    #initiativePanel .init-controls #initNextBtn{flex:1 1 100%}
+    #initiativePanel .init-controls .init-turnbox{flex:1 1 100%}
     .init-topbar .init-lock-row{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;margin:0 0 0 auto}
     #initiativePanel .init-lock-btn, .init-topbar .init-lock-btn{min-height:36px;padding:.35rem .75rem}
     body.init-arranging .init-topbar .init-size-row{display:flex;gap:.45rem;align-items:center;justify-content:flex-end;margin:0;font-size:.85rem;flex:1 1 100%}
@@ -309,7 +310,7 @@
     #initiativePanel #initRollingBtn [data-onoff]{padding:.05rem .38rem}
     #initiativePanel #initRollingBtn[aria-pressed="true"] [data-onoff="on"],#initiativePanel #initRollingBtn[aria-pressed="false"] [data-onoff="off"]{padding:.05rem .5rem}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
-    #initiativePanel .init-controls #initNextBtn{flex:0 1 auto}
+    #initiativePanel .init-controls .init-turnbox{flex:0 1 auto}
     #initiativePanel .init-list{gap:.11rem;margin:.14rem 0 .18rem}
     #initiativePanel .init-row{padding:.05rem .28rem;border-radius:7px}
     #initiativePanel .init-line1,#initiativePanel .init-line2{gap:.08rem}
@@ -393,8 +394,7 @@
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     </div>
     <div class="init-controls init-block" data-block="bar">
-      <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
-      <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
+      <span class="init-turnbox" data-mk="turn" data-mkgrp="bar"><button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">− Prev turn</button><button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn +</button></span>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
@@ -1985,7 +1985,7 @@ window.addEventListener("pagehide", () => {
   var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
   var CONTS = { head: ".init-head", bar: ".init-controls", form: ".init-form", partyadd: ".init-party-add", logbar: ".init-saved-head" };
   var slice = function (nl) { return Array.prototype.slice.call(nl); };
-  slice(bar.querySelectorAll(".btn")).forEach(function (b) { b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
+  slice(bar.querySelectorAll(".btn")).forEach(function (b) { if (b.closest("[data-mk]")) return; b.setAttribute("data-mk", b.id); b.setAttribute("data-mkgrp", "bar"); });
 
   function load(key) { try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
   function store() { try { localStorage.setItem(FFKEY, JSON.stringify(rec)); } catch (e) {} }
@@ -2095,7 +2095,7 @@ window.addEventListener("pagehide", () => {
     return "s";
   }
   var arranging = false;
-  var sel = { fam: "s", key: "initNextBtn" };
+  var sel = { fam: "s", key: "turn" };
   function selId() { return sel.fam + ":" + sel.key; }
   function applyLooks() {
     slice(panel.querySelectorAll("[data-mk]")).forEach(function (el) {
@@ -2206,7 +2206,7 @@ window.addEventListener("pagehide", () => {
     if (typeof renderInitiative === "function") renderInitiative();
     if (typeof renderParty === "function") renderParty();
     if (typeof renderInitSaved === "function") renderInitSaved();
-    applyLooks(); select("s", "initNextBtn");
+    applyLooks(); select("s", "turn");
   });
 
   /* Block grips: one strip per block, visible only while editing. */
