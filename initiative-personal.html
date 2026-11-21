@@ -120,6 +120,53 @@
   #initiativePanel .init-chips{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.45rem}
   #initiativePanel .init-chip{background:#fff;color:#000;border:1px solid #111;border-radius:999px;padding:.16rem .35rem .16rem .65rem;font-size:.92rem;font-weight:600;display:inline-flex;align-items:center;gap:.25rem}
   #initiativePanel .init-chip button{font:inherit;font-weight:700;cursor:pointer;border:none;background:transparent;color:#000;padding:0 .25rem;line-height:1}
+  /* Marker lines (environment and effect trackers): a slim divider row at a
+     fixed initiative count — no HP, no conditions, just a name,
+     its count, and a remove cross. */
+  #initiativePanel .init-row.init-marker{flex-direction:row;align-items:center;gap:.5rem;padding:.3rem .55rem;background:hsla(38,65%,45%,.20);border-style:dashed}
+  #initiativePanel .init-marker-name{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;font-weight:700;letter-spacing:.03em}
+  #initiativePanel .init-marker-count{font-weight:700;font-variant-numeric:tabular-nums}
+  #initiativePanel .init-form #initMarkerBtn[aria-pressed="true"]{background:#f3c969;color:#111;border-color:#f3c969;font-weight:700}
+  /* Recent foes: one-tap refill chips above the add line. */
+  #initiativePanel .init-recents{display:flex;gap:.35rem;flex-wrap:wrap;flex:1 1 100%;align-items:center}
+  #initiativePanel .init-recents[hidden]{display:none}
+  #initiativePanel .init-recent-chip{font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);padding:.22rem .6rem}
+  #initiativePanel .init-recent-chip:hover{border-color:var(--primary)}
+  /* Turn-open prompt + prep EL line + fight switcher (header block). */
+  #initiativePanel .init-prompt{margin:.22rem 0 0;font-weight:600;color:#f3c969;min-height:0}
+  #initiativePanel .init-prompt[hidden]{display:none}
+  #initiativePanel .init-el{margin:.22rem 0 0;font-size:.9rem;opacity:.92}
+  #initiativePanel .init-el[hidden]{display:none}
+  #initiativePanel .init-el input{font:inherit;width:3.4rem;padding:.15rem .35rem;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-fights{display:flex;gap:.4rem;align-items:center;margin:.35rem 0 0}
+  #initiativePanel .init-fight-btn[aria-pressed="true"]{background:#f3c969;color:#111;border-color:#f3c969;font-weight:700}
+  /* Multi-target strip + summary panel. */
+  #initiativePanel .init-multi{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;flex:1 1 100%;margin-top:.35rem;padding:.4rem .45rem;border:1px dashed var(--card-border);border-radius:8px}
+  #initiativePanel .init-multi[hidden]{display:none}
+  #initiativePanel .init-multi input{font:inherit;width:6.5rem;padding:.35rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-multi-tag{font-weight:700;font-size:.8rem;border:1px solid #f3c969;color:#f3c969;border-radius:999px;padding:.08rem .5rem}
+  #initiativePanel .init-row.multi-sel{outline:2px solid #f3c969;outline-offset:1px}
+  #initiativePanel .init-summary{margin:.35rem 0;padding:.45rem .6rem;border:1px solid var(--card-border);border-radius:8px}
+  #initiativePanel .init-summary[hidden]{display:none}
+  #initiativePanel .init-summary h4{margin:0 0 .35rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  /* Row extras: IA chip, recharge, hide, bench, group mates. */
+  #initiativePanel .init-ia{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--card-border);border-radius:999px;background:transparent;color:var(--foreground);padding:.18rem .55rem}
+  #initiativePanel .init-ia.spent{opacity:.35}
+  #initiativePanel .init-recharge-ready{font:inherit;font-weight:700;cursor:pointer;border:1px solid #57a85a;border-radius:999px;background:#57a85a;color:#0c1a0c;padding:.18rem .6rem}
+  #initiativePanel .init-recharge{width:3.4rem}
+  #initiativePanel .init-hide,#initiativePanel .init-benchbtn{font:inherit;cursor:pointer;border:1px solid var(--card-border);border-radius:6px;background:transparent;color:var(--foreground);padding:.25rem .5rem}
+  #initiativePanel .init-hide.on{background:#f3c969;color:#111;border-color:#f3c969;font-weight:700}
+  #initiativePanel .init-row.init-hidden-row{opacity:.62}
+  #initiativePanel .init-row.groupmate{outline:1px dashed var(--mv-blue, #8fb4ff);outline-offset:1px}
+  /* Bench section under the board. */
+  #initiativePanel .init-bench{margin:.35rem 0 .55rem;padding:.45rem .6rem;border:1px dashed var(--card-border);border-radius:8px}
+  #initiativePanel .init-bench[hidden]{display:none}
+  #initiativePanel .init-bench h4{margin:0 0 .35rem;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+  #initiativePanel .init-bench-row{display:flex;gap:.5rem;align-items:center;padding:.22rem 0}
+  #initiativePanel .init-bench-name{flex:1 1 auto;font-weight:600}
+  /* Collect-rolls mode: big tap-to-edit initiative targets. */
+  #initiativePanel.init-collecting .init-val{font-size:1.35rem;font-weight:700;width:4.8rem;padding:.55rem .5rem}
+  #initiativePanel.init-collecting .init-row{border-color:var(--primary)}
   /* Per-character notes (Shaun, 2026-11-18): the notes field sits
      on the name line, immediately after the character's name,
      growing to fill the space before the Init field; on narrow
@@ -371,18 +418,34 @@
       <span class="init-help-q" data-mk="helpq" data-mkgrp="head" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
+    <p class="init-prompt" id="initPrompt" hidden title="What needs attention as this turn opens — timed effects counting down, and the reminder pinned to the combatant"></p>
+    <p class="init-el" id="initElLine" hidden><span id="initElText" title="Prep lens only — what this scene asks, never a dial: the world does not scale to the party. Shown only before the fight starts"></span> <label class="init-lab" title="Your party's level — carried for the prep lens; the estimate uses the standard XP-by-CR table for a party of four">Party level <input id="initPartyLevel" type="number" min="1" max="40" value="5" aria-label="Party level for the prep lens"></label></p>
+    <div class="init-fights" id="initFights">
+      <button type="button" class="btn init-fight-btn" id="initFightABtn" aria-pressed="true" title="Fight A — tap to run this fight on the board; the other fight keeps its own order, round and log meanwhile">Fight A</button>
+      <button type="button" class="btn init-fight-btn" id="initFightBBtn" aria-pressed="false" title="Fight B — a second fight kept alongside this one; tap to swap it onto the board">Fight B</button>
+    </div>
     </div>
     <div class="init-controls init-block" data-block="bar">
       <button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn</button>
       <button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">Prev turn</button>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
+      <button type="button" class="btn" id="initRollBlanksBtn" title="Roll d20 + modifier for every combatant who has no initiative total yet — anyone who already has a total keeps it, and marker lines are never rolled">Roll blanks</button>
+      <button type="button" class="btn" id="initCollectBtn" aria-pressed="false" title="Collect rolls: while this is on, the board is gathering initiative — every row's total becomes a big tap-to-edit target, and Roll ALL / Roll blanks are off. Turn it off to start the fight">Collect rolls</button>
+      <button type="button" class="btn" id="initMultiBtn" aria-pressed="false" title="Multi-target damage: enter one amount, tap each target row to cycle Full, then Half (saved), then None, and Apply deals it to them all at once">Multi-target</button>
+      <button type="button" class="btn" id="initSummaryBtn" hidden title="The fight so far in totals — damage dealt, damage taken, and healing, per combatant">Summary</button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
       <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
+      <div class="init-multi" id="initMultiBar" hidden>
+        <label class="init-lab" title="The one amount dealt to every tapped target — simple sums work too, like 12+4">Amount <input id="initMultiAmt" type="text" placeholder="e.g. 12+4" aria-label="Multi-target damage amount"></label>
+        <span title="Tap a row once for the full amount, again for half (they saved), a third time to leave them out">Tap rows: Full → Half (saved) → None</span>
+        <button type="button" class="btn" id="initMultiApplyBtn" title="Deal the amount to every tapped target and leave multi-target mode">Apply</button>
+        <button type="button" class="btn" id="initMultiCancelBtn" title="Leave multi-target mode without dealing anything">Done</button>
+      </div>
     </div>
     <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
@@ -395,12 +458,16 @@
     </div>
     <div class="init-form init-block folded" data-block="form">
       <button type="button" class="btn" id="initAddFoeBtn" data-mk="addfoe" data-mkgrp="form" data-nohold aria-expanded="false" title="Add a foe — tap to open the combatant line nested under this button; tap again to fold it away">Add foe</button>
+      <div class="init-recents" id="initRecentFoes" data-mk="recents" data-mkgrp="form" hidden title="Foes you added recently on this device — tap one to fill the line with its numbers, then tap Add"></div>
       <input id="initName" data-mk="name" data-mkgrp="form" type="text" placeholder="Combatant name" aria-label="Combatant name" title="The combatant's name">
       <input id="initTotal" data-mk="total" data-mkgrp="form" type="number" placeholder="Init" aria-label="Initiative total — leave blank to roll" title="Initiative total — type it, or leave blank to roll d20 + Mod">
       <input id="initMod" data-mk="mod" data-mkgrp="form" type="number" placeholder="Mod" aria-label="Initiative modifier, used when rolling" title="Initiative modifier, used when the total is rolled for you">
       <input id="initAc" data-mk="ac" data-mkgrp="form" type="number" placeholder="AC" aria-label="Armour class" title="Armour class">
       <input id="initHp" data-mk="hp" data-mkgrp="form" type="number" placeholder="HP" aria-label="Hit points — starts full" title="Hit points — the combatant starts at full">
       <input id="initQty" data-mk="qty" data-mkgrp="form" type="number" value="1" min="1" max="50" aria-label="Quantity to add" title="How many to add at once — they land numbered, like Goblin 1, Goblin 2">
+      <button type="button" class="btn" id="initMarkerBtn" data-mk="marker" data-mkgrp="form" aria-pressed="false" title="Marker: while this is on, Add puts a marker line on the board instead of a creature — a named divider at a fixed count, like the environment acting on 20 or a spreading fire on 10. Uses the Name and Init fields only; leave the name blank and it is called Environment">Marker</button>
+      <button type="button" class="btn" id="initMobBtn" data-mk="mob" data-mkgrp="form" aria-pressed="false" title="Mob: while this is on, Add makes ONE row for a whole mob — the HP field is the hit points of a single member and Quantity is the headcount; the row holds one shared pool and shows how many are still standing">Mob</button>
+      <label class="init-lab" data-mk="oneroll" data-mkgrp="form" title="One roll: when adding more than one with the Init field blank, roll a single d20 + Mod and give every one of them that same total"><input type="checkbox" id="initOneRoll"> One roll</label>
       <button type="button" class="btn" data-mk="add" data-mkgrp="form" id="initAddBtn" title="Add the combatant to the board">Add</button>
     </div>
     <div class="init-block" data-block="list"><div id="initPicChooser" class="init-pic-chooser" hidden>
@@ -411,8 +478,8 @@
       <button type="button" class="btn" id="initPicCloseBtn" data-nohold aria-label="Close the picture picker" title="Close the picture picker">✕</button>
       <button type="button" class="btn" id="initPicRemoveBtn" title="Take the picture off — the slot goes back to empty">Remove</button>
       <span class="init-pic-note" id="initPicNote"></span>
-    </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div></div>
-    <div class="init-block" data-block="log"><div class="init-log" id="initLog"></div></div>
+    </div><input type="file" id="initPicFile" accept="image/*" hidden title="The device file picker for picture uploads"><div class="init-list" id="initList"></div><div class="init-bench" id="initBench" hidden></div></div>
+    <div class="init-block" data-block="log"><div class="init-summary" id="initSummary" hidden></div><div class="init-log" id="initLog"></div></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -499,6 +566,7 @@ if (BG_FILES.length > 1) {
 const INIT_KEY = "campaign_initiative_shaun";
 const INIT_CONDITIONS = {
   "Blinded": "−2 AC and loses Dex bonus to AC; −4 on Search and most Str/Dex-based checks; all opponents have total concealment (50% miss).",
+  "Concentrating": "Holding a spell or effect: taking damage forces a Concentration check (DC 10 + damage dealt + the spell's level).",
   "Confused": "Acts randomly each round (d%): attacks the caster, acts normally, babbles, flees, or attacks the nearest creature.",
   "Cowering": "Frozen in fear: no actions, −2 AC, loses Dex bonus to AC.",
   "Dazed": "Can take no actions (but defends normally, no AC penalty).",
@@ -535,7 +603,7 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false, fight: "A", parked: null, collect: false };
 let initUndoStack = [];
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function stName(s){ return typeof s === "string" ? s : (s && (s.n || s.name)) || ""; }
@@ -564,6 +632,18 @@ function initNorm(c){
     pic: typeof c.pic === "string" ? c.pic : "",
     delaying: !!c.delaying,
     readied: !!c.readied,
+    marker: !!c.marker,
+    iaUsed: !!c.iaUsed,
+    recharge: (typeof c.recharge === "number" ? c.recharge : null),
+    hidden: !!c.hidden,
+    benched: !!c.benched,
+    group: (typeof c.group === "string" ? c.group : ""),
+    mob: !!c.mob,
+    perHp: (c.perHp === undefined || c.perHp === null ? null : (parseInt(c.perHp, 10) || null)),
+    count: parseInt(c.count, 10) || 0,
+    dmgDealt: c.dmgDealt || 0,
+    dmgTaken: c.dmgTaken || 0,
+    healed: c.healed || 0,
     surprised: !!c.surprised,
     wasSurprised: !!c.wasSurprised,
     turnMs: c.turnMs || 0,
@@ -759,6 +839,13 @@ function archiveInitiative(){
       return {
         name: c.name, init: c.init, mod: c.mod, ac: c.ac, hp: c.hp, maxHp: c.maxHp,
         tempHp: c.tempHp || 0, nonlethal: c.nonlethal || 0,
+        marker: !!c.marker,
+        iaUsed: !!c.iaUsed,
+        recharge: (typeof c.recharge === "number" ? c.recharge : null),
+        hidden: !!c.hidden, benched: !!c.benched,
+        group: c.group || "",
+        mob: !!c.mob, perHp: (c.perHp === undefined ? null : c.perHp), count: c.count || 0,
+        dmgDealt: c.dmgDealt || 0, dmgTaken: c.dmgTaken || 0, healed: c.healed || 0,
         fort: c.fort, ref: c.ref, will: c.will, cr: c.cr || "",
         turnMs: (c.turnMs || 0) + live, lastStint: live || c.lastStint || 0,
         surprised: !!c.wasSurprised,
@@ -776,7 +863,7 @@ function archiveInitiative(){
   mergedSaved.slice(20).forEach(s => { if (s && s.id) initSavedGone.add(s.id); });
   initState.saved = mergedSaved.slice(0, 20);
   initState.list = []; initState.turnId = null; initState.round = 1; initState.started = false;
-  initState.manual = false; initState.log = []; initState.turnStart = null; initState.turnPaused = null;
+  initState.manual = false; initState.log = []; initState.turnStart = null; initState.turnPaused = null; initState.collect = false;
   saveInitiative();
 }
 function renderInitSaved(){
@@ -787,6 +874,7 @@ function renderInitSaved(){
     const when = new Date(s.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     const who = (s.list || []).map(c => {
       let t = (c.pic ? '<img class="init-saved-pic" src="' + esc(c.pic) + '" alt=""> ' : '') + esc(c.name) + " " + (c.init === null || c.init === undefined ? "—" : c.init);
+      if (c.marker) t += " · Marker";
       if (typeof c.hp === "number") t += " · HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "");
       if (Array.isArray(c.statuses) && c.statuses.length) t += " · " + c.statuses.map(x => { const n = stName(x); const d = stDur(x); return esc(n) + (d !== null ? " (" + d + " rds)" : ""); }).join(", ");
       if (c.turnMs) t += " · ⏱ " + fmtClock(c.turnMs) + " on the turn";
@@ -799,8 +887,19 @@ function renderInitSaved(){
     const logFold = (Array.isArray(s.log) && s.log.length)
       ? '<details class="init-saved-log"><summary title="The combat log from that fight">Combat log (' + s.log.length + ')</summary>' + s.log.map(esc).join("<br>") + '</details>'
       : "";
+    /* The fight's compact totals line: top dealer and top soaked,
+       from the counters tracked as the fight ran. */
+    let topD = null, topS = null;
+    (s.list || []).forEach(c => {
+      if (c.marker) return;
+      if ((c.dmgDealt || 0) > 0 && (!topD || c.dmgDealt > topD.dmgDealt)) topD = c;
+      if ((c.dmgTaken || 0) > 0 && (!topS || c.dmgTaken > topS.dmgTaken)) topS = c;
+    });
+    const totalsLine = (topD || topS)
+      ? "<br>" + (topD ? "⚔ " + esc(topD.name) + " dealt " + topD.dmgDealt : "") + (topD && topS ? " · " : "") + (topS ? "🛡 " + esc(topS.name) + " soaked " + topS.dmgTaken : "")
+      : "";
     const segS = {
-      body: '<span class="init-saved-body" data-mk="body" data-mkgrp="saved"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + (s.combatMs ? " · ⏱ " + fmtClock(s.combatMs) + " in combat" : "") + "<br>" + who + logFold + '</span>',
+      body: '<span class="init-saved-body" data-mk="body" data-mkgrp="saved"><span class="when">' + when + '</span> — ' + (s.round || 1) + ((s.round || 1) === 1 ? " round" : " rounds") + (s.combatMs ? " · ⏱ " + fmtClock(s.combatMs) + " in combat" : "") + totalsLine + "<br>" + who + logFold + '</span>',
       btns: '<span class="init-saved-btns" data-mk="btns" data-mkgrp="saved"><button type="button" class="init-saved-load" data-saved-load="' + si + '" title="Load this saved fight back onto the board — the current board is saved first">Load</button>' +
       '<button type="button" class="init-saved-del" data-saved-del="' + si + '" aria-label="Delete this saved scenario" title="Delete this saved scenario">×</button></span>'
     };
@@ -826,7 +925,7 @@ function initLoadSaved(idx){
     n.turnMs = 0; n.lastStint = 0; n.wasSurprised = !!n.surprised;
     return n;
   });
-  initState.round = 1; initState.started = false; initState.manual = false;
+  initState.round = 1; initState.started = false; initState.manual = false; initState.collect = false;
   initState.turnStart = null; initState.turnPaused = null;
   initState.log = [];
   initLog("Loaded the saved scenario from " + new Date(entry.endedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " — a fresh fight.");
@@ -843,10 +942,119 @@ function initSorted(){
 }
 /* Until the first turn is taken, the marker sits on top of the order,
    so building the board always starts at the highest initiative. */
-function initPinTop(){ if (!initState.started) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; } }
+function initPinTop(){ if (!initState.started) { const r = initOrder(); initState.turnId = r.length ? r[0].id : null; } }
 function initRoll(mod){ return Math.floor(Math.random() * 20) + 1 + (mod || 0); }
+/* The order the turn actually runs in: benched combatants wait off
+   the board — they are in the saved list, but they take no turns,
+   are never the turn holder, and nothing ticks for them. */
+function initOrder(){ return initSorted().filter(c => !c.benched); }
+/* Two fights at once: the board payload carries the ACTIVE fight in
+   the top-level fields and the other fight parked whole. Each slot
+   keeps its own list, round, turn, log and collecting state; saved
+   scenarios, the party roster and the clocks stay shared. An old
+   single-fight payload simply has no parked slot — it loads as
+   Fight A with an empty Fight B. */
+const FIGHT_FIELDS = ["list", "turnId", "round", "started", "log", "manual", "turnStart", "turnPaused", "rolling", "collect"];
+function initPackFight(){
+  const o = {};
+  FIGHT_FIELDS.forEach(k => { o[k] = initState[k]; });
+  return o;
+}
+function initUnpackFight(o){
+  const d = { list: [], turnId: null, round: 1, started: false, log: [], manual: false, turnStart: null, turnPaused: null, rolling: false, collect: false };
+  FIGHT_FIELDS.forEach(k => { initState[k] = (o && o[k] !== undefined) ? o[k] : d[k]; });
+}
+function initSwitchFight(slot){
+  if (!slot || slot === initState.fight) return;
+  sessionSettle();
+  if (initState.turnId) initCloseStint(initState.turnId, true);
+  const cur = initPackFight();
+  const other = initState.parked;
+  initUnpackFight(other);
+  initState.parked = cur;
+  initState.fight = slot;
+  initUndoStack = [];
+  initConcBanner = "";
+  initLog("— Fight " + slot + " on the board —");
+  saveInitiative(); renderInitiative();
+}
+/* Safe little sums for the damage fields: "12+4", "20-3", "-7".
+   Tokens only — digits, + and − — never eval(). Anything else
+   falls back to a plain integer read. */
+function initMathEval(s){
+  if (typeof s !== "string") return parseInt(s, 10) || 0;
+  const t = s.replace(/\s+/g, "");
+  if (!t || !/^[\d+\-]+$/.test(t) || !/\d/.test(t)) return parseInt(s, 10) || 0;
+  let total = 0;
+  const re = /([+-]?)(\d+)/g;
+  let m;
+  while ((m = re.exec(t))) total += (m[1] === "-" ? -1 : 1) * parseInt(m[2], 10);
+  return total;
+}
+/* The attention line for a turn opening: timed statuses with the
+   rounds they have left, plus the reminder pinned in the row's
+   notes. Also the surface the concentration banner borrows. */
+let initConcBanner = "";
+function initPromptFor(c){
+  const parts = [];
+  (c.statuses || []).forEach(s => {
+    const d = stDur(s);
+    if (d !== null) parts.push(stName(s) + " — " + d + (d === 1 ? " round" : " rounds") + " left");
+  });
+  if (c.notes) parts.push("📌 " + c.notes);
+  return parts.join(" · ");
+}
+/* Prep lens (#15): CR text to a number ("1/2" → 0.5), a CR to its
+   XP on the standard 3.5 table (the DMG diagonal, 300 × CR, with
+   the printed fraction values), and a summed XP back to the CR of
+   a single creature worth the same — the EL estimate. */
+function initCrVal(s){
+  if (s === null || s === undefined) return 0;
+  s = String(s).trim();
+  if (!s) return 0;
+  if (s.indexOf("/") >= 0) {
+    const p = s.split("/");
+    const v = (parseFloat(p[0]) || 0) / (parseFloat(p[1]) || 1);
+    return isFinite(v) ? v : 0;
+  }
+  return parseFloat(s) || 0;
+}
+function initCrXp(cr){
+  if (!(cr > 0)) return 0;
+  if (cr < 1) {
+    if (cr >= 0.5) return 150;
+    if (cr >= 0.34) return 100;
+    if (cr >= 0.25) return 75;
+    if (cr >= 0.17) return 50;
+    if (cr >= 0.125) return 38;
+    return 30;
+  }
+  if (cr <= 20) return 300 * cr;
+  return Math.round(6000 * Math.pow(2, (cr - 20) / 2));
+}
+function initXpCr(xp){
+  if (!(xp > 0)) return 0;
+  const cands = [0.1, 0.125, 1 / 6, 0.25, 1 / 3, 0.5];
+  for (let i = 1; i <= 30; i++) cands.push(i);
+  let best = 1, bd = Infinity;
+  cands.forEach(cr => {
+    const d = Math.abs(Math.log(initCrXp(cr) / xp));
+    if (d < bd) { bd = d; best = cr; }
+  });
+  return best;
+}
+function initCrText(cr){
+  if (cr === 0.5) return "1/2";
+  if (Math.abs(cr - 1 / 3) < 0.01) return "1/3";
+  if (cr === 0.25) return "1/4";
+  if (Math.abs(cr - 1 / 6) < 0.01) return "1/6";
+  if (cr === 0.125) return "1/8";
+  if (cr === 0.1) return "1/10";
+  return String(Math.round(cr));
+}
 function initHpHint(c){
   if (typeof c.hp !== "number") return "";
+  if (c.mob && c.hp <= 0) return "Dead";
   if (c.hp <= -10) return "Dead";
   if (c.hp < 0) return "Dying";
   if (c.hp === 0) return "Disabled";
@@ -871,14 +1079,27 @@ function initApplyDamage(c, amt){
   let left = amt, absorbed = 0;
   if ((c.tempHp || 0) > 0) { absorbed = Math.min(c.tempHp, left); c.tempHp -= absorbed; left -= absorbed; }
   c.hp = (typeof c.hp === "number" ? c.hp : 0) - left;
+  /* Post-combat totals: what lands on a combatant counts as taken;
+     what is dealt while it is your turn counts as dealt by you. */
+  c.dmgTaken = (c.dmgTaken || 0) + amt;
+  const holder = initState.list.find(x => x.id === initState.turnId);
+  if (holder && holder.id !== c.id && initState.started) holder.dmgDealt = (holder.dmgDealt || 0) + amt;
   initLog(c.name + " took " + amt + " damage" + (absorbed ? " (" + absorbed + " soaked by temporary HP)" : "") + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
   initDownLog(c, beforeHint);
+  /* Damage while concentrating forces the check — surface the DC
+     with the base number filled in (spell level is the caster's). */
+  if ((c.statuses || []).some(s => stName(s) === "Concentrating")) {
+    initConcBanner = "Concentration check — " + c.name + ": DC " + (10 + amt) + " + spell level (10 + " + amt + " damage + spell level)";
+    initLog(initConcBanner + ".");
+  }
 }
 function initApplyHeal(c, amt){
   if (!amt) return;
-  let hp = (typeof c.hp === "number" ? c.hp : 0) + amt;
+  const beforeHp = (typeof c.hp === "number" ? c.hp : 0);
+  let hp = beforeHp + amt;
   if (typeof c.maxHp === "number") hp = Math.min(hp, c.maxHp);
   c.hp = hp;
+  if (hp > beforeHp) c.healed = (c.healed || 0) + (hp - beforeHp);
   initLog(c.name + " healed " + amt + " — HP " + c.hp + (typeof c.maxHp === "number" ? "/" + c.maxHp : "") + ".");
 }
 function initApplyNonlethal(c, amt){
@@ -890,6 +1111,7 @@ function initApplyNonlethal(c, amt){
 }
 function initTickStatuses(){
   initState.list.forEach(c => {
+    if (c.benched) return;
     if (!Array.isArray(c.statuses)) return;
     const kept = [];
     c.statuses.forEach(s => {
@@ -987,7 +1209,7 @@ function renderParty(){
   wrap.querySelectorAll("[data-party-pic]").forEach(b => b.addEventListener("click", () => initPicOpen("party", b.dataset.partyPic)));
 }
 const ROW1_KEYS = ["drag","turn","pic","name","notes","init","roll","mod","ac","fort","ref","will","dup","toparty","del"];
-const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status"];
+const ROW2_KEYS = ["delay","ready","surprised","clocks","hp","tmp","nl","cr","amt","hint","status","ia","recharge","hide","bench"];
 const PARTYROW_KEYS = ["pic","name","mod","ac","hp","fort","ref","will","state","del"];
 const SAVED_KEYS = ["body","btns"];
 function renderInitiative(){
@@ -998,29 +1220,94 @@ function renderInitiative(){
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
   const rollBtn = $("initRollingBtn"); if (rollBtn) { rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
-  const rows = initSorted();
+  const rows = initOrder();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
   paintSessionClocks();
   const worldEl = $("initWorldClock");
   if (worldEl) { const secs = round * 6; worldEl.textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"); }
+  /* Header-side state: fight switcher, collect mode, the Summary
+     button's visibility, the prep EL line, the bench, the summary
+     panel — all refreshed on every render, board empty or not. */
+  const panelEl = $("initiativePanel");
+  if (panelEl) panelEl.classList.toggle("init-collecting", !!initState.collect);
+  const faB = $("initFightABtn"); if (faB) faB.setAttribute("aria-pressed", initState.fight === "A" ? "true" : "false");
+  const fbB = $("initFightBBtn"); if (fbB) fbB.setAttribute("aria-pressed", initState.fight === "B" ? "true" : "false");
+  const colB = $("initCollectBtn"); if (colB) colB.setAttribute("aria-pressed", initState.collect ? "true" : "false");
+  const raB = $("initRollAllBtn"); if (raB) raB.disabled = !!initState.collect;
+  const rbB = $("initRollBlanksBtn"); if (rbB) rbB.disabled = !!initState.collect;
+  const sumB = $("initSummaryBtn");
+  if (sumB) sumB.hidden = !initState.list.some(c => (c.dmgDealt || 0) > 0 || (c.dmgTaken || 0) > 0 || (c.healed || 0) > 0);
+  renderBench();
+  renderInitSummary();
+  const elLine = $("initElLine"), elText = $("initElText");
+  if (elLine && elText) {
+    let sumCr = 0, sumXp = 0, anyCr = false;
+    initState.list.forEach(c => {
+      if (c.marker || c.benched) return;
+      const v = initCrVal(c.cr);
+      if (v > 0) { anyCr = true; sumCr += v; sumXp += initCrXp(v); }
+    });
+    if (!initState.started && anyCr) {
+      elLine.hidden = false;
+      elText.textContent = "Prep — total CR " + (Math.round(sumCr * 100) / 100) + " · est. EL " + initCrText(initXpCr(sumXp));
+    } else elLine.hidden = true;
+  }
+  const collectText = () => {
+    const pool = initState.list.filter(c => !c.marker && !c.benched);
+    const n = pool.filter(c => c.init !== null && c.init !== undefined && c.init !== "").length;
+    return "Collecting initiative — " + n + " of " + pool.length + " in";
+  };
   const nn = $("initNowNext");
   if (!rows.length) {
-    nn.textContent = "";
+    nn.textContent = initState.collect ? collectText() : "";
+    const prE = $("initPrompt");
+    if (prE) { prE.textContent = initConcBanner || ""; prE.hidden = !initConcBanner; }
     wrap.innerHTML = '';
     paintPartyStates();
     return;
   }
   let ti = rows.findIndex(c => c.id === initState.turnId);
   if (ti < 0) ti = 0;
-  if (rows.length === 1) nn.textContent = "Now: " + rows[ti].name;
+  if (initState.collect) nn.textContent = collectText();
+  else if (rows.length === 1) nn.textContent = "Now: " + rows[ti].name + (rows[ti].hidden ? " (hidden)" : "");
   else {
-    const ni = initNextIdx(rows, ti, 1);
-    nn.textContent = "Now: " + rows[ti].name + " · Next: " + rows[ni].name;
+    /* The public line keeps hidden combatants' names to itself
+       where it can: Next skips over hidden rows when any visible
+       combatant is waiting. */
+    let ni = initNextIdx(rows, ti, 1);
+    let steps = 0;
+    while (rows[ni].hidden && steps < rows.length) {
+      const nx = initNextIdx(rows, ni, 1);
+      if (nx === ni || nx === ti) break;
+      ni = nx; steps++;
+    }
+    if (rows[ni].hidden) ni = initNextIdx(rows, ti, 1);
+    nn.textContent = "Now: " + rows[ti].name + (rows[ti].hidden ? " (hidden)" : "") + " · Next: " + rows[ni].name;
+  }
+  /* The turn-open attention line: a fresh concentration banner
+     outranks it; otherwise the current holder's timed effects and
+     pinned reminder. */
+  const pr = $("initPrompt");
+  if (pr) {
+    let txt = initConcBanner;
+    if (!txt) { const p = initPromptFor(rows[ti]); if (p) txt = rows[ti].name + " — " + p; }
+    pr.textContent = txt || "";
+    pr.hidden = !txt;
   }
   const statusOptions = '<option value="">+ Status</option>' + Object.keys(INIT_CONDITIONS).map(k => '<option value="' + esc(k) + '">' + esc(k) + '</option>').join("");
   wrap.innerHTML = rows.map(c => {
     const active = c.id === initState.turnId;
+    if (c.marker) {
+      /* Marker line: a slim divider at a fixed count — it takes
+         its turn like any row, but carries no HP/AC/conditions;
+         the remove cross rides the ordinary delete handler. */
+      return '<div class="init-row init-marker' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
+        '<span class="init-turn" aria-hidden="true">▶</span>' +
+        '<span class="init-marker-name" title="Marker line — it takes its turn on its count like any row, but has no hit points or conditions">' + esc(c.name) + '</span>' +
+        '<span class="init-marker-count" title="The fixed initiative count this marker acts on">' + (c.init === null || c.init === undefined ? "—" : c.init) + '</span>' +
+        '<button type="button" class="init-del" data-init-del="' + c.id + '" aria-label="Remove marker ' + esc(c.name) + '" title="Remove this marker line">✕</button></div>';
+    }
     const hint = initHpHint(c);
     const dead = hint === "Dead";
     const num = v => (v === null || v === undefined ? "" : v);
@@ -1041,6 +1328,11 @@ function renderInitiative(){
     if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
     if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
     if (c.surprised) chipsArr.push('<span class="init-chip surprised" title="Surprised — sits out Round 1; the mark clears when Round 2 begins">😲 Surprised</span>');
+    if (c.hidden) chipsArr.push('<span class="init-chip" title="Hidden — in the order and taking turns, but the Now / Next line keeps their name to itself where it can">Hidden</span>');
+    if (c.group) chipsArr.push('<span class="init-chip" title="Added as one group on a single shared roll — the whole group lights up while any of them holds the turn">Group</span>');
+    if (c.mob) chipsArr.push('<span class="init-chip" title="One shared pool for the whole mob — members standing is the pool divided by one member\'s hit points, rounded up">' + (typeof c.hp === "number" && c.hp > 0 && c.perHp ? "×" + Math.max(0, Math.ceil(c.hp / c.perHp)) + " standing" : "Mob wiped out") + '</span>');
+    if (c.notes) chipsArr.push('<span class="init-chip" title="Reminder pinned to this combatant — it is read out above the board and in the log when their turn opens">📌 ' + esc(c.notes) + '</span>');
+    if (initMultiSel[c.id]) chipsArr.push('<span class="init-multi-tag">' + (initMultiSel[c.id] === "half" ? "HALF (saved)" : "FULL") + '</span>');
     const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
     const seg1 = {
       drag: '<span class="init-drag" data-mk="drag" data-mkgrp="row1" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>',
@@ -1078,19 +1370,26 @@ function renderInitiative(){
       nl: '<label class="init-lab" data-mk="nl" data-mkgrp="row2">NL <input class="init-nl" type="number" value="' + (c.nonlethal || 0) + '" aria-label="Nonlethal damage for ' + esc(c.name) + '" title="Nonlethal damage taken \u2014 equal to their HP they are staggered, above it they are knocked out" data-init-nl="' + c.id + '"></label>',
       cr: '<label class="init-lab" data-mk="cr" data-mkgrp="row2">CR <input class="init-cr" type="text" value="' + esc(c.cr || "") + '" aria-label="Challenge rating for ' + esc(c.name) + '" title="Challenge rating \u2014 recorded with the combatant and kept in saved scenarios" data-init-cr="' + c.id + '"></label>',
       amt: '<span class="init-amt-group" data-mk="amt" data-mkgrp="row2">' +
-          '<input class="init-amt" type="number" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons" data-init-amt="' + c.id + '">' +
+          '<input class="init-amt" type="text" placeholder="Amt" aria-label="Amount for ' + esc(c.name) + '" title="The amount for the damage, heal and nonlethal buttons — simple sums work too: type 12+4 or 20-3 and it is worked out for you" data-init-amt="' + c.id + '">' +
           '<button type="button" class="init-dmg" data-init-dmg="' + c.id + '" title="Deal the Amt as damage (temporary HP soaks first)">\u2212Dmg</button>' +
           '<button type="button" class="init-heal" data-init-heal="' + c.id + '" title="Heal the Amt in hit points">+Heal</button>' +
           '<button type="button" class="init-nlbtn" data-init-nlbtn="' + c.id + '" title="Deal the Amt as nonlethal damage">+NL</button>' +
         '</span>',
       hint: '<span class="init-hint" data-mk="hint" data-mkgrp="row2">' + (hint || '') + '</span>',
       status: '<span style="display:inline-flex;gap:.45rem;align-items:center" data-mk="status" data-mkgrp="row2"><select class="init-status-add" data-init-status="' + c.id + '" aria-label="Add a status to ' + esc(c.name) + '" title="Add a status condition to this combatant">' + statusOptions + '</select>' +
-        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts \u2014 leave blank for no countdown" data-init-dur="' + c.id + '"></span>'
+        '<input class="init-dur" type="number" placeholder="Rds" min="1" aria-label="Status duration in rounds for ' + esc(c.name) + '" title="Rounds the status lasts \u2014 leave blank for no countdown" data-init-dur="' + c.id + '"></span>',
+      ia: '<button type="button" class="init-ia' + (c.iaUsed ? ' spent' : '') + '" data-mk="ia" data-mkgrp="row2" data-init-ia="' + c.id + '" title="Immediate action — tap when ' + esc(c.name) + ' spends theirs; it comes back on its own when their turn starts">IA</button>',
+      recharge: (c.recharge === 0
+        ? '<button type="button" class="init-recharge-ready" data-mk="recharge" data-mkgrp="row2" data-init-recharge-fire="' + c.id + '" title="Recharge is READY — tap to restart the countdown at 1d4 rounds">Recharge READY</button>'
+        : '<label class="init-lab" data-mk="recharge" data-mkgrp="row2">Recharge <input class="init-recharge" type="number" min="0" value="' + (c.recharge === null || c.recharge === undefined ? "" : c.recharge) + '" placeholder="—" aria-label="Recharge countdown for ' + esc(c.name) + '" title="Recharge countdown in rounds — set a number and it ticks down as each round begins; at zero the ability is READY" data-init-recharge="' + c.id + '"></label>'),
+      hide: '<button type="button" class="init-hide' + (c.hidden ? ' on' : '') + '" data-mk="hide" data-mkgrp="row2" data-init-hide="' + c.id + '" title="Hide: the row stays in the order and takes its turns, tagged Hidden, and the Now / Next line keeps its name to itself where it can">' + (c.hidden ? "Hidden" : "Hide") + '</button>',
+      bench: '<button type="button" class="init-benchbtn" data-mk="bench" data-mkgrp="row2" data-init-bench="' + c.id + '" title="Bench: move this combatant off the board into the bench below — they take no turns and nothing ticks for them until they Join">Bench</button>'
     };
     const segAll = Object.assign({}, seg1, seg2);
     const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
     const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
-    return '<div class="init-row' + (active ? ' active' : '') + '" data-row-id="' + c.id + '">' +
+    const holderGroup = (rows[ti] && rows[ti].group) || "";
+    return '<div class="init-row' + (active ? ' active' : '') + (c.hidden ? ' init-hidden-row' : '') + (c.group && holderGroup && c.group === holderGroup && !active ? ' groupmate' : '') + (initMultiSel[c.id] ? ' multi-sel' : '') + '" data-row-id="' + c.id + '">' +
       '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '</div>' +
       '<div class="init-line2">' + ord2.map(k => segAll[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
@@ -1159,7 +1458,7 @@ function renderInitiative(){
       saveInitiative(); renderInitiative();
     }
   }));
-  const amtFor = id => { const inp = wrap.querySelector('[data-init-amt="' + id + '"]'); return Math.abs(parseInt(inp && inp.value, 10) || 0); };
+  const amtFor = id => { const inp = wrap.querySelector('[data-init-amt="' + id + '"]'); return Math.abs(initMathEval(inp ? inp.value : "")); };
   wrap.querySelectorAll("[data-init-dmg]").forEach(b => b.addEventListener("click", () => {
     const c = find(b.dataset.initDmg); if (!c) return;
     const amt = amtFor(c.id);
@@ -1253,7 +1552,7 @@ function renderInitiative(){
     const wasRunning = initState.turnId === gone && !!initState.turnStart;
     if (initState.turnId === gone) initCloseStint(gone, true);
     initState.list = initState.list.filter(x => x.id !== gone);
-    if (!initState.started || initState.turnId === gone) { const r = initSorted(); initState.turnId = r.length ? r[0].id : null; }
+    if (!initState.started || initState.turnId === gone) { const r = initOrder(); initState.turnId = r.length ? r[0].id : null; }
     if (wasRunning) { if (initState.list.length) initOpenStint(); else initState.turnStart = null; }
     /* A blank scenario starts with a blank log: when the board
        becomes empty, the log clears with it instead of greeting
@@ -1285,12 +1584,12 @@ function renderInitiative(){
         const r = rowsEls[k].getBoundingClientRect();
         if (upEv.clientY < r.top + r.height / 2) { target = k; break; }
       }
-      const order = initSorted();
+      const order = initOrder();
       const from = order.findIndex(x => x.id === id);
       if (from < 0) return;
       const item = order.splice(from, 1)[0];
       order.splice(target, 0, item);
-      order.forEach((x, idx) => { x.seq = idx + 1; });
+      order.concat(initState.list.filter(x => x.benched)).forEach((x, idx) => { x.seq = idx + 1; });
       initState.manual = true;
       saveInitiative(); renderInitiative();
     };
@@ -1298,8 +1597,109 @@ function renderInitiative(){
     h.addEventListener("pointerup", up);
     h.addEventListener("pointercancel", up);
   }));
+  wrap.querySelectorAll("[data-init-ia]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initIa); if (!c) return;
+    c.iaUsed = !c.iaUsed;
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-recharge]").forEach(inp => inp.addEventListener("change", () => {
+    const c = find(inp.dataset.initRecharge); if (!c) return;
+    c.recharge = inp.value === "" ? null : Math.max(0, parseInt(inp.value, 10) || 0);
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-recharge-fire]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initRechargeFire); if (!c) return;
+    c.recharge = 1 + Math.floor(Math.random() * 4);
+    initLog(c.name + "'s recharge restarts — ready again in " + c.recharge + (c.recharge === 1 ? " round." : " rounds."));
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-hide]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initHide); if (!c) return;
+    c.hidden = !c.hidden;
+    initLog(c.name + (c.hidden ? " is hidden." : " is revealed."));
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-init-bench]").forEach(b => b.addEventListener("click", () => {
+    const c = find(b.dataset.initBench); if (!c) return;
+    const wasRunning = initState.turnId === c.id && !!initState.turnStart;
+    if (initState.turnId === c.id) initCloseStint(c.id, true);
+    c.benched = true;
+    if (initState.turnId === c.id) {
+      const r = initOrder();
+      initState.turnId = r.length ? r[0].id : null;
+      if (wasRunning) { if (r.length) initOpenStint(); else initState.turnStart = null; }
+    }
+    if (!initState.started) initPinTop();
+    initLog(c.name + " is benched.");
+    saveInitiative(); renderInitiative();
+  }));
+  /* Multi-target mode: tapping a row's open space cycles that
+     target Full → Half (saved) → None. Taps on the row's own
+     controls never select. Markers can't be targets — no HP. */
+  if (initMultiMode) {
+    wrap.querySelectorAll(".init-row").forEach(rowEl => {
+      rowEl.addEventListener("click", ev => {
+        if (ev.target.closest("button, input, select, textarea, label, a")) return;
+        const id = rowEl.getAttribute("data-row-id");
+        const c = find(id);
+        if (!c || c.marker) return;
+        const cur = initMultiSel[id];
+        if (!cur) initMultiSel[id] = "full";
+        else if (cur === "full") initMultiSel[id] = "half";
+        else delete initMultiSel[id];
+        renderInitiative();
+      });
+    });
+  }
   initTickClocks();
   paintPartyStates();
+}
+/* The bench: benched combatants rendered below the board, each
+   with a Join that drops them into the order at their initiative
+   (rolled first if they have none). */
+function renderBench(){
+  const wrap = $("initBench"); if (!wrap) return;
+  const benched = initState.list.filter(c => c.benched);
+  if (!benched.length) { wrap.hidden = true; wrap.innerHTML = ""; return; }
+  wrap.hidden = false;
+  wrap.innerHTML = '<h4 title="Combatants waiting off the board — they take no turns and nothing ticks for them until they join">Bench</h4>' + benched.map(c =>
+    '<div class="init-bench-row">' +
+    '<span class="init-bench-name">' + esc(c.name) + (c.marker ? " · Marker" : "") + '</span>' +
+    '<span title="The initiative they will join at — rolled on Join if blank">' + (c.init === null || c.init === undefined || c.init === "" ? "—" : c.init) + '</span>' +
+    '<button type="button" class="btn" data-bench-join="' + c.id + '" title="Bring ' + esc(c.name) + ' into the order at their initiative — rolled first if they have none">Join</button>' +
+    '<button type="button" class="init-del" data-bench-del="' + c.id + '" aria-label="Remove ' + esc(c.name) + '" title="Remove this combatant from the board (Undo can bring them back)">✕</button></div>'
+  ).join("");
+  wrap.querySelectorAll("[data-bench-join]").forEach(b => b.addEventListener("click", () => {
+    const c = initState.list.find(x => x.id === b.dataset.benchJoin); if (!c) return;
+    c.benched = false;
+    if (!c.marker && (c.init === null || c.init === undefined || c.init === "")) c.init = initRoll(c.mod);
+    const order = initOrder();
+    let at = order.findIndex(x => initVal(x) < initVal(c));
+    if (at < 0) at = order.length;
+    order.splice(at, 0, c);
+    order.forEach((x, i) => { x.seq = i + 1; });
+    if (!initState.started) initPinTop();
+    initLog(c.name + " joins the fight.");
+    saveInitiative(); renderInitiative();
+  }));
+  wrap.querySelectorAll("[data-bench-del]").forEach(b => b.addEventListener("click", () => {
+    initSnapshot();
+    initState.list = initState.list.filter(x => x.id !== b.dataset.benchDel);
+    if (!initState.list.length) initState.log = [];
+    saveInitiative(); renderInitiative();
+  }));
+}
+/* The post-combat totals panel: dealt / taken / healed per
+   combatant, biggest dealer first. */
+let initSummaryOpen = false;
+function renderInitSummary(){
+  const el = $("initSummary"); if (!el) return;
+  if (!initSummaryOpen) { el.hidden = true; el.innerHTML = ""; return; }
+  const rows = initState.list.filter(c => !c.marker && ((c.dmgDealt || 0) > 0 || (c.dmgTaken || 0) > 0 || (c.healed || 0) > 0))
+    .sort((a, b) => (b.dmgDealt || 0) - (a.dmgDealt || 0));
+  el.hidden = false;
+  el.innerHTML = '<h4 title="Totals tracked as damage and healing are applied — damage dealt counts what lands while it is that combatant\'s turn">Fight totals</h4>' +
+    (rows.length ? rows.map(c => '<div>' + esc(c.name) + " — dealt " + (c.dmgDealt || 0) + " · taken " + (c.dmgTaken || 0) + " · healed " + (c.healed || 0) + '</div>').join("") : '<div>No damage or healing tracked yet.</div>');
 }
 /* Everything a new round brings, shared by the Next-turn wrap
    and the round counter's click-to-advance: the log line,
@@ -1310,12 +1710,18 @@ function initNewRound(){
   initState.round = (initState.round || 1) + 1;
   initLog("— Round " + initState.round + " begins —");
   initTickStatuses();
+  /* Recharge counters tick with the round; benched rows never tick. */
+  initState.list.forEach(c => {
+    if (c.benched || typeof c.recharge !== "number" || c.recharge <= 0) return;
+    c.recharge -= 1;
+    if (c.recharge === 0) initLog(c.name + "'s recharge is READY.");
+  });
   if (initState.round === 2) initClearSurprise(true);
   if (initState.rolling && initState.list.length) {
-    initState.list.forEach(c => { c.init = initRoll(c.mod); });
+    initState.list.forEach(c => { if (!c.marker && !c.benched) c.init = initRoll(c.mod); });
     initState.manual = false;
     initLog("Rolling initiative — new order rolled for Round " + initState.round + ".");
-    const nr = initSorted();
+    const nr = initOrder();
     return nr.length ? nr[0].id : null;
   }
   return null;
@@ -1326,7 +1732,7 @@ function initClearSurprise(logIt){
   if (any && logIt) initLog("The surprise round ends.");
 }
 function initAdvance(dir, silent){
-  const rows = initSorted(); if (!rows.length) return;
+  const rows = initOrder(); if (!rows.length) return;
   sessionSettle();
   /* The outgoing holder's stint ends here (logged); the incoming
      holder's begins. On the very first advance no stint is open
@@ -1347,12 +1753,25 @@ function initAdvance(dir, silent){
   if (dir < 0 && ni >= i) initState.round = Math.max(1, (initState.round || 1) - 1);
   initState.turnId = rollingTop || rows[ni].id;
   initOpenStint();
+  /* A turn opening: the incoming holder's immediate action comes
+     back, any concentration banner from the last turn clears, and
+     their attention line (timed effects + pinned reminder) is
+     written to the log — the banner above the board shows it too. */
+  if (initState.turnId !== before) {
+    initConcBanner = "";
+    const holder = rows.find(c => c.id === initState.turnId);
+    if (holder) {
+      holder.iaUsed = false;
+      const p = initPromptFor(holder);
+      if (p) initLog("— " + holder.name + " — " + p);
+    }
+  }
   if (!silent && initState.turnId !== before) initChime();
   saveInitiative(); renderInitiative();
 }
 function initNext(){ initAdvance(1); }
 function initPrev(){
-  const rows = initSorted(); if (!rows.length) return;
+  const rows = initOrder(); if (!rows.length) return;
   /* Floored at the start of Round 1 (fix, 2026-11-18): with the
      turn on the first combatant in Round 1 there is nowhere to
      step back to — Prev is a no-op rather than wrapping to the
@@ -1362,7 +1781,7 @@ function initPrev(){
   initAdvance(-1);
 }
 function initJumpIn(c){
-  const rows = initSorted();
+  const rows = initOrder();
   const hi = rows.findIndex(x => x.id === initState.turnId);
   if (hi < 0) return;
   const holder = rows[hi];
@@ -1370,6 +1789,7 @@ function initJumpIn(c){
   const at = order.findIndex(x => x.id === holder.id);
   order.splice(at + 1, 0, c);
   order.forEach((x, idx) => { x.seq = idx + 1; });
+  initState.list.filter(x => x.benched).forEach((x, idx) => { x.seq = order.length + idx + 1; });
   initState.manual = true;
   c.delaying = false;
   initLog(c.name + " jumps in after " + holder.name + ".");
@@ -1411,7 +1831,10 @@ async function loadInitiative(){
       manual: !!v.manual,
       turnStart: v.turnStart ?? null,
       turnPaused: v.turnPaused ?? null,
-      rolling: !!v.rolling
+      rolling: !!v.rolling,
+      fight: v.fight === "B" ? "B" : "A",
+      parked: (v.parked && typeof v.parked === "object") ? v.parked : null,
+      collect: !!v.collect
     };
     initRev = Math.max(initRev, v.rev || 0);
     initLastKnown = v;
@@ -1509,9 +1932,36 @@ function saveInitiative(){
     if (myGen === initSaveGen) initDirty = false;
   });
 }
+/* Marker mode for the add line (environment and effect trackers): while
+   the Marker toggle is on, Add lays a marker line instead of a
+   creature. Device-local UI state, like the chime setting. */
+let initMarkerOn = false;
+/* Mob mode for the add line, and multi-target mode for the bar:
+   device-local UI state, like Marker mode. */
+let initMobOn = false;
+let initMultiMode = false;
+const initMultiSel = {};
 function initAdd(){
   const nameEl = $("initName"), totalEl = $("initTotal"), modEl = $("initMod"), acEl = $("initAc"), hpEl = $("initHp"), qtyEl = $("initQty");
   const name = nameEl.value.trim();
+  if (initMarkerOn) {
+    /* A marker is Name and Init only — a fixed count with no
+       creature stats. A marker without a count is meaningless,
+       so a blank Init field just asks for one. Quantity, Mod,
+       AC and HP do not apply. A blank name defaults to the
+       neutral label: Environment. */
+    if (totalEl.value === "") { totalEl.focus(); return; }
+    const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
+    initState.list.push(initNorm({
+      id: initUid(), name: name || "Environment", init: parseInt(totalEl.value, 10) || 0,
+      marker: true, statuses: [], notes: "", seq
+    }));
+    initPinTop();
+    if (!initState.turnId && initOrder().length) initState.turnId = initOrder()[0].id;
+    nameEl.value = ""; totalEl.value = "";
+    saveInitiative(); renderInitiative(); nameEl.focus();
+    return;
+  }
   if (!name) { nameEl.focus(); return; }
   const mod = parseInt(modEl.value, 10) || 0;
   const typed = totalEl.value !== "" ? (parseInt(totalEl.value, 10) || 0) : null;
@@ -1519,19 +1969,50 @@ function initAdd(){
   const maxHp = hpEl.value === "" ? null : (parseInt(hpEl.value, 10) || 0);
   let qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
   qty = Math.max(1, Math.min(50, qty));
+  if (initMobOn) {
+    /* Mob: ONE row for the whole pack. The HP field is a single
+       member's hit points and Quantity is the headcount; the row
+       holds one shared pool (per-member × headcount) and shows
+       how many are still standing. No recent-foe chip — a chip
+       refill would carry only one member's numbers. */
+    if (maxHp === null) { hpEl.focus(); return; }
+    const perHp = Math.max(1, maxHp);
+    const seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0) + 1;
+    initState.list.push(initNorm({
+      id: initUid(), name,
+      init: typed !== null ? typed : initRoll(mod),
+      mod, ac, hp: perHp * qty, maxHp: perHp * qty,
+      mob: true, perHp, count: qty,
+      statuses: [], notes: "", seq
+    }));
+    initPinTop();
+    if (!initState.turnId && initOrder().length) initState.turnId = initOrder()[0].id;
+    nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
+    if (qtyEl) qtyEl.value = "1";
+    saveInitiative(); renderInitiative(); nameEl.focus();
+    return;
+  }
+  /* One roll: a single d20 + Mod shared by the whole batch. A
+     batch added that way keeps a shared group tag, so the rows
+     light up together while any of them holds the turn. */
+  const oneRollEl = $("initOneRoll");
+  const groupInit = (qty > 1 && typed === null && oneRollEl && oneRollEl.checked) ? initRoll(mod) : null;
+  const gid = groupInit !== null ? initUid() : "";
   let seq = initState.list.reduce((m, c) => Math.max(m, c.seq || 0), 0);
   for (let k = 1; k <= qty; k++) {
     seq += 1;
     initState.list.push(initNorm({
       id: initUid(),
       name: qty > 1 ? name + " " + k : name,
-      init: typed !== null ? typed : initRoll(mod),
+      init: typed !== null ? typed : (groupInit !== null ? groupInit : initRoll(mod)),
       mod, ac, hp: maxHp, maxHp,
+      group: gid,
       statuses: [], notes: "", seq
     }));
   }
+  initRememberFoe({ name, mod, ac, hp: maxHp });
   initPinTop();
-  if (!initState.turnId) initState.turnId = initSorted()[0].id;
+  if (!initState.turnId && initOrder().length) initState.turnId = initOrder()[0].id;
   nameEl.value = ""; totalEl.value = ""; acEl.value = ""; hpEl.value = "";
   if (qtyEl) qtyEl.value = "1";
   saveInitiative(); renderInitiative(); nameEl.focus();
@@ -1552,17 +2033,45 @@ function initAddParty(){
   });
   if (added) initLog("The party joins the fight (" + added + " added).");
   initPinTop();
-  if (!initState.turnId && initState.list.length) initState.turnId = initSorted()[0].id;
+  if (!initState.turnId && initOrder().length) initState.turnId = initOrder()[0].id;
   saveInitiative(); renderInitiative();
 }
+/* Recent foes (this device only): the last few distinct foes the
+   add line produced, kept as one-tap refill chips above the form.
+   Markers and party-roster adds never land here. */
+const INIT_RECENT_KEY = "init_personal_recent_foes";
+function initLoadRecents(){
+  try {
+    const r = JSON.parse(localStorage.getItem(INIT_RECENT_KEY) || "[]");
+    return Array.isArray(r) ? r.filter(x => x && typeof x.name === "string" && x.name) : [];
+  } catch (e) { return []; }
+}
+function initRememberFoe(f){
+  const keyOf = x => x.name.toLowerCase() + "|" + (x.mod || 0) + "|" + (x.ac === null || x.ac === undefined ? "" : x.ac) + "|" + (x.hp === null || x.hp === undefined ? "" : x.hp);
+  const list = initLoadRecents().filter(x => keyOf(x) !== keyOf(f));
+  list.unshift({ name: f.name, mod: f.mod || 0, ac: (f.ac === undefined ? null : f.ac), hp: (f.hp === undefined ? null : f.hp) });
+  try { localStorage.setItem(INIT_RECENT_KEY, JSON.stringify(list.slice(0, 6))); } catch (e) {}
+  renderRecentFoes();
+}
+function renderRecentFoes(){
+  const wrap = $("initRecentFoes"); if (!wrap) return;
+  const list = initLoadRecents();
+  wrap.hidden = !list.length;
+  wrap.innerHTML = list.map((f, i) =>
+    '<button type="button" class="init-recent-chip" data-recent-idx="' + i + '" title="Fill the line with ' + esc(f.name) + ' — Mod ' + (f.mod > 0 ? "+" : "") + f.mod + (f.ac !== null && f.ac !== undefined ? ", AC " + f.ac : "") + (f.hp !== null && f.hp !== undefined ? ", HP " + f.hp : "") + ' — then tap Add">' + esc(f.name) + '</button>'
+  ).join("");
+}
 function initRollAll(){
+  if (initState.collect) return;
   if (!initState.list.length) return;
   sessionSettle();
-  initState.list.forEach(c => { c.init = initRoll(c.mod); });
+  initState.list.forEach(c => { if (!c.marker && !c.benched) c.init = initRoll(c.mod); });
   initState.manual = false;
   initState.started = false;
+  initConcBanner = "";
   initZeroClocks();
   initPinTop();
+  { const top = initOrder()[0]; if (top) top.iaUsed = false; }
   /* The new holder's stint opens with the new order (fix,
      2026-11-18): zeroed totals are by design, but the clock on
      the combatant now holding the turn must run, so the next
@@ -1570,10 +2079,53 @@ function initRollAll(){
   if (initState.list.length) initOpenStint();
   saveInitiative(); renderInitiative();
 }
+/* Roll blanks: only the combatants still missing a total roll —
+   everyone with a total keeps theirs, markers never roll. */
+function initRollBlanks(){
+  if (initState.collect) return;
+  let rolled = 0;
+  initState.list.forEach(c => {
+    if (c.marker || c.benched) return;
+    if (c.init === null || c.init === undefined || c.init === "") { c.init = initRoll(c.mod); rolled += 1; }
+  });
+  if (!rolled) return;
+  initLog("Rolled initiative for " + rolled + (rolled === 1 ? " combatant" : " combatants") + " who had none.");
+  initPinTop();
+  saveInitiative(); renderInitiative();
+}
+/* Multi-target damage: one amount, tapped targets, each Full or
+   Half (saved). Apply routes every hit through initApplyDamage,
+   so temp HP, hints, counters and the log all behave exactly as
+   row damage does; half is the floor of half. */
+function initSetMulti(on){
+  initMultiMode = on;
+  if (!on) { for (const k in initMultiSel) delete initMultiSel[k]; }
+  const bar = $("initMultiBar"); if (bar) bar.hidden = !on;
+  const btn = $("initMultiBtn"); if (btn) btn.setAttribute("aria-pressed", on ? "true" : "false");
+  renderInitiative();
+}
+function initMultiApply(){
+  const amtEl = $("initMultiAmt");
+  const amt = Math.abs(initMathEval(amtEl ? amtEl.value : ""));
+  const ids = Object.keys(initMultiSel);
+  if (!amt || !ids.length) return;
+  initSnapshot();
+  ids.forEach(id => {
+    const c = initState.list.find(x => x.id === id);
+    if (!c || c.marker) return;
+    const a = initMultiSel[id] === "half" ? Math.floor(amt / 2) : amt;
+    if (a > 0) initApplyDamage(c, a);
+    else initLog(c.name + " took no damage (half of " + amt + " rounds to 0).");
+  });
+  initSetMulti(false);
+  saveInitiative(); renderInitiative();
+}
 function initReset(){
-  const rows = initSorted(); if (!rows.length) return;
+  const rows = initOrder(); if (!rows.length) return;
   sessionSettle();
   initState.turnId = rows[0].id; initState.round = 1; initState.started = false;
+  initConcBanner = "";
+  rows[0].iaUsed = false;
   initState.list.forEach(c => { c.surprised = false; c.wasSurprised = false; });
   initZeroClocks();
   /* Same stint rule as Roll ALL (fix, 2026-11-18): the holder
@@ -1707,7 +2259,7 @@ function initClear(){
   sessionSettle();
   const endedMs = initState.started ? sessionTally.combatMs : 0;
   initSnapshot();
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling, fight: initState.fight || "A", parked: initState.parked || null, collect: false };
   /* The fresh board's log opens with the ended fight's record. */
   if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
   if (endedMs) { sessionTally.combatMs = 0; sessionPersist(); }
@@ -1723,7 +2275,7 @@ function initRoundAdvance(){
   /* While either round editor is open, no click advances the
      round (fix, 2026-11-18) — the readout's own click included. */
   if (initRoundEditing || initTimeEditing) return;
-  const rows = initSorted(); if (!rows.length) return;
+  const rows = initOrder(); if (!rows.length) return;
   sessionSettle();
   initCloseStint(initState.turnId, true);
   initState.started = true;
@@ -1858,6 +2410,48 @@ $("initRollingBtn").addEventListener("click", (ev) => {
   saveInitiative(); renderInitiative();
 });
 $("initAddBtn").addEventListener("click", initAdd);
+$("initMarkerBtn").addEventListener("click", () => {
+  initMarkerOn = !initMarkerOn;
+  $("initMarkerBtn").setAttribute("aria-pressed", initMarkerOn ? "true" : "false");
+  if (initMarkerOn) { const t = $("initTotal"); if (t && t.value === "") t.focus(); }
+});
+$("initMobBtn").addEventListener("click", () => {
+  initMobOn = !initMobOn;
+  $("initMobBtn").setAttribute("aria-pressed", initMobOn ? "true" : "false");
+  if (initMobOn) { const h = $("initHp"); if (h && h.value === "") h.focus(); }
+});
+$("initRecentFoes").addEventListener("click", ev => {
+  const chip = ev.target && ev.target.closest ? ev.target.closest("[data-recent-idx]") : null;
+  if (!chip) return;
+  const f = initLoadRecents()[parseInt(chip.dataset.recentIdx, 10)];
+  if (!f) return;
+  /* A chip only fills the line — Add still does the adding. If
+     Marker mode is on it would swallow the refill, so filling a
+     foe turns it off. */
+  if (initMarkerOn) { initMarkerOn = false; $("initMarkerBtn").setAttribute("aria-pressed", "false"); }
+  if (initMobOn) { initMobOn = false; $("initMobBtn").setAttribute("aria-pressed", "false"); }
+  $("initName").value = f.name;
+  $("initMod").value = f.mod || 0;
+  $("initAc").value = (f.ac === null || f.ac === undefined) ? "" : f.ac;
+  $("initHp").value = (f.hp === null || f.hp === undefined) ? "" : f.hp;
+  $("initTotal").value = "";
+  const q = $("initQty"); if (q) q.value = "1";
+  $("initName").focus();
+});
+renderRecentFoes();
+/* Keyboard: N or Space takes the next turn — but never while
+   typing, choosing, or arranging: focus in a field, a select, an
+   editable element, or on a button (Space is that button's own
+   tap) all keep their ordinary meaning. */
+document.addEventListener("keydown", ev => {
+  if (ev.key !== "n" && ev.key !== "N" && ev.key !== " ") return;
+  if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+  if (document.body.classList.contains("init-arranging")) return;
+  const t = ev.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.tagName === "BUTTON" || t.isContentEditable)) return;
+  ev.preventDefault();
+  initNext();
+});
 $("initAddFoeBtn").addEventListener("click", () => {
   const b = $("initAddFoeBtn"), form = document.querySelector("#initiativePanel .init-form");
   if (!form) return;
@@ -1868,6 +2462,23 @@ $("initAddFoeBtn").addEventListener("click", () => {
 $("initNextBtn").addEventListener("click", initNext);
 $("initPrevBtn").addEventListener("click", initPrev);
 $("initRollAllBtn").addEventListener("click", initRollAll);
+$("initRollBlanksBtn").addEventListener("click", initRollBlanks);
+$("initCollectBtn").addEventListener("click", () => {
+  initState.collect = !initState.collect;
+  initLog(initState.collect ? "Collecting initiative — totals go in row by row." : "Initiative collection closed.");
+  saveInitiative(); renderInitiative();
+});
+$("initMultiBtn").addEventListener("click", () => initSetMulti(!initMultiMode));
+$("initMultiApplyBtn").addEventListener("click", initMultiApply);
+$("initMultiCancelBtn").addEventListener("click", () => initSetMulti(false));
+$("initSummaryBtn").addEventListener("click", () => { initSummaryOpen = !initSummaryOpen; renderInitSummary(); });
+$("initFightABtn").addEventListener("click", () => initSwitchFight("A"));
+$("initFightBBtn").addEventListener("click", () => initSwitchFight("B"));
+(function(){
+  const pl = $("initPartyLevel"); if (!pl) return;
+  try { const v = localStorage.getItem("init_personal_party_level"); if (v) pl.value = v; } catch (e) {}
+  pl.addEventListener("change", () => { try { localStorage.setItem("init_personal_party_level", pl.value); } catch (e) {} });
+})();
 $("initResetBtn").addEventListener("click", initReset);
 $("initClearBtn").addEventListener("click", initClear);
 $("initUndoBtn").addEventListener("click", initUndo);
@@ -1959,7 +2570,7 @@ window.addEventListener("pagehide", () => {
   if (!panel || !bar || !lockBtn || !resetBtn) return;
   var FFKEY = "apoc-personal-freeform-v1";
   var ROW1 = ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"];
-  var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status"];
+  var ROW2 = ["delay", "ready", "surprised", "clocks", "hp", "tmp", "nl", "cr", "amt", "hint", "status", "ia", "recharge", "hide", "bench"];
   var PROW = ["pic", "name", "mod", "ac", "hp", "fort", "ref", "will", "state", "del"];
   var SROW = ["body", "btns"];
   var BLOCKS = ["header", "bar", "party", "form", "list", "log"];
