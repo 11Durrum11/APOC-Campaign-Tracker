@@ -205,7 +205,10 @@
   #initiativePanel .init-sessout{font-weight:600;opacity:.85}
   #initiativePanel .init-round{cursor:pointer}
   #initiativePanel .init-roundbox{display:inline-flex;align-items:center;gap:.35rem}
-  #initiativePanel .init-turnbox{display:inline-flex;align-items:center;gap:.35rem}
+  #initiativePanel .init-turnbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
+  #initiativePanel .init-turnbox:hover{background:var(--accent);color:var(--accent-foreground)}
+  #initiativePanel .init-turnbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
+  #initiativePanel .init-turn-word{display:inline-flex;align-items:center;padding:6px 1px;pointer-events:none}
   #initiativePanel .init-roundbox .init-round{display:inline-flex;align-items:center;font-size:.85rem;font-weight:600;min-height:34px;padding:6px 11px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box}
   #initiativePanel .init-round-btn{font:inherit;font-size:.78rem;line-height:1;cursor:pointer;background:transparent;color:var(--foreground);border:none;border-left:1px solid var(--card-border);padding:.18rem .42rem}
   #initiativePanel .init-round-btn:hover{background:hsla(222,20%,30%,.5)}
@@ -359,6 +362,9 @@
       min-height:22px !important; padding:.05rem .38rem !important; font-size:.76rem !important; border-radius:999px !important;
     }
     #initiativePanel .init-roundbox .init-round{min-height:22px;padding:.05rem .38rem;font-size:.76rem;border-radius:999px}
+    #initiativePanel .init-turnbox{min-height:22px;font-size:.76rem}
+    #initiativePanel .init-turnbox button{padding:.05rem .5rem !important}
+    #initiativePanel .init-turn-word{padding:.05rem 1px}
   }
 </style>
 </head>
@@ -394,7 +400,7 @@
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     </div>
     <div class="init-controls init-block" data-block="bar">
-      <span class="init-turnbox" data-mk="turn" data-mkgrp="bar"><button type="button" class="btn" id="initPrevBtn" title="Move the turn back to the previous combatant">− Prev turn</button><button type="button" class="btn" id="initNextBtn" title="Move the turn to the next combatant — someone delaying is skipped">Next turn +</button></span>
+      <span class="init-turnbox" data-mk="turn" data-mkgrp="bar"><button type="button" class="init-turn-zone" id="initPrevBtn" aria-label="Prev turn" title="Move the turn back to the previous combatant">−</button><span class="init-turn-word" aria-hidden="true">Turn</span><button type="button" class="init-turn-zone" id="initNextBtn" aria-label="Next turn" title="Move the turn to the next combatant — someone delaying is skipped">+</button></span>
       <button type="button" class="btn" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button>
       <button type="button" class="btn" id="initRollingBtn" aria-pressed="false" title="Rolling initiative: tap On and everyone re-rolls initiative and the order re-sorts at the start of every new round; tap Off and the order stays fixed"><span data-onoff="on">On</span><span data-onoff="off">Off</span></button>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
