@@ -98,7 +98,7 @@
   /* The orange words sit centred in the middle of the page, on the SAME line
      as Campaign Hub and Edit page (Shaun, 2026-11-20): a centred column
      between the two buttons, both words whole. */
-  .init-midwords{display:flex;flex-direction:row;align-items:baseline;justify-content:flex-start;gap:.6rem;flex:0 0 100%;text-align:left;min-width:0}
+  .init-midwords{display:flex;flex-direction:row;align-items:baseline;justify-content:center;gap:.6rem;flex:0 1 auto;order:2;margin:0 auto;text-align:center;min-width:0}
   .init-midwords>span{white-space:nowrap}
   .init-midwords .init-topbar-title{white-space:nowrap;overflow:visible;text-overflow:clip}
   /* Campaign Initiative Tracker panel — John's House, full combat
@@ -261,6 +261,15 @@
   #initiativePanel .init-saved-log summary{cursor:pointer;opacity:.85}
   #initiativePanel .init-controls .btn[disabled]{opacity:.45;cursor:default}
   #initiativePanel .init-controls .btn.armed{background:#7a2020;color:#fff;border-color:#b05050;font-weight:700}
+  /* Laptop top bar (Shaun, 2026-11-21): ONE line — Campaign Hub on the left,
+     the header centred on that same line, Edit page on the right — and
+     everything below pulls up by the reclaimed title row. The phone side
+     keeps its own title line (the media blocks below restore it). */
+  .init-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .init-topbar>a.btn{grid-column:1;grid-row:1;justify-self:start}
+  .init-topbar .init-midwords{grid-column:2;grid-row:1;justify-self:center;margin:0}
+  .init-topbar .init-lock-row{grid-column:3;grid-row:1;justify-self:end;margin:0}
+  .init-topbar .init-size-row{grid-column:1/-1;grid-row:2}
   /* Phone side (Shaun's definition, 2026-11-18): phones AND tablets. */
   @media (max-width:760px), (pointer:coarse) and (max-width:1400px){
     .panel{padding:16px}
@@ -303,7 +312,11 @@
     .panel{padding:3px 7px}
     .page{padding:0 5px 1px}
     .panel{margin-top:1px}
-    .init-topbar{padding-top:0;gap:.18rem}
+    .init-topbar{display:flex;padding-top:0;gap:.18rem}
+    .init-topbar>a.btn{order:0}
+    .init-topbar .init-midwords{flex:0 0 100%;order:0;margin:0;justify-content:flex-start;text-align:left}
+    .init-topbar .init-lock-row{order:0}
+    .init-topbar .init-size-row{order:0}
     .init-topbar .btn{font-size:.76rem;padding:.12rem .45rem;min-height:0}
     .init-brand{font-size:.55rem;letter-spacing:.08em}
     .init-topbar-title{font-size:.6rem;letter-spacing:.1em}
