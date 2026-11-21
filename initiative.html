@@ -206,6 +206,9 @@
   #initiativePanel .init-round{cursor:pointer}
   #initiativePanel .init-roundbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-roundbox:hover{background:var(--accent);color:var(--accent-foreground)}
+  #initiativePanel .init-helpbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
+  #initiativePanel .init-helpbox:hover{background:var(--accent);color:var(--accent-foreground)}
+  #initiativePanel .init-helpbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-turnbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-turnbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-turnbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px 12px !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
@@ -361,6 +364,8 @@
     #initiativePanel button, .init-topbar button, .init-topbar a.btn{
       min-height:22px !important; padding:.05rem .38rem !important; font-size:.76rem !important; border-radius:999px !important;
     }
+    #initiativePanel .init-helpbox{min-height:22px;font-size:.76rem}
+    #initiativePanel .init-helpbox button{padding:.05rem .5rem !important}
     #initiativePanel .init-turnbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-turnbox button{padding:.05rem .5rem !important}
     #initiativePanel .init-turn-word{padding:.05rem 1px}
@@ -394,7 +399,7 @@
       <button type="button" class="init-clock" data-mk="sessin" data-mkgrp="head" id="initSessIn" title="Click to run the in-combat timer — click it while it runs to turn both timers off">In combat 0:00</button>
       <button type="button" class="init-sessout" data-mk="sessout" data-mkgrp="head" id="initSessOut" title="Click to run the out-of-combat timer — click again to turn both off">Out of combat 0:00</button>
       <button type="button" class="init-worldclock" data-mk="world" data-mkgrp="head" id="initWorldClock" title="Time inside the game world — six seconds to a round, so Round 10 is one minute. Click to set the time: type it as minutes:seconds and the round changes to match — only the number changes, and a time that is not a whole number of rounds snaps to the nearest round">0:06</button>
-      <button type="button" class="init-help-q" data-mk="helpq" data-mkgrp="head" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
+      <span class="init-helpbox" data-mk="helpq" data-mkgrp="head"><button type="button" class="init-help-zone init-help-q" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does." title="Hover any control to see what it does. On a phone or tablet, press and hold instead. Hold any button — or hover on a computer — and it will explain what it does.">?</button><button type="button" class="init-help-zone" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button></span><button type="button" class="init-lock-btn" data-mk="reset" data-mkgrp="head" id="initClockResetBtn" title="Click to reset both session timers to zero">Reset timers</button>
     </div>
     <p class="init-nownext" id="initNowNext" title="Whose turn it is now, and who acts next"></p>
     </div>
@@ -407,7 +412,6 @@
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">↩ Undo</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
-      <button type="button" class="btn" id="initChimeBtn" aria-label="Toggle the turn chime" title="Turn the turn-change chime on or off (this device only)">🔔</button>
     </div>
     <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios</h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
