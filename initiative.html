@@ -386,7 +386,7 @@
     <a class="btn" href="index.html" title="Back to the Campaign Hub">&#8592; Campaign Hub</a>
     <span class="init-midwords"><span class="init-brand">APOC Survival &middot; 2511 DR</span><span class="init-topbar-title">John's House — Initiative Tracker</span></span>
     <div class="init-lock-row" id="initLockRow">
-      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back in its shipped place and size, from any arrangement" hidden>Reset layout</button>
+      <button type="button" class="init-lock-btn" id="initBarResetBtn" title="Reset the layout — put every button, control and block back to the table default layout (the layout last published from the editor), or the shipped layout if none has been published" hidden>Reset layout</button>
       <button type="button" class="init-lock-btn" id="initLockBtn" aria-pressed="false" title="Unlock to edit this page freely — drag any control into any container, resize it with the stepper, nudge it with the arrow pad, and give blocks widths; lock to use the page again">&#128275; Edit page</button>
     </div>
     <div class="init-size-row" id="initSizeRow" hidden>
@@ -398,6 +398,7 @@
       <button type="button" class="init-lock-btn" id="initNudgeU" title="Nudge the selected control up a couple of pixels">&#9650;</button>
       <button type="button" class="init-lock-btn" id="initNudgeD" title="Nudge the selected control down a couple of pixels">&#9660;</button>
       <button type="button" class="init-lock-btn" id="initNudgeR" title="Nudge the selected control right a couple of pixels">&#9654;</button>
+      <button type="button" class="init-lock-btn" id="initPublishBtn" title="Publish this layout as the table default — every device that opens John's House without a layout of its own gets the page arranged exactly as it stands on this device right now, and Reset layout returns to it">Publish as table default</button>
     </div>
   </div>
   <section class="panel" id="initiativePanel" aria-label="John's House Initiative Tracker">
@@ -1996,10 +1997,11 @@ window.addEventListener("pagehide", () => {
    line — resized continuously with the − / + stepper,
    nudged pixel by pixel with the arrow pad, and the blocks
    themselves reorder and take widths so two can sit side by
-   side. Reset layout always restores the shipped page, and
-   nudges clamp at the panel's edges so the page can never
-   scroll sideways. Layouts persist per device. Every load
-   starts locked. */
+   side. Reset layout restores the table default — the layout
+   last published from the editor — or the shipped page when
+   none has been published, and nudges clamp at the panel's
+   edges so the page can never scroll sideways. Layouts persist
+   per device until published. Every load starts locked. */
 (function () {
   var panel = document.getElementById("initiativePanel");
   var bar = panel ? panel.querySelector(".init-controls") : null;
@@ -2010,6 +2012,7 @@ window.addEventListener("pagehide", () => {
   var sizeRead = document.getElementById("initSizeRead");
   var sizeDown = document.getElementById("initSizeDown");
   var sizeUp = document.getElementById("initSizeUp");
+  var publishBtn = document.getElementById("initPublishBtn");
   if (!panel || !bar || !lockBtn || !resetBtn) return;
   var FFKEY = "apoc-personal-freeform-v1";
   var ROW1 = ["drag", "turn", "pic", "name", "notes", "init", "roll", "mod", "ac", "fort", "ref", "will", "dup", "toparty", "del"];
@@ -2061,6 +2064,7 @@ window.addEventListener("pagehide", () => {
     return out;
   }
   var shippedPlace = defaultPlace();
+  var hadLocal = !!load(FFKEY);
   var rec = load(FFKEY) || {};
   rec.place = validPlace(rec.place || defaultPlace());
   rec.lines = validLines(rec.lines);
@@ -2072,6 +2076,34 @@ window.addEventListener("pagehide", () => {
   rec.bwidth = rec.bwidth || {};
   rec.scale = rec.scale || {};
   rec.nudge = rec.nudge || {};
+
+  /* Table default (Shaun's pick B, 2026-11-21): a layout published
+     from the editor to the shared store becomes the default for the
+     whole table. A device with no layout of its own opens with it;
+     Reset layout returns to it. Edits stay per-device until someone
+     publishes — publishing is the deliberate exception. */
+  var LAYOUT_KEY = "init_layout_default";
+  var sharedDefault = null;
+  function layoutSnapshot() {
+    return JSON.parse(JSON.stringify({ place: rec.place, lines: rec.lines, prow: rec.prow, srow: rec.srow, blocks: rec.blocks, bwidth: rec.bwidth, scale: rec.scale, nudge: rec.nudge }));
+  }
+  function adoptLayout(lay) {
+    rec = { place: validPlace(lay.place || {}), lines: validLines(lay.lines), prow: validList(lay.prow, PROW), srow: validList(lay.srow, SROW), blocks: validList(lay.blocks, BLOCKS), bwidth: JSON.parse(JSON.stringify(lay.bwidth || {})), scale: JSON.parse(JSON.stringify(lay.scale || {})), nudge: JSON.parse(JSON.stringify(lay.nudge || {})) };
+    bases = {}; innerBases = new WeakMap();
+    applyPlace(); applyBlocks();
+    if (typeof renderInitiative === "function") renderInitiative();
+    if (typeof renderParty === "function") renderParty();
+    if (typeof renderInitSaved === "function") renderInitSaved();
+    applyLooks();
+  }
+  try {
+    if (typeof db !== "undefined" && db && typeof SETTINGS_TABLE !== "undefined") {
+      db.from(SETTINGS_TABLE).select("value").eq("key", LAYOUT_KEY).maybeSingle().then(function (res) {
+        var v = res && res.data && res.data.value;
+        if (v && v.layout) { sharedDefault = v.layout; if (!hadLocal && !arranging) adoptLayout(v.layout); }
+      }).catch(function () {});
+    }
+  } catch (e) {}
 
   window.__mkOrder = function (grp, keys) {
     if (grp === "row1") return rec.lines.row1.slice();
@@ -2253,6 +2285,7 @@ window.addEventListener("pagehide", () => {
   lockBtn.addEventListener("click", function () { setArranging(!arranging); });
   resetBtn.addEventListener("click", function () {
     try { localStorage.removeItem(FFKEY); localStorage.removeItem("apoc-personal-bar-v1"); localStorage.removeItem("apoc-personal-layout-v2"); } catch (e) {}
+    if (sharedDefault) { adoptLayout(sharedDefault); select("s", "turn"); return; }
     rec = { place: JSON.parse(JSON.stringify(shippedPlace)), lines: { row1: ROW1.slice(), row2: ROW2.slice() }, prow: PROW.slice(), srow: SROW.slice(), blocks: BLOCKS.slice(), bwidth: {}, scale: {}, nudge: {} };
     bases = {}; innerBases = new WeakMap();
     applyPlace(); applyBlocks();
@@ -2260,6 +2293,33 @@ window.addEventListener("pagehide", () => {
     if (typeof renderParty === "function") renderParty();
     if (typeof renderInitSaved === "function") renderInitSaved();
     applyLooks(); select("s", "turn");
+  });
+
+  /* Publish as table default: two-tap arm (10s), then the current
+     layout goes to the shared store; this device keeps its own copy
+     and treats the published layout as its Reset target from now on. */
+  var publishArmUntil = 0;
+  function publishLabel(txt) { if (publishBtn) publishBtn.textContent = txt; }
+  function publishLabelLater() { setTimeout(function () { publishLabel("Publish as table default"); }, 2600); }
+  if (publishBtn) publishBtn.addEventListener("click", function () {
+    var now = Date.now();
+    if (now < publishArmUntil) {
+      publishArmUntil = 0;
+      if (typeof db === "undefined" || !db) { publishLabel("No connection — can't publish"); publishLabelLater(); return; }
+      publishLabel("Publishing…");
+      var payload = { layout: layoutSnapshot(), ts: new Date().toISOString() };
+      try {
+        db.from(SETTINGS_TABLE).upsert({ key: LAYOUT_KEY, value: payload, updated_at: new Date().toISOString() }, { onConflict: "key" }).then(function (res) {
+          if (res && res.error) { publishLabel("Publish failed — try again"); }
+          else { sharedDefault = payload.layout; publishLabel("Published — it's the table default ✓"); }
+          publishLabelLater();
+        }).catch(function () { publishLabel("Publish failed — try again"); publishLabelLater(); });
+      } catch (e) { publishLabel("Publish failed — try again"); publishLabelLater(); }
+      return;
+    }
+    publishArmUntil = now + 10000;
+    publishLabel("Tap again to publish for everyone");
+    setTimeout(function () { if (Date.now() >= publishArmUntil) { publishArmUntil = 0; publishLabel("Publish as table default"); } }, 10200);
   });
 
   /* Block grips: one strip per block, visible only while editing. */
