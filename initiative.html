@@ -159,8 +159,23 @@
   #initiativePanel .init-rollbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-rollbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-rollbox[aria-pressed="true"] #initRollingOnBtn,#initiativePanel .init-rollbox[aria-pressed="false"] #initRollingOffBtn{font-weight:700 !important}
-  #initiativePanel .init-rollbox,#initiativePanel .init-turnbox,#initiativePanel .init-roundbox,#initiativePanel .init-helpbox{flex:0 0 auto;width:max-content;max-width:100%}
-  #initiativePanel .init-rollbox>button,#initiativePanel .init-turnbox>button,#initiativePanel .init-roundbox>button,#initiativePanel .init-helpbox>button,#initiativePanel .init-roundbox .init-round,#initiativePanel .init-turnbox .init-turn-word{flex:0 0 auto;white-space:nowrap}
+  /* Fight A | Fight B are ONE two-zone button (Shaun, 2026-11-21):
+     a single pill on the same spec as the Roll ALL pill — the
+     fight on the board is the bold zone; bold alone tells them
+     apart and the proportions stay even. */
+  #initiativePanel .init-fightbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
+  #initiativePanel .init-fightbox:hover{background:var(--accent);color:var(--accent-foreground)}
+  #initiativePanel .init-fightbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
+  #initiativePanel .init-fightbox[data-fight="A"] #initFightABtn,#initiativePanel .init-fightbox[data-fight="B"] #initFightBBtn{font-weight:700 !important}
+  /* Multi-target strip (Shaun, 2026-11-21): one amount, tapped
+     targets, dealt by the same Multi-target / Apply button. */
+  #initiativePanel .init-multi{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;flex:1 1 100%;margin-top:.35rem;padding:.4rem .45rem;border:1px dashed var(--card-border);border-radius:8px}
+  #initiativePanel .init-multi[hidden]{display:none}
+  #initiativePanel .init-multi input{font:inherit;width:6.5rem;padding:.35rem .5rem;border:1px solid var(--card-border);border-radius:8px;background:transparent;color:var(--foreground)}
+  #initiativePanel .init-multi-tag{font-weight:700;font-size:.8rem;border:1px solid #f3c969;color:#f3c969;border-radius:999px;padding:.08rem .5rem}
+  #initiativePanel .init-row.multi-sel{outline:2px solid #f3c969;outline-offset:1px}
+  #initiativePanel .init-rollbox,#initiativePanel .init-turnbox,#initiativePanel .init-roundbox,#initiativePanel .init-helpbox,#initiativePanel .init-fightbox{flex:0 0 auto;width:max-content;max-width:100%}
+  #initiativePanel .init-rollbox>button,#initiativePanel .init-turnbox>button,#initiativePanel .init-roundbox>button,#initiativePanel .init-helpbox>button,#initiativePanel .init-fightbox>button,#initiativePanel .init-roundbox .init-round,#initiativePanel .init-turnbox .init-turn-word{flex:0 0 auto;white-space:nowrap}
   /* Phone-side action-bar arranging (Shaun, 2026-11-18): the lock
      row and size row exist only on the phone side (phones and
      tablets); the desktop page never shows them. */
@@ -331,6 +346,8 @@
     #initiativePanel .init-controls{gap:.12rem;margin:.08rem 0;padding:.08rem .2rem}
     #initiativePanel .init-rollbox{min-height:22px;font-size:.76rem}
     #initiativePanel .init-rollbox button{padding:.05rem .22rem !important}
+    #initiativePanel .init-fightbox{min-height:22px;font-size:.76rem}
+    #initiativePanel .init-fightbox button{padding:.05rem .22rem !important}
     #initiativePanel .init-controls .btn{min-height:20px;padding:.05rem .38rem;font-size:.76rem}
     #initiativePanel .init-controls .init-turnbox{flex:0 1 auto}
     #initiativePanel .init-list{gap:.05rem;margin:.08rem 0 .1rem}
@@ -434,11 +451,18 @@
     <div class="init-controls init-block" data-block="bar">
       <span class="init-turnbox" data-mk="turn" data-mkgrp="bar"><button type="button" class="init-turn-zone" id="initPrevBtn" aria-label="Prev turn" title="Move the turn back to the previous combatant">−</button><span class="init-turn-word" aria-hidden="true">Turn</span><button type="button" class="init-turn-zone" id="initNextBtn" aria-label="Next turn" title="Move the turn to the next combatant — someone delaying is skipped">+</button></span>
       <span class="init-rollbox" id="initRollBox" data-mk="initRollAllBtn" data-mkgrp="bar" aria-pressed="false"><button type="button" class="init-roll-zone" id="initRollingOnBtn" aria-label="Rolling initiative on" title="Rolling initiative on: everyone re-rolls initiative and the order re-sorts at the start of every new round">On</button><button type="button" class="init-roll-zone" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button><button type="button" class="init-roll-zone" id="initRollingOffBtn" aria-label="Rolling initiative off" title="Rolling initiative off: the order stays fixed">Off</button></span>
+      <span class="init-fightbox" id="initFightBox" data-mk="initFightBox" data-mkgrp="bar" data-fight="A" title="Two fights at once — one pill, two fights: the bold zone is the fight on the board, and each fight keeps its own order, round and log"><button type="button" class="init-fight-zone" id="initFightABtn" aria-label="Fight A" title="Fight A — tap to run this fight on the board; the other fight keeps its own order, round and log meanwhile">Fight A</button><button type="button" class="init-fight-zone" id="initFightBBtn" aria-label="Fight B" title="Fight B — a second fight kept alongside this one; tap to swap it onto the board — it keeps its own order, round and log">Fight B</button></span>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">Undo</button>
       <button type="button" class="btn" id="initPartyAddBtn" title="Drop the whole PC roster onto the board — each member rolls their own initiative">Add party</button>
       <button type="button" class="btn" id="initPartyBtn" title="Show or hide the saved PC roster">PC roster</button>
+      <button type="button" class="btn" id="initMultiBtn" data-mk="initMultiBtn" data-mkgrp="bar" aria-pressed="false" title="Multi-target / Apply — one button, two jobs: tap it to open multi-target damage, type one amount, tap each target row to cycle Full, then Half (saved), then None — then tap this same button again and it applies the damage to them all at once">Multi-target / Apply</button>
+      <div class="init-multi" id="initMultiBar" data-mk="initMultiBar" data-mkgrp="bar" hidden>
+        <label class="init-lab" title="The one amount dealt to every tapped target — simple sums work too, like 12+4">Amount <input id="initMultiAmt" type="text" placeholder="e.g. 12+4" aria-label="Multi-target damage amount"></label>
+        <span title="Tap a row once for the full amount, again for half (they saved), a third time to leave them out">Tap rows: Full → Half (saved) → None</span>
+        <button type="button" class="btn" id="initMultiCancelBtn" title="Leave multi-target mode without dealing anything">Done</button>
+      </div>
     </div>
     <div class="init-block" data-block="saved"><div class="init-saved-head"><h4 data-savedfold="1" title="Fights that were run and saved when the board closed — Load brings one back">Saved scenarios <span class="init-foldglyph" id="initSavedGlyph">\u25B8</span></h4><button type="button" class="init-lock-btn" id="initClearLogBtn" title="Clear the combat log — tap once to arm it, tap again to clear it. Saved scenarios keep their own logs">Clear log</button></div><div class="init-saved" id="initSaved"></div></div>
     <div class="init-party init-block" data-block="party" id="initParty" hidden>
@@ -591,8 +615,10 @@ const INIT_CONDITIONS = {
   "Turned": "Affected undead flees for 10 rounds as if panicked; if it cannot flee, it cowers (−2 AC, loses Dex bonus).",
   "Unconscious": "Knocked out and helpless; cannot act or perceive."
 };
-let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
+let initState = { list: [], turnId: null, round: 1, started: false, saved: [], party: [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: false, fight: "A", parked: null };
 let initUndoStack = [];
+let initMultiMode = false;
+const initMultiSel = {};
 function initUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function stName(s){ return typeof s === "string" ? s : (s && (s.n || s.name)) || ""; }
 function stDur(s){ return (s && typeof s === "object" && typeof s.d === "number") ? s.d : null; }
@@ -944,6 +970,77 @@ function initApplyNonlethal(c, amt){
   initLog(c.name + " took " + amt + " nonlethal damage (total " + c.nonlethal + ").");
   initDownLog(c, beforeHint);
 }
+/* Safe little sums for the multi-target amount: "12+4", "20-3".
+   Tokens only — digits, + and − — never eval(). Anything else
+   falls back to a plain integer read. */
+function initMathEval(s){
+  if (typeof s !== "string") return parseInt(s, 10) || 0;
+  const t = s.replace(/\s+/g, "");
+  if (!t || !/^[\d+\-]+$/.test(t) || !/\d/.test(t)) return parseInt(s, 10) || 0;
+  let total = 0;
+  const re = /([+-]?)(\d+)/g;
+  let m;
+  while ((m = re.exec(t))) total += (m[1] === "-" ? -1 : 1) * parseInt(m[2], 10);
+  return total;
+}
+/* Two fights at once: the board payload carries the ACTIVE fight
+   in the top-level fields and the other fight parked whole, in
+   the same campaign_initiative payload — no second board. Each
+   slot keeps its own list, round, turn and log; saved scenarios,
+   the party roster and the clocks stay shared. An old
+   single-fight payload simply has no parked slot — it loads as
+   Fight A with an empty Fight B. */
+const FIGHT_FIELDS = ["list", "turnId", "round", "started", "log", "manual", "turnStart", "turnPaused", "rolling"];
+function initPackFight(){
+  const o = {};
+  FIGHT_FIELDS.forEach(k => { o[k] = initState[k]; });
+  return o;
+}
+function initUnpackFight(o){
+  const d = { list: [], turnId: null, round: 1, started: false, log: [], manual: false, turnStart: null, turnPaused: null, rolling: false };
+  FIGHT_FIELDS.forEach(k => { initState[k] = (o && o[k] !== undefined) ? o[k] : d[k]; });
+}
+function initSwitchFight(slot){
+  if (!slot || slot === initState.fight) return;
+  sessionSettle();
+  if (initState.turnId) initCloseStint(initState.turnId, true);
+  const cur = initPackFight();
+  const other = initState.parked;
+  initUnpackFight(other);
+  initState.parked = cur;
+  initState.fight = slot;
+  initUndoStack = [];
+  initLog("— Fight " + slot + " on the board —");
+  saveInitiative(); renderInitiative();
+}
+/* Multi-target damage: one amount, tapped targets, each Full or
+   Half (saved). Apply routes every hit through initApplyDamage,
+   so temp HP, hints and the log behave exactly as row damage
+   does; half is the floor of half. One button, two jobs: the
+   first tap opens the mode, the second tap applies. */
+function initSetMulti(on){
+  initMultiMode = on;
+  if (!on) { for (const k in initMultiSel) delete initMultiSel[k]; }
+  const bar = $("initMultiBar"); if (bar) bar.hidden = !on;
+  const btn = $("initMultiBtn"); if (btn) btn.setAttribute("aria-pressed", on ? "true" : "false");
+  renderInitiative();
+}
+function initMultiApply(){
+  const amtEl = $("initMultiAmt");
+  const amt = Math.abs(initMathEval(amtEl ? amtEl.value : ""));
+  const ids = Object.keys(initMultiSel);
+  if (!amt || !ids.length) return;
+  initSnapshot();
+  ids.forEach(id => {
+    const c = initState.list.find(x => x.id === id);
+    if (!c || c.marker) return;
+    const a = initMultiSel[id] === "half" ? Math.floor(amt / 2) : amt;
+    if (a > 0) initApplyDamage(c, a);
+    else initLog(c.name + " took no damage (half of " + amt + " rounds to 0).");
+  });
+  initSetMulti(false);
+  saveInitiative(); renderInitiative();
+}
 function initTickStatuses(){
   initState.list.forEach(c => {
     if (!Array.isArray(c.statuses)) return;
@@ -1061,6 +1158,9 @@ function renderInitiative(){
   const undoBtn = $("initUndoBtn"); if (undoBtn) undoBtn.disabled = !initUndoStack.length;
   initPaintArms();
   const rollBtn = $("initRollBox"); if (rollBtn) { rollBtn.setAttribute("aria-pressed", initState.rolling ? "true" : "false"); }
+  const fightBox = $("initFightBox"); if (fightBox) { fightBox.setAttribute("data-fight", initState.fight === "B" ? "B" : "A"); }
+  const multiBtn = $("initMultiBtn"); if (multiBtn) { multiBtn.setAttribute("aria-pressed", initMultiMode ? "true" : "false"); }
+  const multiBar = $("initMultiBar"); if (multiBar) { multiBar.hidden = !initMultiMode; }
   const rows = initSorted();
   const round = initState.round || 1;
   $("initRound").textContent = "Round " + round;
@@ -1107,6 +1207,7 @@ function renderInitiative(){
     if (c.readied) chipsArr.push('<span class="init-chip readied" title="Holding a readied action">Readied</span>');
     if (c.delaying) chipsArr.push('<span class="init-chip delaying" title="Delaying — skipped by Next turn until they jump back in">⏸ Delaying</span>');
     if (c.surprised) chipsArr.push('<span class="init-chip surprised" title="Surprised — sits out Round 1; the mark clears when Round 2 begins">😲 Surprised</span>');
+    if (initMultiSel[c.id]) chipsArr.push('<span class="init-multi-tag">' + (initMultiSel[c.id] === "half" ? "HALF (saved)" : "FULL") + '</span>');
     const chips = chipsArr.length ? '<div class="init-chips">' + chipsArr.join("") + '</div>' : "";
     const seg1 = {
       drag: '<span class="init-drag" data-mk="drag" data-mkgrp="row1" data-drag="' + c.id + '" title="Drag to move this combatant in the order by hand" aria-hidden="true">⠿</span>',
@@ -1156,7 +1257,7 @@ function renderInitiative(){
     const segAll = Object.assign({}, seg1, seg2);
     const ord1 = (window.__mkOrder ? window.__mkOrder("row1", ROW1_KEYS) : ROW1_KEYS);
     const ord2 = (window.__mkOrder ? window.__mkOrder("row2", ROW2_KEYS) : ROW2_KEYS);
-    return '<div class="init-row' + (active ? ' active' : '') + (rowFolded ? ' folded' : '') + '" data-row-id="' + c.id + '">' +
+    return '<div class="init-row' + (active ? ' active' : '') + (rowFolded ? ' folded' : '') + (initMultiSel[c.id] ? ' multi-sel' : '') + '" data-row-id="' + c.id + '">' +
       '<div class="init-line1">' + ord1.map(k => segAll[k] || "").join("") + '<button type="button" class="init-rowfold" data-rowfold="' + c.id + '" aria-label="Show or hide the extra controls for ' + esc(c.name) + '" title="Show or hide this combatant\'s extra controls \u2014 notes, saves, status and the rest">' + (rowFolded ? '\u25B8' : '\u25B4') + '</button></div>' +
       '<div class="init-line2">' + ord2.map(k => segAll[k] || "").join("") + '</div>' + bar + chips + '</div>';
   }).join("");
@@ -1332,6 +1433,24 @@ function renderInitiative(){
     if (!initState.list.length) initState.log = [];
     saveInitiative(); renderInitiative();
   }));
+  /* Multi-target mode: tapping a row's open space cycles that
+     target Full → Half (saved) → None. Taps on the row's own
+     controls never select. Markers can't be targets — no HP. */
+  if (initMultiMode) {
+    wrap.querySelectorAll(".init-row").forEach(rowEl => {
+      rowEl.addEventListener("click", ev => {
+        if (ev.target.closest("button, input, select, textarea, label, a")) return;
+        const id = rowEl.getAttribute("data-row-id");
+        const c = find(id);
+        if (!c || c.marker) return;
+        const cur = initMultiSel[id];
+        if (!cur) initMultiSel[id] = "full";
+        else if (cur === "full") initMultiSel[id] = "half";
+        else delete initMultiSel[id];
+        renderInitiative();
+      });
+    });
+  }
   /* Drag reorder by the handle: pointer-driven, so it works with
      touch; the rest of the row never starts a drag, so the page
      still scrolls normally everywhere else. */
@@ -1482,7 +1601,9 @@ async function loadInitiative(){
       manual: !!v.manual,
       turnStart: v.turnStart ?? null,
       turnPaused: v.turnPaused ?? null,
-      rolling: !!v.rolling
+      rolling: !!v.rolling,
+      fight: v.fight === "B" ? "B" : "A",
+      parked: (v.parked && typeof v.parked === "object") ? v.parked : null
     };
     initRev = Math.max(initRev, v.rev || 0);
     initLastKnown = v;
@@ -1778,7 +1899,7 @@ function initClear(){
   sessionSettle();
   const endedMs = initState.started ? sessionTally.combatMs : 0;
   initSnapshot();
-  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling };
+  initState = { list: [], turnId: null, round: 1, started: false, saved: initState.saved || [], party: initState.party || [], log: [], manual: false, turnStart: null, turnPaused: null, rolling: initState.rolling, fight: initState.fight || "A", parked: initState.parked || null };
   /* The fresh board's log opens with the ended fight's record. */
   if (endedMs >= 1000) initLog("Combat ended — " + fmtClock(endedMs) + " in combat.");
   if (endedMs) { sessionTally.combatMs = 0; sessionPersist(); }
@@ -1927,6 +2048,10 @@ function initSetRolling(want){
 }
 $("initRollingOnBtn").addEventListener("click", () => initSetRolling(true));
 $("initRollingOffBtn").addEventListener("click", () => initSetRolling(false));
+$("initFightABtn").addEventListener("click", () => initSwitchFight("A"));
+$("initFightBBtn").addEventListener("click", () => initSwitchFight("B"));
+$("initMultiBtn").addEventListener("click", () => { if (!initMultiMode) initSetMulti(true); else initMultiApply(); });
+$("initMultiCancelBtn").addEventListener("click", () => initSetMulti(false));
 $("initAddBtn").addEventListener("click", initAdd);
 $("initAddFoeBtn").addEventListener("click", () => {
   const b = $("initAddFoeBtn"), form = document.querySelector("#initiativePanel .init-form");
