@@ -735,7 +735,7 @@
 
   <!-- 3 / APOC System Hub -->
   <section class="panel hub-panel" id="system" aria-labelledby="hubHeading">
-    <div class="hub-share-row"><span class="hub-share-note" id="hubShareNote" role="status" aria-live="polite"></span><span class="hub-help-q" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button class="hub-share-btn" type="button" id="hubShareBtn" title="Share the campaign — pick a page and send its link by text, email, or WhatsApp, or copy it" aria-label="Share the campaign" aria-expanded="false" aria-controls="hubShareMenu">&#8599; Share</button></div>
+    <div class="hub-share-row"><span class="hub-share-note" id="hubShareNote" role="status" aria-live="polite"></span><span class="hub-help-q" tabindex="0" role="img" aria-label="Hover any control to see what it does. On a phone or tablet, press and hold instead." title="Hover any control to see what it does. On a phone or tablet, press and hold instead.">?</span><button class="hub-share-btn" type="button" id="hubEditBtn" aria-pressed="false" title="Unlock to edit this page — the same Edit page lock as John's House: unlock to edit the page, lock it again to use the page">&#128275; Edit page</button><button class="hub-share-btn" type="button" id="hubShareBtn" title="Share the campaign — pick a page and send its link by text, email, or WhatsApp, or copy it" aria-label="Share the campaign" aria-expanded="false" aria-controls="hubShareMenu">&#8599; Share</button></div>
     <p class="hub-help-line">Hold any button — or hover on a computer — and it will explain what it does.</p>
     <div class="hub-share-menu" id="hubShareMenu" hidden>
       <div class="hub-share-item" data-title="APOC Survival — Campaign Hub" data-url="https://11durrum11.github.io/APOC-Campaign-Tracker/">
@@ -802,6 +802,27 @@
         </span>
       </div>
     </div>
+    <script>
+      /* Edit page lock (Shaun, 2026-11-22): the same lock as John's
+         House, beside the ? in the share row — 🔓 Edit page unlocks
+         the front page's edit state (body.mv-edit-on, the state this
+         page's own edit chrome is built on), 🔒 Done editing locks
+         it again. Every load starts locked, as John's House does. */
+      (function () {
+        var btn = document.getElementById("hubEditBtn");
+        var note = document.getElementById("hubShareNote");
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+          var on = document.body.classList.toggle("mv-edit-on");
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+          btn.innerHTML = on ? "&#128274; Done editing" : "&#128275; Edit page";
+          if (note) {
+            note.textContent = on ? "Editing unlocked" : "Editing locked";
+            setTimeout(function () { note.textContent = ""; }, 2600);
+          }
+        });
+      })();
+    </script>
     <script>
       (function () {
         var btn = document.getElementById("hubShareBtn");
