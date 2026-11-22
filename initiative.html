@@ -30,15 +30,8 @@
   body{
     margin:0;background:var(--background);color:var(--foreground);
     font-family:Georgia,"Times New Roman",serif;line-height:1.5;
-    overflow-x:hidden;overflow-x:clip;min-height:100vh;min-height:100dvh;overscroll-behavior:none;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;min-height:100dvh;overscroll-behavior-y:none;
   }
-  /* No sideways movement, anywhere, under any layout (Shaun's
-     standing rule): a control nudged or scaled past the panel's
-     edge by a saved layout paints to the edge and stops — it can
-     never widen the page or give the phone a sideways slide. */
-  html{overflow-x:clip}
-  .page{overflow-x:clip}
-  #initiativePanel{overflow-x:clip}
   /* The backdrop: the hub's own pinned scene layer and scrim,
      verbatim — the slideshow cycles --scene-image underneath. */
   body::before{
