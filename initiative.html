@@ -30,8 +30,15 @@
   body{
     margin:0;background:var(--background);color:var(--foreground);
     font-family:Georgia,"Times New Roman",serif;line-height:1.5;
-    overflow-x:hidden;overflow-x:clip;min-height:100vh;min-height:100dvh;overscroll-behavior-y:none;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;min-height:100dvh;overscroll-behavior:none;
   }
+  /* No sideways movement, anywhere, under any layout (Shaun's
+     standing rule): a control nudged or scaled past the panel's
+     edge by a saved layout paints to the edge and stops — it can
+     never widen the page or give the phone a sideways slide. */
+  html{overflow-x:clip}
+  .page{overflow-x:clip}
+  #initiativePanel{overflow-x:clip}
   /* The backdrop: the hub's own pinned scene layer and scrim,
      verbatim — the slideshow cycles --scene-image underneath. */
   body::before{
@@ -420,18 +427,6 @@
     .init-topbar{row-gap:.05rem}
     #initiativePanel .init-controls{margin:0;padding-top:0;padding-bottom:0;row-gap:.02rem}
     #initiativePanel .init-saved-head{margin-top:0;margin-bottom:0}
-    /* Sideways is LOCKED on the phone side (Shaun's final word on
-       the slide batch): there is no reason to go left and right, so
-       no layout — his published one, a device-local one, a block
-       dragged past the panel's edge — can give the page horizontal
-       movement. Clipped overflow makes no scrollable area at all.
-       Vertical is deliberately NOT locked: the closed page sits
-       still, and when a control opens something that needs room,
-       the page may move for it. */
-    html{overflow-x:clip}
-    .page{overflow-x:clip}
-    #initiativePanel{overflow-x:clip}
-    body{overscroll-behavior-x:none}
     #initiativePanel .init-form{margin:0}
     #initiativePanel .init-list{margin:0}
   }
