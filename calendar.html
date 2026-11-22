@@ -144,6 +144,7 @@
   <section class="day-panel" id="calDayPanel" aria-live="polite">
     <h2 id="calDayTitle">Pick a day</h2>
     <div class="greg-line" id="calDayGreg"></div>
+    <div style="margin-bottom:.5rem"><button class="btn small" type="button" id="calSetToday" title="Make the picked day the current date in Toril">Set as today in Toril</button></div>
     <div id="calDayEvents"></div>
     <form class="ev-form" id="calForm">
       <div class="form-row">
@@ -263,10 +264,17 @@
   function hkey(dr, periodIdx, day) { return dr + "|" + periodIdx + "|" + day; }
   function harptosLabel(h) { return h.day + " " + h.name + " " + h.dr + " DR"; }
   function gregLabel(g) { return GREG_MONTHS[g.gm - 1] + " " + g.gd + ", " + g.gy; }
-  function todayHarptos() {
-    var n = new Date();
-    var key = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
-    return { h: gregToHarptos(key), gregKey: key, greg: n };
+  /* The current date in Toril is set by the table, not by the real-world
+     clock. Shaun set it 2026-11-22: two weeks before Pelor's winter
+     solstice. The solstice falls on 20 Nightal (its real-world twin is
+     December 21), so today in Toril is 6 Nightal 2511 DR. It is stored
+     in the shared calendar (todayH) and advanced with the button in the
+     day panel. */
+  var todayHKey = "2511|16|6";
+  function torilToday() {
+    var p = todayHKey.split("|");
+    var dr = +p[0], pi = +p[1], dy = +p[2];
+    return { dr: dr, period: pi, day: dy, name: periodsFor(dr)[pi].name };
   }
 
   var events = []; // {id, date:"YYYY-MM-DD" (secondary twin), hdate:"DR|period|day" (primary), title, tag, note}
@@ -276,9 +284,9 @@
   }
   function byHarptos(k) { return events.filter(function (e) { var h = evHarptos(e); return hkey(h.dr, h.period, h.day) === k; }); }
 
-  var t0 = todayHarptos();
-  var view = { dr: t0.h.dr, period: t0.h.period };
-  var selected = hkey(t0.h.dr, t0.h.period, t0.h.day);
+  var t0 = torilToday();
+  var view = { dr: t0.dr, period: t0.period };
+  var selected = todayHKey;
   var editingId = null;
 
   var grid = document.getElementById("calGrid");
@@ -295,8 +303,12 @@
   var fSave = document.getElementById("calFSave");
   var fCancel = document.getElementById("calFCancel");
 
-  document.getElementById("calTodayBig").textContent = "Today in Toril: " + harptosLabel(t0.h);
-  document.getElementById("calTodaySmall").textContent = "real world: " + t0.greg.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) + " (secondary)";
+  function refreshBanner() {
+    var t = torilToday();
+    document.getElementById("calTodayBig").textContent = "Today in Toril: " + harptosLabel(t);
+    document.getElementById("calTodaySmall").textContent = "real world: " + new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) + " (secondary)";
+  }
+  refreshBanner();
 
   function setSync(msg) { syncEl.textContent = msg; }
 
@@ -319,7 +331,7 @@
     } else head.style.display = "none";
 
     grid.innerHTML = "";
-    var tk = hkey(t0.h.dr, t0.h.period, t0.h.day);
+    var tk = todayHKey;
     for (var dnum = 1; dnum <= p.days; dnum++) {
       var k = hkey(view.dr, view.period, dnum);
       var g = harptosToGreg(view.dr, view.period, dnum);
@@ -353,6 +365,7 @@
     dayTitle.textContent = isShieldDay ? "Shieldmeet " + dr + " DR" : dy + " " + p.name + " " + dr + " DR";
     var g = harptosToGreg(dr, pi, dy);
     dayGreg.textContent = g ? "real world (secondary): " + gregLabel(g) : "Shieldmeet has no real-world twin — it sits between Midsummer and Eleasis, one day in four years.";
+    document.getElementById("calSetToday").hidden = (selected === todayHKey);
     dayEvents.innerHTML = "";
     var evs = byHarptos(selected);
     if (!evs.length) {
@@ -397,7 +410,7 @@
   function save() {
     if (!db) { setSync("Offline — changes are on this device only"); return; }
     setSync("Saving…");
-    db.from("site_settings").upsert({ key: STORE_KEY, value: { events: events } }).then(function (r) {
+    db.from("site_settings").upsert({ key: STORE_KEY, value: { events: events, todayH: todayHKey } }).then(function (r) {
       setSync(r && r.error ? "Save failed — try again" : "Saved · shared with the table");
     });
   }
@@ -424,6 +437,10 @@
     syncForm(); render(); save();
   });
   fCancel.addEventListener("click", function () { editingId = null; syncForm(); });
+  document.getElementById("calSetToday").addEventListener("click", function () {
+    todayHKey = selected;
+    refreshBanner(); render(); save();
+  });
 
   function step(dir) {
     var periods = periodsFor(view.dr);
@@ -436,9 +453,9 @@
   document.getElementById("calPrev").addEventListener("click", function () { step(-1); });
   document.getElementById("calNext").addEventListener("click", function () { step(1); });
   document.getElementById("calToday").addEventListener("click", function () {
-    var t = todayHarptos(); t0 = t;
-    view = { dr: t.h.dr, period: t.h.period };
-    selected = hkey(t.h.dr, t.h.period, t.h.day);
+    var t = torilToday();
+    view = { dr: t.dr, period: t.period };
+    selected = todayHKey;
     render();
   });
 
@@ -455,6 +472,13 @@
       var v = r && r.data && r.data.value;
       if (v && Array.isArray(v.events)) { events = v.events; setSync("Shared calendar · live"); }
       else { events = seed(); setSync("Shared calendar · live"); save(); }
+      if (v && typeof v.todayH === "string" && v.todayH.split("|").length === 3) {
+        todayHKey = v.todayH;
+        var t = torilToday();
+        view = { dr: t.dr, period: t.period };
+        selected = todayHKey;
+        refreshBanner();
+      }
       syncForm(); render();
     });
   }
