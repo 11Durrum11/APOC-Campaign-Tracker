@@ -701,6 +701,32 @@
   .mv-drop-ok{outline:2px solid var(--mv-blue) !important;outline-offset:1px}
   body.mv-edit-on [data-text-id]{outline:1px dotted var(--mv-blue-c);outline-offset:1px}
   .mv-editing{outline:2px solid var(--mv-blue) !important;outline-offset:2px;background:hsla(222,20%,14%,.35)}
+
+  /* Hub button arranging (Shaun, 2026-11-17; restored 2026-11-22
+     behind the hub's Edit page lock): while editing is unlocked the
+     fourteen hub buttons can be dragged onto one another to swap
+     places in the three-across grid; the order is kept per device
+     and restored on load. The drag chrome uses the page's
+     movable-pieces dark blue (the --mv-blue family the #mvBar
+     styles already carry). */
+  #mvBar button[aria-pressed="true"]{color:var(--mv-blue);border-color:var(--mv-blue);opacity:1}
+  #hubEditBtn[aria-pressed="true"]{color:hsl(222,89%,55%);border-color:hsl(222,89%,55%);opacity:1}
+  #mvBar .arrange-only{display:none}
+  body.hub-arranging #mvBar .arrange-only{display:inline-block}
+  /* On narrower screens the fixed bar rides ABOVE the slideshow pill
+     (bottom-centre) so the two never overlap. */
+  @media (max-width:1100px){ #mvBar{bottom:calc(64px + env(safe-area-inset-bottom,0px))} }
+  body.hub-arranging .hub-btn{
+    position:relative;cursor:grab;touch-action:none;
+    outline:1px dashed hsla(222,89%,55%,.55);outline-offset:-1px;
+  }
+  body.hub-arranging .hub-btn::before{
+    content:"⠿";position:absolute;top:2px;left:5px;
+    font-size:11px;line-height:1;color:hsl(222,89%,55%);pointer-events:none;
+  }
+  body.hub-arranging .hub-btn:active{cursor:grabbing}
+  .hub-item.hub-drag-src{opacity:.45}
+  .hub-item.hub-drop-ok{outline:2px solid hsl(222,89%,47%);outline-offset:1px;border-radius:8px}
 </style>
 </head>
 <body data-scene="bastion-streets">
@@ -802,27 +828,6 @@
         </span>
       </div>
     </div>
-    <script>
-      /* Edit page lock (Shaun, 2026-11-22): the same lock as John's
-         House, beside the ? in the share row — 🔓 Edit page unlocks
-         the front page's edit state (body.mv-edit-on, the state this
-         page's own edit chrome is built on), 🔒 Done editing locks
-         it again. Every load starts locked, as John's House does. */
-      (function () {
-        var btn = document.getElementById("hubEditBtn");
-        var note = document.getElementById("hubShareNote");
-        if (!btn) return;
-        btn.addEventListener("click", function () {
-          var on = document.body.classList.toggle("mv-edit-on");
-          btn.setAttribute("aria-pressed", on ? "true" : "false");
-          btn.innerHTML = on ? "&#128274; Done editing" : "&#128275; Edit page";
-          if (note) {
-            note.textContent = on ? "Editing unlocked" : "Editing locked";
-            setTimeout(function () { note.textContent = ""; }, 2600);
-          }
-        });
-      })();
-    </script>
     <script>
       (function () {
         var btn = document.getElementById("hubShareBtn");
@@ -2536,6 +2541,185 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
   document.addEventListener("contextmenu", e => {
     if (fired || (e.target.closest && e.target.closest("[title]"))) e.preventDefault();
   }, true);
+})();
+</script>
+
+<!-- Arrange bar: Reset buttons and Reset layout live in the page's
+     movable-pieces bar (#mvBar styles above) while the hub's Edit
+     page lock is unlocked; the lock itself is #hubEditBtn in the
+     hub's share row. -->
+<div id="mvBar" role="group" aria-label="Arrange controls">
+  <button type="button" id="hubResetButtons" class="arrange-only" title="Puts the hub buttons back in their original order and clears the order saved on this device.">Reset buttons</button>
+  <button type="button" id="hubResetLayout" class="arrange-only" title="Restores the page’s original arrangement and clears the arrangement saved on this device.">Reset layout</button>
+</div>
+
+<script>
+/* Movable hub buttons (Shaun, 2026-11-17; restored 2026-11-22):
+   the hub buttons are HIS to place. (Fourteen since the Campaign
+   Calendar joined, 2026-11-22.) The hub's Edit page lock
+   (#hubEditBtn, in the share row beside the gold ?) is the
+   enter/exit: 🔓 Edit page unlocks arranging, 🔒 Done editing
+   locks it again, and every load starts locked. Arrange ON: drag
+   a hub button onto another and the two swap — the three-across
+   grid shape never changes, only the order. Mouse and touch both
+   work (pointer events). While arranging, a hub button's normal
+   action can never fire: clicks in the hub are swallowed whole,
+   drags included. The order is saved per device in localStorage
+   under its own key and restored on load. Reset buttons restores
+   the shipped order and clears the saved arrangement; Reset
+   layout clears the page's saved arrangement the same way.
+   Arrange OFF: the buttons are exactly the buttons they always
+   were. */
+(function(){
+  "use strict";
+  var row = document.getElementById("hubRow");
+  if (!row) return;
+  var ORDER_KEY = "apoc-hub-button-order";
+  /* Keys in the order the buttons ship in — this IS the default. */
+  var KEYS = ["tracker","tavern","lair","weather","blendcrafter","critgen","vtt","encounter","canon","sky","cosmetology","reconvenes","johnshouse","calendar"];
+  var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
+  if (items.length !== KEYS.length) return;
+  var byKey = {};
+  items.forEach(function(it, i){
+    it.setAttribute("data-hub-key", KEYS[i]);
+    byKey[KEYS[i]] = it;
+  });
+  var DEFAULT_ORDER = KEYS.slice();
+
+  function read(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function write(k, v){ try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(e){} }
+  function currentOrder(){
+    return Array.prototype.map.call(row.querySelectorAll(".hub-item"), function(it){ return it.getAttribute("data-hub-key"); });
+  }
+  /* John's House ships in the grid cell directly under Cosmetology
+     (row 5, column 2) and the Calendar at the right bottom (row 5,
+     column 3): those two cells are pinned by placement classes, and
+     the classes belong to the CELLS, not the buttons — whichever
+     buttons a swap or a restored order seats in the last two slots
+     take the pinned cells, exactly as the shipped order has them.
+     (The space build held those cells with spacer elements; this
+     page holds them with the classes, so the script re-seats the
+     classes after every order change instead.) */
+  function seatPins(){
+    var nodes = row.querySelectorAll(".hub-item");
+    Array.prototype.forEach.call(nodes, function(n){
+      n.classList.remove("hub-item-under-cosmo");
+      n.classList.remove("hub-item-bottom-right");
+    });
+    if (nodes.length > 12) nodes[nodes.length - 2].classList.add("hub-item-under-cosmo");
+    if (nodes.length > 13) nodes[nodes.length - 1].classList.add("hub-item-bottom-right");
+  }
+  function applyOrder(order){
+    var nodes = order.map(function(k){ return byKey[k]; }).filter(Boolean);
+    nodes.forEach(function(n){ row.appendChild(n); });
+    seatPins();
+  }
+  function saveOrder(){ write(ORDER_KEY, JSON.stringify(currentOrder())); }
+  function resetOrder(){
+    write(ORDER_KEY, null);
+    applyOrder(DEFAULT_ORDER);
+  }
+
+  /* Restore his saved arrangement, if it is a true permutation. */
+  (function restore(){
+    var raw = read(ORDER_KEY);
+    if (!raw) return;
+    var saved;
+    try { saved = JSON.parse(raw); } catch(e){ return; }
+    if (!Array.isArray(saved) || saved.length !== KEYS.length) return;
+    if (saved.slice().sort().join(",") !== DEFAULT_ORDER.slice().sort().join(",")) return;
+    applyOrder(saved);
+  })();
+
+  var arranging = false;
+  var toggle = document.getElementById("hubEditBtn");
+  function setArranging(on){
+    arranging = on;
+    document.body.classList.toggle("hub-arranging", on);
+    if (toggle) {
+      toggle.setAttribute("aria-pressed", on ? "true" : "false");
+      toggle.innerHTML = on ? "&#128274; Done editing" : "&#128275; Edit page";
+    }
+  }
+  if (toggle) toggle.addEventListener("click", function(){ setArranging(!arranging); });
+  var resetButtons = document.getElementById("hubResetButtons");
+  if (resetButtons) resetButtons.addEventListener("click", resetOrder);
+  /* Reset layout restores the page's shipped arrangement. The old
+     block-level movable-pieces system did not survive this page's
+     rebuild (only its styles remain in the CSS above — there is no
+     block-layout data left on the page to clear), so the hub button
+     order is the arrangement state this page keeps, and resetting
+     the layout clears it alongside the buttons' own reset. */
+  function resetLayout(){
+    write(ORDER_KEY, null);
+    applyOrder(DEFAULT_ORDER);
+  }
+  var resetLayoutBtn = document.getElementById("hubResetLayout");
+  if (resetLayoutBtn) resetLayoutBtn.addEventListener("click", resetLayout);
+
+  /* While arranging, NO click inside the hub does anything — a plain
+     click is inert and a drag's release can never fire the button
+     underneath. Capture phase, so the buttons' own listeners and
+     the links' navigation never see the event. */
+  row.addEventListener("click", function(e){
+    if (!arranging) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  row.addEventListener("dragstart", function(e){ if (arranging) e.preventDefault(); });
+
+  /* Drag to swap — one pointer path for mouse and touch. */
+  var drag = null;
+  row.addEventListener("pointerdown", function(e){
+    if (!arranging) return;
+    var btn = e.target && e.target.closest ? e.target.closest(".hub-btn") : null;
+    if (!btn) return;
+    var item = btn.closest(".hub-item");
+    if (!item) return;
+    e.preventDefault();
+    drag = { item: item, x0: e.clientX, y0: e.clientY, active: false, over: null };
+    try { btn.setPointerCapture(e.pointerId); } catch(err){}
+  });
+  row.addEventListener("pointermove", function(e){
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 7) return;
+      drag.active = true;
+      drag.item.classList.add("hub-drag-src");
+      document.body.classList.add("mv-dragging");
+    }
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var over = el && el.closest ? el.closest(".hub-item") : null;
+    if (over === drag.item) over = null;
+    if (drag.over && drag.over !== over) drag.over.classList.remove("hub-drop-ok");
+    drag.over = over;
+    if (over) over.classList.add("hub-drop-ok");
+  });
+  function endDrag(commit){
+    if (!drag) return;
+    var d = drag;
+    drag = null;
+    d.item.classList.remove("hub-drag-src");
+    if (d.over) d.over.classList.remove("hub-drop-ok");
+    document.body.classList.remove("mv-dragging");
+    if (commit && d.active && d.over) {
+      swapItems(d.item, d.over);
+      saveOrder();
+    }
+  }
+  row.addEventListener("pointerup", function(){ endDrag(true); });
+  row.addEventListener("pointercancel", function(){ endDrag(false); });
+
+  function swapItems(a, b){
+    var p = a.parentNode;
+    var markA = document.createComment("hub-swap-a");
+    var markB = document.createComment("hub-swap-b");
+    p.replaceChild(markA, a);
+    p.replaceChild(markB, b);
+    p.replaceChild(a, markB);
+    p.replaceChild(b, markA);
+    seatPins();
+  }
 })();
 </script>
 </body>
