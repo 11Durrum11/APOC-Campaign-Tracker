@@ -46,21 +46,31 @@
   .btn.small{min-height:28px;padding:3px 10px;font-size:.78rem}
   h1{font-size:1.25rem;font-weight:500;margin:0;letter-spacing:.02em}
   h1 .gold{color:var(--primary)}
-  .month-title{font-size:1.3rem;font-weight:600;min-width:11.5rem;text-align:center}
+  .today-banner{
+    border:1px solid var(--primary);border-radius:12px;background:hsla(38,60%,22%,.35);
+    padding:.55rem .9rem;margin-bottom:.9rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:baseline;
+  }
+  .today-banner .big{font-size:1.15rem;font-weight:700;color:var(--primary)}
+  .today-banner .small{font-size:.8rem;color:var(--muted-foreground)}
+  .month-title{font-size:1.35rem;font-weight:600;min-width:11.5rem;text-align:center}
+  .month-title .sub{display:block;font-size:.78rem;font-weight:400;color:var(--muted-foreground)}
   .cal-wrap{border:1px solid var(--card-border);border-radius:12px;background:hsla(222,20%,13%,.72);padding:.7rem}
-  .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-bottom:.35rem}
-  .dow span{text-align:center;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:.15rem 0}
-  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}
+  .tenday-head{display:grid;grid-template-columns:repeat(10,1fr);gap:.35rem;margin-bottom:.35rem}
+  .tenday-head span{text-align:center;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground);padding:.15rem 0}
+  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:.35rem}
+  .grid.fest{grid-template-columns:1fr}
   .day{
     min-height:86px;border:1px solid var(--card-border);border-radius:8px;padding:.3rem .35rem;
     background:hsla(222,20%,16%,.5);cursor:pointer;display:flex;flex-direction:column;gap:.22rem;overflow:hidden;
   }
   .day:hover{border-color:var(--primary)}
-  .day.out{opacity:.38}
   .day.today{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
   .day.sel{border-color:var(--primary);background:hsla(38,60%,30%,.28)}
-  .day .num{font-size:.82rem;font-weight:600}
+  .day.fest{min-height:120px;align-items:center;justify-content:center;text-align:center}
+  .day .num{font-size:.95rem;font-weight:700}
   .day.today .num{color:var(--primary)}
+  .day .greg{font-size:.62rem;color:var(--muted-foreground);line-height:1.2}
+  .day.fest .num{font-size:1.3rem}
   .chip{
     font-size:.68rem;line-height:1.25;border-radius:5px;padding:.08rem .3rem;
     background:hsla(220,16%,26%,.85);border:1px solid var(--card-border);
@@ -71,7 +81,8 @@
   .chip.tag-deadline{border-color:var(--destructive);color:hsl(0 70% 75%)}
   .more{font-size:.66rem;color:var(--muted-foreground)}
   .day-panel{margin-top:.9rem;border:1px solid var(--card-border);border-radius:12px;background:hsla(222,20%,13%,.72);padding:.8rem .9rem}
-  .day-panel h2{margin:0 0 .5rem;font-size:1.05rem;font-weight:600}
+  .day-panel h2{margin:0 0 .2rem;font-size:1.1rem;font-weight:600}
+  .day-panel .greg-line{font-size:.82rem;color:var(--muted-foreground);margin-bottom:.5rem}
   .ev{border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem;margin-bottom:.45rem;background:hsla(222,20%,16%,.5)}
   .ev .row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
   .ev .t{font-weight:600}
@@ -94,10 +105,13 @@
   .form-acts{display:flex;gap:.5rem;align-items:center}
   .sync{font-size:.74rem;color:var(--muted-foreground)}
   @media (max-width:760px){
-    .day{min-height:62px;padding:.22rem .25rem}
-    .chip{font-size:.6rem}
+    .day{min-height:58px;padding:.2rem .22rem}
+    .day .num{font-size:.8rem}
+    .day .greg{font-size:.54rem}
+    .chip{font-size:.56rem;padding:.05rem .2rem}
     .month-title{min-width:0;font-size:1.1rem;flex:1 1 auto}
     h1{font-size:1.05rem}
+    .tenday-head span{font-size:.54rem}
   }
 </style>
 </head>
@@ -110,20 +124,26 @@
     <span class="sync" id="calSync">Loading…</span>
   </div>
 
-  <div class="topbar" role="group" aria-label="Month navigation">
-    <button class="btn" type="button" id="calPrev" title="Previous month">‹ Prev</button>
-    <div class="month-title" id="calMonthTitle">Month</div>
-    <button class="btn" type="button" id="calNext" title="Next month">Next ›</button>
-    <button class="btn" type="button" id="calToday" title="Jump back to the current month">Today</button>
+  <div class="today-banner" id="calTodayBanner">
+    <span class="big" id="calTodayBig">Today in Toril: …</span>
+    <span class="small" id="calTodaySmall"></span>
+  </div>
+
+  <div class="topbar" role="group" aria-label="Faerûnian month navigation">
+    <button class="btn" type="button" id="calPrev" title="Previous Faerûnian month">‹ Prev</button>
+    <div class="month-title" id="calMonthTitle">…</div>
+    <button class="btn" type="button" id="calNext" title="Next Faerûnian month">Next ›</button>
+    <button class="btn" type="button" id="calToday" title="Jump back to today in Toril">Today</button>
   </div>
 
   <div class="cal-wrap">
-    <div class="dow" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div class="tenday-head" id="calHead" aria-hidden="true"></div>
     <div class="grid" id="calGrid"></div>
   </div>
 
   <section class="day-panel" id="calDayPanel" aria-live="polite">
     <h2 id="calDayTitle">Pick a day</h2>
+    <div class="greg-line" id="calDayGreg"></div>
     <div id="calDayEvents"></div>
     <form class="ev-form" id="calForm">
       <div class="form-row">
@@ -159,21 +179,113 @@
   var db = null;
   try { if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { db = null; }
 
-  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  /* ===== The Faerûnian calendar (Calendar of Harptos) is PRIMARY. =====
+     The real-world (Gregorian) calendar is secondary: it rides along as a
+     small note on each day. Conversion anchor, settled with the table's
+     existing entries: a Faerûnian day keeps the same day-of-year count as
+     its real-world twin, and the Dale Reckoning year is the real-world
+     year + 485 — so the campaign's present, 2511 DR, runs with 2026.
+     A Faerûnian year: twelve months of thirty days (three tendays each),
+     five festival days standing outside the months, and Shieldmeet added
+     after Midsummer every fourth year (2512 DR, 2516 DR, …). */
+  var DR_OFFSET = 485;
+  var MONTH_DEFS = [
+    { name: "Hammer",   alt: "Deepwinter",           kind: "month" },
+    { name: "Midwinter", alt: "Festival day between Hammer and Alturiak", kind: "festival" },
+    { name: "Alturiak", alt: "The Claw of Winter",   kind: "month" },
+    { name: "Ches",     alt: "The Claw of Sunsets",  kind: "month" },
+    { name: "Tarsakh",  alt: "The Claw of Storms",   kind: "month" },
+    { name: "Greengrass", alt: "Festival day between Tarsakh and Mirtul", kind: "festival" },
+    { name: "Mirtul",   alt: "The Melting",          kind: "month" },
+    { name: "Kythorn",  alt: "The Time of Flowers",  kind: "month" },
+    { name: "Flamerule", alt: "Summertide",          kind: "month" },
+    { name: "Midsummer", alt: "Festival day between Flamerule and Eleasis", kind: "festival" },
+    { name: "Eleasis",  alt: "Highsun",              kind: "month" },
+    { name: "Eleint",   alt: "The Fading",           kind: "month" },
+    { name: "Highharvestide", alt: "Festival day between Eleint and Marpenoth", kind: "festival" },
+    { name: "Marpenoth", alt: "Leaffall",            kind: "month" },
+    { name: "Uktar",    alt: "The Rotting",          kind: "month" },
+    { name: "Feast of the Moon", alt: "Festival day after Uktar", kind: "festival" },
+    { name: "Nightal",  alt: "The Drawing Down",     kind: "month" }
+  ];
+  var GREG_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var GREG_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var GREG_CUM = [0,31,59,90,120,151,181,212,243,273,304,334]; // non-leap month starts
   var TAG_LABEL = { session: "Session", inworld: "In-world", deadline: "Deadline", note: "Note" };
+  var TENDAY = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"];
 
+  function isShieldYear(dr) { return dr % 4 === 0; }
+  function periodsFor(dr) {
+    var out = [];
+    MONTH_DEFS.forEach(function (m) {
+      out.push({ name: m.name, alt: m.alt, kind: m.kind, days: m.kind === "month" ? 30 : 1 });
+      // Shieldmeet rides between Midsummer and Eleasis once in four years.
+      // It carries no day-of-year weight: the days after it keep their twins.
+      if (m.name === "Midsummer" && isShieldYear(dr)) out.push({ name: "Shieldmeet", alt: "The leap day, once in four years, after Midsummer", kind: "festival", days: 1, shieldDay: true });
+    });
+    return out;
+  }
   function pad(n) { return (n < 10 ? "0" : "") + n; }
-  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
-  function todayKey() { return keyOf(new Date()); }
 
-  var events = [];           // {id, date:"YYYY-MM-DD", title, tag, note}
-  var view = new Date(); view.setDate(1);
-  var selected = todayKey();
+  // Gregorian (secondary) -> Faerûnian (primary)
+  function gregToHarptos(dateStr) {
+    var p = dateStr.split("-");
+    var gy = +p[0], gm = +p[1], gd = +p[2];
+    var doy = GREG_CUM[gm - 1] + gd; // template day-of-year, Feb counted as 28
+    var dr = gy + DR_OFFSET;
+    return doyToHarptos(dr, doy);
+  }
+  function doyToHarptos(dr, doy) {
+    var periods = periodsFor(dr), acc = 0;
+    for (var i = 0; i < periods.length; i++) {
+      if (periods[i].shieldDay) continue; // no real-world day maps onto Shieldmeet
+      if (doy > acc && doy <= acc + periods[i].days) return { dr: dr, period: i, name: periods[i].name, day: doy - acc, doy: doy };
+      acc += periods[i].days;
+    }
+    return { dr: dr, period: 0, name: "Hammer", day: 1, doy: 1 };
+  }
+  // Faerûnian -> day-of-year, and -> Gregorian twin (null for Shieldmeet, which has no twin)
+  function harptosDoy(dr, periodIdx, day) {
+    var periods = periodsFor(dr), acc = 0;
+    for (var i = 0; i < periodIdx; i++) { if (!periods[i].shieldDay) acc += periods[i].days; }
+    return acc + day;
+  }
+  function harptosToGreg(dr, periodIdx, day) {
+    var periods = periodsFor(dr), p = periods[periodIdx];
+    if (!p || p.shieldDay) return null; // Shieldmeet sits between days
+    var doy = harptosDoy(dr, periodIdx, day);
+    var gy = dr - DR_OFFSET;
+    var gm = 1;
+    for (var m = 12; m >= 1; m--) { if (doy > GREG_CUM[m - 1]) { gm = m; break; } }
+    var gd = doy - GREG_CUM[gm - 1];
+    return { gy: gy, gm: gm, gd: gd, key: gy + "-" + pad(gm) + "-" + pad(gd) };
+  }
+  function hkey(dr, periodIdx, day) { return dr + "|" + periodIdx + "|" + day; }
+  function harptosLabel(h) { return h.day + " " + h.name + " " + h.dr + " DR"; }
+  function gregLabel(g) { return GREG_MONTHS[g.gm - 1] + " " + g.gd + ", " + g.gy; }
+  function todayHarptos() {
+    var n = new Date();
+    var key = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
+    return { h: gregToHarptos(key), gregKey: key, greg: n };
+  }
+
+  var events = []; // {id, date:"YYYY-MM-DD" (secondary twin), hdate:"DR|period|day" (primary), title, tag, note}
+  function evHarptos(e) {
+    if (e.hdate) { var p = e.hdate.split("|"); return { dr: +p[0], period: +p[1], day: +p[2], name: periodsFor(+p[0])[+p[1]].name }; }
+    return gregToHarptos(e.date);
+  }
+  function byHarptos(k) { return events.filter(function (e) { var h = evHarptos(e); return hkey(h.dr, h.period, h.day) === k; }); }
+
+  var t0 = todayHarptos();
+  var view = { dr: t0.h.dr, period: t0.h.period };
+  var selected = hkey(t0.h.dr, t0.h.period, t0.h.day);
   var editingId = null;
 
   var grid = document.getElementById("calGrid");
+  var head = document.getElementById("calHead");
   var titleEl = document.getElementById("calMonthTitle");
   var dayTitle = document.getElementById("calDayTitle");
+  var dayGreg = document.getElementById("calDayGreg");
   var dayEvents = document.getElementById("calDayEvents");
   var syncEl = document.getElementById("calSync");
   var form = document.getElementById("calForm");
@@ -183,25 +295,46 @@
   var fSave = document.getElementById("calFSave");
   var fCancel = document.getElementById("calFCancel");
 
+  document.getElementById("calTodayBig").textContent = "Today in Toril: " + harptosLabel(t0.h);
+  document.getElementById("calTodaySmall").textContent = "real world: " + t0.greg.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) + " (secondary)";
+
   function setSync(msg) { syncEl.textContent = msg; }
-  function byDate(k) { return events.filter(function (e) { return e.date === k; }); }
 
   function render() {
-    titleEl.textContent = MONTHS[view.getMonth()] + " " + view.getFullYear();
+    var periods = periodsFor(view.dr);
+    var p = periods[view.period];
+    var firstGreg = harptosToGreg(view.dr, view.period, 1);
+    var lastGreg = harptosToGreg(view.dr, view.period, p.days) || harptosToGreg(view.dr, view.period, 1);
+    titleEl.innerHTML = "";
+    titleEl.appendChild(document.createTextNode(p.name + " " + view.dr + " DR"));
+    var sub = document.createElement("span"); sub.className = "sub";
+    sub.textContent = firstGreg ? p.alt + " · real world: " + GREG_SHORT[firstGreg.gm - 1] + " " + firstGreg.gy + (lastGreg && lastGreg.gm !== firstGreg.gm ? " – " + GREG_SHORT[lastGreg.gm - 1] + " " + lastGreg.gy : "") + " (secondary)" : p.alt + " · no real-world twin (secondary calendar has no day for it)";
+    titleEl.appendChild(sub);
+
+    head.innerHTML = "";
+    grid.className = "grid" + (p.kind === "festival" ? " fest" : "");
+    if (p.kind === "month") {
+      head.style.display = "grid";
+      TENDAY.forEach(function (t) { var s = document.createElement("span"); s.textContent = t; head.appendChild(s); });
+    } else head.style.display = "none";
+
     grid.innerHTML = "";
-    var first = new Date(view.getFullYear(), view.getMonth(), 1);
-    var start = new Date(first); start.setDate(1 - first.getDay());
-    var tk = todayKey();
-    for (var i = 0; i < 42; i++) {
-      var d = new Date(start); d.setDate(start.getDate() + i);
-      var k = keyOf(d);
+    var tk = hkey(t0.h.dr, t0.h.period, t0.h.day);
+    for (var dnum = 1; dnum <= p.days; dnum++) {
+      var k = hkey(view.dr, view.period, dnum);
+      var g = harptosToGreg(view.dr, view.period, dnum);
       var cell = document.createElement("div");
-      cell.className = "day" + (d.getMonth() !== view.getMonth() ? " out" : "") + (k === tk ? " today" : "") + (k === selected ? " sel" : "");
+      var isShieldDay = !!p.shieldDay;
+      cell.className = "day" + (p.kind === "festival" ? " fest" : "") + (k === tk ? " today" : "") + (k === selected ? " sel" : "");
       cell.setAttribute("role", "button");
-      cell.setAttribute("aria-label", d.toDateString());
-      var num = document.createElement("span"); num.className = "num"; num.textContent = d.getDate();
+      cell.setAttribute("aria-label", dnum + " " + p.name + " " + view.dr + " DR");
+      var num = document.createElement("span"); num.className = "num";
+      num.textContent = p.kind === "festival" ? p.name : dnum;
       cell.appendChild(num);
-      var evs = byDate(k);
+      var gl = document.createElement("span"); gl.className = "greg";
+      gl.textContent = g ? "real: " + GREG_SHORT[g.gm - 1] + " " + g.gd + ", " + g.gy : "no real-world twin";
+      cell.appendChild(gl);
+      var evs = byHarptos(k);
       evs.slice(0, 2).forEach(function (e) {
         var c = document.createElement("span"); c.className = "chip tag-" + e.tag; c.textContent = e.title; cell.appendChild(c);
       });
@@ -213,11 +346,15 @@
   }
 
   function renderDay() {
-    var parts = selected.split("-");
-    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-    dayTitle.textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    var parts = selected.split("|");
+    var dr = +parts[0], pi = +parts[1], dy = +parts[2];
+    var periods = periodsFor(dr), p = periods[pi];
+    var isShieldDay = !!p.shieldDay;
+    dayTitle.textContent = isShieldDay ? "Shieldmeet " + dr + " DR" : dy + " " + p.name + " " + dr + " DR";
+    var g = harptosToGreg(dr, pi, dy);
+    dayGreg.textContent = g ? "real world (secondary): " + gregLabel(g) : "Shieldmeet has no real-world twin — it sits between Midsummer and Eleasis, one day in four years.";
     dayEvents.innerHTML = "";
-    var evs = byDate(selected);
+    var evs = byHarptos(selected);
     if (!evs.length) {
       var em = document.createElement("div"); em.className = "empty"; em.textContent = "Nothing on this day yet — add the first entry below.";
       dayEvents.appendChild(em);
@@ -279,15 +416,31 @@
       if (e) { e.title = title; e.tag = fTag.value; e.note = fNote.value.trim(); }
       editingId = null;
     } else {
-      events.push({ id: uid(), date: selected, title: title, tag: fTag.value, note: fNote.value.trim() });
+      var parts = selected.split("|");
+      var dr = +parts[0], pi = +parts[1], dy = +parts[2];
+      var g = harptosToGreg(dr, pi, dy) || harptosToGreg(dr, pi - 1, 1);
+      events.push({ id: uid(), date: g.key, hdate: selected, title: title, tag: fTag.value, note: fNote.value.trim() });
     }
     syncForm(); render(); save();
   });
   fCancel.addEventListener("click", function () { editingId = null; syncForm(); });
 
-  document.getElementById("calPrev").addEventListener("click", function () { view.setMonth(view.getMonth() - 1); render(); });
-  document.getElementById("calNext").addEventListener("click", function () { view.setMonth(view.getMonth() + 1); render(); });
-  document.getElementById("calToday").addEventListener("click", function () { view = new Date(); view.setDate(1); selected = todayKey(); render(); });
+  function step(dir) {
+    var periods = periodsFor(view.dr);
+    var np = view.period + dir, ndr = view.dr;
+    if (np < 0) { ndr -= 1; np = periodsFor(ndr).length - 1; }
+    if (np >= periods.length) { ndr += 1; np = 0; }
+    view = { dr: ndr, period: np };
+    render();
+  }
+  document.getElementById("calPrev").addEventListener("click", function () { step(-1); });
+  document.getElementById("calNext").addEventListener("click", function () { step(1); });
+  document.getElementById("calToday").addEventListener("click", function () {
+    var t = todayHarptos(); t0 = t;
+    view = { dr: t.h.dr, period: t.h.period };
+    selected = hkey(t.h.dr, t.h.period, t.h.day);
+    render();
+  });
 
   function seed() {
     return [
