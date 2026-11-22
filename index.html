@@ -192,23 +192,6 @@
      nestled in it. */
   .hub-item-bottom-right{grid-column:3}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
-  /* The world timeline inside Cosmetology (Shaun, 2026-11-22): the
-     horizontal timeline — the apocalypse and everything since — on one
-     left-to-right line, all six anchors visible at once at any width.
-     Same beats as the DM's Ledger timeline, in the hub's own colours. */
-  .world-timeline{margin-top:16px;border:1px solid var(--border);border-radius:8px;padding:16px 10px 12px;background:hsla(222,20%,13%,.55)}
-  .world-timeline h3{margin:0 0 12px;font-size:1rem;letter-spacing:.04em}
-  .wt-list{list-style:none;margin:0;padding:0;position:relative;display:flex;gap:2px}
-  .wt-list::before{content:"";position:absolute;left:calc(100%/12);right:calc(100%/12);top:7px;height:2px;background:linear-gradient(90deg,var(--primary),var(--border))}
-  .wt-item{position:relative;flex:1 1 0;min-width:0;padding:26px 2px 0;text-align:center}
-  .wt-item::before{content:"";position:absolute;left:50%;margin-left:-8px;top:0;width:16px;height:16px;border-radius:50%;background:var(--background);border:2px solid var(--primary);z-index:1}
-  .wt-item.apoc::before{background:var(--destructive);border-color:var(--destructive)}
-  .wt-item.now::before{background:var(--primary)}
-  .wt-year{font-family:ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--primary);display:block}
-  .wt-item.apoc .wt-year{color:#e8a09a}
-  .wt-item h4{font-size:12px;letter-spacing:.02em;margin:4px 0 3px;line-height:1.25;overflow-wrap:break-word}
-  .wt-item p{margin:0;font-size:11.5px;color:var(--muted-foreground);line-height:1.4;overflow-wrap:break-word}
-  @media(min-width:640px){.wt-item h4{font-size:13px}.wt-item p{font-size:12.5px}}
   /* The DM's Ledger lives inside the DM's Lair (Shaun, 2026-11-22):
      a hosted copy of the Ledger space, embedded the same way the
      Crystal Sphere is embedded in Cosmetology. The space stays the
@@ -1144,41 +1127,6 @@
     <p class="eyebrow">APOC Survival · Cosmetology</p>
     <p>The Crystal Sphere — Realmspace as it stands in the APOC, the worlds and the stations between them. <a href="sphere.html" target="_blank" rel="noopener" title="Open the Crystal Sphere map on its own page">Open the map on its own page</a></p>
     <iframe src="sphere.html" title="Crystal Sphere Map — Realmspace" loading="lazy"></iframe>
-    <div class="world-timeline">
-      <h3>The World Since the APOC</h3>
-      <ol class="wt-list">
-        <li class="wt-item">
-          <span class="wt-year">1385 DR</span>
-          <h4>The World as It Was Published</h4>
-          <p>The last year of the world as it was published.</p>
-        </li>
-        <li class="wt-item">
-          <span class="wt-year">1386 DR</span>
-          <h4>Laney&rsquo;s Career Begins</h4>
-          <p>Laney&rsquo;s career begins.</p>
-        </li>
-        <li class="wt-item apoc">
-          <span class="wt-year">1511 DR</span>
-          <h4>The APOC</h4>
-          <p>The Demon God freed from Limbo. Eighty percent of life dead in a day. The crystal sphere scarred shut.</p>
-        </li>
-        <li class="wt-item">
-          <span class="wt-year">c. 1811 DR</span>
-          <h4>The Unwriting</h4>
-          <p>The dracolich&rsquo;s spell unwrites a sphere of the Bastion from Mount Waterdeep.</p>
-        </li>
-        <li class="wt-item">
-          <span class="wt-year">c. 2411 DR</span>
-          <h4>The Second Closing</h4>
-          <p>The Mid Wall&rsquo;s great doors shut for the second time.</p>
-        </li>
-        <li class="wt-item now">
-          <span class="wt-year">2511 DR</span>
-          <h4>The Present Day</h4>
-          <p>The present day — the Bastion of Last Hope, Sump Three, the Boilerheart&rsquo;s end beat.</p>
-        </li>
-      </ol>
-    </div>
   </section>
 
   <section class="panel hub-content-panel" id="skyPanel" hidden aria-label="The sky right now">
