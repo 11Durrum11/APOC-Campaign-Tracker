@@ -727,6 +727,10 @@
   body.hub-arranging .hub-btn:active{cursor:grabbing}
   .hub-item.hub-drag-src{opacity:.45}
   .hub-item.hub-drop-ok{outline:2px solid hsl(222,89%,47%);outline-offset:1px;border-radius:8px}
+  /* The one empty slot in the hub grid (Shaun, 2026-11-22): while
+     arranging it shows as a dashed cell so a button can be dropped
+     into it — that is how a button reaches the bottom-left cell. */
+  body.hub-arranging .hub-spacer{outline:1px dashed hsla(222,89%,55%,.55);outline-offset:-1px;border-radius:8px}
 </style>
 </head>
 <body data-scene="bastion-streets">
@@ -929,10 +933,11 @@
       <div class="hub-item">
         <button class="hub-btn" type="button" data-hub-action="reconvenes" aria-expanded="false" id="reconButton" title="Open The Table Reconvenes — the countdown to the next session"><span class="hub-name">The Table Reconvenes</span></button>
       </div>
-      <div class="hub-item hub-item-under-cosmo">
+      <div class="hub-item hub-spacer" aria-hidden="true"></div>
+      <div class="hub-item">
         <a class="hub-btn" href="initiative.html" target="_blank" rel="noopener" title="Open John's House, the initiative tracker, in a new tab"><span class="hub-name">John's House</span><span class="hub-sub">Initiative Tracker</span></a>
       </div>
-      <div class="hub-item hub-item-bottom-right">
+      <div class="hub-item">
         <a class="hub-btn" href="calendar.html" target="_blank" rel="noopener" title="Open the Campaign Calendar in a new tab — the shared tracking calendar: sessions, in-world dates and deadlines, kept by the whole table"><span class="hub-name">Calendar</span><span class="hub-sub">Campaign Calendar</span></a>
       </div>
     </div>
@@ -2561,7 +2566,12 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
    enter/exit: 🔓 Edit page unlocks arranging, 🔒 Done editing
    locks it again, and every load starts locked. Arrange ON: drag
    a hub button onto another and the two swap — the three-across
-   grid shape never changes, only the order. Mouse and touch both
+   grid shape never changes, only the order. The grid holds
+   FIFTEEN slots: the fourteen buttons and ONE empty slot, which
+   ships at the bottom left (row 5, column 1). Dragging a button
+   onto the empty slot moves the button into it and leaves the
+   empty slot where the button was — no cell of the grid is out
+   of reach. Mouse and touch both
    work (pointer events). While arranging, a hub button's normal
    action can never fire: clicks in the hub are swallowed whole,
    drags included. The order is saved per device in localStorage
@@ -2576,7 +2586,7 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
   if (!row) return;
   var ORDER_KEY = "apoc-hub-button-order";
   /* Keys in the order the buttons ship in — this IS the default. */
-  var KEYS = ["tracker","tavern","lair","weather","blendcrafter","critgen","vtt","encounter","canon","sky","cosmetology","reconvenes","johnshouse","calendar"];
+  var KEYS = ["tracker","tavern","lair","weather","blendcrafter","critgen","vtt","encounter","canon","sky","cosmetology","reconvenes","empty","johnshouse","calendar"];
   var items = Array.prototype.slice.call(row.querySelectorAll(".hub-item"));
   if (items.length !== KEYS.length) return;
   var byKey = {};
@@ -2591,28 +2601,16 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
   function currentOrder(){
     return Array.prototype.map.call(row.querySelectorAll(".hub-item"), function(it){ return it.getAttribute("data-hub-key"); });
   }
-  /* John's House ships in the grid cell directly under Cosmetology
-     (row 5, column 2) and the Calendar at the right bottom (row 5,
-     column 3): those two cells are pinned by placement classes, and
-     the classes belong to the CELLS, not the buttons — whichever
-     buttons a swap or a restored order seats in the last two slots
-     take the pinned cells, exactly as the shipped order has them.
-     (The space build held those cells with spacer elements; this
-     page holds them with the classes, so the script re-seats the
-     classes after every order change instead.) */
-  function seatPins(){
-    var nodes = row.querySelectorAll(".hub-item");
-    Array.prototype.forEach.call(nodes, function(n){
-      n.classList.remove("hub-item-under-cosmo");
-      n.classList.remove("hub-item-bottom-right");
-    });
-    if (nodes.length > 12) nodes[nodes.length - 2].classList.add("hub-item-under-cosmo");
-    if (nodes.length > 13) nodes[nodes.length - 1].classList.add("hub-item-bottom-right");
-  }
+  /* Placement is pure slot order — there are no pinned cells.
+     The grid's fifteen slots are the fourteen buttons plus the
+     one empty slot ("empty", a plain spacer item in the markup):
+     whichever slot a button is dragged into is the cell it sits
+     in, the bottom-left cell included. (The placement classes
+     that used to pin the last two slots right — and so kept the
+     bottom-left cell permanently empty — are retired.) */
   function applyOrder(order){
     var nodes = order.map(function(k){ return byKey[k]; }).filter(Boolean);
     nodes.forEach(function(n){ row.appendChild(n); });
-    seatPins();
   }
   function saveOrder(){ write(ORDER_KEY, JSON.stringify(currentOrder())); }
   function resetOrder(){
@@ -2626,7 +2624,15 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
     if (!raw) return;
     var saved;
     try { saved = JSON.parse(raw); } catch(e){ return; }
-    if (!Array.isArray(saved) || saved.length !== KEYS.length) return;
+    if (!Array.isArray(saved)) return;
+    /* Orders saved before the empty slot existed hold the fourteen
+       buttons only: seat the empty slot in its shipped place
+       (index 12) and the arrangement carries over whole. */
+    if (saved.length === KEYS.length - 1 &&
+        saved.slice().sort().join(",") === DEFAULT_ORDER.filter(function(k){ return k !== "empty"; }).sort().join(",")) {
+      saved = saved.slice(0, 12).concat(["empty"], saved.slice(12));
+    }
+    if (saved.length !== KEYS.length) return;
     if (saved.slice().sort().join(",") !== DEFAULT_ORDER.slice().sort().join(",")) return;
     applyOrder(saved);
   })();
@@ -2718,7 +2724,6 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
     p.replaceChild(markB, b);
     p.replaceChild(a, markB);
     p.replaceChild(b, markA);
-    seatPins();
   }
 })();
 </script>
