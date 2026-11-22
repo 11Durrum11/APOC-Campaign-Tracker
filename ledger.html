@@ -149,17 +149,21 @@
   .timeline-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
   .timeline{margin-top:18px}
   .timeline[hidden]{display:none}
-  .tl-list{list-style:none;margin:0;padding:0;position:relative}
-  .tl-list::before{content:"";position:absolute;left:7px;top:10px;bottom:10px;width:2px;background:linear-gradient(180deg,var(--line-gold),var(--line))}
-  .tl-item{position:relative;padding:0 0 22px 34px}
-  .tl-item:last-child{padding-bottom:2px}
-  .tl-item::before{content:"";position:absolute;left:0;top:7px;width:16px;height:16px;border-radius:50%;background:var(--bg2);border:2px solid var(--gold);z-index:1}
+  .tl-list{list-style:none;margin:0;padding:0;position:relative;display:flex;gap:2px}
+  .tl-list::before{content:"";position:absolute;left:calc(100%/12);right:calc(100%/12);top:7px;height:2px;background:linear-gradient(90deg,var(--line-gold),var(--line))}
+  .tl-item{position:relative;flex:1 1 0;min-width:0;padding:26px 2px 0;text-align:center}
+  .tl-item::before{content:"";position:absolute;left:50%;margin-left:-8px;top:0;width:16px;height:16px;border-radius:50%;background:var(--bg2);border:2px solid var(--gold);z-index:1}
   .tl-item.apoc::before{background:var(--red);border-color:var(--red)}
   .tl-item.now::before{background:var(--gold)}
-  .tl-year{font-family:var(--font-mono);font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--gold);display:block}
+  .tl-year{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.03em;line-height:1.35;color:var(--gold);display:block}
   .tl-item.apoc .tl-year{color:var(--red-text)}
-  .tl-item h3{font-family:var(--font-display);font-size:16.5px;letter-spacing:.03em;margin:3px 0 4px;line-height:1.25}
-  .tl-item p{margin:0;font-size:16px;color:var(--ink-dim);line-height:1.45}
+  .tl-item h3{font-family:var(--font-display);font-size:12px;letter-spacing:.02em;margin:4px 0 3px;line-height:1.25;overflow-wrap:break-word}
+  .tl-item p{margin:0;font-size:11.5px;color:var(--ink-dim);line-height:1.4;overflow-wrap:break-word}
+  @media(min-width:560px){
+    .tl-year{font-size:12px}
+    .tl-item h3{font-size:13px}
+    .tl-item p{font-size:12.5px}
+  }
   @media (prefers-reduced-motion: no-preference){
     .timeline.open{animation:tlIn .25s ease}
     @keyframes tlIn{0%{opacity:0;transform:translateY(-4px)}100%{opacity:1;transform:translateY(0)}}
