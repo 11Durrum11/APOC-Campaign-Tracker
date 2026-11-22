@@ -192,6 +192,12 @@
      nestled in it. */
   .hub-item-bottom-right{grid-column:3}
   #cosmetologyPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#000;display:block}
+  /* The DM's Ledger lives inside the DM's Lair (Shaun, 2026-11-22):
+     a hosted copy of the Ledger space, embedded the same way the
+     Crystal Sphere is embedded in Cosmetology. The space stays the
+     source of truth; ledger.html re-syncs from it on future pushes. */
+  #lairPanel iframe{width:100%;height:76vh;min-height:420px;border:1px solid var(--border);border-radius:8px;background:#12100d;display:block}
+  .lair-ledger{margin:0 0 12px}
   .hub-item{position:relative;min-width:0}
   /* Uniform hub buttons (Shaun, 2026-11-07): EVERY hub button is the
      SAME size — fixed height 47px for all nine, whatever the label:
@@ -956,6 +962,10 @@
     <div class="lair-actions">
       <button type="button" class="btn" id="lairCopyBriefBtn" title="Copy the AI DM session brief to paste into the AI DM chat">Copy AI DM brief</button>
       <button type="button" class="btn" id="lairAddBtn" title="Add this brief to the Lair journal below">Add to the Lair</button>
+    </div>
+    <div class="lair-ledger">
+      <p>The DM's Ledger — the game record: the law, the dice rolled live, Jaspar, the state of the world, the log, and the save. <a href="ledger.html" target="_blank" rel="noopener" title="Open the DM's Ledger on its own page">Open the Ledger on its own page</a></p>
+      <iframe src="ledger.html" title="The DM's Ledger" loading="lazy"></iframe>
     </div>
     <div id="lairContent"></div>
   </section>
