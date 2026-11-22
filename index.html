@@ -446,6 +446,13 @@
   .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .entry-card{background:var(--popover);border:1px solid var(--card-border);border-radius:11px;padding:16px;min-width:0}
   .entry-card h3{margin:0 0 7px;font-size:1.22rem;line-height:1.22}
+  .entry-card h3 .name-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+  .entry-card h3 .name-toggle:hover{text-decoration:underline}
+  .entry-card h3 .name-toggle:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+  .entry-card h3 .name-toggle .nt-arrow{font-size:.72em;color:var(--primary);margin-left:5px}
+  .entry-stats{border-left:4px solid var(--primary);background:var(--secondary);border-radius:0 9px 9px 0;padding:10px 12px;margin:0 0 10px;font-size:.86rem;line-height:1.45;overflow-wrap:anywhere}
+  .entry-stats p{margin:0 0 8px}
+  .entry-stats p:last-child{margin-bottom:0}
   .entry-art{width:100%;display:block;border-radius:9px;border:1px solid var(--card-border);margin-bottom:10px}
   .meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
   .pill{display:inline-flex;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--secondary);font-size:.74rem;line-height:1.35;color:var(--accent-foreground)}
@@ -1285,6 +1292,38 @@ const SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
 const ENTRIES_TABLE = "entries";
 const SETTINGS_TABLE = "site_settings";       // per live-tracker-prep/artwork-storage-and-settings.sql
 const STATUS_KEY = "campaign_status";         // the campaign-status row key in site_settings
+const STATS_KEY = "npc_stats";                // full stat blocks for named people, keyed by exact entry title
+let npcStats = {};
+/* A person's full stats ride the shared store under their exact entry
+   title. Any people entry whose title is in this map gets its stats
+   nested under its name — including names added later: file a new
+   person's block into the npc_stats row and their name picks the
+   treatment up on its own. */
+async function loadNpcStats(){
+  if (!db) return;
+  try {
+    const { data, error } = await db.from(SETTINGS_TABLE).select("value").eq("key", STATS_KEY).maybeSingle();
+    if (error) throw error;
+    if (data && data.value && data.value.stats) { npcStats = data.value.stats; renderTracker(); if (typeof renderLair === "function") renderLair(); }
+  } catch(e) { /* stats are an addition; the board stands without them */ }
+}
+function statsHTML(text){
+  return String(text).split(/\n{2,}/).map(p =>
+    `<p>${esc(p.trim()).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>").replace(/\n/g, "<br>")}</p>`
+  ).join("");
+}
+document.addEventListener("click", ev => {
+  const btn = ev.target.closest ? ev.target.closest("[data-stats-toggle]") : null;
+  if (!btn) return;
+  const card = btn.closest(".entry-card");
+  const panel = card ? card.querySelector("[data-stats-panel]") : null;
+  if (!panel) return;
+  const open = panel.hidden;
+  panel.hidden = !open;
+  btn.setAttribute("aria-expanded", String(open));
+  const arrow = btn.querySelector(".nt-arrow");
+  if (arrow) arrow.textContent = open ? "▾" : "▸";
+});
 const ARTWORK_BUCKET = "cody-artwork";        // per the same setup SQL
 
 let db = null;
@@ -1619,9 +1658,14 @@ function entryCard(e){
      "assets/saint-james-winged.webp" as stray text). Only real,
      non-image links are shown. */
   const shownLinks = (e.links || "").replace(/assets\/[^\s"']+\.(?:webp|jpg|jpeg|png)/gi, "").replace(/\s+/g, " ").trim();
+  const statsText = (e.category === "npc" || e.category === "character") ? npcStats[e.title] : null;
+  const nameHTML = statsText
+    ? `<button type="button" class="name-toggle" data-stats-toggle aria-expanded="false" title="Show the full stats for ${esc(e.title)} — abilities, combat numbers, spells, skills, feats, and full equipment">${esc(e.title)}<span class="nt-arrow" aria-hidden="true">▸</span></button>`
+    : esc(e.title);
   return `<article class="entry-card">
     ${art ? `<img class="entry-art" src="${esc(art[0])}" alt="${esc(e.title)}" loading="lazy">` : ""}
-    <h3>${esc(e.title)}</h3>
+    <h3>${nameHTML}</h3>
+    ${statsText ? `<div class="entry-stats" data-stats-panel hidden>${statsHTML(statsText)}</div>` : ""}
     <div class="meta">${meta}</div>
     ${e.detail ? `<div class="detail">${esc(e.detail)}</div>` : ""}
     ${e.origin === "dm" && e.secret ? `<div class="secret"><strong>DM secret (this browser only):</strong>\n${esc(e.secret)}</div>` : ""}
@@ -1767,7 +1811,7 @@ $("entryScope").addEventListener("change", updateScopeUI);
 $("entryCategory").addEventListener("change", updateScopeUI);
 $("addEntryBtn").addEventListener("click", () => openEntryForm());
 $("cancelEntryBtn").addEventListener("click", () => { $("entryForm").hidden = true; });
-$("refreshEntries").addEventListener("click", () => { loadSharedEntries(); loadCampaignStatus(); loadArtwork(); });
+$("refreshEntries").addEventListener("click", () => { loadSharedEntries(); loadCampaignStatus(); loadNpcStats(); loadArtwork(); });
 $("entrySearch").addEventListener("input", ev => { entryQuery = ev.target.value; renderTracker(); });
 /* ============ DM's Lair — its own panel (Shaun, 2026-11-07) ============
    The Lair holds the journal (AI DM + session entries) and the AI DM
@@ -2252,6 +2296,7 @@ setInterval(() => { if (!$("galleryOverlay").hidden) loadTavernChat(); }, 5000);
   renderTracker();
   loadCampaignStatus();
   loadSharedEntries();
+  loadNpcStats();
   loadArtwork();
   setInterval(() => loadSharedEntries(false), 60000);
   if (db) {
