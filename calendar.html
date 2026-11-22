@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campaign Calendar · APOC Survival</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --background:hsl(222 22% 10%);
+    --foreground:hsl(42 38% 88%);
+    --card-border:hsl(220 16% 24%);
+    --primary:hsl(38 92% 50%);
+    --primary-foreground:hsl(30 40% 10%);
+    --muted-foreground:hsl(220 12% 62%);
+    --destructive:hsl(0 62% 46%);
+    --scene-image:url("assets/scenes/bastion-streets.webp");
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--background);color:var(--foreground);
+    font-family:Georgia,"Times New Roman",serif;line-height:1.5;
+    overflow-x:hidden;overflow-x:clip;min-height:100vh;min-height:100dvh;
+  }
+  body::before{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-2;
+    background-image:var(--scene-image);background-size:cover;background-position:center;opacity:.45;
+  }
+  body::after{
+    content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;
+    background:linear-gradient(180deg,hsla(222,22%,10%,.62),hsla(222,22%,10%,.86) 46%,hsla(222,22%,10%,.96) 100%);
+  }
+  .page{max-width:1060px;margin:0 auto;padding:1rem .9rem 2.5rem}
+  .topbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .topbar .spacer{flex:1 1 auto}
+  .btn{
+    font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;
+    background:hsla(220,16%,20%,.55);color:var(--foreground);
+    border:1px solid var(--card-border);border-radius:999px;
+    min-height:34px;padding:6px 14px;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;
+  }
+  .btn:hover{border-color:var(--primary);color:var(--primary)}
+  .btn.primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+  .btn.primary:hover{color:var(--primary-foreground);opacity:.92}
+  .btn.danger:hover{border-color:var(--destructive);color:var(--destructive)}
+  .btn.small{min-height:28px;padding:3px 10px;font-size:.78rem}
+  h1{font-size:1.25rem;font-weight:500;margin:0;letter-spacing:.02em}
+  h1 .gold{color:var(--primary)}
+  .month-title{font-size:1.3rem;font-weight:600;min-width:11.5rem;text-align:center}
+  .cal-wrap{border:1px solid var(--card-border);border-radius:12px;background:hsla(222,20%,13%,.72);padding:.7rem}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-bottom:.35rem}
+  .dow span{text-align:center;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:.15rem 0}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}
+  .day{
+    min-height:86px;border:1px solid var(--card-border);border-radius:8px;padding:.3rem .35rem;
+    background:hsla(222,20%,16%,.5);cursor:pointer;display:flex;flex-direction:column;gap:.22rem;overflow:hidden;
+  }
+  .day:hover{border-color:var(--primary)}
+  .day.out{opacity:.38}
+  .day.today{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+  .day.sel{border-color:var(--primary);background:hsla(38,60%,30%,.28)}
+  .day .num{font-size:.82rem;font-weight:600}
+  .day.today .num{color:var(--primary)}
+  .chip{
+    font-size:.68rem;line-height:1.25;border-radius:5px;padding:.08rem .3rem;
+    background:hsla(220,16%,26%,.85);border:1px solid var(--card-border);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .chip.tag-session{border-color:var(--primary);color:var(--primary)}
+  .chip.tag-inworld{border-color:hsl(160 40% 45%);color:hsl(160 45% 70%)}
+  .chip.tag-deadline{border-color:var(--destructive);color:hsl(0 70% 75%)}
+  .more{font-size:.66rem;color:var(--muted-foreground)}
+  .day-panel{margin-top:.9rem;border:1px solid var(--card-border);border-radius:12px;background:hsla(222,20%,13%,.72);padding:.8rem .9rem}
+  .day-panel h2{margin:0 0 .5rem;font-size:1.05rem;font-weight:600}
+  .ev{border:1px solid var(--card-border);border-radius:8px;padding:.5rem .6rem;margin-bottom:.45rem;background:hsla(222,20%,16%,.5)}
+  .ev .row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+  .ev .t{font-weight:600}
+  .ev .tag{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--card-border);border-radius:999px;padding:.05rem .45rem;color:var(--muted-foreground)}
+  .ev .tag-session{border-color:var(--primary);color:var(--primary)}
+  .ev .tag-inworld{border-color:hsl(160 40% 45%);color:hsl(160 45% 70%)}
+  .ev .tag-deadline{border-color:var(--destructive);color:hsl(0 70% 75%)}
+  .ev .note{font-size:.85rem;color:var(--foreground);opacity:.88;margin-top:.2rem;white-space:pre-wrap;overflow-wrap:anywhere}
+  .ev .acts{margin-left:auto;display:flex;gap:.35rem}
+  .empty{color:var(--muted-foreground);font-size:.88rem;padding:.3rem 0 .1rem}
+  form.ev-form{margin-top:.7rem;border-top:1px dashed var(--card-border);padding-top:.7rem;display:grid;gap:.5rem}
+  form.ev-form label{font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-foreground);display:grid;gap:.25rem}
+  form.ev-form input[type="text"],form.ev-form textarea,form.ev-form select{
+    font:inherit;font-size:.9rem;color:var(--foreground);background:hsla(222,20%,12%,.8);
+    border:1px solid var(--card-border);border-radius:8px;padding:.42rem .55rem;width:100%;
+  }
+  form.ev-form textarea{resize:vertical;min-height:3.2rem}
+  .form-row{display:flex;gap:.6rem;flex-wrap:wrap}
+  .form-row label{flex:1 1 12rem}
+  .form-acts{display:flex;gap:.5rem;align-items:center}
+  .sync{font-size:.74rem;color:var(--muted-foreground)}
+  @media (max-width:760px){
+    .day{min-height:62px;padding:.22rem .25rem}
+    .chip{font-size:.6rem}
+    .month-title{min-width:0;font-size:1.1rem;flex:1 1 auto}
+    h1{font-size:1.05rem}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <a class="btn" href="index.html" title="Back to the Campaign Hub">Campaign Hub</a>
+    <h1>APOC Survival <span class="gold">Campaign Calendar</span></h1>
+    <span class="spacer"></span>
+    <span class="sync" id="calSync">Loading…</span>
+  </div>
+
+  <div class="topbar" role="group" aria-label="Month navigation">
+    <button class="btn" type="button" id="calPrev" title="Previous month">‹ Prev</button>
+    <div class="month-title" id="calMonthTitle">Month</div>
+    <button class="btn" type="button" id="calNext" title="Next month">Next ›</button>
+    <button class="btn" type="button" id="calToday" title="Jump back to the current month">Today</button>
+  </div>
+
+  <div class="cal-wrap">
+    <div class="dow" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div class="grid" id="calGrid"></div>
+  </div>
+
+  <section class="day-panel" id="calDayPanel" aria-live="polite">
+    <h2 id="calDayTitle">Pick a day</h2>
+    <div id="calDayEvents"></div>
+    <form class="ev-form" id="calForm">
+      <div class="form-row">
+        <label>Title
+          <input type="text" id="calFTitle" required maxlength="120" placeholder="What's happening">
+        </label>
+        <label style="flex:0 1 11rem">Kind
+          <select id="calFTag">
+            <option value="session">Session</option>
+            <option value="inworld">In-world</option>
+            <option value="deadline">Deadline</option>
+            <option value="note">Note</option>
+          </select>
+        </label>
+      </div>
+      <label>Notes
+        <textarea id="calFNote" maxlength="600" placeholder="Details, times, who's coming, what's needed"></textarea>
+      </label>
+      <div class="form-acts">
+        <button class="btn primary" type="submit" id="calFSave">Add to this day</button>
+        <button class="btn" type="button" id="calFCancel" hidden>Cancel edit</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  var SUPABASE_URL = "https://gjvebpbxggmumtslidej.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_lHurlKltZPfNQ5VviUv90g_yiQ7xZSl";
+  var STORE_KEY = "campaign_calendar";
+  var db = null;
+  try { if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { db = null; }
+
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var TAG_LABEL = { session: "Session", inworld: "In-world", deadline: "Deadline", note: "Note" };
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function todayKey() { return keyOf(new Date()); }
+
+  var events = [];           // {id, date:"YYYY-MM-DD", title, tag, note}
+  var view = new Date(); view.setDate(1);
+  var selected = todayKey();
+  var editingId = null;
+
+  var grid = document.getElementById("calGrid");
+  var titleEl = document.getElementById("calMonthTitle");
+  var dayTitle = document.getElementById("calDayTitle");
+  var dayEvents = document.getElementById("calDayEvents");
+  var syncEl = document.getElementById("calSync");
+  var form = document.getElementById("calForm");
+  var fTitle = document.getElementById("calFTitle");
+  var fTag = document.getElementById("calFTag");
+  var fNote = document.getElementById("calFNote");
+  var fSave = document.getElementById("calFSave");
+  var fCancel = document.getElementById("calFCancel");
+
+  function setSync(msg) { syncEl.textContent = msg; }
+  function byDate(k) { return events.filter(function (e) { return e.date === k; }); }
+
+  function render() {
+    titleEl.textContent = MONTHS[view.getMonth()] + " " + view.getFullYear();
+    grid.innerHTML = "";
+    var first = new Date(view.getFullYear(), view.getMonth(), 1);
+    var start = new Date(first); start.setDate(1 - first.getDay());
+    var tk = todayKey();
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var k = keyOf(d);
+      var cell = document.createElement("div");
+      cell.className = "day" + (d.getMonth() !== view.getMonth() ? " out" : "") + (k === tk ? " today" : "") + (k === selected ? " sel" : "");
+      cell.setAttribute("role", "button");
+      cell.setAttribute("aria-label", d.toDateString());
+      var num = document.createElement("span"); num.className = "num"; num.textContent = d.getDate();
+      cell.appendChild(num);
+      var evs = byDate(k);
+      evs.slice(0, 2).forEach(function (e) {
+        var c = document.createElement("span"); c.className = "chip tag-" + e.tag; c.textContent = e.title; cell.appendChild(c);
+      });
+      if (evs.length > 2) { var m = document.createElement("span"); m.className = "more"; m.textContent = "+" + (evs.length - 2) + " more"; cell.appendChild(m); }
+      (function (kk) { cell.addEventListener("click", function () { selected = kk; editingId = null; syncForm(); render(); }); })(k);
+      grid.appendChild(cell);
+    }
+    renderDay();
+  }
+
+  function renderDay() {
+    var parts = selected.split("-");
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    dayTitle.textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    dayEvents.innerHTML = "";
+    var evs = byDate(selected);
+    if (!evs.length) {
+      var em = document.createElement("div"); em.className = "empty"; em.textContent = "Nothing on this day yet — add the first entry below.";
+      dayEvents.appendChild(em);
+      return;
+    }
+    evs.forEach(function (e) {
+      var box = document.createElement("div"); box.className = "ev";
+      var row = document.createElement("div"); row.className = "row";
+      var t = document.createElement("span"); t.className = "t"; t.textContent = e.title;
+      var tag = document.createElement("span"); tag.className = "tag tag-" + e.tag; tag.textContent = TAG_LABEL[e.tag] || "Note";
+      var acts = document.createElement("span"); acts.className = "acts";
+      var eb = document.createElement("button"); eb.className = "btn small"; eb.type = "button"; eb.textContent = "Edit"; eb.title = "Edit this entry";
+      eb.addEventListener("click", function () { startEdit(e); });
+      var del = document.createElement("button"); del.className = "btn small danger"; del.type = "button"; del.textContent = "Delete"; del.title = "Delete this entry";
+      del.addEventListener("click", function () { removeEvent(e.id); });
+      acts.appendChild(eb); acts.appendChild(del);
+      row.appendChild(t); row.appendChild(tag); row.appendChild(acts);
+      box.appendChild(row);
+      if (e.note) { var n = document.createElement("div"); n.className = "note"; n.textContent = e.note; box.appendChild(n); }
+      dayEvents.appendChild(box);
+    });
+  }
+
+  function syncForm() {
+    if (editingId) {
+      var e = events.find(function (x) { return x.id === editingId; });
+      if (e) { fTitle.value = e.title; fTag.value = e.tag; fNote.value = e.note || ""; }
+      fSave.textContent = "Save changes";
+      fCancel.hidden = false;
+    } else {
+      form.reset(); fTag.value = "session";
+      fSave.textContent = "Add to this day";
+      fCancel.hidden = true;
+    }
+  }
+  function startEdit(e) { editingId = e.id; syncForm(); fTitle.focus(); }
+
+  function uid() { return "ev" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function save() {
+    if (!db) { setSync("Offline — changes are on this device only"); return; }
+    setSync("Saving…");
+    db.from("site_settings").upsert({ key: STORE_KEY, value: { events: events } }).then(function (r) {
+      setSync(r && r.error ? "Save failed — try again" : "Saved · shared with the table");
+    });
+  }
+
+  function removeEvent(id) {
+    events = events.filter(function (e) { return e.id !== id; });
+    if (editingId === id) editingId = null;
+    syncForm(); render(); save();
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var title = fTitle.value.trim(); if (!title) return;
+    if (editingId) {
+      var e = events.find(function (x) { return x.id === editingId; });
+      if (e) { e.title = title; e.tag = fTag.value; e.note = fNote.value.trim(); }
+      editingId = null;
+    } else {
+      events.push({ id: uid(), date: selected, title: title, tag: fTag.value, note: fNote.value.trim() });
+    }
+    syncForm(); render(); save();
+  });
+  fCancel.addEventListener("click", function () { editingId = null; syncForm(); });
+
+  document.getElementById("calPrev").addEventListener("click", function () { view.setMonth(view.getMonth() - 1); render(); });
+  document.getElementById("calNext").addEventListener("click", function () { view.setMonth(view.getMonth() + 1); render(); });
+  document.getElementById("calToday").addEventListener("click", function () { view = new Date(); view.setDate(1); selected = todayKey(); render(); });
+
+  function seed() {
+    return [
+      { id: uid(), date: "2026-11-22", title: "Game session — 11:00 AM", tag: "session", note: "At the table. John Kricks out with the flu; Fransisco away for Thanksgiving, possibly remote." },
+      { id: uid(), date: "2026-12-06", title: "Game session — 11:00 AM", tag: "session", note: "At the table." }
+    ];
+  }
+
+  function load() {
+    if (!db) { events = seed(); setSync("Offline — showing this device's copy"); syncForm(); render(); return; }
+    db.from("site_settings").select("value").eq("key", STORE_KEY).maybeSingle().then(function (r) {
+      var v = r && r.data && r.data.value;
+      if (v && Array.isArray(v.events)) { events = v.events; setSync("Shared calendar · live"); }
+      else { events = seed(); setSync("Shared calendar · live"); save(); }
+      syncForm(); render();
+    });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
