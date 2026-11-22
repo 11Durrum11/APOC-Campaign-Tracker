@@ -177,6 +177,24 @@
   .secrets button{margin-top:14px;background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:999px;padding:8px 18px;font-family:var(--font-mono);font-size:12.5px;cursor:pointer;min-height:40px}
   .secrets .denied{font-family:var(--font-mono);font-size:13px;color:var(--red-text);margin-top:10px;min-height:20px}
 
+  /* Solo game zone — visually its own compartment, apart from the world */
+  .solo-zone{margin-top:40px;border:1px solid var(--line-gold);border-radius:12px;background:#17130e;padding:20px 16px 16px}
+  @media(min-width:720px){.solo-zone{padding:24px 20px 20px}}
+  .solo-badge{display:inline-block;border:1px solid var(--red-line);background:var(--red-bg);color:var(--red-text);border-radius:999px;padding:6px 13px;font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 12px}
+  .solo-title{font-family:var(--font-display);font-size:clamp(21px,4.5vw,27px);letter-spacing:.05em;text-transform:none;color:var(--ink);margin:0;display:flex;align-items:center;gap:12px}
+  .solo-title::after{content:"";flex:1;height:1px;background:var(--line-gold)}
+  .solo-intro{color:var(--ink-dim);font-size:17px;margin:10px 0 18px;max-width:660px}
+  .solo-panel{background:var(--panel)}
+
+  /* Sunday Table zone — the live campaign's own compartment */
+  .table-zone{margin-top:40px;border:1px solid var(--line-gold);border-radius:12px;background:#181510;padding:20px 16px 16px}
+  @media(min-width:720px){.table-zone{padding:24px 20px 20px}}
+  .table-badge{display:inline-block;border:1px solid var(--line-gold);background:var(--panel2);color:var(--gold-bright);border-radius:999px;padding:6px 13px;font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 12px}
+  .table-title{font-family:var(--font-display);font-size:clamp(21px,4.5vw,27px);letter-spacing:.05em;color:var(--ink);margin:0;display:flex;align-items:center;gap:12px}
+  .table-title::after{content:"";flex:1;height:1px;background:var(--line-gold)}
+  .table-intro{color:var(--ink-dim);font-size:17px;margin:10px 0 18px;max-width:660px}
+  .table-panel{background:var(--panel)}
+
   /* Save */
   .save-head{font-family:var(--font-mono);font-size:14px;line-height:1.7;word-break:break-word}
   .save-head b{color:var(--gold-bright)}
@@ -272,147 +290,202 @@
     </div>
   </section>
 
-  <div class="grid2">
-    <!-- CHARACTER -->
-    <section class="sec panel" aria-label="Character">
-      <div class="sec-head"><h2>Character</h2><span class="sec-note">character.md</span></div>
-      <p class="char-name">Jaspar &ldquo;Tick&rdquo; Wren</p>
-      <p class="char-line">Human · Rogue 3 / Psion (Seer) 1 · Level 4</p>
-      <div class="stat-row">
-        <div class="stat"><div class="v">23</div><div class="l">Hit Points</div></div>
-        <div class="stat"><div class="v">16</div><div class="l">Armor Class</div></div>
-        <div class="stat"><div class="v">+7</div><div class="l">Initiative</div></div>
-        <div class="stat"><div class="v">4</div><div class="l">Level</div></div>
-      </div>
-      <p class="detail"><strong>War-Torn left hand</strong> — fitted brass-and-steel, taken by a Guild press at seventeen. It ticks when he&rsquo;s nervous or standing too still; he pins a metal toothpick under the ticking spot to quiet it.</p>
-      <p class="label">Feats</p>
-      <div class="chips"><span class="chip">Weapon Finesse</span><span class="chip">Dodge</span><span class="chip">Improved Initiative</span></div>
-      <p class="label">Skills</p>
-      <div class="skills">
-        <div class="skill"><span>Search</span><b>+8</b></div>
-        <div class="skill"><span>Disable Device</span><b>+8</b></div>
-        <div class="skill"><span>Tumble</span><b>+8</b></div>
-        <div class="skill"><span>Sense Motive</span><b>+7</b></div>
-        <div class="skill"><span>Hide</span><b>+7</b></div>
-        <div class="skill"><span>Move Silently</span><b>+7</b></div>
-        <div class="skill"><span>Spot</span><b>+6</b></div>
-        <div class="skill"><span>Listen</span><b>+6</b></div>
-        <div class="skill"><span>Diplomacy</span><b>+5</b></div>
-        <div class="skill"><span>Open Lock</span><b>+5</b></div>
-        <div class="skill"><span>Craft (alchemy)</span><b>+5</b></div>
-        <div class="skill"><span>Bluff</span><b>+4</b></div>
-        <div class="skill"><span>Gather Info.</span><b>+4</b></div>
-        <div class="skill"><span>Knowledge (local)</span><b>+4</b></div>
-        <div class="skill"><span>Climb</span><b>+2</b></div>
-      </div>
-    </section>
+  <!-- WORLD STATE -->
+  <section class="sec panel world" aria-label="World state">
+    <div class="sec-head"><h2>World State</h2><span class="sec-note">world-state.md · the world only</span></div>
+    <p class="where">2511 DR · THE BASTION OF LAST HOPE</p>
+    <p>The Bastion of Last Hope holds — six million souls behind its walls, a thousand years after the APOC scarred the crystal sphere shut.</p>
+    <p><strong>The war beyond the walls.</strong> The war goes on out there, and the held cities hold — each on its own course, none of them waiting on anyone inside the walls.</p>
+    <p><strong>The world moves on its own.</strong> Powers rise and press, cities and fronts shift on their own courses whether anyone here acts or not. Nothing is frozen, and nothing waits to be found.</p>
 
-    <!-- WORLD STATE -->
-    <section class="sec panel world" aria-label="World state">
-      <div class="sec-head"><h2>World State</h2><span class="sec-note">world-state.md</span></div>
-      <p class="where">2511 DR · THE BASTION OF LAST HOPE · SUMP THREE</p>
-      <p>The Boilerheart arc stands at its end beat: the seal opened, Jaspar&rsquo;s sister rescued, Guild records taken as proof.</p>
-      <p><strong>Between movements.</strong> The world keeps moving off-screen — the Guild, the Watch, and Sump Three go on with their business whether Jaspar acts or not. Nothing is frozen waiting for him.</p>
-      <p>Play resumes from the end beat, at Shaun&rsquo;s word.</p>
+    <button class="timeline-btn" id="timelineBtn" aria-expanded="false" aria-controls="timelinePanel">Timeline<span class="chev" aria-hidden="true">▾</span></button>
+    <div class="timeline" id="timelinePanel" hidden>
+      <ol class="tl-list">
+        <li class="tl-item">
+          <span class="tl-year">1385 DR</span>
+          <h3>The World as It Was Published</h3>
+          <p>The last year of the world as it was published.</p>
+        </li>
+        <li class="tl-item">
+          <span class="tl-year">1386 DR</span>
+          <h3>Laney&rsquo;s Career Begins</h3>
+          <p>Laney&rsquo;s career begins.</p>
+        </li>
+        <li class="tl-item apoc">
+          <span class="tl-year">1511 DR</span>
+          <h3>The APOC</h3>
+          <p>The Demon God freed from Limbo. Eighty percent of life dead in a day. The crystal sphere scarred shut.</p>
+        </li>
+        <li class="tl-item">
+          <span class="tl-year">c. 1811 DR</span>
+          <h3>The Unwriting</h3>
+          <p>The dracolich&rsquo;s spell unwrites a sphere of the Bastion from Mount Waterdeep.</p>
+        </li>
+        <li class="tl-item">
+          <span class="tl-year">c. 2411 DR</span>
+          <h3>The Second Closing</h3>
+          <p>The Mid Wall&rsquo;s great doors shut for the second time.</p>
+        </li>
+        <li class="tl-item now">
+          <span class="tl-year">2511 DR</span>
+          <h3>The Present Day</h3>
+          <p>The present day — the Bastion of Last Hope, a thousand years after the APOC.</p>
+        </li>
+      </ol>
+    </div>
 
-      <button class="timeline-btn" id="timelineBtn" aria-expanded="false" aria-controls="timelinePanel">Timeline<span class="chev" aria-hidden="true">▾</span></button>
-      <div class="timeline" id="timelinePanel" hidden>
-        <ol class="tl-list">
-          <li class="tl-item">
-            <span class="tl-year">1385 DR</span>
-            <h3>The World as It Was Published</h3>
-            <p>The last year of the world as it was published.</p>
-          </li>
-          <li class="tl-item">
-            <span class="tl-year">1386 DR</span>
-            <h3>Laney&rsquo;s Career Begins</h3>
-            <p>Laney&rsquo;s career begins.</p>
-          </li>
-          <li class="tl-item apoc">
-            <span class="tl-year">1511 DR</span>
-            <h3>The APOC</h3>
-            <p>The Demon God freed from Limbo. Eighty percent of life dead in a day. The crystal sphere scarred shut.</p>
-          </li>
-          <li class="tl-item">
-            <span class="tl-year">c. 1811 DR</span>
-            <h3>The Unwriting</h3>
-            <p>The dracolich&rsquo;s spell unwrites a sphere of the Bastion from Mount Waterdeep.</p>
-          </li>
-          <li class="tl-item">
-            <span class="tl-year">c. 2411 DR</span>
-            <h3>The Second Closing</h3>
-            <p>The Mid Wall&rsquo;s great doors shut for the second time.</p>
-          </li>
-          <li class="tl-item now">
-            <span class="tl-year">2511 DR</span>
-            <h3>The Present Day</h3>
-            <p>The present day — the Bastion of Last Hope, Sump Three, the Boilerheart&rsquo;s end beat.</p>
-          </li>
-        </ol>
-      </div>
+    <p class="label" style="margin-top:20px">Fronts &amp; Clocks</p>
+    <div class="empty-state" style="border:1px dashed var(--line);border-radius:8px">
+      <div class="big">None currently running</div>
+      <div>Between movements. The next situation&rsquo;s clocks open at its prep — not before.</div>
+    </div>
+  </section>
 
-      <p class="label" style="margin-top:20px">Fronts &amp; Clocks</p>
-      <div class="empty-state" style="border:1px dashed var(--line);border-radius:8px">
-        <div class="big">None currently running</div>
-        <div>Between movements. The next situation&rsquo;s clocks open at its prep — not before.</div>
-      </div>
-    </section>
+  <!-- LOCATIONS -->
+  <section class="sec panel" aria-label="Locations">
+    <div class="sec-head"><h2>Locations</h2><span class="sec-note">locations.md</span></div>
+    <div class="loc">
+      <h3>Sump Three</h3>
+      <p>One of the Bastion&rsquo;s sump districts — the Guild&rsquo;s boilerworks and the cistern stand here, down where the lower city&rsquo;s water and steam are worked.</p>
+    </div>
+    <div class="loc">
+      <h3>The Bastion Market</h3>
+      <p>The Bastion&rsquo;s great market. Six million souls, and the market feels like all of them at once.</p>
+    </div>
 
-    <!-- ADVENTURE LOG -->
-    <section class="sec panel span2" aria-label="Adventure log">
-      <div class="sec-head"><h2>Adventure Log</h2><span class="sec-note">adventure-log.md · corrected recaps open each session</span></div>
-      <div class="log-entry">
-        <span class="log-date">2026-11-17 — OPENING</span>
-        <h3>The Market</h3>
-        <p>Guild water-cart incident in the Bastion market. Sella Marr saved, the driver signed a chit. Level 4 taken — HP die rolled openly: 1 + 2 = 3.</p>
-      </div>
-      <div class="log-entry">
-        <span class="log-date">2026-11-17 / 18 — BOILERHEART, END BEAT</span>
-        <h3>The Seal Opened</h3>
-        <p>Seal opened, sister rescued, Guild records taken as proof. Milestone reached.</p>
-      </div>
-    </section>
+    <p class="label" style="margin-top:22px">Secrets</p>
+    <div class="panel secrets" style="padding:20px 14px">
+      <div class="lock" aria-hidden="true">🔒</div>
+      <h3>Sealed — DM Only</h3>
+      <p><code style="font-family:var(--font-mono);font-size:13px">secrets.md</code> exists as its own compartment, apart from everything above. It is never shown at the table and never leaks into the telling.</p>
+      <button id="secretsBtn">Try the seal</button>
+      <div class="denied" id="secretsMsg" aria-live="polite"></div>
+    </div>
+  </section>
 
-    <!-- NPCS -->
-    <section class="sec panel" aria-label="NPCs">
-      <div class="sec-head"><h2>People</h2><span class="sec-note">npcs.md</span></div>
-      <div class="npc">
-        <h3>Pell</h3><span class="role">Companion — ex-pump-guard</span>
-        <div class="nums">Fighter 2 · HP 19 · AC 16 · Warhammer +5 (1d8+3)</div>
-        <p>Counts rivets under his breath when nervous. Runs on a no-spotlight leash — never solves the puzzle, never takes Jaspar&rsquo;s decisions.</p>
-      </div>
-      <div class="npc">
-        <h3>Sella Marr</h3><span class="role">Spice-seller, the market</span>
-        <p>Saved by Jaspar in the water-cart incident, 2026-11-17.</p>
-      </div>
-      <div class="npc">
-        <h3>Harlo Venn</h3><span class="role">Guild factor</span>
-        <p>The Boilerheart&rsquo;s villain. The Guild records taken at the landing name his scheme. His position is the next movement&rsquo;s business.</p>
-      </div>
-    </section>
+  <!-- SUNDAY TABLE -->
+  <section class="table-zone" aria-label="The Sunday Table">
+    <p class="table-badge">The live campaign — its own game · not the solo game</p>
+    <h2 class="table-title">The Sunday Table</h2>
+    <p class="table-intro">The live campaign&rsquo;s corner of the Ledger — its own state and its own log, kept apart from the world above and from the solo game below.</p>
 
-    <!-- LOCATIONS -->
-    <section class="sec panel" aria-label="Locations">
-      <div class="sec-head"><h2>Locations</h2><span class="sec-note">locations.md</span></div>
-      <div class="loc">
-        <h3>Sump Three</h3>
-        <p>Jaspar&rsquo;s home ground — he grew up in the Sump. Site of the Boilerheart: the Guild&rsquo;s boilerworks, the seal, the cistern.</p>
-      </div>
-      <div class="loc">
-        <h3>The Bastion Market</h3>
-        <p>Where the game opened — the Guild water-cart, Sella Marr&rsquo;s spice stall. Six million souls, and the market feels like all of them at once.</p>
-      </div>
+    <div class="grid2">
+      <section class="panel table-panel world" aria-label="Sunday Table state">
+        <div class="sec-head"><h2>Where the Campaign Stands</h2><span class="sec-note">the live campaign</span></div>
+        <p class="where">RESUMES SUNDAY, DECEMBER 6, 2026</p>
+        <p>The Sunday table&rsquo;s game resumes <strong>Sunday, December 6, 2026</strong>.</p>
+        <p>Its state is written here as it is played — what happens at the table is the record, and this corner of the Ledger is corrected to match it.</p>
+      </section>
 
-      <p class="label" style="margin-top:22px">Secrets</p>
-      <div class="panel secrets" style="padding:20px 14px">
-        <div class="lock" aria-hidden="true">🔒</div>
-        <h3>Sealed — DM Only</h3>
-        <p><code style="font-family:var(--font-mono);font-size:13px">secrets.md</code> exists as its own compartment, apart from everything above. It is never shown at the table and never leaks into the telling.</p>
-        <button id="secretsBtn">Try the seal</button>
-        <div class="denied" id="secretsMsg" aria-live="polite"></div>
-      </div>
-    </section>
-  </div>
+      <section class="panel table-panel" aria-label="Sunday Table campaign log">
+        <div class="sec-head"><h2>Campaign Log</h2><span class="sec-note">the Sunday Table&rsquo;s own log</span></div>
+        <div class="empty-state" style="border:1px dashed var(--line);border-radius:8px">
+          <div class="big">Nothing played yet in this ledger</div>
+          <div>The log opens with the first session back — Sunday, December 6, 2026 — and fills as the campaign is played.</div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- SOLO GAME -->
+  <section class="solo-zone" aria-label="The solo game — Jaspar Wren">
+    <p class="solo-badge">Solo game only — not world canon · not the Sunday table</p>
+    <h2 class="solo-title">The Solo Game — Jaspar Wren</h2>
+    <p class="solo-intro">Everything in this section is the solo game, kept apart from the state of the world above. The Boilerheart lives here, and only here.</p>
+
+    <div class="grid2">
+      <!-- CHARACTER — SOLO GAME -->
+      <section class="panel solo-panel" aria-label="Character — solo game">
+        <div class="sec-head"><h2>Character</h2><span class="sec-note">character.md</span></div>
+        <p class="char-name">Jaspar &ldquo;Tick&rdquo; Wren</p>
+        <p class="char-line">Human · Rogue 3 / Psion (Seer) 1 · Level 4</p>
+        <div class="stat-row">
+          <div class="stat"><div class="v">23</div><div class="l">Hit Points</div></div>
+          <div class="stat"><div class="v">16</div><div class="l">Armor Class</div></div>
+          <div class="stat"><div class="v">+7</div><div class="l">Initiative</div></div>
+          <div class="stat"><div class="v">4</div><div class="l">Level</div></div>
+        </div>
+        <p class="detail"><strong>War-Torn left hand</strong> — fitted brass-and-steel, taken by a Guild press at seventeen. It ticks when he&rsquo;s nervous or standing too still; he pins a metal toothpick under the ticking spot to quiet it.</p>
+        <p class="label">Feats</p>
+        <div class="chips"><span class="chip">Weapon Finesse</span><span class="chip">Dodge</span><span class="chip">Improved Initiative</span></div>
+        <p class="label">Skills</p>
+        <div class="skills">
+          <div class="skill"><span>Search</span><b>+8</b></div>
+          <div class="skill"><span>Disable Device</span><b>+8</b></div>
+          <div class="skill"><span>Tumble</span><b>+8</b></div>
+          <div class="skill"><span>Sense Motive</span><b>+7</b></div>
+          <div class="skill"><span>Hide</span><b>+7</b></div>
+          <div class="skill"><span>Move Silently</span><b>+7</b></div>
+          <div class="skill"><span>Spot</span><b>+6</b></div>
+          <div class="skill"><span>Listen</span><b>+6</b></div>
+          <div class="skill"><span>Diplomacy</span><b>+5</b></div>
+          <div class="skill"><span>Open Lock</span><b>+5</b></div>
+          <div class="skill"><span>Craft (alchemy)</span><b>+5</b></div>
+          <div class="skill"><span>Bluff</span><b>+4</b></div>
+          <div class="skill"><span>Gather Info.</span><b>+4</b></div>
+          <div class="skill"><span>Knowledge (local)</span><b>+4</b></div>
+          <div class="skill"><span>Climb</span><b>+2</b></div>
+        </div>
+      </section>
+
+      <!-- SOLO GAME STATE — THE BOILERHEART -->
+      <section class="panel solo-panel world" aria-label="Solo game state — the Boilerheart">
+        <div class="sec-head"><h2>Where the Solo Game Stands</h2><span class="sec-note">the Boilerheart · end beat</span></div>
+        <p class="where">SUMP THREE · THE BOILERHEART</p>
+        <p>The Boilerheart arc stands at its end beat: the seal opened, Jaspar&rsquo;s sister rescued, Guild records taken as proof.</p>
+        <p><strong>Between movements.</strong> In the solo game, the world around Jaspar keeps moving off-screen — the Guild, the Watch, and Sump Three go on with their business whether he acts or not. Nothing is frozen waiting for him.</p>
+        <p>Play resumes from the end beat, at Shaun&rsquo;s word.</p>
+        <p class="label" style="margin-top:20px">Harlo Venn</p>
+        <p>The Guild records taken at the landing name Harlo Venn&rsquo;s scheme. His position is the solo game&rsquo;s next movement&rsquo;s business.</p>
+      </section>
+
+      <!-- ADVENTURE LOG — SOLO GAME -->
+      <section class="panel solo-panel span2" aria-label="Adventure log — solo game">
+        <div class="sec-head"><h2>Adventure Log — Solo Game</h2><span class="sec-note">adventure-log.md · corrected recaps open each session</span></div>
+        <div class="log-entry">
+          <span class="log-date">2026-11-17 — OPENING</span>
+          <h3>The Market</h3>
+          <p>Guild water-cart incident in the Bastion market. Sella Marr saved, the driver signed a chit. Level 4 taken — HP die rolled openly: 1 + 2 = 3.</p>
+        </div>
+        <div class="log-entry">
+          <span class="log-date">2026-11-17 / 18 — BOILERHEART, END BEAT</span>
+          <h3>The Seal Opened</h3>
+          <p>Seal opened, sister rescued, Guild records taken as proof. Milestone reached.</p>
+        </div>
+      </section>
+
+      <!-- PEOPLE — SOLO GAME -->
+      <section class="panel solo-panel" aria-label="People — solo game">
+        <div class="sec-head"><h2>People — Solo Game</h2><span class="sec-note">npcs.md</span></div>
+        <div class="npc">
+          <h3>Pell</h3><span class="role">Companion — ex-pump-guard</span>
+          <div class="nums">Fighter 2 · HP 19 · AC 16 · Warhammer +5 (1d8+3)</div>
+          <p>Counts rivets under his breath when nervous. Runs on a no-spotlight leash — never solves the puzzle, never takes Jaspar&rsquo;s decisions.</p>
+        </div>
+        <div class="npc">
+          <h3>Sella Marr</h3><span class="role">Spice-seller, the market</span>
+          <p>Saved by Jaspar in the water-cart incident, 2026-11-17.</p>
+        </div>
+        <div class="npc">
+          <h3>Harlo Venn</h3><span class="role">Guild factor</span>
+          <p>The Boilerheart&rsquo;s villain. The Guild records taken at the landing name his scheme. His position is the next movement&rsquo;s business.</p>
+        </div>
+      </section>
+
+      <!-- PLACES — SOLO GAME -->
+      <section class="panel solo-panel" aria-label="Places — solo game">
+        <div class="sec-head"><h2>Places — Solo Game</h2><span class="sec-note">as they stand in the solo game</span></div>
+        <div class="loc">
+          <h3>Sump Three</h3>
+          <p>Jaspar&rsquo;s home ground — he grew up in the Sump. Site of the Boilerheart: the Guild&rsquo;s boilerworks, the seal, the cistern.</p>
+        </div>
+        <div class="loc">
+          <h3>The Bastion Market</h3>
+          <p>Where the solo game opened — the Guild water-cart, Sella Marr&rsquo;s spice stall.</p>
+        </div>
+      </section>
+    </div>
+  </section>
 
   <!-- SAVE -->
   <section class="sec" aria-label="The save">
