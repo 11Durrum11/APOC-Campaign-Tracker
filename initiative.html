@@ -166,13 +166,15 @@
   #initiativePanel .init-rollbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-rollbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
   #initiativePanel .init-rollbox[aria-pressed="true"] #initRollingOnBtn,#initiativePanel .init-rollbox[aria-pressed="false"] #initRollingOffBtn{font-weight:700 !important}
-  /* Fight A | Fight B are ONE two-zone button (Shaun, 2026-11-21):
-     a single pill on the same spec as the Roll ALL pill — the
-     fight on the board is the bold zone; bold alone tells them
-     apart and the proportions stay even. */
+  /* The fight pill reads "A fight B" (Shaun, 2026-11-22): ONE
+     pill, two zones — the A zone runs Fight A, the B zone runs
+     Fight B, and the shared word "fight" sits between them,
+     written once. The fight on the board is the bold letter;
+     bold alone tells them apart and the zones stay even. */
   #initiativePanel .init-fightbox{display:inline-flex;align-items:stretch;padding:0;font-family:inherit;font-size:.85rem;font-weight:600;line-height:1.15;min-height:34px;border:1px solid var(--card-border);border-radius:999px;background:var(--secondary);color:var(--foreground);box-sizing:border-box;overflow:hidden}
   #initiativePanel .init-fightbox:hover{background:var(--accent);color:var(--accent-foreground)}
   #initiativePanel .init-fightbox button{background:transparent !important;border:none !important;border-radius:0 !important;min-height:0 !important;padding:6px .22rem !important;font-size:inherit !important;color:inherit !important;flex:1 1 auto}
+  #initiativePanel .init-fightbox .init-fight-word{display:inline-flex;align-items:center;padding:6px .05rem;font-size:inherit;color:inherit;white-space:nowrap}
   #initiativePanel .init-fightbox[data-fight="A"] #initFightABtn,#initiativePanel .init-fightbox[data-fight="B"] #initFightBBtn{font-weight:700 !important}
   /* Multi-target strip (Shaun, 2026-11-21): one amount, tapped
      targets, dealt by the same Multi-target / Apply button. */
@@ -470,7 +472,7 @@
     <div class="init-controls init-block" data-block="bar">
       <span class="init-turnbox" data-mk="turn" data-mkgrp="bar"><button type="button" class="init-turn-zone" id="initPrevBtn" aria-label="Prev turn" title="Move the turn back to the previous combatant">−</button><span class="init-turn-word" aria-hidden="true">Turn</span><button type="button" class="init-turn-zone" id="initNextBtn" aria-label="Next turn" title="Move the turn to the next combatant — someone delaying is skipped">+</button></span>
       <span class="init-rollbox" id="initRollBox" data-mk="initRollAllBtn" data-mkgrp="bar" aria-pressed="false"><button type="button" class="init-roll-zone" id="initRollingOnBtn" aria-label="Rolling initiative on" title="Rolling initiative on: everyone re-rolls initiative and the order re-sorts at the start of every new round">On</button><button type="button" class="init-roll-zone" id="initRollAllBtn" title="Roll a fresh d20 + modifier for everyone and go back to rolled order">Roll ALL</button><button type="button" class="init-roll-zone" id="initRollingOffBtn" aria-label="Rolling initiative off" title="Rolling initiative off: the order stays fixed">Off</button></span>
-      <span class="init-fightbox" id="initFightBox" data-mk="initFightBox" data-mkgrp="bar" data-fight="A" title="Two fights at once — one pill, two fights: the bold zone is the fight on the board, and each fight keeps its own order, round and log"><button type="button" class="init-fight-zone" id="initFightABtn" aria-label="Fight A" title="Fight A — tap to run this fight on the board; the other fight keeps its own order, round and log meanwhile">Fight A</button><button type="button" class="init-fight-zone" id="initFightBBtn" aria-label="Fight B" title="Fight B — a second fight kept alongside this one; tap to swap it onto the board — it keeps its own order, round and log">Fight B</button></span>
+      <span class="init-fightbox" id="initFightBox" data-mk="initFightBox" data-mkgrp="bar" data-fight="A" title="Two fights at once — one pill, two fights: the bold zone is the fight on the board, and each fight keeps its own order, round and log"><button type="button" class="init-fight-zone" id="initFightABtn" aria-label="Fight A" title="Fight A — tap to run this fight on the board; the other fight keeps its own order, round and log meanwhile">A</button><span class="init-fight-word" aria-hidden="true">fight</span><button type="button" class="init-fight-zone" id="initFightBBtn" aria-label="Fight B" title="Fight B — a second fight kept alongside this one; tap to swap it onto the board — it keeps its own order, round and log">B</button></span>
       <button type="button" class="btn" id="initResetBtn" title="Put the turn back on the first combatant and return to Round 1 — the turn timers reset and surprise marks clear; hit points, statuses and the log stay as they are">Back to top</button>
       <button type="button" class="btn" id="initClearBtn" title="Remove every combatant from the board">Clear all</button>
       <button type="button" class="btn" id="initUndoBtn" disabled title="Undo the last damage, heal, removal or Clear all">Undo</button>
