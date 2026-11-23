@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-<!-- APOC-GATE v1 — shared-password gate (Shaun's order, 2026-11-23). One unlock on this origin (24h) opens every APOC site. When locked, this script writes the gate and stops the page: no page content, scripts, or data load behind it. -->
+<!-- APOC-GATE v1.1 — shared-password gate (Shaun's order, 2026-11-23; persistent-unlock amendment same day). One unlock per device/browser is permanent — it asks again only if storage is cleared or a new device/browser is used. When locked, this script writes the gate and stops the page: no page content, scripts, or data load behind it. -->
 <script>
 (function () {
   var KEY = 'apoc_gate_until';
-  function ok() { try { return (+localStorage.getItem(KEY) || 0) > Date.now(); } catch (e) { return false; } }
+  function ok() { try { return localStorage.getItem(KEY) !== null; } catch (e) { return false; } }
   if (ok()) return;
   window.__apocTry = function () {
     var inp = document.getElementById('apocGatePw');
     if (inp && inp.value === 'APOC') {
-      try { localStorage.setItem(KEY, String(Date.now() + 24 * 60 * 60 * 1000)); } catch (e) {}
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
       location.reload();
     } else {
       var err = document.getElementById('apocGateErr');
