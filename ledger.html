@@ -1,6 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!-- APOC-GATE v1 — shared-password gate (Shaun's order, 2026-11-23). One unlock on this origin (24h) opens every APOC site. When locked, this script writes the gate and stops the page: no page content, scripts, or data load behind it. -->
+<script>
+(function () {
+  var KEY = 'apoc_gate_until';
+  function ok() { try { return (+localStorage.getItem(KEY) || 0) > Date.now(); } catch (e) { return false; } }
+  if (ok()) return;
+  window.__apocTry = function () {
+    var inp = document.getElementById('apocGatePw');
+    if (inp && inp.value === 'APOC') {
+      try { localStorage.setItem(KEY, String(Date.now() + 24 * 60 * 60 * 1000)); } catch (e) {}
+      location.reload();
+    } else {
+      var err = document.getElementById('apocGateErr');
+      if (err) err.style.display = 'block';
+      if (inp) { inp.value = ''; inp.focus(); }
+    }
+    return false;
+  };
+  document.write(
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<title>APOC Survival — Closed Gate</title>'
+    + '<style>'
+    + 'html,body{margin:0;padding:0;background:#0d0b09 !important}'
+    + '.apoc-gate-wrap{position:fixed;inset:0;background:#0d0b09;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:Georgia,"Times New Roman",serif;z-index:2147483647}'
+    + '.apoc-gate-card{background:#171310;border:1px solid #8a6d2f;border-radius:10px;max-width:340px;width:100%;padding:28px 24px 24px;text-align:center;box-shadow:0 12px 44px rgba(0,0,0,.75)}'
+    + '.apoc-gate-card h1{margin:0 0 6px;font-size:24px;letter-spacing:.14em;color:#e8c268;font-weight:700}'
+    + '.apoc-gate-card p{margin:0 0 18px;font-size:14.5px;line-height:1.45;color:#b8a888}'
+    + '.apoc-gate-card input{width:100%;box-sizing:border-box;padding:11px 12px;font-size:16px;border-radius:6px;border:1px solid #5c4a22;background:#0d0b09;color:#f0e2b6;text-align:center;letter-spacing:.08em}'
+    + '.apoc-gate-card button{margin-top:14px;width:100%;padding:11px 12px;font-size:16px;font-family:inherit;letter-spacing:.1em;border-radius:999px;border:1px solid #8a6d2f;background:#241b0d;color:#e8c268;cursor:pointer}'
+    + '#apocGateErr{display:none;margin-top:12px;font-size:13.5px;color:#d97b6c}'
+    + '</style>'
+    + '<div class="apoc-gate-wrap"><form class="apoc-gate-card" onsubmit="return __apocTry()">'
+    + '<h1>APOC SURVIVAL</h1>'
+    + '<p>The gate is closed to strangers.<br>Speak the word to enter.</p>'
+    + '<input id="apocGatePw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Password" autofocus>'
+    + '<div id="apocGateErr">That word does not open this gate.</div>'
+    + '<button type="submit">Enter</button>'
+    + '</form></div>'
+  );
+  setTimeout(function () { var i = document.getElementById('apocGatePw'); if (i) i.focus(); }, 60);
+  if (window.stop) window.stop();
+})();
+</script>
+
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
