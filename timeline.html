@@ -27,34 +27,42 @@
   .anchors a b{color:var(--gold);font-weight:normal}
   .anchors a.grey b{color:var(--dim)}
   /* ---------- the line ---------- */
-  .scroll{overflow-x:auto;padding:8px 0 2px}
-  .track{position:relative;width:2900px;height:470px;margin:0 auto}
-  .axis{position:absolute;left:30px;right:30px;top:235px;height:4px;
+  .scroll{padding:8px 0 2px}
+  .track{position:relative;width:100%;max-width:1600px;height:470px;margin:0 auto}
+  .axis{position:absolute;left:1%;right:1%;top:225px;height:4px;
         background:linear-gradient(90deg,#3a3a41,var(--line) 8%,var(--line) 92%,var(--gold));border-radius:2px}
-  .era{position:absolute;top:217px;height:40px;background:rgba(139,92,246,.10);
+  .era{position:absolute;top:207px;height:40px;background:rgba(139,92,246,.10);
        border-top:1px dashed rgba(139,92,246,.4);border-bottom:1px dashed rgba(139,92,246,.4)}
   .era span{position:absolute;top:10px;left:0;right:0;text-align:center;color:var(--dim);
             font-size:.8rem;letter-spacing:.22em;text-transform:uppercase}
-  .entry{position:absolute;top:227px;width:20px;height:20px;margin-left:-10px;z-index:3;
+  .entry{position:absolute;top:217px;width:20px;height:20px;margin-left:-10px;z-index:3;
          background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .entry .dot{display:block;width:20px;height:20px;border-radius:50%;
               background:var(--bg);border:4px solid var(--line)}
   .entry.gold .dot{border-color:var(--gold)} .entry.grey .dot{border-color:var(--grey)}
-  .entry .lab{position:absolute;left:50%;transform:translateX(-50%);width:158px;
+  .entry .lab{position:absolute;left:50%;transform:translateX(-50%);width:min(148px,23vw);
               text-align:center;pointer-events:none}
-  .entry .lab .yr{display:block;color:var(--gold);font-size:.92rem;font-style:italic}
+  .entry.first .lab{left:0;transform:none;text-align:left;width:196px}
+  .entry.first .lab::after{left:16px}
+  .entry.last .lab{left:auto;right:0;transform:none;text-align:right}
+  .entry.last .lab::after{left:auto;right:16px}
+  .entry .lab .yr{display:block;color:var(--gold);font-size:.82rem;font-style:italic;white-space:nowrap}
   .entry.grey .lab .yr{color:var(--dim)}
-  .entry .lab .ti{display:block;font-size:.88rem;letter-spacing:.05em;
-              text-transform:uppercase;line-height:1.25;margin-top:2px}
+  .entry .lab .ti{display:block;font-size:.74rem;letter-spacing:.04em;
+              text-transform:uppercase;line-height:1.3;margin-top:2px}
   .entry.above .lab{bottom:30px}
   .entry.below .lab{top:30px}
-  .entry.far.above .lab{bottom:104px}
-  .entry.far.below .lab{top:104px}
+  .entry.mid.above .lab{bottom:80px}
+  .entry.mid.below .lab{top:80px}
+  .entry.far.above .lab{bottom:122px}
+  .entry.far.below .lab{top:122px}
   .entry .lab::after{content:"";position:absolute;left:50%;width:2px;background:#3c3c45}
   .entry.above .lab::after{top:100%;height:22px}
   .entry.below .lab::after{bottom:100%;height:22px}
-  .entry.far.above .lab::after{height:96px}
-  .entry.far.below .lab::after{height:96px}
+  .entry.far.above .lab::after{height:114px}
+  .entry.far.below .lab::after{height:114px}
+  .entry.mid.above .lab::after{height:72px}
+  .entry.mid.below .lab::after{height:72px}
   .entry:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:50%}
   .entry.lit .dot{box-shadow:0 0 0 5px rgba(201,162,39,.35)}
   .detail{display:none}
@@ -75,13 +83,29 @@
   .open h2{margin:0 0 8px;font-size:1rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
   .open ul{margin:0;padding-left:20px;color:#cfc9ba;font-size:.95rem;line-height:1.55}
   footer{color:var(--grey);font-size:.8rem;text-align:center;padding:0 16px 26px}
+  @media (max-width:760px){
+    .track{height:330px}
+    .axis{top:165px}.era{top:147px}
+    .entry{top:157px}
+    .entry .lab{width:auto}
+    .entry .lab .ti{display:none}
+    .entry .lab .yr{font-size:.74rem}
+    .entry.first .lab{width:auto}
+    .entry.above .lab{bottom:22px}.entry.below .lab{top:22px}
+    .entry.mid.above .lab{bottom:46px}.entry.mid.below .lab{top:46px}
+    .entry.far.above .lab{bottom:70px}.entry.far.below .lab{top:70px}
+    .entry.above .lab::after,.entry.below .lab::after{height:14px}
+    .entry.mid.above .lab::after,.entry.mid.below .lab::after{height:38px}
+    .entry.far.above .lab::after,.entry.far.below .lab::after{height:62px}
+    .era span{font-size:.62rem;letter-spacing:.14em}
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>The APOC Timeline</h1>
   <div class="sub">From the end of the published works, through the thousand years, to the present — 2511 DR</div>
-  <div class="hint">The road runs left to right, oldest on the left. Rest on any entry — or press and hold — to read it in full.</div>
+  <div class="hint">The road runs left to right, oldest on the left — the whole thousand years on one screen. Rest on any entry — or press and hold — to read it in full.</div>
 </header>
 
 <nav class="anchors">
@@ -96,99 +120,99 @@
 <div class="scroll" id="scroller">
   <div class="track">
     <div class="axis"></div>
-    <div class="era" style="left:300px;width:2280px"><span>The Thousand Years</span></div>
+    <div class="era" style="left:10.5%;width:79%"><span>The Thousand Years</span></div>
 
-    <button class="entry grey above" id="e1" style="left:50px" aria-label="1385 DR — The Published Record Ends">
+    <button class="entry grey above first" id="e1" style="left:3%" aria-label="1385 DR — The Published Record Ends">
       <span class="dot"></span>
       <span class="lab"><span class="yr">1385 DR</span><span class="ti">The Published Record Ends</span></span>
       <span class="detail"><p>Forgotten Realms history, as published in the 3.5 materials, runs true and unbroken — and then it stops. Its last year is 1385 DR. Nothing published after that stands in this world.</p><p>Beyond that last page the history is the world's own, written by no book.</p></span>
     </button>
 
-    <button class="entry grey below" id="e2" style="left:185px" aria-label="1386 DR — Laney's Career Begins">
+    <button class="entry grey below" id="e2" style="left:5.9%" aria-label="1386 DR — Laney's Career Begins">
       <span class="dot"></span>
       <span class="lab"><span class="yr">1386 DR</span><span class="ti">Laney's Career Begins</span></span>
       <span class="detail"><p>Laney starts her career the year after the published record stops. Her party's run lasts 125 years — 125 years from this quiet beginning to the day the party drops the ball.</p></span>
     </button>
 
-    <button class="entry above" id="e3" style="left:320px" aria-label="1511 DR — Day One, the APOC">
+    <button class="entry mid above" id="e3" style="left:11%" aria-label="1511 DR — Day One, the APOC">
       <span class="dot"></span>
       <span class="lab"><span class="yr">1511 DR</span><span class="ti">Day One — The APOC</span></span>
       <span class="detail"><p>125 years after Laney's career began, the original party fails against the Demon God imprisoned in Limbo. The god goes free.</p><p>Laney is captured — her unborn twins merged into the god's vessel — and her Oracle is projected out before the door shuts, lost in time, seeking the sparks of life.</p></span>
     </button>
 
-    <button class="entry far below" id="e4" style="left:405px" aria-label="Day One — within twenty-four hours">
+    <button class="entry far below" id="e4" style="left:14%" aria-label="Day One — within twenty-four hours">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Day One</span><span class="ti">Within 24 Hours</span></span>
       <span class="detail"><p>Abyssal rifts tear open across the world. Eighty percent of all life is dead within twenty-four hours.</p><p>What is left of life makes its stands where it can.</p></span>
     </button>
 
-    <button class="entry far above" id="e5" style="left:490px" aria-label="Day One — The Severing">
+    <button class="entry far above" id="e5" style="left:16.9%" aria-label="Day One — The Severing">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Day One</span><span class="ti">The Severing</span></span>
       <span class="detail"><p>The crystal sphere is scarred and shut — the Closing, called the Cut in street speech the world over. All planar travel ends, permanently; even the Demon God cannot undo it.</p><p>The gods are trapped OUTSIDE the sphere: they can see in, they cannot touch, answer, or influence anything within.</p><p>What reached across dimensions does not die in that instant — its road does. The magic in those things still lives, and a bag of holding still answers for what it is; it only opens on lint and nothing, the other side no longer there to reach. The age of the portable hole ends with a wizard's blanket falling over his head — or so the old tale of the Closing tells it.</p><p>Summoning ends. The survivors learn the new physics by dying of the old one.</p></span>
     </button>
 
-    <button class="entry below" id="e6" style="left:620px" aria-label="The APOC era — the dragons withdraw">
+    <button class="entry below" id="e6" style="left:21.4%" aria-label="The APOC era — the dragons withdraw">
       <span class="dot"></span>
       <span class="lab"><span class="yr">The APOC Era</span><span class="ti">The Dragons Withdraw</span></span>
       <span class="detail"><p>The dragons withdraw: the Council of Wyrms saw what was coming, and every dragon goes deep below.</p><p>No dragon has been seen in a thousand years.</p></span>
     </button>
 
-    <button class="entry above" id="e7" style="left:730px" aria-label="The APOC era — the drow choose">
+    <button class="entry above" id="e7" style="left:25.2%" aria-label="The APOC era — the drow choose">
       <span class="dot"></span>
       <span class="lab"><span class="yr">The APOC Era</span><span class="ti">The Drow Choose</span></span>
       <span class="detail"><p>The drow CHOOSE the demons and are absorbed.</p><p>No drow remain as a race.</p></span>
     </button>
 
-    <button class="entry below" id="e8" style="left:840px" aria-label="The APOC era — the tieflings are taken">
+    <button class="entry mid below" id="e8" style="left:29%" aria-label="The APOC era — the tieflings are taken">
       <span class="dot"></span>
       <span class="lab"><span class="yr">The APOC Era</span><span class="ti">The Tieflings Are Taken</span></span>
       <span class="detail"><p>The tieflings are TAKEN, not willing.</p><p>Every race that worshipped demonic gods is folded into the demons with them.</p></span>
     </button>
 
-    <button class="entry above" id="e9" style="left:990px" aria-label="The APOC era — four cities hold">
+    <button class="entry mid above" id="e9" style="left:34.1%" aria-label="The APOC era — four cities hold">
       <span class="dot"></span>
       <span class="lab"><span class="yr">The APOC Era</span><span class="ti">Four Cities Hold</span></span>
       <span class="detail"><p>Four cities are known to have held: the Bastion of Last Hope — Waterdeep under its earned name — Silverymoon, the front-line bastion, holding the war's hardest front — a city remade into a hardened battle station by its thousand years there, plated and steaming, its walls a working machine, its engines kept warm and its people living at constant readiness, the Gem of the North refitted as an engine of war — Sundabar, and a fourth on the far side of the world: Marrakesh, a city built upon a colossal horse that walks, so the city wanders and no road leads to it — a rumor to Faerûn's survivors even now, though the record carries its name.</p><p>Citadel Adbar did not hold.</p><p>Everything beyond the held walls is the Badlands — not one land but the whole untamed world, blighted wherever the demons crossed it — and across it: constant war, Life against demon enclaves against the Kingdom of the Undead, with the Warforged in the mix.</p></span>
     </button>
 
-    <button class="entry grey below" id="e10" style="left:1180px" aria-label="Early centuries — Alistair and the levels">
+    <button class="entry grey far below" id="e10" style="left:40.7%" aria-label="Early centuries — Alistair and the levels">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Early Centuries</span><span class="ti">Alistair &amp; the Levels</span></span>
       <span class="detail"><p>Alistair Blackstaff gives Undermountain's Levels 1, 2, and 3 up to the city and cordons Level 4 and below. He and his many clones help seal the sphere's breaches and build real stairs, hoists, and shafts where portal magic used to serve — then every Alistair disappears.</p><p>The three levels are reclaimed as the city itself soon after: hundreds of years before the present, the Bastion grows downward, and surface, sewers, and the three levels become one woven city.</p></span>
     </button>
 
-    <button class="entry grey above" id="e11" style="left:1360px" aria-label="Early centuries — the new world's shape">
+    <button class="entry grey far above" id="e11" style="left:46.9%" aria-label="Early centuries — the new world's shape">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Early Centuries</span><span class="ti">The New World's Shape</span></span>
       <span class="detail"><p>The Fog of Life lies over the surface of the world — grey, inert, untouchable, never underground, never through the mythals.</p><p>Raw magic blights the land around its caster; alchemy becomes the cornerstone of survival.</p><p>The undead sort themselves into the unclaimed, wild in the badlands, and the claimed — the Kingdom of the Undead, ruled by its own laws under its highest order — so it is told as lore of the world, not as law within the walls.</p></span>
     </button>
 
-    <button class="entry below" id="e12" style="left:1560px" aria-label="c. 1811 DR — The Unwriting">
+    <button class="entry mid below" id="e12" style="left:53.8%" aria-label="c. 1811 DR — The Unwriting">
       <span class="dot"></span>
       <span class="lab"><span class="yr">c. 1811 DR</span><span class="ti">The Unwriting</span></span>
       <span class="detail"><p>A vast undead army led by demons comes out of the east, spearheaded by a flying dracolich — dragon, undead, and flyer in one body, everything the Melairshield was raised to keep out. It lands on the peak of Mount Waterdeep and casts the spell that UNWRITES a perfect sphere of the city out of existence and memory together: it has always been like that.</p><p>The sea rushes into the opened sewers and Undermountain; the city floods and holds; the army is beaten back. With the water rushing into every open cavity, the calamity becomes a calamity from within — and the Mid Wall's great double doors close for the first time in the city's history.</p><p>In the scoop the city builds the Heart of the City — floating industrial docks riding the tide on pylons to bedrock, inside the sphere the dracolich cut. The Bastion's second founding.</p></span>
     </button>
 
-    <button class="entry grey above" id="e13" style="left:1900px" aria-label="Years 300 to 900 — the long middle">
+    <button class="entry grey above" id="e13" style="left:65.5%" aria-label="Years 300 to 900 — the long middle">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Years 300–900</span><span class="ti">The Long Middle</span></span>
       <span class="detail"><p>The thousand years settle into their shape. The Bastion grows up and down instead of out — megastructures, 24 consortiums, everything on temporary contracts, disputes settled in the badlands. The guard watches outward, the Watch inward.</p><p>Shantytown rises outside the wall, is razed to the ground, rebuilds, and is razed again, every couple of decades, across the whole span.</p><p>The Mid Wall's great double doors close only twice in all the city's history — the first time at the Unwriting; the second came about 600 years later, when the city fell to complete civil unrest.</p><p>Reclamation Item Retrieval — one business among the city's many — sends crews out into the badlands after the buried treasures of the dead world.</p><p>The Warforged, created and not born, stand as a people.</p></span>
     </button>
 
-    <button class="entry above" id="e14" style="left:2305px" aria-label="c. 2411 DR — The Second Closing">
+    <button class="entry mid above" id="e14" style="left:79.5%" aria-label="c. 2411 DR — The Second Closing">
       <span class="dot"></span>
       <span class="lab"><span class="yr">c. 2411 DR</span><span class="ti">The Second Closing</span></span>
       <span class="detail"><p>About 600 years after the first closing, the city falls to complete civil unrest, and the Mid Wall's great double doors close for the second and last time in the city's history — north sealed from south while the Bastion besieges itself.</p><p>The full story of that year — the blight in the farm tunnels, a legal famine, the South's refusal, the doors shut on a city besieged by itself, the table in the doorway, and the city agreeing it never happened — stands as its own canon piece: “The Second Closing — the year the city shut its own throat.”</p></span>
     </button>
 
-    <button class="entry grey below" id="e15" style="left:2445px" aria-label="Within living memory — freedom, second-class">
+    <button class="entry grey below" id="e15" style="left:84.3%" aria-label="Within living memory — freedom, second-class">
       <span class="dot"></span>
       <span class="lab"><span class="yr">Living Memory</span><span class="ti">Freedom, Second-Class</span></span>
       <span class="detail"><p>Slavery is abolished because of the Warforged.</p><p>In the present it is about 1965 for the Warforged: free, and second-class.</p></span>
     </button>
 
-    <button class="entry gold above" id="e16" style="left:2830px" aria-label="2511 DR — The Present">
+    <button class="entry gold above last" id="e16" style="left:96.8%" aria-label="2511 DR — The Present">
       <span class="dot"></span>
       <span class="lab"><span class="yr">2511 DR</span><span class="ti">The Present</span></span>
       <span class="detail"><p>A thousand years after the door shut. Four known cities, the fog on the surface, the gods watching from outside, the war beyond the walls permanent.</p><p>Saint James — human, seventy years old, fifty-five of them pirating the badlands from the tavern on his crocodile's back — is what the badlands grew on their own.</p><p>The Southeast Brigade works its cases south of the Mid Wall. And in the Bastion, a new party is about to learn what the old world left buried. Play begins.</p></span>
@@ -271,12 +295,10 @@
 
   document.querySelectorAll('.anchors a').forEach(function(a){
     a.addEventListener('click', function(ev){
-      ev.preventDefault();
+      ev.preventDefault(); ev.stopPropagation();
       var el = document.getElementById(a.getAttribute('data-go'));
       if(!el) return;
-      var trackLeft = el.offsetLeft;
-      scroller.scrollTo({left: Math.max(0, trackLeft - scroller.clientWidth/2), behavior:'smooth'});
-      setTimeout(function(){ show(el, true); }, 450);
+      show(el, true);
     });
   });
 })();
