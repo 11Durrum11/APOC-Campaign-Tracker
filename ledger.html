@@ -56,6 +56,10 @@
   .out-rule b{font-family:var(--font-display);letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--gold-bright);display:block;margin-bottom:4px}
   .out-rule p{margin:0;font-size:19px}
   .out-rule p em{color:var(--gold-bright)}
+  .house-rule{margin-top:10px;border:1px solid var(--line-gold);background:var(--panel);border-radius:8px;padding:14px 16px}
+  .house-rule b{display:block;font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:4px}
+  .house-rule p{margin:0;font-size:17px;line-height:1.45;color:var(--ink)}
+  .house-rule p strong{color:var(--gold-bright)}
 
   /* Flow strip */
   .flow{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
@@ -92,6 +96,14 @@
 
   /* Dice */
   .dice-panel{border-color:var(--line-gold)}
+  .type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .type-btn{flex:1 1 130px;min-height:48px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:9px;font-family:var(--font-display);font-size:13.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;padding:9px 8px}
+  .type-btn small{display:block;font-family:var(--font-mono);font-size:10px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-top:3px}
+  .type-btn[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1408}
+  .type-btn[aria-pressed="true"] small{color:#4a3a14}
+  .explode-status{border:1px solid var(--line);border-left:4px solid var(--gold);background:var(--bg2);border-radius:8px;padding:10px 13px;font-size:15.5px;color:var(--ink-dim);margin-bottom:14px;line-height:1.4}
+  .explode-status strong{color:var(--gold-bright)}
+  .explode-status.off{border-left-color:var(--line)}
   .dice-grid{display:flex;flex-wrap:wrap;gap:8px}
   .die-btn{flex:1 1 62px;min-height:52px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:9px;font-family:var(--font-mono);font-size:17px;font-weight:600;cursor:pointer;padding:8px 4px}
   .die-btn[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1408}
@@ -108,6 +120,9 @@
   .roll-result .math{font-family:var(--font-mono);font-size:15px;color:var(--gold-bright);margin-top:6px}
   .roll-result .empty{color:var(--ink-faint);font-size:16px}
   .roll-result.crit .total{color:var(--green)}
+  .roll-result.exploded{border-color:var(--green);border-style:solid}
+  .roll-result.exploded .total{color:var(--green)}
+  .roll-result .chain{font-family:var(--font-mono);font-size:13.5px;color:var(--green);margin-top:6px;letter-spacing:.04em}
   .roll-result.fumble .total{color:var(--red)}
   .history{margin-top:14px}
   .history-head{display:flex;justify-content:space-between;align-items:center}
@@ -231,6 +246,10 @@
       <div class="flag"><b>🚩 No scaling</b><p>No scaling — the world is not level-dependent.</p></div>
       <div class="flag"><b>🚩 No placation</b><p>No placation — nothing given that wasn&rsquo;t earned, nothing let slide.</p></div>
     </div>
+    <div class="house-rule">
+      <b>Exploding Dice — Skills &amp; Saving Throws Only</b>
+      <p>On a <strong>skill check</strong> or a <strong>saving throw</strong>, a natural 20 <strong>explodes</strong> — roll again and add it to the total, and keep rolling and adding on each further natural 20. <strong>Attack rolls do not explode</strong> — they keep their normal threat and confirm rules. The roller below enforces this: pick the roll type first.</p>
+    </div>
     <div class="out-rule">
       <b>The Standing Rule</b>
       <p>There is always an <em>out</em> — placed in the world, never handed over. <em>Find it or miss it.</em></p>
@@ -243,7 +262,7 @@
     <div class="flow">
       <div class="flow-step"><span class="n">01</span><b>Prep</b><span>Situation built into the files first. The out placed in the world.</span></div>
       <div class="flow-step"><span class="n">02</span><b>Open</b><span>On the corrected recap from the adventure log.</span></div>
-      <div class="flow-step"><span class="n">03</span><b>Play</b><span>Dice live. State written to its file as it happens.</span></div>
+      <div class="flow-step"><span class="n">03</span><b>Play</b><span>Dice live. Skills &amp; saves explode on a natural 20; attacks don&rsquo;t. State written to its file as it happens.</span></div>
       <div class="flow-step"><span class="n">04</span><b>Land</b><span>Ends on what changed. Validator pass. Log drafted for correction.</span></div>
       <div class="flow-step"><span class="n">05</span><b>Save</b><span>One commit. The game is where the files say it is.</span></div>
     </div>
@@ -251,8 +270,16 @@
 
   <!-- DICE -->
   <section class="sec" aria-label="Dice">
-    <div class="sec-head"><h2>Dice — Rolled Live</h2><span class="sec-note">tap a die · set modifier · roll</span></div>
+    <div class="sec-head"><h2>Dice — Rolled Live</h2><span class="sec-note">skills &amp; saves explode on nat 20 · attacks don&rsquo;t</span></div>
     <div class="panel dice-panel">
+      <p class="label" style="margin-top:0">Roll type — decides whether the die can explode</p>
+      <div class="type-grid" role="group" aria-label="Choose a roll type">
+        <button class="type-btn" data-type="skill" aria-pressed="true">Skill Check<small>Explodes on nat 20</small></button>
+        <button class="type-btn" data-type="save" aria-pressed="false">Saving Throw<small>Explodes on nat 20</small></button>
+        <button class="type-btn" data-type="attack" aria-pressed="false">Attack Roll<small>Does not explode</small></button>
+      </div>
+      <div class="explode-status" id="explodeStatus" aria-live="polite"><strong>Exploding is ON</strong> — skill check: a natural 20 rolls again and adds, and keeps exploding on each further 20.</div>
+      <p class="label">Die</p>
       <div class="dice-grid" role="group" aria-label="Choose a die">
         <button class="die-btn" data-sides="4">d4</button>
         <button class="die-btn" data-sides="6">d6</button>
@@ -510,7 +537,10 @@
 <script>
 (function(){
   var sides = 20;
+  var rollType = 'skill';
   var dieBtns = document.querySelectorAll('.die-btn');
+  var typeBtns = document.querySelectorAll('.type-btn');
+  var explodeStatus = document.getElementById('explodeStatus');
   var modInput = document.getElementById('modInput');
   var rollBtn = document.getElementById('rollBtn');
   var result = document.getElementById('rollResult');
@@ -518,13 +548,40 @@
   var histEmpty = document.getElementById('histEmpty');
   var history = [];
 
+  var TYPE_LABEL = { skill:'Skill', save:'Save', attack:'Attack' };
+  function canExplode(){ return (rollType==='skill' || rollType==='save') && sides===20; }
+
   function fmtMod(m){ return (m>0?'+':'') + m; }
+
+  function updateExplodeStatus(){
+    if(rollType==='attack'){
+      explodeStatus.classList.add('off');
+      explodeStatus.innerHTML = '<strong>Exploding is OFF</strong> — attack roll: a natural 20 is a threat under the normal threat / confirm rules. It does not explode.';
+    } else if(sides!==20){
+      explodeStatus.classList.add('off');
+      explodeStatus.innerHTML = '<strong>Exploding is OFF</strong> — exploding needs a natural 20, so it only applies to a d20 ' + (rollType==='save' ? 'saving throw' : 'skill check') + '. This d' + sides + ' cannot roll one.';
+    } else {
+      explodeStatus.classList.remove('off');
+      explodeStatus.innerHTML = '<strong>Exploding is ON</strong> — ' + (rollType==='save' ? 'saving throw' : 'skill check') + ': a natural 20 rolls again and adds, and keeps exploding on each further 20.';
+    }
+  }
+
+  function selectType(btn){
+    typeBtns.forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+    btn.setAttribute('aria-pressed','true');
+    rollType = btn.getAttribute('data-type');
+    updateExplodeStatus();
+  }
+  typeBtns.forEach(function(b){
+    b.addEventListener('click', function(){ selectType(b); });
+  });
 
   function selectDie(btn){
     dieBtns.forEach(function(b){ b.setAttribute('aria-pressed','false'); });
     btn.setAttribute('aria-pressed','true');
     sides = parseInt(btn.getAttribute('data-sides'),10);
     rollBtn.textContent = 'Roll d' + sides;
+    updateExplodeStatus();
   }
   dieBtns.forEach(function(b){
     b.addEventListener('click', function(){ selectDie(b); });
@@ -540,37 +597,64 @@
   document.getElementById('modPlus').addEventListener('click', function(){ modInput.value = getMod()+1; });
   modInput.addEventListener('change', function(){ modInput.value = getMod(); });
 
+  function rollOne(){ return Math.floor(Math.random()*sides)+1; }
+
   function roll(){
     var mod = getMod();
-    var die = Math.floor(Math.random()*sides)+1;
-    var total = die + mod;
+    var exploding = canExplode();
+    var rolls = [rollOne()];
+    if(exploding){
+      var guard = 0;
+      while(rolls[rolls.length-1]===20 && guard<50){
+        rolls.push(rollOne());
+        guard++;
+      }
+    }
+    var exploded = exploding && rolls.length>1;
+    var diceSum = rolls.reduce(function(a,b){ return a+b; }, 0);
+    var total = diceSum + mod;
     var now = new Date();
     var time = now.toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'});
 
-    result.classList.remove('crit','fumble','rolled');
-    if(sides===20 && die===20) result.classList.add('crit');
-    if(sides===20 && die===1) result.classList.add('fumble');
+    result.classList.remove('crit','fumble','exploded','rolled');
+    if(exploded) result.classList.add('exploded');
+    else if(sides===20 && rolls[0]===20) result.classList.add('crit');
+    if(sides===20 && rolls[0]===1) result.classList.add('fumble');
+
+    var chain = rolls.join(' + ');
     var math;
-    if(mod===0) math = 'd'+sides+' → '+die;
-    else math = die+' '+ (mod>0?'+':'−') +' '+Math.abs(mod)+' = '+total+'  ·  d'+sides+' '+fmtMod(mod);
+    if(rolls.length>1) math = chain + (mod!==0 ? ' ' + (mod>0?'+':'−') + ' ' + Math.abs(mod) : '') + ' = ' + total;
+    else if(mod===0) math = 'd'+sides+' → '+rolls[0];
+    else math = rolls[0]+' '+ (mod>0?'+':'−') +' '+Math.abs(mod)+' = '+total+'  ·  d'+sides+' '+fmtMod(mod);
+    math = TYPE_LABEL[rollType]+' · ' + math;
+
     var label = '';
-    if(sides===20 && die===20) label = ' · natural 20';
-    if(sides===20 && die===1) label = ' · natural 1';
-    result.innerHTML = '<div class="total">'+total+'</div><div class="math">'+math+label+'</div>';
+    var chainLine = '';
+    if(exploded){
+      label = ' · natural 20 — exploded ×' + (rolls.length-1);
+      chainLine = '<div class="chain">EXPLODED — ' + rolls.length + ' dice in the chain: ' + chain + '</div>';
+    } else if(sides===20 && rolls[0]===20 && rollType==='attack'){
+      label = ' · natural 20 · threat — attacks do not explode';
+    } else if(sides===20 && rolls[0]===20){
+      label = ' · natural 20';
+    }
+    if(sides===20 && rolls[0]===1) label = ' · natural 1';
+    result.innerHTML = '<div class="total">'+total+'</div><div class="math">'+math+label+'</div>' + chainLine;
     // restart animation
     void result.offsetWidth;
     result.classList.add('rolled');
 
-    history.unshift({sides:sides, die:die, mod:mod, total:total, time:time});
+    history.unshift({sides:sides, rolls:rolls, mod:mod, total:total, time:time, type:rollType, exploded:exploded});
     renderHistory();
   }
   function renderHistory(){
     histList.innerHTML = '';
     histEmpty.style.display = history.length ? 'none' : 'block';
     history.slice(0,30).forEach(function(h){
+      var rolls = h.rolls || [h.die];
       var li = document.createElement('li');
       var left = document.createElement('span');
-      left.textContent = 'd'+h.sides+(h.mod!==0 ? ' '+fmtMod(h.mod) : '')+' → '+h.die+(h.mod!==0 ? ' → ' : '');
+      left.textContent = (h.type ? TYPE_LABEL[h.type]+' · ' : '') + 'd'+h.sides+(h.mod!==0 ? ' '+fmtMod(h.mod) : '')+' → '+rolls.join('+')+(h.exploded ? ' ✦ exploded' : '')+(h.mod!==0 || rolls.length>1 ? ' → ' : ' ');
       var mid = document.createElement('span');
       mid.className='h-total'; mid.textContent = h.total;
       var right = document.createElement('span');
@@ -584,7 +668,7 @@
   document.getElementById('clearHist').addEventListener('click', function(){
     history = []; renderHistory();
     result.innerHTML = '<span class="empty">History cleared. The next roll happens here, where it can be seen.</span>';
-    result.classList.remove('crit','fumble');
+    result.classList.remove('crit','fumble','exploded');
   });
 
   var tBtn = document.getElementById('timelineBtn');
@@ -603,6 +687,7 @@
     var box = sBtn.closest('.secrets');
     box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
   });
+  updateExplodeStatus();
   renderHistory();
 })();
 </script>
